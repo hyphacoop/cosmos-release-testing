@@ -13,7 +13,7 @@ else
 fi
 
 attempt_counter=0
-max_attempts=1000
+max_attempts=2000
 echo "Wait for node to respond"
 until $(curl --output /dev/null --silent --head --fail http://$node_host:$node_port)
 do
@@ -25,7 +25,8 @@ do
     fi
     printf '.'
     attempt_counter=$(($attempt_counter+1))
-    sleep 1
+    sleep 10
+    free -m
 done
 
 chain_version=$(curl -s http://$node_host:$node_port/abci_info | jq -r .result.response.version)
