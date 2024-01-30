@@ -1,0 +1,61 @@
+---
+
+name: Join Release Testnet
+on:
+  push:
+  workflow_dispatch:
+#   schedule:
+    # At 15:30 on Monday.
+    # - cron: '30 15 * * 1'
+concurrency:
+  group: self-hosted-runners
+jobs:
+  test-public-testnet:
+    runs-on: self-hosted-ubuntu-22.04
+    steps:
+      # Get system info
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install required packages
+        run: |
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip
+    #   - name: Check out repository code
+        # uses: actions/checkout@v3
+    #   - name: Init Python venv
+    #     run: python -m venv ~/env
+    #   - name: Install dependencies
+    #     run: |
+    #       source ~/env/bin/activate
+    #       python -m pip install --upgrade pip
+    #       python -m pip install toml toml-cli ansible
+    #   - name: Configure ansible.cfg
+    #     run: |
+    #       source ~/env/bin/activate
+    #       echo "transport = local" >> ansible.cfg
+    #   - name: Install ansible-galaxy requirements
+    #     run: |
+    #       source ~/env/bin/activate
+    #       ansible-galaxy install -r requirements.yml
+      - name: Run script
+        run: |
+            wget https://github.com/cosmos/testnets/raw/master/public/join-public-testnet.sh -O join.sh
+            chmod +x join.sh
+            ./join.sh
+      - name: Check blocks are being produced
+        run: |
+          height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
+          echo "Waiting for block $[ $height + 100 ]..."
+          tests/test_block_production.sh 127.0.0.1 26657 100
