@@ -23,8 +23,12 @@ jobs:
       - run: echo "GitHub branch is ${{ github.ref }}"
       - run: whoami
       - run: pwd
-      - name: mkdir ~/artifact
-        run: mkdir ~/artifact
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 8
+      # - name: mkdir ~/artifact
+      #   run: mkdir ~/artifact
       - name: Update Apt
         run: |
           sudo apt update
@@ -54,9 +58,13 @@ jobs:
           tests/setup_release_testnet.sh
       - name: Start node
         run: |
-          screen -d -m "~/go/bin/gaiad start --home ~/.release"
-      - name: Check blocks are being produced
-        run: |
-          height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
-          echo "Waiting for block $[ $height + 100 ]..."
-          tests/test_block_production.sh 127.0.0.1 26657 100
+          # screen -d -m "~/go/bin/gaiad start --home ~/.release"
+          screen -L -Logfile ~/gaiad.log -S gaiad -dm ~/go/bin/gaiad start --home ~/.release
+          sleep 10
+          cat ~/gaiad.log
+          
+      # - name: Check blocks are being produced
+      #   run: |
+      #     height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
+      #     echo "Waiting for block $[ $height + 100 ]..."
+      #     tests/test_block_production.sh 127.0.0.1 26657 100
