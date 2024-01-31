@@ -56,10 +56,10 @@ jobs:
         run: |
           export PATH="$PATH:/home/runner/go/bin"
           gaiad start --home /home/runner/.release &> /home/runner/gaia.log&
-          sleep 15
-          tail -n 10 /home/runner/gaia.log
-      # - name: Check blocks are being produced
-      #   run: |
-      #     height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
-      #     echo "Waiting for block $[ $height + 100 ]..."
-      #     tests/test_block_production.sh 127.0.0.1 26657 100
+          sleep 60
+          tail -n 20 /home/runner/gaia.log
+      - name: Check blocks are being produced
+        run: |
+          height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
+          echo "Waiting for block $[ $height + 100 ]..."
+          tests/test_block_production.sh 127.0.0.1 26657 100
