@@ -55,9 +55,12 @@ jobs:
       - name: Start node
         run: |
           # screen -d -m "~/go/bin/gaiad start --home ~/.release"
-          screen -L -Logfile ~/gaiad.log -S gaiad -dm ~/go/bin/gaiad start --home ~/.release
-          sleep 10
-          cat ~/gaiad.log
+          # screen -L -Logfile ~/gaiad.log -S gaiad -dm ~/go/bin/gaiad start --home ~/.release
+          # sleep 10
+          # cat ~/gaiad.log
+          ~/go/bin/gaiad start --home ~/.release &> ~/gaiad.log
+          sleep 15
+          tail ~/gaiad.log
           
       # - name: Check blocks are being produced
       #   run: |
