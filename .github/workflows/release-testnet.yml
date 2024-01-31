@@ -55,8 +55,9 @@ jobs:
       - name: Start node
         run: |
           export PATH="$PATH:/home/runner/go/bin"
-          gaiad start --home /home/runner/.release
-          
+          gaiad start --home /home/runner/.release &> /home/runner/gaia.log
+          sleep 15
+          tail -n 10 /home/runner/gaia.log
       # - name: Check blocks are being produced
       #   run: |
       #     height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
