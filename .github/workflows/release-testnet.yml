@@ -55,7 +55,7 @@ jobs:
       - name: Start node
         run: |
           export PATH="$PATH:/home/runner/go/bin"
-          tmux new-session -d -s gaia "gaiad start --home /home/runnner/.release &> /home/runner/gaia.log"
+          tmux new-session -d -s gaia "/home/runner/go/bin/gaiad start --home /home/runnner/.release &> /home/runner/gaia.log"
           # gaiad start --home /home/runner/.release &> /home/runner/gaia.log&
           sleep 60
           tail -n 100 /home/runner/gaia.log
