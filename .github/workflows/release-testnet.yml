@@ -54,13 +54,16 @@ jobs:
           tests/setup_release_testnet.sh
       - name: Start node
         run: |
-          export PATH="$PATH:/home/runner/go/bin"
-          touch /home/runner/gaia.log
-          tmux new-session -d -s gaia '/home/runner/go/bin/gaiad start --home /home/runner/.release |& tee -a /home/runner/gaia.log'
-          sleep 60
-          tail -n 100 /home/runner/gaia.log
-          cat /home/runner/gaia.log
-          tmux list-sessions
+          # export PATH="$PATH:/home/runner/go/bin"
+          # touch /home/runner/gaia.log
+          # tmux new-session -d -s gaia '/home/runner/go/bin/gaiad start --home /home/runner/.release |& tee -a /home/runner/gaia.log'
+          # sleep 60
+          # tail -n 100 /home/runner/gaia.log
+          # cat /home/runner/gaia.log
+          # tmux list-sessions
+          echo "while true; do $HOME/go/bin/gaiad start --home $HOME/.release; sleep 1; done" > $HOME/gaiad.sh
+          chmod +x $HOME/gaiad.sh
+          screen -L -Logfile $HOME/gaiad.log -S gaiad -d -m bash $HOME/gaiad.sh
       - name: Check blocks are being produced
         run: |
           height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
