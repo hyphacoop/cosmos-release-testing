@@ -4,7 +4,7 @@
 # Configuration
 # You should only have to modify the values in this block
 # ***
-NODE_HOME=/home/runner/release
+NODE_HOME=/home/runner/.release
 NODE_MONIKER=public-testnet
 SERVICE_NAME=gaiad
 GAIA_VERSION=v14.1.0
@@ -27,6 +27,7 @@ SYNC_RPC_SERVERS="$SYNC_RPC_1,$SYNC_RPC_2"
 # Install Gaia binary
 echo "Installing Gaia..."
 mkdir -p /home/runner/go/bin
+export PATH="$PATH:/home/runner/go/bin"
 wget $CHAIN_BINARY_URL -O /home/runner/go/bin/$CHAIN_BINARY
 chmod +x /home/runner/go/bin/$CHAIN_BINARY
 
