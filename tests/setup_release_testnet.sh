@@ -28,7 +28,7 @@ SYNC_RPC_SERVERS="$SYNC_RPC_1,$SYNC_RPC_2"
 echo "Installing Gaia..."
 mkdir -p /home/runner/go/bin
 export PATH="$PATH:/home/runner/go/bin"
-wget $CHAIN_BINARY_URL -O /home/runner/go/bin/$CHAIN_BINARY
+wget $CHAIN_BINARY_URL -O /home/runner/go/bin/$CHAIN_BINARY -q
 chmod +x /home/runner/go/bin/$CHAIN_BINARY
 
 # Initialize home directory
