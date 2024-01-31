@@ -56,7 +56,7 @@ jobs:
         run: |
           export PATH="$PATH:/home/runner/go/bin"
           touch /home/runner/gaia.log
-          tmux new-session -d -s gaia '/home/runner/go/bin/gaiad start --home /home/runnner/.release |& tee -a /home/runner/gaia.log'
+          tmux new-session -d -s gaia '/home/runner/go/bin/gaiad start --home /home/runner/.release |& tee -a /home/runner/gaia.log'
           sleep 60
           tail -n 100 /home/runner/gaia.log
       - name: Check blocks are being produced
