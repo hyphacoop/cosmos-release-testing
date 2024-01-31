@@ -59,6 +59,8 @@ jobs:
           tmux new-session -d -s gaia '/home/runner/go/bin/gaiad start --home /home/runner/.release |& tee -a /home/runner/gaia.log'
           sleep 60
           tail -n 100 /home/runner/gaia.log
+          cat /home/runner/gaia.log
+          tmux list-sessions
       - name: Check blocks are being produced
         run: |
           height=$(curl -s http://rpc.state-sync-01.theta-testnet.polypore.xyz:26657/block | jq -r '.result.block.header.height')
