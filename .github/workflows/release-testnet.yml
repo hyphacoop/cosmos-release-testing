@@ -23,10 +23,6 @@ jobs:
       - run: echo "GitHub branch is ${{ github.ref }}"
       - run: whoami
       - run: pwd
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 8
       # - name: mkdir ~/artifact
       #   run: mkdir ~/artifact
       - name: Update Apt
