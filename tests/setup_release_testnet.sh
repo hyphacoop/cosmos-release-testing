@@ -4,7 +4,7 @@
 # Configuration
 # You should only have to modify the values in this block
 # ***
-NODE_HOME=~/.release
+NODE_HOME=/home/runner/release
 NODE_MONIKER=public-testnet
 SERVICE_NAME=gaiad
 GAIA_VERSION=v14.1.0
@@ -22,14 +22,13 @@ SYNC_RPC_2=https://rpc.state-sync-02.theta-testnet.polypore.xyz:443
 SYNC_RPC_SERVERS="$SYNC_RPC_1,$SYNC_RPC_2"
 
 # Install wget and jq
-sudo apt-get install curl jq wget -y
-mkdir -p $HOME/go/bin
-export PATH=$PATH:$HOME/go/bin
+# sudo apt-get install curl jq wget -y
 
 # Install Gaia binary
 echo "Installing Gaia..."
-wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY
-chmod +x $HOME/go/bin/$CHAIN_BINARY
+mkdir -p /home/runner/go/bin
+wget $CHAIN_BINARY_URL -O /home/runner/go/bin/$CHAIN_BINARY
+chmod +x /home/runner/go/bin/$CHAIN_BINARY
 
 # Initialize home directory
 echo "Initializing $NODE_HOME..."
@@ -57,38 +56,6 @@ fi
 
 # Replace genesis file
 echo "Downloading genesis file..."
-wget $GENESIS_ZIPPED_URL
+wget $GENESIS_ZIPPED_URL -q
 gunzip genesis.json.gz -f
-cp genesis.json $NODE_HOME/config/genesis.json
-
-sudo rm /etc/systemd/system/$SERVICE_NAME.service
-sudo touch /etc/systemd/system/$SERVICE_NAME.service
-
-echo "[Unit]"                               | sudo tee /etc/systemd/system/$SERVICE_NAME.service
-echo "Description=Gaia service"             | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "After=network-online.target"          | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo ""                                     | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "[Service]"                            | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "User=$USER"                           | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "Restart=no"                           | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo ""                                     | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "[Install]"                            | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$SERVICE_NAME.service -a
-
-# Start service
-echo "Starting $SERVICE_NAME.service..."
-sudo systemctl daemon-reload
-sudo systemctl enable $SERVICE_NAME.service
-sudo systemctl start $SERVICE_NAME.service
-sudo systemctl restart systemd-journald
-
-# Add go and gaiad to the path
-echo "Setting up paths for go and gaiad bin..."
-echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> .profile
-
-echo "***********************"
-echo "To see the Gaia log enter:"
-echo "journalctl -fu $SERVICE_NAME.service"
-echo "***********************"
+mv genesis.json $NODE_HOME/config/genesis.json
