@@ -286,6 +286,12 @@ jobs:
       - name: _Blocks produced after upgrade
         run: |
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          echo "val1:"
+          journalctl -u $PROVIDER_SERVICE_1 | tail -n 5
+          echo "val2:"
+          journalctl -u $PROVIDER_SERVICE_2 | tail -n 5
+          echo "val3:"
+          journalctl -u $PROVIDER_SERVICE_3 | tail -n 5
 
       - name: Flush "migration successful" lines
         run: |
