@@ -156,7 +156,7 @@ jobs:
       - name: Generate starting versions
         id: generate-start
         run: |
-          start=$(tests/generate_version_matrix.py $VERSION_CUTOFF)
+          start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
           echo $start
           echo "start_versions=$start" >> $GITHUB_OUTPUT
       - name: Generate upgrade versions
@@ -193,7 +193,7 @@ jobs:
       - name: Generate starting versions
         id: generate-start
         run: |
-          start=$(tests/generate_version_matrix.py $VERSION_CUTOFF)
+          start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
           echo $start
           echo "start_versions=$start" >> $GITHUB_OUTPUT
       - name: Generate upgrade versions
