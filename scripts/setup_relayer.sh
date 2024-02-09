@@ -11,7 +11,7 @@ if [ $RELAYER == "hermes" ]; then
     export PATH="$PATH:~/.hermes"
 
     echo "Setting up Hermes config..."
-    cp tests/v15_upgrade/hermes-config.toml ~/.hermes/config.toml
+    cp templates/hermes-config.toml ~/.hermes/config.toml
 
     echo "Adding relayer keys..."
     echo $MNEMONIC_RELAYER > mnemonic.txt
@@ -44,7 +44,7 @@ elif [ $RELAYER == "rly" ]; then
 
     echo "Adding chains to config..."
     # provider
-    rly chains add --file tests/v15_upgrade/testnet.json
+    rly chains add --file templates/testnet.json
 
     # two
     # jq '.value."chain-id" = "two-v200"' tests/v15_upgrade/testnet.json > two-1.json
@@ -54,21 +54,21 @@ elif [ $RELAYER == "rly" ]; then
     # rly chains add --file two-v200.json
 
     # three
-    jq '.value."chain-id" = "three-v310"' tests/v15_upgrade/testnet.json > three-1.json
+    jq '.value."chain-id" = "three-v310"' templates/testnet.json > three-1.json
     jq '.value."rpc-addr" = "http://localhost:27301"' three-1.json > three-2.json
     jq '.value."gas-prices" = "0.005ucon"' three-2.json > three-v310.json
     cat three-v310.json
     rly chains add --file three-v310.json
 
     # four
-    jq '.value."chain-id" = "four-v330"' tests/v15_upgrade/testnet.json > four-1.json
+    jq '.value."chain-id" = "four-v330"' templates/testnet.json > four-1.json
     jq '.value."rpc-addr" = "http://localhost:27401"' four-1.json > four-2.json
     jq '.value."gas-prices" = "0.005ucon"' four-2.json > four-v330.json
     cat four-v330.json
     rly chains add --file four-v330.json
 
     # five - Stride
-    jq '.value."chain-id" = "five"' tests/v15_upgrade/testnet.json > five-1.json
+    jq '.value."chain-id" = "five"' templates/testnet.json > five-1.json
     jq '.value."rpc-addr" = "http://localhost:27501"' five-1.json > five-2.json
     jq '.value."account-prefix" = "stride"' five-2.json > five-3.json
     jq '.value."gas-prices" = "0.0025ustrd"' five-3.json > five.json
@@ -76,21 +76,21 @@ elif [ $RELAYER == "rly" ]; then
     rly chains add --file five.json
 
     # six
-    jq '.value."chain-id" = "six-v310"' tests/v15_upgrade/testnet.json > six-1.json
+    jq '.value."chain-id" = "six-v310"' templates/testnet.json > six-1.json
     jq '.value."rpc-addr" = "http://localhost:27601"' six-1.json > six-2.json
     jq '.value."gas-prices" = "0.005ucon"' six-2.json > six-v310.json
     cat six-v310.json
     rly chains add --file six-v310.json
 
     # eight
-    jq '.value."chain-id" = "eight-v330"' tests/v15_upgrade/testnet.json > eight-1.json
+    jq '.value."chain-id" = "eight-v330"' templates/estnet.json > eight-1.json
     jq '.value."rpc-addr" = "http://localhost:27801"' eight-1.json > eight-2.json
     jq '.value."gas-prices" = "0.005ucon"' eight-2.json > eight-v330.json
     cat eight-v330.json
     rly chains add --file eight-v330.json
 
     # nine
-    jq '.value."chain-id" = "nine-v400"' tests/v15_upgrade/testnet.json > nine-1.json
+    jq '.value."chain-id" = "nine-v400"' templates/testnet.json > nine-1.json
     jq '.value."rpc-addr" = "http://localhost:27901"' nine-1.json > nine-2.json
     jq '.value."account-prefix" = "consumer"' nine-2.json > nine-3.json
     jq '.value."gas-prices" = "0.005ucon"' nine-3.json > nine-v400.json
@@ -98,7 +98,7 @@ elif [ $RELAYER == "rly" ]; then
     rly chains add --file nine-v400.json
 
     # ten
-    jq '.value."chain-id" = "ten-v400"' tests/v15_upgrade/testnet.json > ten-1.json
+    jq '.value."chain-id" = "ten-v400"' templates/testnet.json > ten-1.json
     jq '.value."rpc-addr" = "http://localhost:47901"' ten-1.json > ten-2.json
     jq '.value."account-prefix" = "consumer"' ten-2.json > ten-3.json
     jq '.value."gas-prices" = "0.005ucon"' ten-3.json > ten-v400.json
@@ -106,19 +106,19 @@ elif [ $RELAYER == "rly" ]; then
     rly chains add --file ten-v400.json
 
     # pfm-1
-    jq '.value."chain-id" = "pfm1"' tests/v15_upgrade/testnet.json > p.json
+    jq '.value."chain-id" = "pfm1"' templates/testnet.json > p.json
     jq '.value."rpc-addr" = "http://localhost:27011"' p.json > pf.json
     jq '.value."gas-prices" = "0.005uatom"' pf.json > pfm1.json
     rly chains add --file pfm1.json
 
     # pfm-2
-    jq '.value."chain-id" = "pfm2"' tests/v15_upgrade/testnet.json > p.json
+    jq '.value."chain-id" = "pfm2"' templates/testnet.json > p.json
     jq '.value."rpc-addr" = "http://localhost:27012"' p.json > pf.json
     jq '.value."gas-prices" = "0.005uatom"' pf.json > pfm2.json
     rly chains add --file pfm2.json
 
     # pfm-3
-    jq '.value."chain-id" = "pfm3"' tests/v15_upgrade/testnet.json > p.json
+    jq '.value."chain-id" = "pfm3"' templates/testnet.json > p.json
     jq '.value."rpc-addr" = "http://localhost:27013"' p.json > pf.json
     jq '.value."gas-prices" = "0.005uatom"' pf.json > pfm3.json
     rly chains add --file pfm3.json
@@ -127,7 +127,6 @@ elif [ $RELAYER == "rly" ]; then
 
     echo "Adding relayer keys..."
     rly keys restore $CHAIN_ID default "$MNEMONIC_RELAYER"
-    # rly keys restore two-v200 default "$MNEMONIC_RELAYER"
     rly keys restore three-v310 default "$MNEMONIC_RELAYER"
     rly keys restore four-v330 default "$MNEMONIC_RELAYER"
     rly keys restore five default "$MNEMONIC_RELAYER"
