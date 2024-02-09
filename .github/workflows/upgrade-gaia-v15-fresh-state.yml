@@ -470,7 +470,7 @@ jobs:
         if: ${{ matrix.relayer == 'rly' }}
         run: echo "RELAYER=rly" >> $GITHUB_ENV
       - name: Set up relayer
-        run: tests/v15_upgrade/setup_relayer.sh
+        run: scripts/setup_relayer.sh
       - name: Download consumer chain binaries
         run: |
           wget $CONSUMER_CHAIN_V310_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V310_BINARY -q
