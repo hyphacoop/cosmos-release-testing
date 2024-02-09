@@ -2,10 +2,10 @@
 
 echo "Patching add template with spawn time..."
 spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
-jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' tests/patch_upgrade/proposal-add-template.json > proposal-add-spawn.json
+jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/proposal-add-template.json > proposal-add-spawn.json
 
 if $CHANGEOVER_HEIGHT_OFFSET ; then
-    jq -r --argjson HEIGHT "$CHANGEOVER_REV_HEIGHT" '.initial_height.revision_height |= $HEIGHT' tests/patch_upgrade/proposal-add-template.json > proposal-add-height.json
+    jq -r --argjson HEIGHT "$CHANGEOVER_REV_HEIGHT" '.initial_height.revision_height |= $HEIGHT' templates/proposal-add-template.json > proposal-add-height.json
     spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
     jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' proposal-add-height.json > proposal-add-spawn.json
 fi
