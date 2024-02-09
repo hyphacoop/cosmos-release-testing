@@ -6,8 +6,8 @@
 
 # 1. globalfee < node
 # set globalfee = 0.002uatom
-jq '.changes[0].value[0].amount = "0.003"' tests/major_fresh_upgrade/globalfee-params.json > globalfee-1.json
-tests/param_change.sh globalfee-1.json
+jq '.changes[0].value[0].amount = "0.003"' templates/globalfee-params.json > globalfee-1.json
+scripts/param_change.sh globalfee-1.json
 amount=$($CHAIN_BINARY q globalfee params -o json --home $HOME_1 | jq -r --arg DENOM "$DENOM" '.minimum_gas_prices[] | select(.denom == $DENOM).amount')
 echo "globalfee minimum_gas_prices: $amount$DENOM"
 
@@ -58,8 +58,8 @@ fi
 
 # 2. set node < globalfee
 # globalfee = 0.007uatom
-jq '.changes[0].value[0].amount = "0.007"' tests/major_fresh_upgrade/globalfee-params.json > globalfee-1.json
-tests/param_change.sh globalfee-1.json
+jq '.changes[0].value[0].amount = "0.007"' templates/globalfee-params.json > globalfee-1.json
+scripts/param_change.sh globalfee-1.json
 amount=$($CHAIN_BINARY q globalfee params -o json --home $HOME_1 | jq -r --arg DENOM "$DENOM" '.minimum_gas_prices[] | select(.denom == $DENOM).amount')
 echo "globalfee minimum_gas_prices: $amount$DENOM"
 
@@ -112,7 +112,7 @@ fi
 echo "globalfee test done, set globalfee = node"
 # set globalfee = 0.005uatom
 GAS_PRICE=0.009
-tests/param_change.sh tests/major_fresh_upgrade/globalfee-params.json
+scripts/param_change.sh templates/globalfee-params.json
 amount=$($CHAIN_BINARY q globalfee params -o json --home $HOME_1 | jq -r --arg DENOM "$DENOM" '.minimum_gas_prices[] | select(.denom == $DENOM).amount')
 echo "globalfee minimum_gas_prices: $amount$DENOM"
 GAS_PRICE=0.005
