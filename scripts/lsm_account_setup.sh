@@ -1,6 +1,6 @@
 #!/bin/bash
 # set -x
-source tests/process_tx.sh
+source scripts/process_tx.sh
 
 delegation=100000000
 tokenize=50000000

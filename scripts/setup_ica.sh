@@ -1,5 +1,5 @@
 #!/bin/bash
-source tests/process_tx.sh
+source scripts/process_tx.sh
 
 echo "Registering ICA account..."
 submit_ibc_tx "tx interchain-accounts controller register connection-0 --from $STRIDE_WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$STRIDE_DENOM -y --chain-id $STRIDE_CHAIN_ID -o json" $STRIDE_CHAIN_BINARY $ICA_CHAIN_HOME

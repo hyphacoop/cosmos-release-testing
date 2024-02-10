@@ -6,7 +6,7 @@ port=$2
 address=$3
 operator=$4
 
-source tests/process_tx.sh
+source scripts/process_tx.sh
 
 echo "Restarting $service..."
 sudo systemctl start $service
