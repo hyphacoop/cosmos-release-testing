@@ -2545,7 +2545,7 @@ jobs:
       - name: Register and fund ICA
         env:
           ICA_CHAIN_HOME: /home/runner/.five_1
-        run: tests/v15_upgrade/setup_ica.sh
+        run: scripts/setup_ica.sh
       - name: Set up happy path LSM accounts
         run: |
           scripts/lsm_account_setup.sh
