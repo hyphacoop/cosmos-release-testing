@@ -1,7 +1,7 @@
 #!/bin/bash
 # Happy path for liquid staking provider
 
-source tests/process_tx.sh
+source scripts/process_tx.sh
 
 delegate=20000000
 bond_delegation=20000000
