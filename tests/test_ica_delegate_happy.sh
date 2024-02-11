@@ -25,13 +25,13 @@ echo "** LIQUID STAKING PROVIDER HAPPY PATH> 1: DELEGATE AND BOND **"
     echo "Expected shares: $expected_shares"
     expected_shares=${expected_shares%.*}
 
-    tests/v12_upgrade/log_lsm_data.sh accounting pre-delegate-1 $lsp_happy_bonding $bond_delegation
+    scripts/log_lsm_data.sh accounting pre-delegate-1 $lsp_happy_bonding $bond_delegation
     submit_tx "tx staking delegate $VALOPER_2 $bond_delegation$DENOM --from $lsp_happy_bonding -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
-    tests/v12_upgrade/log_lsm_data.sh accounting post-delegate-1 $lsp_happy_bonding $bond_delegation
+    scripts/log_lsm_data.sh accounting post-delegate-1 $lsp_happy_bonding $bond_delegation
     $CHAIN_BINARY q staking validator $VALOPER_2 --home $HOME_1 -o json | jq '.'
-    tests/v12_upgrade/log_lsm_data.sh accounting pre-bond-1 $lsp_happy_bonding -
+    scripts/log_lsm_data.sh accounting pre-bond-1 $lsp_happy_bonding -
     submit_tx "tx staking validator-bond $VALOPER_2 --from $lsp_happy_bonding -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
-    tests/v12_upgrade/log_lsm_data.sh accounting post-bond-1 $lsp_happy_bonding -
+    scripts/log_lsm_data.sh accounting post-bond-1 $lsp_happy_bonding -
     $CHAIN_BINARY q staking validator $VALOPER_2 --home $HOME_1 -o json | jq '.'
 
     bond_shares_2=$($CHAIN_BINARY q staking validator $VALOPER_2 --home $HOME_1 -o json | jq -r '.validator_bond_shares')
@@ -61,7 +61,7 @@ echo "** LIQUID STAKING PROVIDER HAPPY PATH> 2: DELEGATE VIA ICA **"
     expected_liquid_increase=${expected_liquid_increase%.*}
     echo "Expected increase in liquid shares: $expected_liquid_increase"
     
-    jq -r --arg ADDRESS "$ICA_ADDRESS" '.delegator_address = $ADDRESS' tests/v12_upgrade/msg-delegate.json > delegate-happy.json
+    jq -r --arg ADDRESS "$ICA_ADDRESS" '.delegator_address = $ADDRESS' templates/ica-msg-delegate.json > delegate-happy.json
     jq -r --arg AMOUNT "$delegate" '.amount.amount = $AMOUNT' delegate-happy.json > delegate-happy-2.json
     # message=$(jq -r --arg ADDRESS "$VALOPER_2" '.validator_address = $ADDRESS' delegate-happy-2.json)
     # echo $message
@@ -73,7 +73,7 @@ echo "** LIQUID STAKING PROVIDER HAPPY PATH> 2: DELEGATE VIA ICA **"
     $STRIDE_CHAIN_BINARY tx interchain-accounts host generate-packet-data "$(cat delegate-happy-3.json)" --encoding proto3 > delegate_packet.json # Stride v18
     # $STRIDE_CHAIN_BINARY tx interchain-accounts host generate-packet-data "$(cat delegate-happy-3.json)" > delegate_packet.json # Stride v12
     echo "Sending tx staking delegate to host chain..."
-    tests/v12_upgrade/log_lsm_data.sh lsp-happy pre-ica-delegate-1 $ICA_ADDRESS $delegate
+    scripts/log_lsm_data.sh lsp-happy pre-ica-delegate-1 $ICA_ADDRESS $delegate
     
     $CHAIN_BINARY q bank balances $ICA_ADDRESS -o json --home $HOME_1 | jq '.'
     $CHAIN_BINARY q staking delegations $ICA_ADDRESS -o json --home $HOME_1 | jq '.'
@@ -82,7 +82,7 @@ echo "** LIQUID STAKING PROVIDER HAPPY PATH> 2: DELEGATE VIA ICA **"
     echo "Waiting for delegation to go on-chain..."
     sleep $(($COMMIT_TIMEOUT*20))
     journalctl -u $RELAYER | tail -n 50
-    tests/v12_upgrade/log_lsm_data.sh lsp-happy post-ica-delegate-1 $ICA_ADDRESS $delegate
+    scripts/log_lsm_data.sh lsp-happy post-ica-delegate-1 $ICA_ADDRESS $delegate
     
     $CHAIN_BINARY q staking delegations $ICA_ADDRESS -o json --home $HOME_1 | jq '.'
     $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.'
