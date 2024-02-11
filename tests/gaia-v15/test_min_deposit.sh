@@ -33,7 +33,7 @@ if $UPGRADED_V15 ; then
     sleep $(($COMMIT_TIMEOUT+2))
 else
     echo "Setting minimum deposit to 10ATOM..."
-    tests/param_change.sh tests/v15_upgrade/proposal-10atom-deposit.json
+    scripts/param_change.sh templates/proposal-10atom-deposit.json
     params=$($CHAIN_BINARY q gov params --home $HOME_1 -o json | jq -r '.')
     echo $params
 
