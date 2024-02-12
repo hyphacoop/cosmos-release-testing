@@ -2778,7 +2778,7 @@ jobs:
           export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain stride-test
+      - name: Prepare consumer chain neutron-test
         env:
           CONSUMER_CHAIN_ID: neutron-test
           CONSUMER_HOME_1: /home/runner/.neutron-1
@@ -2799,7 +2799,7 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
           journalctl -u $CONSUMER_SERVICE_1
-      - name: _Pre-upgrade consumer chain produces blocks> Stride chain
+      - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
         env:
           CON1_RPC_PORT: 32121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
