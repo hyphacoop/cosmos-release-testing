@@ -901,7 +901,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.1.0 chain 1
         env:
-          CON1_RPC_PORT: 27301
+          CON1_RPC_PORT: 31121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for v310-one
         env:
@@ -1766,7 +1766,9 @@ jobs:
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+          echo "client id: $client_id"
           connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+          echo "connection id: $connection_id"
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           echo "Provider channel id: $channel_id"
           tests/test_consumer_ibc_transfer.sh $channel_id
@@ -1946,7 +1948,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
         env:
-          CON1_RPC_PORT: 27901
+          CON1_RPC_PORT: 40121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for v400-one
         env:

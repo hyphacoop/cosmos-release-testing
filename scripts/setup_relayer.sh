@@ -73,7 +73,7 @@ elif [ $RELAYER == "rly" ]; then
     rly chains add --file v330-one.json
 
     # v330-two
-    jq '.value."chain-id" = "v310-two"' templates/testnet.json > v330-1.json
+    jq '.value."chain-id" = "v330-two"' templates/testnet.json > v330-1.json
     jq '.value."rpc-addr" = "http://localhost:33221"' v330-1.json > v330-2.json
     jq '.value."gas-prices" = "0.005ucon"' v330-2.json > v330-two.json
     cat v330-two.json
