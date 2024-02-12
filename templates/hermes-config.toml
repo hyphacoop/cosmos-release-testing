@@ -83,7 +83,7 @@ type = "CosmosSdk"
 id = 'v330-two'
 rpc_addr = 'http://localhost:33221'
 grpc_addr = 'http://localhost:33211'
-event_source = { mode = 'push', url = 'ws://localhost:33211/websocket', batch_delay = '500ms' }
+event_source = { mode = 'push', url = 'ws://localhost:33221/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'

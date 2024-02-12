@@ -2450,7 +2450,7 @@ jobs:
       - name: Add Stride consumer chain
         env:
           COSMOS_SDK: v45
-          CONSUMER_CHAIN_ID: five
+          CONSUMER_CHAIN_ID: stride-test
         run: |
           scripts/add_consumer.sh
       - name: Initialize Stride consumer chain
