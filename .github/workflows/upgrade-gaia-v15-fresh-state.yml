@@ -2483,7 +2483,7 @@ jobs:
           export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain five
+      - name: Prepare consumer chain stride-test
         env:
           CONSUMER_CHAIN_ID: stride-test
           CONSUMER_HOME_1: /home/runner/.stride-1
@@ -2547,7 +2547,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
       - name: Register and fund ICA
         env:
-          ICA_CHAIN_HOME: /home/runner/.five_1
+          ICA_CHAIN_HOME: /home/runner/.stride-1
         run: scripts/setup_ica.sh
       - name: Set up happy path LSM accounts
         run: |
@@ -2607,7 +2607,7 @@ jobs:
 
       - name: _CCV channel verified> Stride chain
         env:
-          CONSUMER_HOME_1: /home/runner/.five_1
+          CONSUMER_HOME_1: /home/runner/.stride-1
           CON1_RPC_PORT: 32121
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> Stride chain
