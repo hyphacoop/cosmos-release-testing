@@ -22,7 +22,8 @@ if [ $RELAYER == "hermes" ]; then
     hermes keys add --chain v330-two --mnemonic-file mnemonic.txt
     hermes keys add --chain v400-one --mnemonic-file mnemonic.txt
     hermes keys add --chain v400-two --mnemonic-file mnemonic.txt
-    hermes keys add --chain five --mnemonic-file mnemonic.txt
+    hermes keys add --chain stride-test --mnemonic-file mnemonic.txt
+    hermes keys add --chain neutron-test --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm1 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm2 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm3 --mnemonic-file mnemonic.txt
@@ -92,14 +93,21 @@ elif [ $RELAYER == "rly" ]; then
     cat v400-two.json
     rly chains add --file v400-two.json
 
+    # Stride
+    jq '.value."chain-id" = "stride-test"' templates/testnet.json > stride-1.json
+    jq '.value."rpc-addr" = "http://localhost:32121"' stride-1.json > stride-2.json
+    jq '.value."account-prefix" = "stride"' stride-2.json > stride-3.json
+    jq '.value."gas-prices" = "0.0025ustrd"' stride-3.json > stride-test.json
+    cat stride-test.json
+    rly chains add --file stride-test.json
 
-    # five - Stride
-    jq '.value."chain-id" = "five"' templates/testnet.json > five-1.json
-    jq '.value."rpc-addr" = "http://localhost:27501"' five-1.json > five-2.json
-    jq '.value."account-prefix" = "stride"' five-2.json > five-3.json
-    jq '.value."gas-prices" = "0.0025ustrd"' five-3.json > five.json
-    cat five.json
-    rly chains add --file five.json
+    # Neutron
+    jq '.value."chain-id" = "neutron-test"' templates/testnet.json > neutron-1.json
+    jq '.value."rpc-addr" = "http://localhost:31321"' neutron-1.json > neutron-2.json
+    jq '.value."account-prefix" = "neutron"' neutron-2.json > neutron-3.json
+    jq '.value."gas-prices" = "0.0025untrn"' neutron-3.json > neutron-test.json
+    cat neutron-test.json
+    rly chains add --file neutron-test.json
 
     # pfm-1
     jq '.value."chain-id" = "pfm1"' templates/testnet.json > p.json
@@ -129,7 +137,8 @@ elif [ $RELAYER == "rly" ]; then
     rly keys restore v330-two default "$MNEMONIC_RELAYER"
     rly keys restore v400-one default "$MNEMONIC_RELAYER"
     rly keys restore v400-two default "$MNEMONIC_RELAYER"
-    rly keys restore five default "$MNEMONIC_RELAYER"
+    rly keys restore stride-test default "$MNEMONIC_RELAYER"
+    rly keys restore neutron-test default "$MNEMONIC_RELAYER"
     rly keys restore pfm1 default "$MNEMONIC_RELAYER"
     rly keys restore pfm2 default "$MNEMONIC_RELAYER"
     rly keys restore pfm3 default "$MNEMONIC_RELAYER"
