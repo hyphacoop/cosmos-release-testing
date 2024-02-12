@@ -38,7 +38,7 @@ mv genesis-1.json $CONSUMER_HOME_1/config/genesis.json
 
 echo "Patching genesis for block max gas != -1..."
 jq -r '.consensus_params.block.max_gas = "50000000"' $CONSUMER_HOME_1/config/genesis.json > consumer-gas.json
-MV consumer-gas.json $CONSUMER_HOME_1/config/genesis.json
+mv consumer-gas.json $CONSUMER_HOME_1/config/genesis.json
 
 # Set slashing to $DOWNTIME_BLOCKS
 jq -r --arg SLASH "$DOWNTIME_BLOCKS" '.app_state.slashing.params.signed_blocks_window |= $SLASH' $CONSUMER_HOME_1/config/genesis.json > consumer-slashing.json
