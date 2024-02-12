@@ -496,63 +496,63 @@ jobs:
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v45
-          CONSUMER_CHAIN_ID: three-v310
+          CONSUMER_CHAIN_ID: v310-one
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.1.0
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CONSUMER_HOME_2: /home/runner/.three_2
-          CONSUMER_HOME_3: /home/runner/.three_3
-          CONSUMER_SERVICE_1: three_1.service
-          CONSUMER_SERVICE_2: three_2.service
-          CONSUMER_SERVICE_3: three_3.service
-          CON1_API_PORT: 25301
-          CON2_API_PORT: 25302
-          CON3_API_PORT: 25303
-          CON1_GRPC_PORT: 26301
-          CON2_GRPC_PORT: 26302
-          CON3_GRPC_PORT: 26303
-          CON1_RPC_PORT: 27301
-          CON2_RPC_PORT: 27302
-          CON3_RPC_PORT: 27303
-          CON1_P2P_PORT: 28301
-          CON2_P2P_PORT: 28302
-          CON3_P2P_PORT: 28303
-          CON1_PPROF_PORT: 29301
-          CON2_PPROF_PORT: 29302
-          CON3_PPROF_PORT: 29303
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CONSUMER_HOME_2: /home/runner/.v310-1-2
+          CONSUMER_HOME_3: /home/runner/.v310-1-3
+          CONSUMER_SERVICE_1: v310-1-1.service
+          CONSUMER_SERVICE_2: v310-1-2.service
+          CONSUMER_SERVICE_3: v310-1-3.service
+          CON1_API_PORT: 31101
+          CON2_API_PORT: 31102
+          CON3_API_PORT: 31103
+          CON1_GRPC_PORT: 31111
+          CON2_GRPC_PORT: 31112
+          CON3_GRPC_PORT: 31113
+          CON1_RPC_PORT: 31121
+          CON2_RPC_PORT: 31122
+          CON3_RPC_PORT: 31123
+          CON1_P2P_PORT: 31131
+          CON2_P2P_PORT: 31132
+          CON3_P2P_PORT: 31133
+          CON1_PPROF_PORT: 31141
+          CON2_PPROF_PORT: 31142
+          CON3_PPROF_PORT: 31143
           DOWNTIME_BLOCKS: 100000
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain three-v310
+      - name: Prepare consumer chain v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CONSUMER_HOME_2: /home/runner/.three_2
-          CONSUMER_HOME_3: /home/runner/.three_3
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CONSUMER_HOME_2: /home/runner/.v310-1-2
+          CONSUMER_HOME_3: /home/runner/.v310-1-3
         run: |
           scripts/prepare_consumer.sh
-      - name: Start consumer chain three-v310
+      - name: Start consumer chain v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_SERVICE_1: three_1.service
-          CONSUMER_SERVICE_2: three_2.service
-          CONSUMER_SERVICE_3: three_3.service
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_SERVICE_1: v310-1-1.service
+          CONSUMER_SERVICE_2: v310-1-2.service
+          CONSUMER_SERVICE_3: v310-1-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.1.0 chain 1
         env:
-          CON1_RPC_PORT: 27301
+          CON1_RPC_PORT: 31121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for three-v310
+      - name: Establish CCV channel for v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
+          CONSUMER_CHAIN_ID: v310-one
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -561,23 +561,23 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > three-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' three-1.json > three-2.json
-            rly paths add testnet three-v310 three --file three-2.json
-            rly transact connection three
-            rly transact channel three --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v310-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v310-1.json > v310-2.json
+            rly paths add testnet v310-one v310-1 --file v310-2.json
+            rly transact connection v310-1
+            rly transact channel v310-1 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v3.1.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CON1_RPC_PORT: 27301
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CON1_RPC_PORT: 31121
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v3.1.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -610,13 +610,13 @@ jobs:
 
       - name: _CCV channel verified> ICS v3.1.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CON1_RPC_PORT: 27301
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CON1_RPC_PORT: 31121
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -627,57 +627,57 @@ jobs:
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v47
-          CONSUMER_CHAIN_ID: six-v310
+          CONSUMER_CHAIN_ID: v310-two
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.1.0
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
-          CONSUMER_HOME_2: /home/runner/.six_2
-          CONSUMER_HOME_3: /home/runner/.six_3
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
-          CON1_API_PORT: 25601
-          CON2_API_PORT: 25602
-          CON3_API_PORT: 25603
-          CON1_GRPC_PORT: 26601
-          CON2_GRPC_PORT: 26602
-          CON3_GRPC_PORT: 26603
-          CON1_RPC_PORT: 27601
-          CON2_RPC_PORT: 27602
-          CON3_RPC_PORT: 27603
-          CON1_P2P_PORT: 28601
-          CON2_P2P_PORT: 28602
-          CON3_P2P_PORT: 28603
-          CON1_PPROF_PORT: 29601
-          CON2_PPROF_PORT: 29602
-          CON3_PPROF_PORT: 29603
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
+          CONSUMER_HOME_2: /home/runner/.v310-2-2
+          CONSUMER_HOME_3: /home/runner/.v310-2-3
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
+          CON1_API_PORT: 31201
+          CON2_API_PORT: 31202
+          CON3_API_PORT: 31203
+          CON1_GRPC_PORT: 31211
+          CON2_GRPC_PORT: 31212
+          CON3_GRPC_PORT: 31213
+          CON1_RPC_PORT: 31221
+          CON2_RPC_PORT: 31222
+          CON3_RPC_PORT: 31223
+          CON1_P2P_PORT: 31231
+          CON2_P2P_PORT: 31232
+          CON3_P2P_PORT: 31233
+          CON1_PPROF_PORT: 31241
+          CON2_PPROF_PORT: 31242
+          CON3_PPROF_PORT: 31243
           DOWNTIME_BLOCKS: 20
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain six-v310
+      - name: Prepare consumer chain v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
-          CONSUMER_HOME_2: /home/runner/.six_2
-          CONSUMER_HOME_3: /home/runner/.six_3
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
+          CONSUMER_HOME_2: /home/runner/.v310-2-2
+          CONSUMER_HOME_3: /home/runner/.v310-2-3
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
           ICS_310: true
           COSMOS_SDK: v47
         run: |
           scripts/prepare_consumer.sh
-      - name: Start consumer chain six-v310
+      - name: Start consumer chain v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
@@ -686,11 +686,11 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
         env:
-          CON1_RPC_PORT: 27601
+          CON1_RPC_PORT: 31221
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for six-v310
+      - name: Establish CCV channel for v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
+          CONSUMER_CHAIN_ID: v310-two
         run: |
             client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
             if [ $RELAYER == "hermes" ]; then
@@ -699,23 +699,23 @@ jobs:
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
             elif [ $RELAYER == "rly" ]; then
               echo "Creating channel with Go relayer..."
-              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > six-1.json
-              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' six-1.json > six-2.json
-              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID six --file six-2.json
-              rly transact connection six
-              rly transact channel six --src-port consumer --dst-port provider --order ordered --version 1
+              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v310-1.json
+              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v310-1.json > v310-2.json
+              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v310-2 --file v310-2.json
+              rly transact connection v310-2
+              rly transact channel v310-2 --src-port consumer --dst-port provider --order ordered --version 1
             fi
             sudo systemctl restart $RELAYER
             sleep 10
       - name: _CCV channel verified> ICS v3.1.0 chain 2
         env:
-          CON1_RPC_PORT: 27601
-          CONSUMER_HOME_1: /home/runner/.six_1
+          CON1_RPC_PORT: 31221
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 2
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -725,8 +725,8 @@ jobs:
 
       - name: Stop validator services
         env:
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
         run: |
           sudo systemctl disable $CONSUMER_SERVICE_2 --now
           sudo systemctl disable $CONSUMER_SERVICE_3 --now
@@ -737,7 +737,7 @@ jobs:
         run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Unjail validator
         env:
-          CONSUMER_SERVICE_2: six_2.service
+          CONSUMER_SERVICE_2: v310-2-2.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sleep $(($COMMIT_TIMEOUT*10))
@@ -747,7 +747,7 @@ jobs:
         run: tests/test_validator_jailed.sh $VALOPER_2 false
       # - name: Stop validator services
       #   env:
-      #     CONSUMER_SERVICE_2: six_2.service
+      #     CONSUMER_SERVICE_2: v310-2-2.service
       #   run: |
       #     sudo systemctl disable $CONSUMER_SERVICE_2 --now
       #     sleep $(($COMMIT_TIMEOUT*30))
@@ -849,18 +849,18 @@ jobs:
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v45
-          CONSUMER_CHAIN_ID: three-v310
+          CONSUMER_CHAIN_ID: v310-one
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.1.0
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CONSUMER_HOME_2: /home/runner/.three_2
-          CONSUMER_HOME_3: /home/runner/.three_3
-          CONSUMER_SERVICE_1: three_1.service
-          CONSUMER_SERVICE_2: three_2.service
-          CONSUMER_SERVICE_3: three_3.service
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CONSUMER_HOME_2: /home/runner/.v310-1-2
+          CONSUMER_HOME_3: /home/runner/.v310-1-3
+          CONSUMER_SERVICE_1: v310-1-1.service
+          CONSUMER_SERVICE_2: v310-1-2.service
+          CONSUMER_SERVICE_3: v310-1-3.service
           CON1_API_PORT: 25301
           CON2_API_PORT: 25302
           CON3_API_PORT: 25303
@@ -881,20 +881,20 @@ jobs:
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           scripts/init_consumer_assign_some_keys.sh
           sleep 20
-      - name: Prepare consumer chain three-v310
+      - name: Prepare consumer chain v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CONSUMER_HOME_2: /home/runner/.three_2
-          CONSUMER_HOME_3: /home/runner/.three_3
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CONSUMER_HOME_2: /home/runner/.v310-1-2
+          CONSUMER_HOME_3: /home/runner/.v310-1-3
         run: |
           scripts/prepare_consumer.sh
-      - name: Start consumer chain three-v310
+      - name: Start consumer chain v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_SERVICE_1: three_1.service
-          CONSUMER_SERVICE_2: three_2.service
-          CONSUMER_SERVICE_3: three_3.service
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_SERVICE_1: v310-1-1.service
+          CONSUMER_SERVICE_2: v310-1-2.service
+          CONSUMER_SERVICE_3: v310-1-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
@@ -903,9 +903,9 @@ jobs:
         env:
           CON1_RPC_PORT: 27301
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for three-v310
+      - name: Establish CCV channel for v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
+          CONSUMER_CHAIN_ID: v310-one
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -916,7 +916,7 @@ jobs:
             echo "Creating channel with Go relayer..."
             jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > three-1.json
             jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' three-1.json > three-2.json
-            rly paths add testnet three-v310 three --file three-2.json
+            rly paths add testnet v310-one three --file three-2.json
             rly transact connection three
             rly transact channel three --src-port consumer --dst-port provider --order ordered --version 1
           fi
@@ -924,13 +924,13 @@ jobs:
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v3.1.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
           CON1_RPC_PORT: 27301
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v3.1.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -963,13 +963,13 @@ jobs:
 
       - name: _CCV channel verified> ICS v3.1.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
           CON1_RPC_PORT: 27301
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -980,18 +980,18 @@ jobs:
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v47
-          CONSUMER_CHAIN_ID: six-v310
+          CONSUMER_CHAIN_ID: v310-two
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.1.0
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
-          CONSUMER_HOME_2: /home/runner/.six_2
-          CONSUMER_HOME_3: /home/runner/.six_3
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
+          CONSUMER_HOME_2: /home/runner/.v310-2-2
+          CONSUMER_HOME_3: /home/runner/.v310-2-3
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
           CON1_API_PORT: 25601
           CON2_API_PORT: 25602
           CON3_API_PORT: 25603
@@ -1012,25 +1012,25 @@ jobs:
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           scripts/init_consumer_assign_some_keys.sh
           sleep 20
-      - name: Prepare consumer chain six-v310
+      - name: Prepare consumer chain v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
-          CONSUMER_HOME_2: /home/runner/.six_2
-          CONSUMER_HOME_3: /home/runner/.six_3
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
+          CONSUMER_HOME_2: /home/runner/.v310-2-2
+          CONSUMER_HOME_3: /home/runner/.v310-2-3
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
           ICS_310: true
           COSMOS_SDK: v47
         run: |
           scripts/prepare_consumer.sh
-      - name: Start consumer chain six-v310
+      - name: Start consumer chain v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
@@ -1041,9 +1041,9 @@ jobs:
         env:
           CON1_RPC_PORT: 27601
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for six-v310
+      - name: Establish CCV channel for v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
+          CONSUMER_CHAIN_ID: v310-two
         run: |
             client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
             if [ $RELAYER == "hermes" ]; then
@@ -1063,12 +1063,12 @@ jobs:
       - name: _CCV channel verified> ICS v3.1.0 chain 2
         env:
           CON1_RPC_PORT: 27601
-          CONSUMER_HOME_1: /home/runner/.six_1
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 2
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1078,8 +1078,8 @@ jobs:
 
       - name: Stop validator services
         env:
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
         run: |
           sudo systemctl disable $CONSUMER_SERVICE_2 --now
           sudo systemctl disable $CONSUMER_SERVICE_3 --now
@@ -1090,7 +1090,7 @@ jobs:
         run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Unjail validator
         env:
-          CONSUMER_SERVICE_2: six_2.service
+          CONSUMER_SERVICE_2: v310-2-2.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sleep $(($COMMIT_TIMEOUT*10))
@@ -1194,18 +1194,18 @@ jobs:
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v45
-          CONSUMER_CHAIN_ID: three-v310
+          CONSUMER_CHAIN_ID: v310-one
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.1.0
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CONSUMER_HOME_2: /home/runner/.three_2
-          CONSUMER_HOME_3: /home/runner/.three_3
-          CONSUMER_SERVICE_1: three_1.service
-          CONSUMER_SERVICE_2: three_2.service
-          CONSUMER_SERVICE_3: three_3.service
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CONSUMER_HOME_2: /home/runner/.v310-1-2
+          CONSUMER_HOME_3: /home/runner/.v310-1-3
+          CONSUMER_SERVICE_1: v310-1-1.service
+          CONSUMER_SERVICE_2: v310-1-2.service
+          CONSUMER_SERVICE_3: v310-1-3.service
           CON1_API_PORT: 25301
           CON2_API_PORT: 25302
           CON3_API_PORT: 25303
@@ -1226,20 +1226,20 @@ jobs:
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           scripts/init_consumer_assign_no_keys.sh
           sleep 20
-      - name: Prepare consumer chain three-v310
+      - name: Prepare consumer chain v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
-          CONSUMER_HOME_2: /home/runner/.three_2
-          CONSUMER_HOME_3: /home/runner/.three_3
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
+          CONSUMER_HOME_2: /home/runner/.v310-1-2
+          CONSUMER_HOME_3: /home/runner/.v310-1-3
         run: |
           scripts/prepare_consumer.sh
-      - name: Start consumer chain three-v310
+      - name: Start consumer chain v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_SERVICE_1: three_1.service
-          CONSUMER_SERVICE_2: three_2.service
-          CONSUMER_SERVICE_3: three_3.service
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_SERVICE_1: v310-1-1.service
+          CONSUMER_SERVICE_2: v310-1-2.service
+          CONSUMER_SERVICE_3: v310-1-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
@@ -1248,9 +1248,9 @@ jobs:
         env:
           CON1_RPC_PORT: 27301
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for three-v310
+      - name: Establish CCV channel for v310-one
         env:
-          CONSUMER_CHAIN_ID: three-v310
+          CONSUMER_CHAIN_ID: v310-one
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -1261,7 +1261,7 @@ jobs:
             echo "Creating channel with Go relayer..."
             jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > three-1.json
             jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' three-1.json > three-2.json
-            rly paths add testnet three-v310 three --file three-2.json
+            rly paths add testnet v310-one three --file three-2.json
             rly transact connection three
             rly transact channel three --src-port consumer --dst-port provider --order ordered --version 1
           fi
@@ -1269,13 +1269,13 @@ jobs:
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v3.1.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
           CON1_RPC_PORT: 27301
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v3.1.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1308,13 +1308,13 @@ jobs:
 
       - name: _CCV channel verified> ICS v3.1.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
           CON1_RPC_PORT: 27301
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: three-v310
-          CONSUMER_HOME_1: /home/runner/.three_1
+          CONSUMER_CHAIN_ID: v310-one
+          CONSUMER_HOME_1: /home/runner/.v310-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1325,18 +1325,18 @@ jobs:
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v47
-          CONSUMER_CHAIN_ID: six-v310
+          CONSUMER_CHAIN_ID: v310-two
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.1.0
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
-          CONSUMER_HOME_2: /home/runner/.six_2
-          CONSUMER_HOME_3: /home/runner/.six_3
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
+          CONSUMER_HOME_2: /home/runner/.v310-2-2
+          CONSUMER_HOME_3: /home/runner/.v310-2-3
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
           CON1_API_PORT: 25601
           CON2_API_PORT: 25602
           CON3_API_PORT: 25603
@@ -1357,25 +1357,25 @@ jobs:
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           scripts/init_consumer_assign_no_keys.sh
           sleep 20
-      - name: Prepare consumer chain six-v310
+      - name: Prepare consumer chain v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
-          CONSUMER_HOME_2: /home/runner/.six_2
-          CONSUMER_HOME_3: /home/runner/.six_3
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
+          CONSUMER_HOME_2: /home/runner/.v310-2-2
+          CONSUMER_HOME_3: /home/runner/.v310-2-3
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
           ICS_310: true
           COSMOS_SDK: v47
         run: |
           scripts/prepare_consumer.sh
-      - name: Start consumer chain six-v310
+      - name: Start consumer chain v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_SERVICE_1: six_1.service
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_SERVICE_1: v310-2-1.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
@@ -1386,9 +1386,9 @@ jobs:
         env:
           CON1_RPC_PORT: 27601
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for six-v310
+      - name: Establish CCV channel for v310-two
         env:
-          CONSUMER_CHAIN_ID: six-v310
+          CONSUMER_CHAIN_ID: v310-two
         run: |
             client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
             if [ $RELAYER == "hermes" ]; then
@@ -1408,12 +1408,12 @@ jobs:
       - name: _CCV channel verified> ICS v3.1.0 chain 2
         env:
           CON1_RPC_PORT: 27601
-          CONSUMER_HOME_1: /home/runner/.six_1
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 2
         env:
-          CONSUMER_CHAIN_ID: six-v310
-          CONSUMER_HOME_1: /home/runner/.six_1
+          CONSUMER_CHAIN_ID: v310-two
+          CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1423,8 +1423,8 @@ jobs:
 
       - name: Stop validator services
         env:
-          CONSUMER_SERVICE_2: six_2.service
-          CONSUMER_SERVICE_3: six_3.service
+          CONSUMER_SERVICE_2: v310-2-2.service
+          CONSUMER_SERVICE_3: v310-2-3.service
         run: |
           sudo systemctl disable $CONSUMER_SERVICE_2 --now
           sudo systemctl disable $CONSUMER_SERVICE_3 --now
@@ -1435,7 +1435,7 @@ jobs:
         run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Unjail validator
         env:
-          CONSUMER_SERVICE_2: six_2.service
+          CONSUMER_SERVICE_2: v310-2-2.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sleep $(($COMMIT_TIMEOUT*10))

@@ -16,16 +16,13 @@ if [ $RELAYER == "hermes" ]; then
     echo "Adding relayer keys..."
     echo $MNEMONIC_RELAYER > mnemonic.txt
     hermes keys add --chain $CHAIN_ID --mnemonic-file mnemonic.txt
-    hermes keys add --chain one-v120 --mnemonic-file mnemonic.txt
-    hermes keys add --chain two-v200 --mnemonic-file mnemonic.txt
-    hermes keys add --chain three-v310 --mnemonic-file mnemonic.txt
-    hermes keys add --chain four-v330 --mnemonic-file mnemonic.txt
+    hermes keys add --chain v310-one --mnemonic-file mnemonic.txt
+    hermes keys add --chain v310-two --mnemonic-file mnemonic.txt
+    hermes keys add --chain v330-one --mnemonic-file mnemonic.txt
+    hermes keys add --chain v330-two --mnemonic-file mnemonic.txt
+    hermes keys add --chain v400-one --mnemonic-file mnemonic.txt
+    hermes keys add --chain v400-two --mnemonic-file mnemonic.txt
     hermes keys add --chain five --mnemonic-file mnemonic.txt
-    hermes keys add --chain six-v310 --mnemonic-file mnemonic.txt
-    hermes keys add --chain seven-v320 --mnemonic-file mnemonic.txt
-    hermes keys add --chain eight-v330 --mnemonic-file mnemonic.txt
-    hermes keys add --chain nine-v400 --mnemonic-file mnemonic.txt
-    hermes keys add --chain ten-v400 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm1 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm2 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm3 --mnemonic-file mnemonic.txt
@@ -53,19 +50,48 @@ elif [ $RELAYER == "rly" ]; then
     # cat two-v200.json
     # rly chains add --file two-v200.json
 
-    # three
-    jq '.value."chain-id" = "three-v310"' templates/testnet.json > three-1.json
-    jq '.value."rpc-addr" = "http://localhost:27301"' three-1.json > three-2.json
-    jq '.value."gas-prices" = "0.005ucon"' three-2.json > three-v310.json
-    cat three-v310.json
-    rly chains add --file three-v310.json
+    # v310-one
+    jq '.value."chain-id" = "v310-one"' templates/testnet.json > v310-1.json
+    jq '.value."rpc-addr" = "http://localhost:31121"' v310-1.json > v310-2.json
+    jq '.value."gas-prices" = "0.005ucon"' v310-2.json > v310-one.json
+    cat v310-one.json
+    rly chains add --file v310-one.json
 
-    # four
-    jq '.value."chain-id" = "four-v330"' templates/testnet.json > four-1.json
-    jq '.value."rpc-addr" = "http://localhost:27401"' four-1.json > four-2.json
-    jq '.value."gas-prices" = "0.005ucon"' four-2.json > four-v330.json
-    cat four-v330.json
-    rly chains add --file four-v330.json
+    # v310-two
+    jq '.value."chain-id" = "v310-two"' templates/testnet.json > v310-1.json
+    jq '.value."rpc-addr" = "http://localhost:31221"' v310-1.json > v310-2.json
+    jq '.value."gas-prices" = "0.005ucon"' v310-2.json > v310-two.json
+    cat v310-two.json
+    rly chains add --file v310-two.json
+
+    # v330-one
+    jq '.value."chain-id" = "v330-one"' templates/testnet.json > v330-1.json
+    jq '.value."rpc-addr" = "http://localhost:33121"' v330-1.json > v330-2.json
+    jq '.value."gas-prices" = "0.005ucon"' v330-2.json > v330-one.json
+    cat v330-one.json
+    rly chains add --file v330-one.json
+
+    # v330-two
+    jq '.value."chain-id" = "v310-two"' templates/testnet.json > v330-1.json
+    jq '.value."rpc-addr" = "http://localhost:33221"' v330-1.json > v330-2.json
+    jq '.value."gas-prices" = "0.005ucon"' v330-2.json > v330-two.json
+    cat v330-two.json
+    rly chains add --file v330-two.json
+
+    # v400-one
+    jq '.value."chain-id" = "v400-one"' templates/testnet.json > v400-1.json
+    jq '.value."rpc-addr" = "http://localhost:40121"' v400-1.json > v400-2.json
+    jq '.value."gas-prices" = "0.005ucon"' v400-2.json > v400-one.json
+    cat v400-one.json
+    rly chains add --file v400-one.json
+
+    # v400-two
+    jq '.value."chain-id" = "v400-two"' templates/testnet.json > v400-1.json
+    jq '.value."rpc-addr" = "http://localhost:40221"' v400-1.json > v400-2.json
+    jq '.value."gas-prices" = "0.005ucon"' v400-2.json > v400-two.json
+    cat v400-two.json
+    rly chains add --file v400-two.json
+
 
     # five - Stride
     jq '.value."chain-id" = "five"' templates/testnet.json > five-1.json
@@ -74,36 +100,6 @@ elif [ $RELAYER == "rly" ]; then
     jq '.value."gas-prices" = "0.0025ustrd"' five-3.json > five.json
     cat five.json
     rly chains add --file five.json
-
-    # six
-    jq '.value."chain-id" = "six-v310"' templates/testnet.json > six-1.json
-    jq '.value."rpc-addr" = "http://localhost:27601"' six-1.json > six-2.json
-    jq '.value."gas-prices" = "0.005ucon"' six-2.json > six-v310.json
-    cat six-v310.json
-    rly chains add --file six-v310.json
-
-    # eight
-    jq '.value."chain-id" = "eight-v330"' templates/estnet.json > eight-1.json
-    jq '.value."rpc-addr" = "http://localhost:27801"' eight-1.json > eight-2.json
-    jq '.value."gas-prices" = "0.005ucon"' eight-2.json > eight-v330.json
-    cat eight-v330.json
-    rly chains add --file eight-v330.json
-
-    # nine
-    jq '.value."chain-id" = "nine-v400"' templates/testnet.json > nine-1.json
-    jq '.value."rpc-addr" = "http://localhost:27901"' nine-1.json > nine-2.json
-    jq '.value."account-prefix" = "consumer"' nine-2.json > nine-3.json
-    jq '.value."gas-prices" = "0.005ucon"' nine-3.json > nine-v400.json
-    cat nine-v400.json
-    rly chains add --file nine-v400.json
-
-    # ten
-    jq '.value."chain-id" = "ten-v400"' templates/testnet.json > ten-1.json
-    jq '.value."rpc-addr" = "http://localhost:47901"' ten-1.json > ten-2.json
-    jq '.value."account-prefix" = "consumer"' ten-2.json > ten-3.json
-    jq '.value."gas-prices" = "0.005ucon"' ten-3.json > ten-v400.json
-    cat ten-v400.json
-    rly chains add --file ten-v400.json
 
     # pfm-1
     jq '.value."chain-id" = "pfm1"' templates/testnet.json > p.json
@@ -127,13 +123,13 @@ elif [ $RELAYER == "rly" ]; then
 
     echo "Adding relayer keys..."
     rly keys restore $CHAIN_ID default "$MNEMONIC_RELAYER"
-    rly keys restore three-v310 default "$MNEMONIC_RELAYER"
-    rly keys restore four-v330 default "$MNEMONIC_RELAYER"
+    rly keys restore v310-one default "$MNEMONIC_RELAYER"
+    rly keys restore v310-two default "$MNEMONIC_RELAYER"
+    rly keys restore v330-one default "$MNEMONIC_RELAYER"
+    rly keys restore v330-two default "$MNEMONIC_RELAYER"
+    rly keys restore v400-one default "$MNEMONIC_RELAYER"
+    rly keys restore v400-two default "$MNEMONIC_RELAYER"
     rly keys restore five default "$MNEMONIC_RELAYER"
-    rly keys restore six-v310 default "$MNEMONIC_RELAYER"
-    rly keys restore eight-v330 default "$MNEMONIC_RELAYER"
-    rly keys restore nine-v400 default "$MNEMONIC_RELAYER"
-    rly keys restore ten-v400 default "$MNEMONIC_RELAYER"
     rly keys restore pfm1 default "$MNEMONIC_RELAYER"
     rly keys restore pfm2 default "$MNEMONIC_RELAYER"
     rly keys restore pfm3 default "$MNEMONIC_RELAYER"
