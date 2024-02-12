@@ -40,6 +40,8 @@ echo "Patching genesis for block max gas != -1..."
 jq -r '.consensus_params.block.max_gas = "50000000"' $CONSUMER_HOME_1/config/genesis.json > consumer-gas.json
 mv consumer-gas.json $CONSUMER_HOME_1/config/genesis.json
 
+
+
 # Set slashing to $DOWNTIME_BLOCKS
 jq -r --arg SLASH "$DOWNTIME_BLOCKS" '.app_state.slashing.params.signed_blocks_window |= $SLASH' $CONSUMER_HOME_1/config/genesis.json > consumer-slashing.json
 jq -r '.app_state.slashing.params.downtime_jail_duration |= "10s"' consumer-slashing.json > consumer-slashing-2.json
@@ -73,6 +75,10 @@ if [ "$CONSUMER_CHAIN_BINARY" == "strided" ]; then
     jq '(.app_state.epochs.epochs[] | select(.identifier=="stride_epoch") ).duration = "120s"' stride-genesis-5.json  > stride-genesis-6.json
     jq '.app_state.gov.voting_params.voting_period = "30s"' stride-genesis-6.json  > stride-genesis-7.json
     jq '.app_state.gov.params.voting_period = "30s"' stride-genesis-7.json  > stride-genesis-8.json
+
+elif [ "$CONSUMER_CHAIN_BINARY" == "neutrond" ]; then
+    jq --arg DENOM "$CONSUMER_DENOM" -r '.app_state.globalfee.params.minimum_gas_prices[0] |= {"amount": "0.02", "denom": $DENOM}' $CONSUMER_HOME_1/config/genesis.json > consumer-globalfee.json
+    mv consumer-globalfee.json $CONSUMER_HOME_1/config/genesis.json
 fi
 
 echo "Patching config files..."
