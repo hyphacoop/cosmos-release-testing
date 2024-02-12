@@ -134,7 +134,7 @@ ccv_consumer_chain = true
 type = "CosmosSdk"
 
 [[chains]]
-id = 'test-stride'
+id = 'stride-test'
 rpc_addr = 'http://localhost:32121'
 grpc_addr = 'http://localhost:32111'
 event_source = { mode = 'push', url = 'ws://localhost:32121/websocket', batch_delay = '500ms' }
@@ -152,7 +152,7 @@ ccv_consumer_chain = true
 type = "CosmosSdk"
 
 [[chains]]
-id = 'test-neutron'
+id = 'neutron-test'
 rpc_addr = 'http://localhost:31321'
 grpc_addr = 'http://localhost:31311'
 event_source = { mode = 'push', url = 'ws://localhost:31321/websocket', batch_delay = '500ms' }
