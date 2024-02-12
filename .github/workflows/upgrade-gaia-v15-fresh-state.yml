@@ -2968,7 +2968,7 @@ jobs:
 
       - name: _CCV channel verified> Neutron chain
         env:
-          CONSUMER_HOME_1: /home/runner/.stride-1
+          CONSUMER_HOME_1: /home/runner/.neutron-1
           CON1_RPC_PORT: 31321
         run: tests/test_ccv_key_assignment.sh
       
