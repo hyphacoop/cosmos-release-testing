@@ -20,7 +20,9 @@ echo "Consumer starting balance in expected denom: $consumer_start_balance"
 
 # Transfer provider token to consumer chain
 echo "Sending $DENOM to $CONSUMER_CHAIN_ID..."
-$CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $PROVIDER_CHANNEL $RECIPIENT 1000$DENOM --from $WALLET_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+command="$CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $PROVIDER_CHANNEL $RECIPIENT 1000$DENOM --from $WALLET_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y"
+echo $command
+$command
 echo "Waiting for the transfer to reach the consumer chain..."
 sleep $(($COMMIT_TIMEOUT*15))
 $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $RECIPIENT
