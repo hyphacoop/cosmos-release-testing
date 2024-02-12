@@ -2801,7 +2801,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
         env:
-          CON1_RPC_PORT: 32121
+          CON1_RPC_PORT: 31321
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for Neutron chain
         env:
