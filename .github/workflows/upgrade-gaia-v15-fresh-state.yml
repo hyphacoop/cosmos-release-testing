@@ -125,7 +125,7 @@ env:
   STRIDE_P2P_2: 38002
   STRIDE_PPROF_1: 39001
   STRIDE_PPROF_2: 39002
-  CHANGEOVER_HEIGHT_OFFSET: false
+  CHANGEOVER_Hv330-2-OFFSET: false
   # Relayer variables
   RELAYER: hermes
   HERMES_VERSION: v1.8.0
@@ -861,21 +861,21 @@ jobs:
           CONSUMER_SERVICE_1: v310-1-1.service
           CONSUMER_SERVICE_2: v310-1-2.service
           CONSUMER_SERVICE_3: v310-1-3.service
-          CON1_API_PORT: 25301
-          CON2_API_PORT: 25302
-          CON3_API_PORT: 25303
-          CON1_GRPC_PORT: 26301
-          CON2_GRPC_PORT: 26302
-          CON3_GRPC_PORT: 26303
-          CON1_RPC_PORT: 27301
-          CON2_RPC_PORT: 27302
-          CON3_RPC_PORT: 27303
-          CON1_P2P_PORT: 28301
-          CON2_P2P_PORT: 28302
-          CON3_P2P_PORT: 28303
-          CON1_PPROF_PORT: 29301
-          CON2_PPROF_PORT: 29302
-          CON3_PPROF_PORT: 29303
+          CON1_API_PORT: 31101
+          CON2_API_PORT: 31102
+          CON3_API_PORT: 31103
+          CON1_GRPC_PORT: 31111
+          CON2_GRPC_PORT: 31112
+          CON3_GRPC_PORT: 31113
+          CON1_RPC_PORT: 31121
+          CON2_RPC_PORT: 31122
+          CON3_RPC_PORT: 31123
+          CON1_P2P_PORT: 31131
+          CON2_P2P_PORT: 31132
+          CON3_P2P_PORT: 31133
+          CON1_PPROF_PORT: 31141
+          CON2_PPROF_PORT: 31142
+          CON3_PPROF_PORT: 31143
           DOWNTIME_BLOCKS: 100000
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
@@ -914,18 +914,18 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > three-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' three-1.json > three-2.json
-            rly paths add testnet v310-one three --file three-2.json
-            rly transact connection three
-            rly transact channel three --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v310-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v310-1.json > v310-2.json
+            rly paths add testnet v310-one v310-1 --file v310-2.json
+            rly transact connection v310-1
+            rly transact channel v310-1 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v3.1.0 chain 1
         env:
           CONSUMER_HOME_1: /home/runner/.v310-1-1
-          CON1_RPC_PORT: 27301
+          CON1_RPC_PORT: 31121
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v3.1.0 chain 1
         env:
@@ -964,7 +964,7 @@ jobs:
       - name: _CCV channel verified> ICS v3.1.0 chain 1
         env:
           CONSUMER_HOME_1: /home/runner/.v310-1-1
-          CON1_RPC_PORT: 27301
+          CON1_RPC_PORT: 31121
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 1
         env:
@@ -992,21 +992,21 @@ jobs:
           CONSUMER_SERVICE_1: v310-2-1.service
           CONSUMER_SERVICE_2: v310-2-2.service
           CONSUMER_SERVICE_3: v310-2-3.service
-          CON1_API_PORT: 25601
-          CON2_API_PORT: 25602
-          CON3_API_PORT: 25603
-          CON1_GRPC_PORT: 26601
-          CON2_GRPC_PORT: 26602
-          CON3_GRPC_PORT: 26603
-          CON1_RPC_PORT: 27601
-          CON2_RPC_PORT: 27602
-          CON3_RPC_PORT: 27603
-          CON1_P2P_PORT: 28601
-          CON2_P2P_PORT: 28602
-          CON3_P2P_PORT: 28603
-          CON1_PPROF_PORT: 29601
-          CON2_PPROF_PORT: 29602
-          CON3_PPROF_PORT: 29603
+          CON1_API_PORT: 31201
+          CON2_API_PORT: 31202
+          CON3_API_PORT: 31203
+          CON1_GRPC_PORT: 31211
+          CON2_GRPC_PORT: 31212
+          CON3_GRPC_PORT: 31213
+          CON1_RPC_PORT: 31221
+          CON2_RPC_PORT: 31222
+          CON3_RPC_PORT: 31223
+          CON1_P2P_PORT: 31231
+          CON2_P2P_PORT: 31232
+          CON3_P2P_PORT: 31233
+          CON1_PPROF_PORT: 31241
+          CON2_PPROF_PORT: 31242
+          CON3_PPROF_PORT: 31243
           DOWNTIME_BLOCKS: 20
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
@@ -1039,7 +1039,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
         env:
-          CON1_RPC_PORT: 27601
+          CON1_RPC_PORT: 31221
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for v310-two
         env:
@@ -1052,17 +1052,17 @@ jobs:
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
             elif [ $RELAYER == "rly" ]; then
               echo "Creating channel with Go relayer..."
-              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > six-1.json
-              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' six-1.json > six-2.json
-              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID six --file six-2.json
-              rly transact connection six
-              rly transact channel six --src-port consumer --dst-port provider --order ordered --version 1
+              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v310-1.json
+              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v310-1.json > v310-2.json
+              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v310-2 --file v310-2.json
+              rly transact connection v310-2
+              rly transact channel v310-2 --src-port consumer --dst-port provider --order ordered --version 1
             fi
             sudo systemctl restart $RELAYER
             sleep 10
       - name: _CCV channel verified> ICS v3.1.0 chain 2
         env:
-          CON1_RPC_PORT: 27601
+          CON1_RPC_PORT: 31221
           CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 2
@@ -1206,21 +1206,21 @@ jobs:
           CONSUMER_SERVICE_1: v310-1-1.service
           CONSUMER_SERVICE_2: v310-1-2.service
           CONSUMER_SERVICE_3: v310-1-3.service
-          CON1_API_PORT: 25301
-          CON2_API_PORT: 25302
-          CON3_API_PORT: 25303
-          CON1_GRPC_PORT: 26301
-          CON2_GRPC_PORT: 26302
-          CON3_GRPC_PORT: 26303
-          CON1_RPC_PORT: 27301
-          CON2_RPC_PORT: 27302
-          CON3_RPC_PORT: 27303
-          CON1_P2P_PORT: 28301
-          CON2_P2P_PORT: 28302
-          CON3_P2P_PORT: 28303
-          CON1_PPROF_PORT: 29301
-          CON2_PPROF_PORT: 29302
-          CON3_PPROF_PORT: 29303
+          CON1_API_PORT: 31101
+          CON2_API_PORT: 31102
+          CON3_API_PORT: 31103
+          CON1_GRPC_PORT: 31111
+          CON2_GRPC_PORT: 31112
+          CON3_GRPC_PORT: 31113
+          CON1_RPC_PORT: 31121
+          CON2_RPC_PORT: 31122
+          CON3_RPC_PORT: 31123
+          CON1_P2P_PORT: 31131
+          CON2_P2P_PORT: 31132
+          CON3_P2P_PORT: 31133
+          CON1_PPROF_PORT: 31141
+          CON2_PPROF_PORT: 31142
+          CON3_PPROF_PORT: 31143
           DOWNTIME_BLOCKS: 100000
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
@@ -1246,7 +1246,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.1.0 chain 1
         env:
-          CON1_RPC_PORT: 27301
+          CON1_RPC_PORT: 31121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for v310-one
         env:
@@ -1259,18 +1259,18 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > three-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' three-1.json > three-2.json
-            rly paths add testnet v310-one three --file three-2.json
-            rly transact connection three
-            rly transact channel three --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v310-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v310-1.json > v310-2.json
+            rly paths add testnet v310-one v310-1 --file v310-2.json
+            rly transact connection v310-1
+            rly transact channel v310-1 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v3.1.0 chain 1
         env:
           CONSUMER_HOME_1: /home/runner/.v310-1-1
-          CON1_RPC_PORT: 27301
+          CON1_RPC_PORT: 31121
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v3.1.0 chain 1
         env:
@@ -1337,21 +1337,21 @@ jobs:
           CONSUMER_SERVICE_1: v310-2-1.service
           CONSUMER_SERVICE_2: v310-2-2.service
           CONSUMER_SERVICE_3: v310-2-3.service
-          CON1_API_PORT: 25601
-          CON2_API_PORT: 25602
-          CON3_API_PORT: 25603
-          CON1_GRPC_PORT: 26601
-          CON2_GRPC_PORT: 26602
-          CON3_GRPC_PORT: 26603
-          CON1_RPC_PORT: 27601
-          CON2_RPC_PORT: 27602
-          CON3_RPC_PORT: 27603
-          CON1_P2P_PORT: 28601
-          CON2_P2P_PORT: 28602
-          CON3_P2P_PORT: 28603
-          CON1_PPROF_PORT: 29601
-          CON2_PPROF_PORT: 29602
-          CON3_PPROF_PORT: 29603
+          CON1_API_PORT: 31201
+          CON2_API_PORT: 31202
+          CON3_API_PORT: 31203
+          CON1_GRPC_PORT: 31211
+          CON2_GRPC_PORT: 31212
+          CON3_GRPC_PORT: 31213
+          CON1_RPC_PORT: 31221
+          CON2_RPC_PORT: 31222
+          CON3_RPC_PORT: 31223
+          CON1_P2P_PORT: 31231
+          CON2_P2P_PORT: 31232
+          CON3_P2P_PORT: 31233
+          CON1_PPROF_PORT: 31241
+          CON2_PPROF_PORT: 31242
+          CON3_PPROF_PORT: 31243
           DOWNTIME_BLOCKS: 20
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
@@ -1384,7 +1384,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
         env:
-          CON1_RPC_PORT: 27601
+          CON1_RPC_PORT: 31221
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for v310-two
         env:
@@ -1397,17 +1397,17 @@ jobs:
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
             elif [ $RELAYER == "rly" ]; then
               echo "Creating channel with Go relayer..."
-              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > six-1.json
-              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' six-1.json > six-2.json
-              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID six --file six-2.json
-              rly transact connection six
-              rly transact channel six --src-port consumer --dst-port provider --order ordered --version 1
+              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v310-1.json
+              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v310-1.json > v310-2.json
+              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v310-2 --file v310-2.json
+              rly transact connection v310-2
+              rly transact channel v310-2 --src-port consumer --dst-port provider --order ordered --version 1
             fi
             sudo systemctl restart $RELAYER
             sleep 10
       - name: _CCV channel verified> ICS v3.1.0 chain 2
         env:
-          CON1_RPC_PORT: 27601
+          CON1_RPC_PORT: 31221
           CONSUMER_HOME_1: /home/runner/.v310-2-1
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.1.0 chain 2
@@ -1540,67 +1540,67 @@ jobs:
       - name: Add consumer chain with ICS v3.3.0
         env:
           COSMOS_SDK: v45
-          CONSUMER_CHAIN_ID: four-v330
+          CONSUMER_CHAIN_ID: v330-one
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.3.0
         env:
-          CONSUMER_CHAIN_ID: four-v330
-          CONSUMER_HOME_1: /home/runner/.four_1
-          CONSUMER_HOME_2: /home/runner/.four_2
-          CONSUMER_HOME_3: /home/runner/.four_3
-          CONSUMER_SERVICE_1: four_1.service
-          CONSUMER_SERVICE_2: four_2.service
-          CONSUMER_SERVICE_3: four_3.service
-          CON1_API_PORT: 25401
-          CON2_API_PORT: 25402
-          CON3_API_PORT: 25403
-          CON1_GRPC_PORT: 26401
-          CON2_GRPC_PORT: 26402
-          CON3_GRPC_PORT: 26403
-          CON1_RPC_PORT: 27401
-          CON2_RPC_PORT: 27402
-          CON3_RPC_PORT: 27403
-          CON1_P2P_PORT: 28401
-          CON2_P2P_PORT: 28402
-          CON3_P2P_PORT: 28403
-          CON1_PPROF_PORT: 29401
-          CON2_PPROF_PORT: 29402
-          CON3_PPROF_PORT: 29403
+          CONSUMER_CHAIN_ID: v330-one
+          CONSUMER_HOME_1: /home/runner/.v330-1-1
+          CONSUMER_HOME_2: /home/runner/.v330-1-2
+          CONSUMER_HOME_3: /home/runner/.v330-1-3
+          CONSUMER_SERVICE_1: v330-1-1.service
+          CONSUMER_SERVICE_2: v330-1-2.service
+          CONSUMER_SERVICE_3: v330-1-3.service
+          CON1_API_PORT: 33101
+          CON2_API_PORT: 33102
+          CON3_API_PORT: 33103
+          CON1_GRPC_PORT: 33111
+          CON2_GRPC_PORT: 33112
+          CON3_GRPC_PORT: 33113
+          CON1_RPC_PORT: 33121
+          CON2_RPC_PORT: 33122
+          CON3_RPC_PORT: 33123
+          CON1_P2P_PORT: 33131
+          CON2_P2P_PORT: 33132
+          CON3_P2P_PORT: 33133
+          CON1_PPROF_PORT: 33141
+          CON2_PPROF_PORT: 33142
+          CON3_PPROF_PORT: 33143
           DOWNTIME_BLOCKS: 100000
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain four-v330
+      - name: Prepare consumer chain v330-one
         env:
-          CONSUMER_CHAIN_ID: four-v330
-          CONSUMER_HOME_1: /home/runner/.four_1
-          CONSUMER_HOME_2: /home/runner/.four_2
-          CONSUMER_HOME_3: /home/runner/.four_3
+          CONSUMER_CHAIN_ID: v330-one
+          CONSUMER_HOME_1: /home/runner/.v330-1-1
+          CONSUMER_HOME_2: /home/runner/.v330-1-2
+          CONSUMER_HOME_3: /home/runner/.v330-1-3
           ICS_330: true
           CONSUMER_ICS: v3.3.0
           PROVIDER_ICS: v2.4.0
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           scripts/prepare_consumer.sh
-      - name: Start consumer chain four-v330
+      - name: Start consumer chain v330-one
         env:
-          CONSUMER_CHAIN_ID: four-v330
-          CONSUMER_SERVICE_1: four_1.service
-          CONSUMER_SERVICE_2: four_2.service
-          CONSUMER_SERVICE_3: four_3.service
+          CONSUMER_CHAIN_ID: v330-one
+          CONSUMER_SERVICE_1: v330-1-1.service
+          CONSUMER_SERVICE_2: v330-1-2.service
+          CONSUMER_SERVICE_3: v330-1-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.3.0 chain 1
         env:
-          CON1_RPC_PORT: 27401
+          CON1_RPC_PORT: 33121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for four-v330
+      - name: Establish CCV channel for v330-one
         env:
-          CONSUMER_CHAIN_ID: four-v330
+          CONSUMER_CHAIN_ID: v330-one
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -1609,23 +1609,23 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > four-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' four-1.json > four-2.json
-            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID four --file four-2.json
-            rly transact connection four
-            rly transact channel four --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v330-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v330-1.json > v330-2.json
+            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v330-1 --file v330-2.json
+            rly transact connection v330-1
+            rly transact channel v330-1 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v3.3.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.four_1
-          CON1_RPC_PORT: 27401
+          CONSUMER_HOME_1: /home/runner/.v330-1-1
+          CON1_RPC_PORT: 33121
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v3.3.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: four-v330
-          CONSUMER_HOME_1: /home/runner/.four_1
+          CONSUMER_CHAIN_ID: v330-one
+          CONSUMER_HOME_1: /home/runner/.v330-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1660,13 +1660,13 @@ jobs:
 
       - name: _CCV channel verified> ICS v3.3.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.four_1
-          CON1_RPC_PORT: 27401
+          CONSUMER_HOME_1: /home/runner/.v330-1-1
+          CON1_RPC_PORT: 33121
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.3.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: four-v330
-          CONSUMER_HOME_1: /home/runner/.four_1
+          CONSUMER_CHAIN_ID: v330-one
+          CONSUMER_HOME_1: /home/runner/.v330-1-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1677,67 +1677,67 @@ jobs:
       - name: Add consumer chain with ICS v3.3.0
         env:
           COSMOS_SDK: v47
-          CONSUMER_CHAIN_ID: eight-v330
+          CONSUMER_CHAIN_ID: v330-two
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v3.3.0
         env:
-          CONSUMER_CHAIN_ID: eight-v330
-          CONSUMER_HOME_1: /home/runner/.eight_1
-          CONSUMER_HOME_2: /home/runner/.eight_2
-          CONSUMER_HOME_3: /home/runner/.eight_3
-          CONSUMER_SERVICE_1: eight_1.service
-          CONSUMER_SERVICE_2: eight_2.service
-          CONSUMER_SERVICE_3: eight_3.service
-          CON1_API_PORT: 25801
-          CON2_API_PORT: 25802
-          CON3_API_PORT: 25803
-          CON1_GRPC_PORT: 26801
-          CON2_GRPC_PORT: 26802
-          CON3_GRPC_PORT: 26803
-          CON1_RPC_PORT: 27801
-          CON2_RPC_PORT: 27802
-          CON3_RPC_PORT: 27803
-          CON1_P2P_PORT: 28801
-          CON2_P2P_PORT: 28802
-          CON3_P2P_PORT: 28803
-          CON1_PPROF_PORT: 29801
-          CON2_PPROF_PORT: 29802
-          CON3_PPROF_PORT: 29803
+          CONSUMER_CHAIN_ID: v330-two
+          CONSUMER_HOME_1: /home/runner/.v330-2-1
+          CONSUMER_HOME_2: /home/runner/.v330-2-2
+          CONSUMER_HOME_3: /home/runner/.v330-2-3
+          CONSUMER_SERVICE_1: v330-2-1.service
+          CONSUMER_SERVICE_2: v330-2-2.service
+          CONSUMER_SERVICE_3: v330-2-3.service
+          CON1_API_PORT: 33201
+          CON2_API_PORT: 33202
+          CON3_API_PORT: 33203
+          CON1_GRPC_PORT: 33211
+          CON2_GRPC_PORT: 33212
+          CON3_GRPC_PORT: 33213
+          CON1_RPC_PORT: 33221
+          CON2_RPC_PORT: 33222
+          CON3_RPC_PORT: 33223
+          CON1_P2P_PORT: 33231
+          CON2_P2P_PORT: 33232
+          CON3_P2P_PORT: 33233
+          CON1_PPROF_PORT: 33241
+          CON2_PPROF_PORT: 33242
+          CON3_PPROF_PORT: 33243
           DOWNTIME_BLOCKS: 20
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain eight-v330
+      - name: Prepare consumer chain v330-two
         env:
-          CONSUMER_CHAIN_ID: eight-v330
-          CONSUMER_HOME_1: /home/runner/.eight_1
-          CONSUMER_HOME_2: /home/runner/.eight_2
-          CONSUMER_HOME_3: /home/runner/.eight_3
+          CONSUMER_CHAIN_ID: v330-two
+          CONSUMER_HOME_1: /home/runner/.v330-2-1
+          CONSUMER_HOME_2: /home/runner/.v330-2-2
+          CONSUMER_HOME_3: /home/runner/.v330-2-3
           ICS_330: true
           CONSUMER_ICS: v3.3.0
           PROVIDER_ICS: v3.3.0
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           scripts/prepare_consumer.sh
-      - name: Start consumer chain eight-v330
+      - name: Start consumer chain v330-two
         env:
-          CONSUMER_CHAIN_ID: eight-v330
-          CONSUMER_SERVICE_1: eight_1.service
-          CONSUMER_SERVICE_2: eight_2.service
-          CONSUMER_SERVICE_3: eight_3.service
+          CONSUMER_CHAIN_ID: v330-two
+          CONSUMER_SERVICE_1: v330-2-1.service
+          CONSUMER_SERVICE_2: v330-2-2.service
+          CONSUMER_SERVICE_3: v330-2-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Consumer chain produces blocks> ICS v3.3.0 chain 2
         env:
-          CON1_RPC_PORT: 27801
+          CON1_RPC_PORT: 33221
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for eight-v330
+      - name: Establish CCV channel for v330-two
         env:
-          CONSUMER_CHAIN_ID: eight-v330
+          CONSUMER_CHAIN_ID: v330-two
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -1746,23 +1746,23 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > eight-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' eight-1.json > eight-2.json
-            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID eight --file eight-2.json
-            rly transact connection eight
-            rly transact channel eight --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v330-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v330-1.json > v330-2.json
+            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v330-2 --file v330-2.json
+            rly transact connection v330-2
+            rly transact channel v330-2 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _CCV channel verified> ICS v3.3.0 chain 2
         env:
-          CONSUMER_HOME_1: /home/runner/.eight_1
-          CON1_RPC_PORT: 27801
+          CONSUMER_HOME_1: /home/runner/.v330-2-1
+          CON1_RPC_PORT: 33221
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v3.3.0 chain 2
         env:
-          CONSUMER_CHAIN_ID: eight-v330
-          CONSUMER_HOME_1: /home/runner/.eight_1
+          CONSUMER_CHAIN_ID: v330-two
+          CONSUMER_HOME_1: /home/runner/.v330-2-1
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -1772,8 +1772,8 @@ jobs:
 
       - name: Stop validator services
         env:
-          CONSUMER_SERVICE_2: eight_2.service
-          CONSUMER_SERVICE_3: eight_3.service
+          CONSUMER_SERVICE_2: v330-2-2.service
+          CONSUMER_SERVICE_3: v330-2-3.service
         run: |
           sudo systemctl disable $CONSUMER_SERVICE_2 --now
           sudo systemctl disable $CONSUMER_SERVICE_3 --now
@@ -1784,7 +1784,7 @@ jobs:
         run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Unjail validator
         env:
-          CONSUMER_SERVICE_2: eight_2.service
+          CONSUMER_SERVICE_2: v330-2-2.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sleep $(($COMMIT_TIMEOUT*10))
@@ -1889,56 +1889,56 @@ jobs:
       - name: Add consumer chain with ICS v4.0.0
         env:
           COSMOS_SDK: v45
-          CONSUMER_CHAIN_ID: nine-v400
+          CONSUMER_CHAIN_ID: v400-one
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v4.0.0
         env:
-          CONSUMER_CHAIN_ID: nine-v400
-          CONSUMER_HOME_1: /home/runner/.nine_1
-          CONSUMER_HOME_2: /home/runner/.nine_2
-          CONSUMER_HOME_3: /home/runner/.nine_3
-          CONSUMER_SERVICE_1: nine_1.service
-          CONSUMER_SERVICE_2: nine_2.service
-          CONSUMER_SERVICE_3: nine_3.service
-          CON1_API_PORT: 25901
-          CON2_API_PORT: 25902
-          CON3_API_PORT: 25903
-          CON1_GRPC_PORT: 26901
-          CON2_GRPC_PORT: 26902
-          CON3_GRPC_PORT: 26903
-          CON1_RPC_PORT: 27901
-          CON2_RPC_PORT: 27902
-          CON3_RPC_PORT: 27903
-          CON1_P2P_PORT: 28901
-          CON2_P2P_PORT: 28902
-          CON3_P2P_PORT: 28903
-          CON1_PPROF_PORT: 29901
-          CON2_PPROF_PORT: 29902
-          CON3_PPROF_PORT: 29903
+          CONSUMER_CHAIN_ID: v400-one
+          CONSUMER_HOME_1: /home/runner/.v400-1-1
+          CONSUMER_HOME_2: /home/runner/.v400-1-2
+          CONSUMER_HOME_3: /home/runner/.v400-1-3
+          CONSUMER_SERVICE_1: v400-1-1.service
+          CONSUMER_SERVICE_2: v400-1-2.service
+          CONSUMER_SERVICE_3: v400-1-3.service
+          CON1_API_PORT: 40101
+          CON2_API_PORT: 40102
+          CON3_API_PORT: 40103
+          CON1_GRPC_PORT: 40111
+          CON2_GRPC_PORT: 40112
+          CON3_GRPC_PORT: 40113
+          CON1_RPC_PORT: 40121
+          CON2_RPC_PORT: 40122
+          CON3_RPC_PORT: 40123
+          CON1_P2P_PORT: 40131
+          CON2_P2P_PORT: 40132
+          CON3_P2P_PORT: 40133
+          CON1_PPROF_PORT: 40141
+          CON2_PPROF_PORT: 40142
+          CON3_PPROF_PORT: 40143
           DOWNTIME_BLOCKS: 100000
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain nine-v400
+      - name: Prepare consumer chain v400-one
         env:
-          CONSUMER_CHAIN_ID: nine-v400
-          CONSUMER_HOME_1: /home/runner/.nine_1
-          CONSUMER_HOME_2: /home/runner/.nine_2
-          CONSUMER_HOME_3: /home/runner/.nine_3
+          CONSUMER_CHAIN_ID: v400-one
+          CONSUMER_HOME_1: /home/runner/.v400-1-1
+          CONSUMER_HOME_2: /home/runner/.v400-1-2
+          CONSUMER_HOME_3: /home/runner/.v400-1-3
           ICS_400: true
           CONSUMER_ICS: v4.0.0
           PROVIDER_ICS: v2.4.0
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
           scripts/prepare_consumer.sh
-      - name: Start consumer chain nine-v400
+      - name: Start consumer chain v400-one
         env:
-          CONSUMER_CHAIN_ID: nine-v400
-          CONSUMER_SERVICE_1: nine_1.service
-          CONSUMER_SERVICE_2: nine_2.service
-          CONSUMER_SERVICE_3: nine_3.service
+          CONSUMER_CHAIN_ID: v400-one
+          CONSUMER_SERVICE_1: v400-1-1.service
+          CONSUMER_SERVICE_2: v400-1-2.service
+          CONSUMER_SERVICE_3: v400-1-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
@@ -1947,9 +1947,9 @@ jobs:
         env:
           CON1_RPC_PORT: 27901
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for nine-v400
+      - name: Establish CCV channel for v400-one
         env:
-          CONSUMER_CHAIN_ID: nine-v400
+          CONSUMER_CHAIN_ID: v400-one
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -1958,23 +1958,23 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > nine-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' nine-1.json > nine-2.json
-            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID nine --file nine-2.json
-            rly transact connection nine
-            rly transact channel nine --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v400-1.json > v400-2.json
+            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v400-2.json
+            rly transact connection v400-1
+            rly transact channel v400-1 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.nine_1
-          CON1_RPC_PORT: 27901
+          CONSUMER_HOME_1: /home/runner/.v400-1-1
+          CON1_RPC_PORT: 40121
         run: tests/test_ccv_key_assignment.sh
       - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: nine-v400
-          CONSUMER_HOME_1: /home/runner/.nine_1
+          CONSUMER_CHAIN_ID: v400-one
+          CONSUMER_HOME_1: /home/runner/.v400-1-1
           RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
@@ -2010,13 +2010,13 @@ jobs:
 
       - name: _CCV channel verified> ICS v4.0.0 chain 1
         env:
-          CONSUMER_HOME_1: /home/runner/.nine_1
-          CON1_RPC_PORT: 27901
+          CONSUMER_HOME_1: /home/runner/.v400-1-1
+          CON1_RPC_PORT: 40121
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v4.0.0 chain 1
         env:
-          CONSUMER_CHAIN_ID: nine-v400
-          CONSUMER_HOME_1: /home/runner/.nine_1
+          CONSUMER_CHAIN_ID: v400-one
+          CONSUMER_HOME_1: /home/runner/.v400-1-1
           RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
@@ -2028,67 +2028,67 @@ jobs:
       - name: Add consumer chain with ICS v4.0.0
         env:
           COSMOS_SDK: v47
-          CONSUMER_CHAIN_ID: ten-v400
+          CONSUMER_CHAIN_ID: v400-two
         run: |
           scripts/add_consumer.sh
       - name: Initialize consumer chain with ICS v4.0.0
         env:
-          CONSUMER_CHAIN_ID: ten-v400
-          CONSUMER_HOME_1: /home/runner/.ten_1
-          CONSUMER_HOME_2: /home/runner/.ten_2
-          CONSUMER_HOME_3: /home/runner/.ten_3
-          CONSUMER_SERVICE_1: ten_1.service
-          CONSUMER_SERVICE_2: ten_2.service
-          CONSUMER_SERVICE_3: ten_3.service
-          CON1_API_PORT: 45901
-          CON2_API_PORT: 45902
-          CON3_API_PORT: 45903
-          CON1_GRPC_PORT: 46901
-          CON2_GRPC_PORT: 46902
-          CON3_GRPC_PORT: 46903
-          CON1_RPC_PORT: 47901
-          CON2_RPC_PORT: 47902
-          CON3_RPC_PORT: 47903
-          CON1_P2P_PORT: 48901
-          CON2_P2P_PORT: 48902
-          CON3_P2P_PORT: 48903
-          CON1_PPROF_PORT: 49901
-          CON2_PPROF_PORT: 49902
-          CON3_PPROF_PORT: 49903
+          CONSUMER_CHAIN_ID: v400-two
+          CONSUMER_HOME_1: /home/runner/.v400-2-1
+          CONSUMER_HOME_2: /home/runner/.v400-2-2
+          CONSUMER_HOME_3: /home/runner/.v400-2-3
+          CONSUMER_SERVICE_1: v400-2-1.service
+          CONSUMER_SERVICE_2: v400-2-2.service
+          CONSUMER_SERVICE_3: v400-2-3.service
+          CON1_API_PORT: 40201
+          CON2_API_PORT: 40202
+          CON3_API_PORT: 40203
+          CON1_GRPC_PORT: 40211
+          CON2_GRPC_PORT: 40212
+          CON3_GRPC_PORT: 40213
+          CON1_RPC_PORT: 40221
+          CON2_RPC_PORT: 40222
+          CON3_RPC_PORT: 40223
+          CON1_P2P_PORT: 40231
+          CON2_P2P_PORT: 40232
+          CON3_P2P_PORT: 40233
+          CON1_PPROF_PORT: 40241
+          CON2_PPROF_PORT: 40242
+          CON3_PPROF_PORT: 40243
           DOWNTIME_BLOCKS: 20
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
           scripts/init_consumer_assign_keys.sh
           sleep 20
-      - name: Prepare consumer chain ten-v400
+      - name: Prepare consumer chain v400-two
         env:
-          CONSUMER_CHAIN_ID: ten-v400
-          CONSUMER_HOME_1: /home/runner/.ten_1
-          CONSUMER_HOME_2: /home/runner/.ten_2
-          CONSUMER_HOME_3: /home/runner/.ten_3
+          CONSUMER_CHAIN_ID: v400-two
+          CONSUMER_HOME_1: /home/runner/.v400-2-1
+          CONSUMER_HOME_2: /home/runner/.v400-2-2
+          CONSUMER_HOME_3: /home/runner/.v400-2-3
           ICS_400: true
           CONSUMER_ICS: v4.0.0
           PROVIDER_ICS: v3.3.0
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
           scripts/prepare_consumer.sh
-      - name: Start consumer chain ten-v400
+      - name: Start consumer chain v400-two
         env:
-          CONSUMER_CHAIN_ID: eight-v330
-          CONSUMER_SERVICE_1: ten_1.service
-          CONSUMER_SERVICE_2: ten_2.service
-          CONSUMER_SERVICE_3: ten_3.service
+          CONSUMER_CHAIN_ID: v330-two
+          CONSUMER_SERVICE_1: v400-2-1.service
+          CONSUMER_SERVICE_2: v400-2-2.service
+          CONSUMER_SERVICE_3: v400-2-3.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sleep 5
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
         env:
-          CON1_RPC_PORT: 47901
+          CON1_RPC_PORT: 40221
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      - name: Establish CCV channel for ten-v400
+      - name: Establish CCV channel for v400-two
         env:
-          CONSUMER_CHAIN_ID: ten-v400
+          CONSUMER_CHAIN_ID: v400-two
         run: |
           client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
           if [ $RELAYER == "hermes" ]; then
@@ -2097,23 +2097,23 @@ jobs:
             hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           elif [ $RELAYER == "rly" ]; then
             echo "Creating channel with Go relayer..."
-            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > ten-1.json
-            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' ten-1.json > ten-2.json
-            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID ten --file ten-2.json
-            rly transact connection ten
-            rly transact channel ten --src-port consumer --dst-port provider --order ordered --version 1
+            jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
+            jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v400-1.json > v400-2.json
+            rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v400-2.json
+            rly transact connection v400-1
+            rly transact channel v400-1 --src-port consumer --dst-port provider --order ordered --version 1
           fi
           sudo systemctl restart $RELAYER
           sleep 10
       - name: _CCV channel verified> ICS v4.0.0 chain 2
         env:
-          CONSUMER_HOME_1: /home/runner/.ten_1
-          CON1_RPC_PORT: 47901
+          CONSUMER_HOME_1: /home/runner/.v400-2-1
+          CON1_RPC_PORT: 40221
         run: tests/test_ccv_key_assignment.sh
       - name: _IBC transfer successful> ICS v4.0.0 chain 2
         env:
-          CONSUMER_CHAIN_ID: ten-v400
-          CONSUMER_HOME_1: /home/runner/.ten_1
+          CONSUMER_CHAIN_ID: v400-two
+          CONSUMER_HOME_1: /home/runner/.v400-2-1
           RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
@@ -2124,8 +2124,8 @@ jobs:
 
       - name: Stop validator services
         env:
-          CONSUMER_SERVICE_2: ten_2.service
-          CONSUMER_SERVICE_3: ten_3.service
+          CONSUMER_SERVICE_2: v400-2-2.service
+          CONSUMER_SERVICE_3: v400-2-3.service
         run: |
           sudo systemctl disable $CONSUMER_SERVICE_2 --now
           sudo systemctl disable $CONSUMER_SERVICE_3 --now
@@ -2136,7 +2136,7 @@ jobs:
         run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Unjail validator
         env:
-          CONSUMER_SERVICE_2: ten_2.service
+          CONSUMER_SERVICE_2: v400-2-2.service
         run: |
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sleep $(($COMMIT_TIMEOUT*10))
