@@ -11,7 +11,7 @@ parser.add_argument('-r', '--relayer', action='store_true')
 args = parser.parse_args()
 RELAYER = args.relayer
 
-SKIP_TARGET_VERSIONS = ['v14.0.0-rc0','v14.0.0-rc1','v14.0.0', 'v14.1.0-rc0']
+SKIP_TARGET_VERSIONS = ['v15.0.0-rc0','v15.0.0-rc1']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 # starting_version = sys.argv[1].split('.')
