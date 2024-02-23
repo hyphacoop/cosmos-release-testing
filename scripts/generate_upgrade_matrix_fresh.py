@@ -7,8 +7,11 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('starting_version')
+parser.add_argument('-c', '--cosmovisor', action='store_true')
 parser.add_argument('-r', '--relayer', action='store_true')
+
 args = parser.parse_args()
+COSMOVISOR = args.cosmovisor
 RELAYER = args.relayer
 
 SKIP_TARGET_VERSIONS = ['v15.0.0-rc0','v15.0.0-rc1']
@@ -69,38 +72,24 @@ for version, upgrades in matrix.items():
     if upgrades:
         for upgrade in upgrades:
             if upgrade not in SKIP_TARGET_VERSIONS:
-                if RELAYER:
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
-                    # includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'binary', 'relayer': 'rly'})
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.5.0', 'relayer': 'hermes'})
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.4.0', 'relayer': 'hermes'})
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.3.0', 'relayer': 'hermes'})
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.5.0', 'relayer': 'hermes'})
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.4.0', 'relayer': 'hermes'})
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.3.0', 'relayer': 'hermes'})
-                else:
-                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'binary'})
+                if COSMOVISOR:
                     includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.5.0'})
                     includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.4.0'})
                     includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.3.0'})
                     includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.5.0'})
                     includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.4.0'})
                     includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.3.0'})
+                elif RELAYER:
+                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
+                    # includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'binary', 'relayer': 'rly'})
+                else:
+                    includes.append({'gaia_version': version, 'upgrade_version': upgrade, 'upgrade_mechanism': 'binary'})
 
     else: # Add main branch build
         if RELAYER:
             includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary', 'relayer': 'rly'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.5.0', 'relayer': 'hermes'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.5.0', 'relayer': 'hermes'})
         else:
             includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.5.0'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.4.0'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_manual', 'cv_version': 'v1.3.0'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.5.0'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.4.0'})
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'cv_auto', 'cv_version': 'v1.3.0'})
 
 
 upgrade_json = json.dumps({'include': includes})
