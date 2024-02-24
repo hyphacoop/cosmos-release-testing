@@ -40,6 +40,14 @@ if $ICS_310 ; then
     fi
 fi
 
+if [ "$CONSUMER_ICS" == "v3.2.0" ]; then
+    if [ "$PROVIDER_ICS" == "v3.3.0" ]; then
+        echo "Provider v3.3.0 / Consumer v3.2.0: using genesis transform operation..."
+        $ICS_TRANSFORM_BINARY genesis transform --to v3.2.x ccv.json > ccv-transform.json
+        cp ccv-tranform.json ccv.json
+    fi
+fi
+
 if [ "$CONSUMER_ICS" == "v3.3.0" ]; then
     if [ "$PROVIDER_ICS" != "v3.3.0" ]; then
         echo "Patching for ICS v3.3.0"
