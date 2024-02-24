@@ -1638,7 +1638,7 @@ jobs:
           journalctl -u $CONSUMER_SERVICE_1
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.2.0 chain 1
         env:
-          CON1_RPC_PORT: 33121
+          CON1_RPC_PORT: 32121
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
       - name: Establish CCV channel for v320-one
         env:
@@ -1838,7 +1838,7 @@ jobs:
       - name: _Soft opt-out test> Validator must be unjailed
         run: tests/test_validator_jailed.sh $VALOPER_2 false
 
-  Baseline-4-icsv330:
+  Baseline-5-icsv330:
     runs-on: ubuntu-22.04
     needs: set-version-matrix-relayer
     strategy:
@@ -2190,7 +2190,7 @@ jobs:
       - name: _Soft opt-out test> Validator must be unjailed
         run: tests/test_validator_jailed.sh $VALOPER_2 false
 
-  Baseline-5-icsv400:
+  Baseline-6-icsv400:
     runs-on: ubuntu-22.04
     needs: set-version-matrix-relayer
     strategy:
@@ -2542,7 +2542,7 @@ jobs:
       - name: _Soft opt-out test> Validator must be unjailed
         run: tests/test_validator_jailed.sh $VALOPER_2 false
 
-  Baseline-6-pfm:
+  Baseline-7-pfm:
     runs-on: ubuntu-22.04
     needs: set-version-matrix-relayer
     strategy:
@@ -2749,7 +2749,7 @@ jobs:
         run: |
           tests/test_pfm_transfers.sh
 
-  Baseline-7-lsm:
+  Baseline-8-lsm:
     runs-on: ubuntu-22.04
     needs: set-version-matrix-relayer
     strategy:
@@ -3036,7 +3036,7 @@ jobs:
           COSMOS_SDK: v47
         run: tests/test_ica_delegate_happy.sh
 
-  Baseline-8-mainnet-consumer-chains:
+  Baseline-9-mainnet-consumer-chains:
     runs-on: ubuntu-22.04
     needs: set-version-matrix-relayer
     strategy:
