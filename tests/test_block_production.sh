@@ -13,7 +13,7 @@ fi
 
 # Test gaia response
 tests/test_node_response.sh $gaia_host $gaia_port
-# Exit if test_gaia_response.sh fails
+# Exit if test_node_response.sh fails
 if [ $? != 0 ]
 then
     exit 1
@@ -32,7 +32,7 @@ done
 
 # Check if gaia is producing blocks
 test_counter=0
-echo "Current gaiad version: $chain_version"
+echo "Current node binary version: $chain_version"
 echo "Block height: $cur_height"
 height=0
 stop_height=$[ $cur_height + $height_offset ]
@@ -42,7 +42,7 @@ do
     sleep 5
     if [ ${test_counter} -gt ${max_tests} ]
     then
-        echo "Queried gaia $test_counter times with a 5s wait between queries. A block height of $stop_height was not reached. Exiting."
+        echo "Queried node $test_counter times with a 5s wait between queries. A block height of $stop_height was not reached. Exiting."
         exit 2
     fi
     height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header.height)
@@ -53,4 +53,4 @@ do
     echo "Block height: $height"
     test_counter=$(($test_counter+1))
 done
-echo "Gaia is producing blocks."
+echo "Node is producing blocks."
