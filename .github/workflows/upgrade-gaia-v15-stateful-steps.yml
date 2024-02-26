@@ -177,7 +177,7 @@ jobs:
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
       - name: _Clawback test
-        run: tests/v15_upgrade/test_clawback_stateful.sh
+        run: tests/gaia-v15/stateful/test_clawback_stateful.sh
       - name: Query unbonding time
         run: $CHAIN_BINARY --home $HOME_1 q staking params
       - name: Set unbonding time via gov proposal
