@@ -1,5 +1,5 @@
 ---
-name: Export rs-testnet genesis
+name: Test Joining Release Testnet
 on:
   workflow_dispatch:
   schedule:
@@ -84,8 +84,7 @@ jobs:
           mv genesis.json $NODE_HOME/config/genesis.json
           echo "halt-height set to: $HALT_HEIGHT"
           echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
-      - name: cat app.toml
-        run: cat $NODE_HOME/config/app.toml
+          cat $NODE_HOME/config/app.toml
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
