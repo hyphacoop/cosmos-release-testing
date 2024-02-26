@@ -91,4 +91,4 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
-        run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME > ~/artifact/gaiad_joining_provider.log
+        run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
