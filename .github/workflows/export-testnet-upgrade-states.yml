@@ -152,7 +152,7 @@ jobs:
 
       - name: Get current running gaiad version
         run: |
-          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.rs-testnet.polypore.xyz/abci_info | jq -r '.result.version')
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.rs-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Download binary from cosmos/gaia repo
