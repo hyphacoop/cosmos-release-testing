@@ -91,7 +91,8 @@ jobs:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
         run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
-  export-rs-testnet:
+      
+  export-rs-testnet-provider:
     runs-on: self-hosted-debian-12
     environment: export-rs-testnet
     env:
@@ -151,8 +152,7 @@ jobs:
 
       - name: Get current running gaiad version
         run: |
-          # RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.rs-testnet.polypore.xyz/abci_info | jq -r '.result.version')
-          RUNNING_VERSION="v14.1.0"
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.rs-testnet.polypore.xyz/abci_info | jq -r '.result.version')
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Download binary from cosmos/gaia repo
@@ -238,8 +238,6 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50
       - name: Submit and vote on the upgrade proposal
-        env:
-          UPGRADE_NAME: "v15"
         run: |
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover 2> ~/.gaia/validator.json
@@ -247,6 +245,7 @@ jobs:
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
           echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: $UPGRADE_NAME"
           proposal="gaiad --output json tx gov submit-proposal software-upgrade $UPGRADE_NAME --from val --keyring-backend test --upgrade-height $upgrade_height --upgrade-info 'Test' --title gaia-upgrade --description 'test' --chain-id local-testnet --deposit 10uatom --fees 1000uatom --yes -b block"
           echo $proposal
           txhash=$($proposal | jq -r .txhash)
