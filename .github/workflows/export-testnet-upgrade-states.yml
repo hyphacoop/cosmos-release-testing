@@ -212,9 +212,7 @@ jobs:
           cd cosmos-genesis-tinkerer
           git checkout main
           pip install -r requirements.txt
-          ln -s /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json tests/rs-testnet_genesis.json
-          echo "LS"
-          ls -alh /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json tests/rs-testnet_genesis.json
+          ln -s /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json rs-testnet_genesis.json
           python example_rs_testnet_genesis.py
           cp tinkered_genesis.json /home/runner/
       - name: Initializing chain with tinkered genesis
