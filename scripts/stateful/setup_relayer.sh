@@ -35,7 +35,7 @@ echo "Set hermes parth"
 export PATH="$PATH:~/.hermes"
 
 echo "Setting up Hermes config..."
-cp tests/major_stateful_upgrade/hermes-config.toml ~/.hermes/config.toml
+cp templates/hermes-config-stateful.toml ~/.hermes/config.toml
 
 echo "Adding relayer keys..."
 echo $MNEMONIC_4 > mnemonic.txt
