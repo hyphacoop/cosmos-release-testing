@@ -204,7 +204,7 @@ jobs:
       - name: Export Genesis
         run: |
           mkdir /home/runner/rs-genesis-export
-          gaiad export --height ${{ env.HALT_HEIGHT }} 2> /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          gaiad export --height ${{ env.HALT_HEIGHT }} > /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
       - name: Tinker Genesis
         run: |
           source /home/runner/env/bin/activate
