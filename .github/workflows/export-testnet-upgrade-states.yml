@@ -92,7 +92,7 @@ jobs:
           CHAIN_BINARY: 'gaiad'
         run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
   export-rs-testnet:
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted-debian-12
     environment: export-rs-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
