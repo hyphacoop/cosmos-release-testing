@@ -213,6 +213,8 @@ jobs:
           git checkout main
           pip install -r requirements.txt
           ln -s /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json tests/rs-testnet_genesis.json
+          echo "LS"
+          ls -alh /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json tests/rs-testnet_genesis.json
           python example_rs_testnet_genesis.py
           cp tinkered_genesis.json /home/runner/
       - name: Initializing chain with tinkered genesis
@@ -242,7 +244,7 @@ jobs:
       - name: Submit and vote on the upgrade proposal
         run: |
           echo "Restoring validator key"
-          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover 2> ~/.gaia/validator.json
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
