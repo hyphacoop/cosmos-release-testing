@@ -207,6 +207,7 @@ jobs:
           gaiad export --height ${{ env.HALT_HEIGHT }} --output-document /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
       - name: Tinker Genesis
         run: |
+          sleep 10h
           source /home/runner/env/bin/activate
           git clone https://github.com/hyphacoop/cosmos-genesis-tinkerer.git
           cd cosmos-genesis-tinkerer
