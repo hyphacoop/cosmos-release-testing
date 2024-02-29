@@ -229,7 +229,8 @@ jobs:
           $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
           $CHAIN_BINARY config broadcast-mode block --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
-          sed -i -e "/fast_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/block_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "Replaceing genesis..."
           cp cosmos-genesis-tinkerer/tinkered_genesis.json $NODE_HOME/config/genesis.json
           echo "Restoring validator-40 node / validator keys"
