@@ -221,6 +221,7 @@ jobs:
           NODE_MONIKER: test-node
           CHAIN_ID: local-testnet
           CHAIN_BINARY: 'gaiad'
+          GAS_PRICES: "0.0025uatom"
         run: |
           echo "Removing $NODE_HOME..."
           rm -rf $NODE_HOME
