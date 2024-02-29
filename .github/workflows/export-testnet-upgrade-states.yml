@@ -230,11 +230,12 @@ jobs:
           $CHAIN_BINARY config broadcast-mode block --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/fast_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
-          echo "Restoring validator-40 node / validator keys"
-          cp examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
-          cp examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
           echo "Replaceing genesis..."
           cp cosmos-genesis-tinkerer/tinkered_genesis.json $NODE_HOME/config/genesis.json
+          echo "Restoring validator-40 node / validator keys"
+          git clone https://github.com/hyphacoop/cosmos-ansible.git
+          cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
+          cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
       - name: Start tinkered chain
         run: screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
       - name: Wait for gaiad to start and stabilize
