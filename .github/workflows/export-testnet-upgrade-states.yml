@@ -91,7 +91,47 @@ jobs:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
         run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
-      
+      - name: Export Genesis
+        run: |
+          mkdir /home/runner/release-genesis-export
+          gaiad export --height ${{ env.HALT_HEIGHT }} --output-document /home/runner/release-genesis-export/release-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+      - name: Tinker Genesis
+        run: |
+          source /home/runner/env/bin/activate
+          git clone https://github.com/hyphacoop/cosmos-genesis-tinkerer.git
+          cd cosmos-genesis-tinkerer
+          git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
+          pip install -r requirements.txt
+          ln -s /home/runner/release-genesis-export/release-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json release-testnet-export.json
+          python example_release_testnet_genesis.py
+          cp tinkered_genesis.json /home/runner/
+      - name: Initializing chain with tinkered genesis
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: test-node
+          CHAIN_ID: release-testnet
+          CHAIN_BINARY: 'gaiad'
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Removing $NODE_HOME..."
+          rm -rf $NODE_HOME
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode block --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/block_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          cp cosmos-genesis-tinkerer/tinkered_genesis.json $NODE_HOME/config/genesis.json
+          echo "Restoring validator-40 node / validator keys"
+          git clone https://github.com/hyphacoop/cosmos-ansible.git
+          cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
+          cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
+      - name: Start tinkered chain
+        run: screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50
   export-rs-testnet-provider:
     runs-on: self-hosted-debian-12
     environment: export-rs-testnet
@@ -210,7 +250,7 @@ jobs:
           source /home/runner/env/bin/activate
           git clone https://github.com/hyphacoop/cosmos-genesis-tinkerer.git
           cd cosmos-genesis-tinkerer
-          git checkout v15-update
+          git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
           pip install -r requirements.txt
           ln -s /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json rs-testnet-export.json
           python example_rs_testnet_genesis.py
