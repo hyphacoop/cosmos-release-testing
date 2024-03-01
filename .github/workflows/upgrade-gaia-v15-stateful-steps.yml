@@ -249,7 +249,7 @@ jobs:
           echo "Connection ID: $connection_id"
           channel_id=$(hermes --json query connection channels --chain local-testnet --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
-          scripts/stateful/test_consumer_ibc_transfer.sh $channel_id 2
+          tests/test_consumer_ibc_transfer.sh $channel_id 2
       - name: Initialize consumer chain b with ICS v2.0.0
         env:
           CONSUMER_CHAIN_ID: consumerb
@@ -301,7 +301,7 @@ jobs:
           echo "Connection ID: $connection_id"
           channel_id=$(hermes --json query connection channels --chain local-testnet --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
-          scripts/stateful/test_consumer_ibc_transfer.sh $channel_id 3
+          tests/test_consumer_ibc_transfer.sh $channel_id 3
       # - name: Start Stride chain
       #   run: scripts/stateful/start_stride.sh
       # - name: Pre-upgrade block Production> Stride
@@ -346,7 +346,7 @@ jobs:
       #     echo "Connection ID: $connection_id"
       #     channel_id=$(hermes --json query connection channels --chain local-testnet --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
       #     echo "Channel ID: $channel_id"
-      #     scripts/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_2 $RECIPIENT
+      #     tests/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_2 $RECIPIENT
       #     echo "CONSUMERD_CHAN=$channel_id" >> $GITHUB_ENV
       # - name: Register and fund ICA
       #   run: tests/v12_upgrade/setup_ica.sh
