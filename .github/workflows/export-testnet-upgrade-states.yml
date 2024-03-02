@@ -281,7 +281,7 @@ jobs:
       - name: Start tinkered chain
         run: screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
       - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Submit and vote on the upgrade proposal
         run: |
           echo "Restoring validator key"
