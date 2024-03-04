@@ -293,7 +293,7 @@ jobs:
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
           jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
-          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --yes"
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --from val --yes"
           echo $proposal
           txhash=$($proposal | jq -r .txhash)
           echo "Wait for the proposal to go on chain..."
