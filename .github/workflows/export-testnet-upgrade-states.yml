@@ -290,8 +290,11 @@ jobs:
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
           echo "Submitting the upgrade proposal..."
-          echo "Upgrade Name set to: $vars.UPGRADE_NAME"
-          proposal="gaiad --output json tx gov submit-proposal software-upgrade $vars.UPGRADE_NAME --from val --keyring-backend test --upgrade-height $upgrade_height --upgrade-info 'Test' --title gaia-upgrade --description 'test' --chain-id local-testnet --deposit 10uatom --fees 1000uatom --yes -b block"
+          echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+
+          proposal="gaiad --output json tx gov submit-proposal --fees 1000uatom --yes"
           echo $proposal
           txhash=$($proposal | jq -r .txhash)
           echo "Wait for the proposal to go on chain..."
