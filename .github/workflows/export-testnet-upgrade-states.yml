@@ -259,7 +259,7 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
           NODE_MONIKER: test-node
-          CHAIN_ID: local-testnet
+          CHAIN_ID: rs-testnet
           CHAIN_BINARY: 'gaiad'
           GAS_PRICES: "0.0025uatom"
         run: |
@@ -279,7 +279,9 @@ jobs:
           cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
           cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
       - name: Start tinkered chain
-        run: screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
+          screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Submit and vote on the upgrade proposal
@@ -293,7 +295,7 @@ jobs:
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
           jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
-          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --from val --yes --chain-id rs-testnet"
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --from val --yes"
           $proposal
           txhash=$($proposal | jq -r .txhash)
           echo "Wait for the proposal to go on chain..."
@@ -303,16 +305,24 @@ jobs:
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
           vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --chain-id local-testnet --fees 1000uatom --yes"
           $vote
+      # - name: Stop gaiad when reached upgrade height
+      #   run: |
+      #     current_block=0
+      #     echo "Upgrade height is: ${{ env.upgrade_height }}"
+      #     while [ $current_block != ${{ env.upgrade_height }} ]
+      #     do
+      #       current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+      #       echo "Current block is: $current_block"
+      #       sleep 5
+      #     done
+      #     echo "exiting gaia and screen"
+      #     killall gaiad screen
+      #     tail -30 /home/runner/artifact/gaiad_upgrade.log
       - name: Stop gaiad when reached upgrade height
         run: |
           current_block=0
           echo "Upgrade height is: ${{ env.upgrade_height }}"
-          while [ $current_block != ${{ env.upgrade_height }} ]
-          do
-            current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
-            echo "Current block is: $current_block"
-            sleep 5
-          done
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
