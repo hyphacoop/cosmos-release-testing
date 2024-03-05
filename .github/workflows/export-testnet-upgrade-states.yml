@@ -303,7 +303,7 @@ jobs:
           echo "Get proposal ID from txhash..."
           proposal_id=$(gaiad --output json q tx $txhash | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --chain-id local-testnet --fees 1000uatom --yes"
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
           $vote
       # - name: Stop gaiad when reached upgrade height
       #   run: |
