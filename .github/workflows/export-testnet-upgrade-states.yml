@@ -137,7 +137,7 @@ jobs:
           git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
           pip install -r requirements.txt
           ln -s /home/runner/theta-genesis-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json theta-testnet-export.json
-          python example_rs_testnet_genesis.py
+          python example_release_testnet_genesis.py
           cp tinkered_genesis.json /home/runner/
       - name: Initializing chain with tinkered genesis
         env:
@@ -226,7 +226,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.runs-on-os }}_archived-upgrade-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          name: export-release-testnet
           path: ~/artifact/
   export-rs-testnet-provider:
     runs-on: self-hosted-debian-12
@@ -442,5 +442,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.runs-on-os }}_archived-upgrade-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          name: export-release-testnet
           path: ~/artifact/
