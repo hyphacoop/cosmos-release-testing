@@ -82,7 +82,7 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
           NODE_MONIKER: thetatestnet
-          SERVICE_NAME: provider
+          SERVICE_NAME: release-testnet
           CHAIN_ID: theta-testnet-001
           CHAIN_BINARY: 'gaiad'
           GENESIS_URL: https://github.com/cosmos/testnets/raw/master/public/genesis.json.gz
@@ -217,7 +217,7 @@ jobs:
           cd /home/runner/
           tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
-          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet-provider/
+          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-tinkered/theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
