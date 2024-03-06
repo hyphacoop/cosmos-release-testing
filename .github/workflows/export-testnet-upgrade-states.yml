@@ -111,12 +111,14 @@ jobs:
           sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "Replaceing genesis..."
-          wget -nv $GENESIS_URL -O genesis.json
+          wget -nv $GENESIS_URL -O genesis.json.gz
           gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
           echo "halt-height set to: $HALT_HEIGHT"
           echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
       - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/theta-testnet-001 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/theta-testnet-001/
       - name: Start Chain
         env:
@@ -161,6 +163,8 @@ jobs:
           cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
           cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
       - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/tinkered && cp -rvp $NODE_HOME/config /home/runner/artifact/config/tinkered/
       - name: Start tinkered chain
         run: |
@@ -329,6 +333,8 @@ jobs:
           echo "halt-height set to: $HALT_HEIGHT"
           echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
       - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/provider && cp -rvp $NODE_HOME/config /home/runner/artifact/config/provider/
       - name: Start Chain
         env:
@@ -373,6 +379,8 @@ jobs:
           cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
           cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
       - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/tinkered && cp -rvp $NODE_HOME/config /home/runner/artifact/config/tinkered/
       - name: Start tinkered chain
         run: |
