@@ -442,5 +442,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: export-release-testnet
+          name: export-rs-testnet-provider
           path: ~/artifact/
