@@ -15,7 +15,7 @@ concurrency:
 
 env:
   # Versions
-  VERSION_CUTOFF: v14.1.0
+  VERSION_CUTOFF: v14.2.0
   TARGET_VERSION: v15
   # All chain variables
   COMMIT_TIMEOUT: 3
