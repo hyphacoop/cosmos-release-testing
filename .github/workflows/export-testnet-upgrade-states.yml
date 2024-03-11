@@ -1,0 +1,446 @@
+---
+name: Export Testnet Upgrade States
+on:
+  workflow_dispatch:
+  schedule:
+    # At 05:30 on Tuesday.
+    - cron: '30 5 * * 2'
+  push:
+
+concurrency:
+  group: self-hosted-runners
+
+jobs:
+  export-release-testnet:
+    runs-on: self-hosted-debian-12
+    environment: export-rs-testnet
+    env:
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+    steps:
+      # Get system info
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
+
+      - name: Set SSH key
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s https://rpc.sentry-01.theta-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+      - name: Initializing chain to sync with Release Testnet
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: thetatestnet
+          SERVICE_NAME: release-testnet
+          CHAIN_ID: theta-testnet-001
+          CHAIN_BINARY: 'gaiad'
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/public/genesis.json.gz
+          SEEDS: "639d50339d7045436c756a042906b9a69970913f@seed-01.theta-testnet.polypore.xyz:26656,3e506472683ceb7ed75c1578d092c79785c27857@seed-02.theta-testnet.polypore.xyz:26656"
+          SYNC_RPC_1: https://rpc.state-sync-01.theta-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.state-sync-02.theta-testnet.polypore.xyz:443
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
+          echo "Configuring state sync..."
+          CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
+          TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
+          TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
+          TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
+          HALT_HEIGHT=$[$CURRENT_BLOCK+50]
+          sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json.gz
+          gunzip genesis.json.gz
+          mv genesis.json $NODE_HOME/config/genesis.json
+          echo "halt-height set to: $HALT_HEIGHT"
+          echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
+      - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
+        run: mkdir -p /home/runner/artifact/config/theta-testnet-001 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/theta-testnet-001/
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Export Genesis
+        run: |
+          mkdir /home/runner/theta-genesis-export
+          gaiad export --height ${{ env.HALT_HEIGHT }} --output-document /home/runner/theta-genesis-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+      - name: Tinker Genesis
+        run: |
+          source /home/runner/env/bin/activate
+          git clone https://github.com/hyphacoop/cosmos-genesis-tinkerer.git
+          cd cosmos-genesis-tinkerer
+          git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
+          pip install -r requirements.txt
+          ln -s /home/runner/theta-genesis-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json release-testnet-export.json
+          python example_release_testnet_genesis.py
+          cp tinkered_genesis.json /home/runner/
+      - name: Initializing chain with tinkered genesis
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: test-node
+          CHAIN_ID: release-testnet
+          CHAIN_BINARY: 'gaiad'
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Removing $NODE_HOME..."
+          rm -rf $NODE_HOME
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/block_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          cp cosmos-genesis-tinkerer/tinkered_genesis.json $NODE_HOME/config/genesis.json
+          echo "Restoring validator-40 node / validator keys"
+          git clone https://github.com/hyphacoop/cosmos-ansible.git
+          cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
+          cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
+      - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
+        run: mkdir -p /home/runner/artifact/config/tinkered && cp -rvp $NODE_HOME/config /home/runner/artifact/config/tinkered/
+      - name: Start tinkered chain
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
+          screen -r gaiad -p0 -X logfile flush 0
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --from val --yes"
+          $proposal
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+          echo "Get proposal ID from txhash..."
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        run: |
+          current_block=0
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Compress and upload files
+        run: |
+          cp cosmos-genesis-tinkerer/tinkered_genesis.json /home/runner/theta-genesis-export/theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          cd /home/runner/theta-genesis-export/
+          echo "Compressing theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
+          gzip theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          echo "Compressing theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
+          gzip theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          echo "Uploading exported genesis to files.polypore.xyz"
+          scp theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-export/
+          echo "Uploading Tinkered genesis to files.polypore.xyz"
+          scp theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-tinkered/
+          echo "Compressing ~/.gaia ..."
+          cd /home/runner/
+          tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
+          echo "Uploading archived state to files.polypore.xyz"
+          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet/
+          # Update latest file symlinks
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-tinkered/theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/theta-testnet/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/theta-testnet/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: export-release-testnet
+          path: ~/artifact/
+  export-rs-testnet-provider:
+    runs-on: self-hosted-debian-12
+    environment: export-rs-testnet
+    env:
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+    steps:
+      # Get system info
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
+
+      - name: Set SSH key
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.rs-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+      - name: Initializing chain to sync with RS Testnet
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: provider
+          SERVICE_NAME: provider
+          CHAIN_ID: provider
+          CHAIN_BINARY: 'gaiad'
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/replicated-security/provider/provider-genesis.json
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.rs-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.rs-testnet.polypore.xyz:26656"
+          SYNC_RPC_1: https://rpc.provider-state-sync-01.rs-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.provider-state-sync-02.rs-testnet.polypore.xyz:443
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
+          echo "Configuring state sync..."
+          CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
+          TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
+          TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
+          TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
+          HALT_HEIGHT=$[$CURRENT_BLOCK+50]
+          sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json
+          mv genesis.json $NODE_HOME/config/genesis.json
+          echo "halt-height set to: $HALT_HEIGHT"
+          echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
+      - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
+        run: mkdir -p /home/runner/artifact/config/provider && cp -rvp $NODE_HOME/config /home/runner/artifact/config/provider/
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Export Genesis
+        run: |
+          mkdir /home/runner/rs-genesis-export
+          gaiad export --height ${{ env.HALT_HEIGHT }} --output-document /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+      - name: Tinker Genesis
+        run: |
+          source /home/runner/env/bin/activate
+          git clone https://github.com/hyphacoop/cosmos-genesis-tinkerer.git
+          cd cosmos-genesis-tinkerer
+          git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
+          pip install -r requirements.txt
+          ln -s /home/runner/rs-genesis-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json rs-testnet-export.json
+          python example_rs_testnet_genesis.py
+          cp tinkered_genesis.json /home/runner/
+      - name: Initializing chain with tinkered genesis
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: test-node
+          CHAIN_ID: rs-testnet
+          CHAIN_BINARY: 'gaiad'
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Removing $NODE_HOME..."
+          rm -rf $NODE_HOME
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/block_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          cp cosmos-genesis-tinkerer/tinkered_genesis.json $NODE_HOME/config/genesis.json
+          echo "Restoring validator-40 node / validator keys"
+          git clone https://github.com/hyphacoop/cosmos-ansible.git
+          cp cosmos-ansible/examples/validator-keys/validator-40/node_key.json $NODE_HOME/config/node_key.json
+          cp cosmos-ansible/examples/validator-keys/validator-40/priv_validator_key.json $NODE_HOME/config/priv_validator_key.json
+      - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
+        run: mkdir -p /home/runner/artifact/config/tinkered && cp -rvp $NODE_HOME/config /home/runner/artifact/config/tinkered/
+      - name: Start tinkered chain
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad start --x-crisis-skip-assert-invariants
+          screen -r gaiad -p0 -X logfile flush 0
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --from val --yes"
+          $proposal
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+          echo "Get proposal ID from txhash..."
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        run: |
+          current_block=0
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Compress and upload files
+        run: |
+          cp cosmos-genesis-tinkerer/tinkered_genesis.json /home/runner/rs-genesis-export/rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          cd /home/runner/rs-genesis-export/
+          echo "Compressing rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
+          gzip rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          echo "Compressing rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
+          gzip rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          echo "Uploading exported genesis to files.polypore.xyz"
+          scp rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-export/
+          echo "Uploading Tinkered genesis to files.polypore.xyz"
+          scp rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-tinkered/
+          echo "Compressing ~/.gaia ..."
+          cd /home/runner/
+          tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
+          echo "Uploading archived state to files.polypore.xyz"
+          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
+          # Update latest file symlinks
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-tinkered/rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: export-rs-testnet-provider
+          path: ~/artifact/
