@@ -30,7 +30,7 @@ env:
   GAS_ADJUSTMENT: 2
   GAS_PRICE: 0.005
   VOTING_PERIOD: 10s
-  COSMOS_SDK: v45
+  COSMOS_SDK: v47
   COSMOVISOR: false
   # Provider nodes variables
   HOME_1: /home/runner/.val1
@@ -315,7 +315,6 @@ jobs:
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
           DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          COSMOS_SDK: v47
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
