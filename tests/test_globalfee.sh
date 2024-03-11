@@ -5,7 +5,7 @@
 # Node gas prices are set to 0.005uatom.
 
 # 1. globalfee < node
-# set globalfee = 0.002uatom
+# set globalfee = 0.003uatom
 jq '.changes[0].value[0].amount = "0.003"' templates/globalfee-params.json > globalfee-1.json
 scripts/param_change.sh globalfee-1.json
 amount=$($CHAIN_BINARY q globalfee params -o json --home $HOME_1 | jq -r --arg DENOM "$DENOM" '.minimum_gas_prices[] | select(.denom == $DENOM).amount')
