@@ -13,6 +13,7 @@ do
     if [ ${attempt_counter} -gt ${max_attempts} ]
     then
         echo ""
+        journalctl -u $PROVIDER_SERVICE_1 | tail -n 20
         echo "Tried connecting to node for $attempt_counter times. Exiting."
         exit 3
     fi
