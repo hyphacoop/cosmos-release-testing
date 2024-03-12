@@ -97,4 +97,8 @@ else
     sudo systemctl start $PROVIDER_SERVICE_1
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
+
+    sleep 3
+
+    systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
 fi
