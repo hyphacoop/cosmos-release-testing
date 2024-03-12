@@ -3,10 +3,10 @@
 
 gaia_host=$1
 gaia_port=$2
-
+max_attempts=${3:-20}
 # Waiting until node responds
 attempt_counter=0
-max_attempts=8000
+# max_attempts=8000
 echo "Waiting for node to come back online..."
 until $(curl --output /dev/null --silent --head --fail http://$gaia_host:$gaia_port)
 do
