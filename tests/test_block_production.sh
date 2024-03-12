@@ -12,7 +12,7 @@ else
 fi
 
 # Test gaia response
-tests/test_node_response.sh $gaia_host $gaia_port $max_tests
+tests/test_node_response.sh $gaia_host $gaia_port
 # Exit if test_node_response.sh fails
 if [ $? != 0 ]
 then
