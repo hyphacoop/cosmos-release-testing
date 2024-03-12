@@ -100,5 +100,6 @@ else
 
     sleep 3
 
+    echo "Checking $PROVIDER_SERVICE_1 is active..."
     systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
 fi
