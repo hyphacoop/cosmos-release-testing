@@ -23,10 +23,18 @@ height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
 
-# Auto download: Set the binary paths need for the proposal message
 upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
-proposal="$CHAIN_BINARY --output json tx gov submit-proposal software-upgrade $upgrade_name --from $WALLET_1 --keyring-backend test --upgrade-height $upgrade_height --upgrade-info $upgrade_info --title gaia-upgrade --description 'test' --chain-id $CHAIN_ID --deposit $VAL3_STAKE$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
-
+# Auto download: Set the binary paths need for the proposal message
+if [ $COSMOS_SDK == "v45" ]; then
+    proposal="$CHAIN_BINARY --output json tx gov submit-proposal software-upgrade $upgrade_name --from $WALLET_1 --keyring-backend test --upgrade-height $upgrade_height --upgrade-info $upgrade_info --title gaia-upgrade --description 'test' --chain-id $CHAIN_ID --deposit $VAL3_STAKE$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
+elif [ $COSMOS_SDK == "v47" ]; then
+    # Set up metadata
+    jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-software-upgrade.json > upgrade-1.json
+    jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
+    jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
+    jq '.' upgrade-3.json
+    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-3.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
+fi
 # Submit the proposal
 echo "Submitting the upgrade proposal."
 echo $proposal
@@ -88,4 +96,9 @@ else
     sudo systemctl start $PROVIDER_SERVICE_1
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
+
+    sleep 3
+
+    echo "Checking $PROVIDER_SERVICE_1 is active..."
+    systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
 fi
