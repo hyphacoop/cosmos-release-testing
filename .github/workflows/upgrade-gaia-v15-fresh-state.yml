@@ -1120,6 +1120,8 @@ jobs:
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: _Soft opt-out test> Validator must not be jailed
+        run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Stop validator services
         env:
           CONSUMER_SERVICE_2: v310-2-2.service
@@ -1465,6 +1467,8 @@ jobs:
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: _Soft opt-out test> Validator must not be jailed
+        run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Stop validator services
         env:
           CONSUMER_SERVICE_2: v310-2-2.service
@@ -1817,6 +1821,8 @@ jobs:
           echo "Provider channel id: $channel_id"
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: _Soft opt-out test> Validator must not be jailed
+        run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Stop validator services
         env:
           CONSUMER_SERVICE_2: v320-2-2.service
@@ -2169,6 +2175,8 @@ jobs:
           echo "Provider channel id: $channel_id"
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: _Soft opt-out test> Validator must not be jailed
+        run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Stop validator services
         env:
           CONSUMER_SERVICE_2: v330-2-2.service
@@ -2521,6 +2529,8 @@ jobs:
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: _Soft opt-out test> Validator must not be jailed
+        run: tests/test_validator_jailed.sh $VALOPER_3 false
       - name: Stop validator services
         env:
           CONSUMER_SERVICE_2: v400-2-2.service
