@@ -26,7 +26,7 @@ command="$CHAIN_BINARY tx staking delegate $VALOPER_1 $VAL_STAKE$DENOM --home $H
 echo $command
 TXHASH=$($command | jq -r '.txhash')
 echo "Tx hash: $TXHASH"
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT*2))
 check_code $TXHASH
 
 # TXHASH=$($CHAIN_BINARY tx staking delegate $VALOPER_1 $VAL_STAKE$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --chain-id $CHAIN_ID -y -o json | jq -r '.txhash')
