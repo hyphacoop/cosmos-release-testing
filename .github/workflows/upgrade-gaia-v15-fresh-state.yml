@@ -1771,8 +1771,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V320_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v320-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -1800,8 +1800,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V320_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v320-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -1834,8 +1834,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V320_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v320-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -2158,8 +2158,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v330-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -2210,8 +2210,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v330-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -2535,8 +2535,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v400-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -2588,8 +2588,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v400-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
@@ -3197,8 +3197,8 @@ jobs:
 
       - name: Check jailed status
         run: |
-          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
-          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+          export CONSUMER_HOME_1=/home/runner/.stride-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           echo "Slashing params for provider chain:"
           $CHAIN_BINARY q slashing params --home $HOME_1
