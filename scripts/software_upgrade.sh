@@ -85,11 +85,18 @@ else
     echo "Waiting for the upgrade to take place at block height $upgrade_height..."
     tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
     echo "The upgrade height was reached."
+    echo "val1:"
+    journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+    echo "val2:"
+    journalctl -u $PROVIDER_SERVICE_2 | tail -n 10
+    echo "val3:"
+    journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 
-    # Replace binary
+    echo "Restarting services with the new binary..."
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
     sudo systemctl stop $PROVIDER_SERVICE_3
+    sleep 3
     wget $DOWNLOAD_URL -O ./upgraded -q
     chmod +x ./upgraded
     mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
@@ -97,7 +104,7 @@ else
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
 
-    sleep 30
+    sleep 20
 
     echo "Checking provider services are active..."
     systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
