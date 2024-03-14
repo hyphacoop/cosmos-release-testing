@@ -148,14 +148,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ inputs.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ inputs.upgrade_version }}/gaiad-${{ inputs.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-v15.1.0-preview/gaiad
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
       - name: Test software upgrade for main branch
         if: ${{ inputs.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-v15.1.0-preview/gaiad
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
