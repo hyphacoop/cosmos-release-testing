@@ -627,6 +627,9 @@ jobs:
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
@@ -985,6 +988,9 @@ jobs:
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
@@ -1334,6 +1340,9 @@ jobs:
           connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
+
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -1689,6 +1698,9 @@ jobs:
           connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
+
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -2047,6 +2059,9 @@ jobs:
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
 
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
@@ -2404,6 +2419,9 @@ jobs:
           connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
+
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
