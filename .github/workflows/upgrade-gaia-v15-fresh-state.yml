@@ -628,7 +628,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -670,7 +670,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -989,7 +989,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -1031,7 +1031,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1342,7 +1342,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -1384,7 +1384,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1700,7 +1700,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -1719,6 +1719,9 @@ jobs:
       - name: _Blocks produced after upgrade
         run: |
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+
+      - name: Check jailed status
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Restart relayer
         run: sudo systemctl restart $RELAYER
@@ -1744,7 +1747,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Add consumer chain with ICS v3.2.0
         env:
@@ -2060,7 +2063,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -2104,7 +2107,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Add consumer chain with ICS v3.3.0
         env:
@@ -2421,7 +2424,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -2466,7 +2469,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
 
       - name: Add consumer chain with ICS v4.0.0
         env:
