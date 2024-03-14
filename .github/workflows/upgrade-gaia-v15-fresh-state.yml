@@ -19,7 +19,7 @@ env:
   TARGET_VERSION: v15
   # All chain variables
   COMMIT_TIMEOUT: 3
-  DOWNTIME_BLOCKS: 50
+  DOWNTIME_BLOCKS: 100
   # Provider chain variables
   CHAIN_BINARY: gaiad
   CHAIN_ID: testnet
