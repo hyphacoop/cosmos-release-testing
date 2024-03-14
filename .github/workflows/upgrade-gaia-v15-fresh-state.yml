@@ -667,7 +667,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1025,7 +1025,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1375,7 +1375,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1732,7 +1732,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Add consumer chain with ICS v3.2.0
         env:
@@ -2089,7 +2089,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Add consumer chain with ICS v3.3.0
         env:
@@ -2448,7 +2448,7 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json | jq '.validators[].jailed'
+        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[].jailed'
 
       - name: Add consumer chain with ICS v4.0.0
         env:
