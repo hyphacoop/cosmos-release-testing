@@ -644,6 +644,14 @@ jobs:
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
+      - name: Check jailed status
+        run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+
       - name: _Blocks produced after upgrade
         run: |
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
@@ -671,6 +679,7 @@ jobs:
 
       - name: Check jailed status
         run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           $CHAIN_BINARY q slashing params --home $HOME_1
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
