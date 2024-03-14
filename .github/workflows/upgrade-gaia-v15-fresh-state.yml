@@ -670,7 +670,11 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1031,7 +1035,11 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1384,7 +1392,11 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Add consumer chain with ICS v3.1.0
         env:
@@ -1747,7 +1759,11 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Add consumer chain with ICS v3.2.0
         env:
@@ -2063,7 +2079,11 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -2469,7 +2489,11 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Add consumer chain with ICS v4.0.0
         env:
@@ -3068,6 +3092,14 @@ jobs:
           connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
+
+      - name: Check jailed status
+        run: |
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+
       - name: _LSM happy path
         env:
           BASE_FEES: 3000
