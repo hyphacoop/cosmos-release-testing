@@ -18,7 +18,7 @@ env:
   VERSION_CUTOFF: v14.2.0
   TARGET_VERSION: v15
   # All chain variables
-  COMMIT_TIMEOUT: 3
+  COMMIT_TIMEOUT: 5
   DOWNTIME_BLOCKS: 200
   # Provider chain variables
   CHAIN_BINARY: gaiad
