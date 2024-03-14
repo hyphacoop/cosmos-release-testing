@@ -665,6 +665,12 @@ jobs:
           echo "Slashing params for pre-upgrade consumer chain:"
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
           $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+          echo "val1:"
+          journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+          echo "val2:"
+          journalctl -u $PROVIDER_SERVICE_2 | tail -n 10
+          echo "val3:"
+          journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 
       - name: _Blocks produced after upgrade
         run: |
@@ -701,8 +707,11 @@ jobs:
           echo "Slashing params for pre-upgrade consumer chain:"
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
           $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+          echo "val1:"
           journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+          echo "val2:"
           journalctl -u $PROVIDER_SERVICE_2 | tail -n 10
+          echo "val3:"
           journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 
       - name: Add consumer chain with ICS v3.1.0
@@ -776,8 +785,11 @@ jobs:
           echo "Slashing params for pre-upgrade consumer chain:"
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
           $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+          echo "val1:"
           journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+          echo "val2:"
           journalctl -u $PROVIDER_SERVICE_2 | tail -n 10
+          echo "val3:"
           journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
@@ -829,8 +841,11 @@ jobs:
           echo "Slashing params for pre-upgrade consumer chain:"
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
           $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+          echo "val1:"
           journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+          echo "val2:"
           journalctl -u $PROVIDER_SERVICE_2 | tail -n 10
+          echo "val3:"
           journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 
       - name: _Soft opt-out test> Validator must not be jailed

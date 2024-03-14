@@ -97,10 +97,17 @@ else
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
 
-    sleep 5
+    sleep 30
 
     echo "Checking provider services are active..."
     systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
     systemctl is-active --quiet $PROVIDER_SERVICE_2 && echo "$PROVIDER_SERVICE_2 is running"
     systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
+
+    echo "val1:"
+    journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+    echo "val2:"
+    journalctl -u $PROVIDER_SERVICE_2 | tail -n 10
+    echo "val3:"
+    journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 fi
