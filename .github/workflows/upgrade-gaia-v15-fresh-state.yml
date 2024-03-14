@@ -628,7 +628,14 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
+
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -680,6 +687,7 @@ jobs:
       - name: Check jailed status
         run: |
           export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v310-1-1
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           $CHAIN_BINARY q slashing params --home $HOME_1
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
@@ -783,6 +791,15 @@ jobs:
           connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
           channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           tests/test_consumer_ibc_transfer.sh $channel_id
+
+      - name: Check jailed status
+        run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
+          export CONSUMER_HOME_1=/home/runner/.v310-1-1
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: _Soft opt-out test> Validator must not be jailed
         run: tests/test_validator_jailed.sh $VALOPER_3 false
@@ -1002,7 +1019,12 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -1045,6 +1067,7 @@ jobs:
 
       - name: Check jailed status
         run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           $CHAIN_BINARY q slashing params --home $HOME_1
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
@@ -1359,7 +1382,12 @@ jobs:
           tests/test_consumer_ibc_transfer.sh $channel_id
 
       - name: Check jailed status
-        run: $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+        run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
+          $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
+          $CHAIN_BINARY q slashing params --home $HOME_1
+          $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
+          $CHAIN_BINARY q slashing signing-infos --home $HOME_1
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -1402,11 +1430,11 @@ jobs:
 
       - name: Check jailed status
         run: |
+          export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V310_BINARY
           $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.validators[] | "\(.description.moniker) \(.jailed)"'
           $CHAIN_BINARY q slashing params --home $HOME_1
           $CONSUMER_CHAIN_BINARY q slashing params --home $CONSUMER_HOME_1
           $CHAIN_BINARY q slashing signing-infos --home $HOME_1
-
       - name: Add consumer chain with ICS v3.1.0
         env:
           COSMOS_SDK: v47
