@@ -314,14 +314,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
 
@@ -411,14 +411,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -648,14 +648,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -1095,14 +1095,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -1470,14 +1470,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -1850,14 +1850,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -2245,14 +2245,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -2630,14 +2630,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -2983,14 +2983,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: _Blocks produced after upgrade
@@ -3245,14 +3245,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -3621,14 +3621,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -3757,14 +3757,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -3855,14 +3855,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -3953,14 +3953,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
@@ -4068,14 +4068,14 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
       - name: Test software upgrade for main branch
         if: ${{ matrix.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-deterministic/gaiad
         run: |
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
 
