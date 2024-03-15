@@ -176,9 +176,12 @@ toml set --toml-path $HOME_3/config/config.toml consensus.timeout_commit "$COMMI
 
 # Set persistent peers
 echo "Setting persistent peers..."
+VAL1_PEER="$VAL1_NODE_ID@localhost:$VAL1_P2P_PORT"
 VAL2_PEER="$VAL2_NODE_ID@localhost:$VAL2_P2P_PORT"
 VAL3_PEER="$VAL3_NODE_ID@localhost:$VAL3_P2P_PORT"
 toml set --toml-path $HOME_1/config/config.toml p2p.persistent_peers "$VAL2_PEER,$VAL3_PEER"
+toml set --toml-path $HOME_2/config/config.toml p2p.persistent_peers "$VAL1_PEER,$VAL3_PEER"
+toml set --toml-path $HOME_3/config/config.toml p2p.persistent_peers "$VAL1_PEER,$VAL2_PEER"
 
 toml set --toml-path $HOME_1/config/config.toml p2p.addr_book_strict false
 toml set --toml-path $HOME_2/config/config.toml p2p.addr_book_strict false
