@@ -97,10 +97,11 @@ else
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
     sudo systemctl stop $PROVIDER_SERVICE_3
+    sleep 5
 
-    wget $DOWNLOAD_URL -O ./upgraded -q
-    chmod +x ./upgraded
-    mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
+    wget $DOWNLOAD_URL -O upgraded -q
+    chmod +x upgraded
+    mv upgraded $HOME/go/bin/$CHAIN_BINARY
     sudo systemctl start $PROVIDER_SERVICE_1
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
@@ -113,12 +114,12 @@ else
     systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
 
     echo "val1:"
-    journalctl -u $PROVIDER_SERVICE_1 | tail -n 50
+    journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
     curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
     echo "val2:"
-    journalctl -u $PROVIDER_SERVICE_2 | tail -n 50
+    journalctl -u $PROVIDER_SERVICE_2 | tail -n 100
     curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
     echo "val3:"
-    journalctl -u $PROVIDER_SERVICE_3 | tail -n 50
+    journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
     curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
 fi
