@@ -83,6 +83,7 @@ else
     echo "Waiting for the upgrade to take place at block height $upgrade_height..."
     tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
     echo "The upgrade height was reached."
+    sleep 10
 
     # Replace binary
     sudo systemctl stop $PROVIDER_SERVICE_1
@@ -103,12 +104,12 @@ fi
     systemctl is-active --quiet $PROVIDER_SERVICE_2 && echo "$PROVIDER_SERVICE_2 is running"
     systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
 
-    printf "\n\n** val1 ***\n\n"
+    printf "\n\n*** val1 ***\n\n"
     journalctl -u $PROVIDER_SERVICE_1 | tail -n 150
     curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
-    printf "\n\n** val2 ***\n\n"
+    printf "\n\n*** val2 ***\n\n"
     journalctl -u $PROVIDER_SERVICE_2 | tail -n 150
     curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
-    printf "\n\n** val3 ***\n\n"
+    printf "\n\n*** val3 ***\n\n"
     journalctl -u $PROVIDER_SERVICE_3 | tail -n 150
     curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
