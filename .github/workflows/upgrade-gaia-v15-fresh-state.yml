@@ -314,7 +314,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
@@ -411,7 +411,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -648,7 +648,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -1095,7 +1095,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -1470,7 +1470,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -1850,7 +1850,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -2245,7 +2245,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -2630,7 +2630,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -2983,7 +2983,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -3245,7 +3245,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -3621,7 +3621,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -3757,7 +3757,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -3855,7 +3855,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -3953,7 +3953,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
@@ -4068,7 +4068,7 @@ jobs:
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/v15-no-migration/gaiad
         run: |
           echo $DOWNLOAD_URL
           scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
