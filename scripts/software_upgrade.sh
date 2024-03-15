@@ -113,13 +113,13 @@ else
     systemctl is-active --quiet $PROVIDER_SERVICE_2 && echo "$PROVIDER_SERVICE_2 is running"
     systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
 
-    echo "val1:"
+    printf "\n\n** val1 ***\n\n"
     journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
     curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
-    echo "val2:"
+    printf "\n\n** val2 ***\n\n"
     journalctl -u $PROVIDER_SERVICE_2 | tail -n 100
     curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
-    echo "val3:"
+    printf "\n\n** val3 ***\n\n"
     journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
     curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
 fi
