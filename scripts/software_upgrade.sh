@@ -92,11 +92,12 @@ else
     echo "val3:"
     journalctl -u $PROVIDER_SERVICE_3 | tail -n 10
 
+    sleep 5
     echo "Restarting services with the new binary..."
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
     sudo systemctl stop $PROVIDER_SERVICE_3
-    sleep 3
+
     wget $DOWNLOAD_URL -O ./upgraded -q
     chmod +x ./upgraded
     mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
@@ -104,7 +105,7 @@ else
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
 
-    sleep 20
+    sleep 10
 
     echo "Checking provider services are active..."
     systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
