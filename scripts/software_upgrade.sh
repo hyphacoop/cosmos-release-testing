@@ -96,7 +96,7 @@ else
     sudo systemctl start $PROVIDER_SERVICE_3
 fi
 
-    sleep 3
+    sleep 10
 
     echo "Checking provider services are active..."
     systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
@@ -104,11 +104,11 @@ fi
     systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
 
     printf "\n\n** val1 ***\n\n"
-    journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
+    journalctl -u $PROVIDER_SERVICE_1 | tail -n 150
     curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
     printf "\n\n** val2 ***\n\n"
-    journalctl -u $PROVIDER_SERVICE_2 | tail -n 100
+    journalctl -u $PROVIDER_SERVICE_2 | tail -n 150
     curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
     printf "\n\n** val3 ***\n\n"
-    journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+    journalctl -u $PROVIDER_SERVICE_3 | tail -n 150
     curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'

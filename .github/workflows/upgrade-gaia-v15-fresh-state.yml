@@ -588,8 +588,11 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
+
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.1.0 chain 1
         env:
           CON1_RPC_PORT: 31121
@@ -726,8 +729,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
         env:
           CON1_RPC_PORT: 31221
@@ -943,8 +948,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.1.0 chain 1
         env:
           CON1_RPC_PORT: 31121
@@ -1081,8 +1088,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
         env:
           CON1_RPC_PORT: 31221
@@ -1290,8 +1299,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.1.0 chain 1
         env:
           CON1_RPC_PORT: 31121
@@ -1428,8 +1439,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Consumer chain produces blocks> ICS v3.1.0 chain 2
         env:
           CON1_RPC_PORT: 31221
@@ -1642,8 +1655,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.2.0 chain 1
         env:
           CON1_RPC_PORT: 32121
@@ -1781,8 +1796,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Consumer chain produces blocks> ICS v3.2.0 chain 2
         env:
           CON1_RPC_PORT: 32221
@@ -1998,8 +2015,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> ICS v3.3.0 chain 1
         env:
           CON1_RPC_PORT: 33121
@@ -2137,8 +2156,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Consumer chain produces blocks> ICS v3.3.0 chain 2
         env:
           CON1_RPC_PORT: 33221
@@ -2354,8 +2375,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
         env:
           CON1_RPC_PORT: 40121
@@ -2495,8 +2518,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
         env:
           CON1_RPC_PORT: 40221
@@ -2916,8 +2941,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> Stride chain
         env:
           CON1_RPC_PORT: 32321
@@ -3208,8 +3235,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
         env:
           CON1_RPC_PORT: 31321
@@ -3310,8 +3339,10 @@ jobs:
           sudo systemctl enable $CONSUMER_SERVICE_1 --now
           sudo systemctl enable $CONSUMER_SERVICE_2 --now
           sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          sleep 5
+          sleep 10
           journalctl -u $CONSUMER_SERVICE_1
+          journalctl -u $CONSUMER_SERVICE_2
+          journalctl -u $CONSUMER_SERVICE_3
       - name: _Pre-upgrade consumer chain produces blocks> Stride chain
         env:
           CON1_RPC_PORT: 32321
