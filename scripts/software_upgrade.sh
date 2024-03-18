@@ -6,6 +6,17 @@ gaia_host=$1
 gaia_port=$2
 upgrade_name=$3
 
+echo "*** PRE-UPGRADE LOGS ***"
+printf "\n\n*** val1 ***\n\n"
+journalctl -u $PROVIDER_SERVICE_1 | tail -n 20
+curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
+printf "\n\n*** val2 ***\n\n"
+journalctl -u $PROVIDER_SERVICE_2 | tail -n 20
+curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
+printf "\n\n*** val3 ***\n\n"
+journalctl -u $PROVIDER_SERVICE_3 | tail -n 20
+curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
+
 echo "Attempting upgrade to $upgrade_name."
 
 # Set time to wait for proposal to pass
@@ -76,16 +87,15 @@ if [ "$COSMOVISOR" = true ]; then
         cp ./upgraded $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
         cp ./upgraded $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
     fi
-
+    echo "Waiting for the upgrade to take place at block height $upgrade_height..."
     tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
     echo "The upgrade height was reached."
-    sudo journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
 
 else
     echo "Waiting for the upgrade to take place at block height $upgrade_height..."
     tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
     echo "The upgrade height was reached."
-
+    sleep $(($COMMIT_TIMEOUT*3))
     # Replace binary
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
@@ -96,9 +106,21 @@ else
     sudo systemctl start $PROVIDER_SERVICE_1
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
-
-    sleep 3
-
-    echo "Checking $PROVIDER_SERVICE_1 is active..."
-    systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
 fi
+
+sleep 10
+
+echo "Checking provider services are active..."
+systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
+systemctl is-active --quiet $PROVIDER_SERVICE_2 && echo "$PROVIDER_SERVICE_2 is running"
+systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
+
+printf "\n\n*** val1 ***\n\n"
+journalctl -u $PROVIDER_SERVICE_1 | tail -n 150
+curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
+printf "\n\n*** val2 ***\n\n"
+journalctl -u $PROVIDER_SERVICE_2 | tail -n 150
+curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
+printf "\n\n*** val3 ***\n\n"
+journalctl -u $PROVIDER_SERVICE_3 | tail -n 150
+curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
