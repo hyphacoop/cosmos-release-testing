@@ -92,7 +92,7 @@ jobs:
           $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
           $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
-          sed -i -e "/seeds =/ s^= .*^= \"${{ vars.SEED_NODES }}\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/persistent_peers =/ s^= .*^= \"${{ vars.PERSISTENT_PEERS }}\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
           CURRENT_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block | jq -r '.result.block.header.height')
           TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
@@ -106,6 +106,8 @@ jobs:
           sed -i -e "/rpc_servers =/ s^= .*^= \"${{ vars.SYNC_RPC_1 }},${{ vars.SYNC_RPC_2 }}\"^" $NODE_HOME/config/config.toml
           sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo ${{ secrets.PRIV_VALIDATOR_KEY }} > $NODE_HOME/config/priv_validator_key.json
+          echo ${{ secrets.NODE_KEY }} > $NODE_HOME/config/node_key.json
           echo "Replaceing genesis..."
           wget -nv $GENESIS_URL -O genesis.json.gz
           gunzip genesis.json.gz
