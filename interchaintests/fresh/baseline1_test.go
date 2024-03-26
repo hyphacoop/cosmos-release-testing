@@ -12,7 +12,7 @@ func TestBaseline1Upgrade(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 
-	chain := fresh.CreateChains(ctx, t, fresh.GetConfig(ctx).StartVersion)
+	chain := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion)
 
 	fresh.TransactionsTest(ctx, t, chain)
 
