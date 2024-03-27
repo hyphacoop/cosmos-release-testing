@@ -134,7 +134,7 @@ jobs:
           cd cosmos-genesis-tinkerer
           git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
           pip install -r requirements.txt
-          ln -s /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json test/mainnet_genesis.json
+          ln -s /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json tests/mainnet_genesis.json
           python example_mainnet_genesis.py
           cp tinkered_genesis.json /home/runner/
       - name: Initializing chain with tinkered genesis
