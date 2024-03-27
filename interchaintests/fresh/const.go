@@ -6,8 +6,9 @@ const (
 	NUM_VALIDATORS  = 3
 	VALIDATOR_FUNDS = 11_000_000_000
 	// This moniker is hardcoded into the chain's genesis process.
-	VALIDATOR_MONIKER = "validator"
-	RELAYER_PATH_NAME = "ibc-path"
+	VALIDATOR_MONIKER  = "validator"
+	RELAYER_PATH_NAME  = "ibc-path"
+	GOV_DEPOSIT_AMOUNT = "5000000" + DENOM
 )
 
 func getValidatorStake() [NUM_VALIDATORS]int64 {

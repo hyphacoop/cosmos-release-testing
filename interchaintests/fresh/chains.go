@@ -151,6 +151,18 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos.
 	return provider
 }
 
+func PassProposal(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, proposalID string) {
+	propID, err := strconv.ParseInt(proposalID, 10, 64)
+	require.NoError(t, err)
+	err = chain.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
+	require.NoError(t, err)
+	chainHeight, err := chain.Height(ctx)
+	require.NoError(t, err)
+	maxHeight := chainHeight + UPGRADE_DELTA
+	_, err = cosmos.PollForProposalStatus(ctx, chain, chainHeight, maxHeight, propID, govv1beta1.StatusPassed)
+	require.NoError(t, err)
+}
+
 func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, proposalKey, upgradeName, version string) {
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
@@ -158,7 +170,7 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 	haltHeight := height + UPGRADE_DELTA
 
 	proposal := cosmos.SoftwareUpgradeProposal{
-		Deposit:     "5000000uatom", // greater than min deposit
+		Deposit:     GOV_DEPOSIT_AMOUNT, // greater than min deposit
 		Title:       "Upgrade to " + upgradeName,
 		Name:        upgradeName,
 		Description: "Upgrade to " + upgradeName,
@@ -166,13 +178,7 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 	}
 	upgradeTx, err := chain.UpgradeProposal(ctx, proposalKey, proposal)
 	require.NoError(t, err, "error submitting upgrade proposal")
-	propId, err := strconv.Atoi(upgradeTx.ProposalID)
-	require.NoError(t, err, "error converting proposal id to int")
-
-	err = chain.VoteOnProposalAllValidators(ctx, int64(propId), cosmos.ProposalVoteYes)
-	require.NoError(t, err, "error voting on upgrade proposal")
-	prop, err := cosmos.PollForProposalStatus(ctx, chain, height, haltHeight, int64(propId), govv1beta1.StatusPassed)
-	require.NoError(t, err, "error polling for proposal status: %+v", prop)
+	PassProposal(ctx, t, chain, upgradeTx.ProposalID)
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after upgrade proposal passed")
