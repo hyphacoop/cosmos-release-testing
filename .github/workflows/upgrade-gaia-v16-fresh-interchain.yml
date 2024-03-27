@@ -2,7 +2,13 @@
 
 name: Gaia v16 Upgrade - Fresh State Interchain
 on:
-    push:
+    # push:
+    repository_dispatch:
+      types: [new_main_build]
+    schedule:
+      - cron: '0 10 * * 1-6'
+    workflow_dispatch:
+    
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -57,7 +63,7 @@ jobs:
       - name: Generate upgrade versions
         id: generate-upgrade
         run: |
-          upgrade=$(scripts/generate_upgrade_matrix_fresh.py $VERSION_CUTOFF)
+          upgrade=$(scripts/generate_upgrade_matrix_fresh_interchaintest.py $VERSION_CUTOFF)
           echo "upgrade_versions=$upgrade" | tee -a $GITHUB_OUTPUT
     outputs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
