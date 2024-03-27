@@ -99,6 +99,7 @@ jobs:
           TRUST_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block\?height\=$TRUST_HEIGHT)
           TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
           HALT_HEIGHT=$[$CURRENT_BLOCK+50]
+          sed -i -e "/block_sync =/ s^= .*^= \"false\"^" $NODE_HOME/config/config.toml
           sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
           sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
