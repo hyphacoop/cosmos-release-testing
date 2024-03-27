@@ -134,7 +134,7 @@ jobs:
           cd cosmos-genesis-tinkerer
           git checkout "${{ vars.GENESIS_TINKER_BRANCH }}"
           pip install -r requirements.txt
-          ln -s /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json mainnet_genesis.json
+          ln -s /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json test/mainnet_genesis.json
           python example_mainnet_genesis.py
           cp tinkered_genesis.json /home/runner/
       - name: Initializing chain with tinkered genesis
@@ -217,13 +217,13 @@ jobs:
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/
           # Update latest file symlinks
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/mainnet-testnet-export/thmainneteta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/mainnet-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/mainnet-testnet-tinkered/mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/mainnet-genesis-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/mainnet-genesis-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/mainnet-genesis-tinkered/mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/mainnet-genesis-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: export-release-testnet
+          name: export-cosmos-hub-mainnet
           path: ~/artifact/
  
