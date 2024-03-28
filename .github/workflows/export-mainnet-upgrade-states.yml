@@ -133,7 +133,9 @@ jobs:
       - name: Export Genesis
         run: |
           mkdir /home/runner/mainnet-genesis-export
-          wget https://files.polypore.xyz/genesis/mainnet-genesis-export/latest_v15.json.gz -O /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          wget https://files.polypore.xyz/genesis/mainnet-genesis-export/latest_v15.json.gz -qO /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz
+          cd /home/runner/mainnet-genesis-export/
+          gunzip mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz
       - name: Tinker Genesis
         run: |
           source /home/runner/env/bin/activate
