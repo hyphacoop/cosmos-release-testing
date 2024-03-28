@@ -162,7 +162,7 @@ jobs:
       - name: Start chain
         env:
           START_VERSION: ${{inputs.gaia_version}}
-          ARCHIVE_URL: "https://files.polypore.xyz/archived-state/latest_v15.tar.gz"
+          ARCHIVE_URL: "https://files.polypore.xyz/archived-state/theta-testnet/latest_v15.json.gz"
         run: scripts/stateful/start_chain.sh
       - name: _Blocks produced after upgrade to v16
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 200 12600
