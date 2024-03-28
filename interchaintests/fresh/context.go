@@ -3,6 +3,7 @@ package fresh
 import (
 	"context"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/kelseyhightower/envconfig"
@@ -62,6 +63,20 @@ func GetConfig(ctx context.Context) *Config {
 	return c
 }
 
+func setEnvironment() error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	if err := os.Setenv("IBCTEST_CONFIGURED_CHAINS", path.Join(cwd, "..", "configuredChains.yaml")); err != nil {
+		return err
+	}
+	if err := os.Setenv("CONTAINER_LOG_TAIL", "250"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewTestContext(t *testing.T) (context.Context, error) {
 	ctx := context.Background()
 	logger := zaptest.NewLogger(t)
@@ -78,6 +93,11 @@ func NewTestContext(t *testing.T) (context.Context, error) {
 		return nil, err
 	}
 	ctx = WithConfig(ctx, config)
+
+	// This isn't exactly a concern of the test context, but it's a convenient place to set this. Every test calls this function.
+	if err := setEnvironment(); err != nil {
+		return nil, err
+	}
 
 	return ctx, nil
 }

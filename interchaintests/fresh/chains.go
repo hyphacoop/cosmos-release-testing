@@ -2,8 +2,7 @@ package fresh
 
 import (
 	"context"
-	"os"
-	"path"
+	"fmt"
 	"strconv"
 	"sync"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/strangelove-ventures/interchaintest/v7/relayer"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
@@ -26,8 +26,7 @@ type ValidatorWallet struct {
 	ValoperAddress string
 }
 
-func CreateChains(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos.CosmosChain {
-	// TODO: allow creation of consumer chains
+func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *interchaintest.ChainSpec {
 	configToml := make(testutil.Toml)
 	consensusToml := make(testutil.Toml)
 	consensusToml["timeout_commit"] = "10s"
@@ -36,9 +35,6 @@ func CreateChains(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos
 	configToml["fast_sync"] = false
 	fullNodes := 0
 	validators := 3
-	cwd, err := os.Getwd()
-	require.NoError(t, err)
-	require.NoError(t, os.Setenv("IBCTEST_CONFIGURED_CHAINS", path.Join(cwd, "..", "configuredChains.yaml")))
 	shortVoteGenesis := func(denom string) []cosmos.GenesisKV {
 		return []cosmos.GenesisKV{
 			cosmos.NewGenesisKV("app_state.gov.params.voting_period", "40s"),
@@ -48,56 +44,107 @@ func CreateChains(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos
 		}
 	}
 
+	return &interchaintest.ChainSpec{
+		Name:          "gaia",
+		Version:       gaiaVersion,
+		ChainName:     chainName,
+		NumFullNodes:  &fullNodes,
+		NumValidators: &validators,
+		ChainConfig: ibc.ChainConfig{
+			Denom:         DENOM,
+			GasPrices:     "0.005" + DENOM,
+			GasAdjustment: 2.0,
+			ConfigFileOverrides: map[string]any{
+				"config/config.toml": configToml,
+			},
+			Images: []ibc.DockerImage{{
+				Repository: GetConfig(ctx).DockerRepository,
+				UidGid:     "1025:1025", // this is the user in heighliner docker images
+			}},
+			ModifyGenesisAmounts: func(i int) (types.Coin, types.Coin) {
+				return types.Coin{
+						Amount: sdkmath.NewInt(VALIDATOR_FUNDS),
+						Denom:  DENOM,
+					}, types.Coin{
+						Amount: sdkmath.NewInt(getValidatorStake()[i]),
+						Denom:  DENOM,
+					}
+			},
+			ModifyGenesis: cosmos.ModifyGenesis(shortVoteGenesis(DENOM)),
+		},
+	}
+}
+
+// CreateProviderConsumerChains creates two new chains, a provider and consumer, with the given versions, sets up ICS, and returns the chain and relayer objects.
+func CreateProviderConsumerChains(ctx context.Context, t *testing.T, providerVersion, consumerICSVersion string) (*cosmos.CosmosChain, *cosmos.CosmosChain, ibc.Relayer) {
+	panic("not implemented")
+}
+
+// CreateLinkedChains creates two new chains with the given version, links them through IBC, and returns the chain and relayer objects.
+func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (*cosmos.CosmosChain, *cosmos.CosmosChain, ibc.Relayer) {
+	dockerClient, dockerNetwork := interchaintest.DockerSetup(t)
+
 	cf := interchaintest.NewBuiltinChainFactory(
 		GetLogger(ctx),
 		[]*interchaintest.ChainSpec{
-			{
-				Name:          "gaia",
-				Version:       gaiaVersion,
-				ChainName:     "provider",
-				NumFullNodes:  &fullNodes,
-				NumValidators: &validators,
-				ChainConfig: ibc.ChainConfig{
-					Denom:         DENOM,
-					GasPrices:     "0.005" + DENOM,
-					GasAdjustment: 2.0,
-					ConfigFileOverrides: map[string]any{
-						"config/config.toml": configToml,
-					},
-					Images: []ibc.DockerImage{{
-						Repository: GetConfig(ctx).DockerRepository,
-						UidGid:     "1025:1025", // this is the user in heighliner docker images
-					}},
-					ModifyGenesisAmounts: func(i int) (types.Coin, types.Coin) {
-						return types.Coin{
-								Amount: sdkmath.NewInt(VALIDATOR_FUNDS),
-								Denom:  DENOM,
-							}, types.Coin{
-								Amount: sdkmath.NewInt(getValidatorStake()[i]),
-								Denom:  DENOM,
-							}
-					},
-					ModifyGenesis: cosmos.ModifyGenesis(shortVoteGenesis(DENOM)),
-				},
-			},
-		},
+			createGaiaChainSpec(ctx, "gaia-1", gaiaVersion),
+			createGaiaChainSpec(ctx, "gaia-2", gaiaVersion),
+		})
+	chains, err := cf.Chains(t.Name())
+	require.NoError(t, err)
+	chain1, chain2 := chains[0].(*cosmos.CosmosChain), chains[1].(*cosmos.CosmosChain)
+	relayer := interchaintest.NewBuiltinRelayerFactory(
+		ibc.Hermes, // TODO: allow specifying relayer type
+		GetLogger(ctx),
+		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "v1.8.0", "1000:1000"),
+	).Build(t, dockerClient, dockerNetwork)
+	ic := interchaintest.NewInterchain().
+		AddChain(chain1).
+		AddChain(chain2).
+		AddRelayer(relayer, "relayer").
+		AddLink(interchaintest.InterchainLink{
+			Chain1:  chain1,
+			Chain2:  chain2,
+			Relayer: relayer,
+			Path:    RELAYER_PATH_NAME,
+		})
+
+	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
+		Client:    dockerClient,
+		NetworkID: dockerNetwork,
+		TestName:  t.Name(),
+	}))
+	t.Cleanup(func() {
+		_ = ic.Close()
+	})
+
+	require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx), RELAYER_PATH_NAME))
+	t.Cleanup(func() {
+		_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
+	})
+	return chain1, chain2, relayer
+}
+
+// CreateChain creates a single new chain with the given version and returns the chain object.
+func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos.CosmosChain {
+	dockerClient, dockerNetwork := interchaintest.DockerSetup(t)
+
+	cf := interchaintest.NewBuiltinChainFactory(
+		GetLogger(ctx),
+		[]*interchaintest.ChainSpec{createGaiaChainSpec(ctx, "gaia", gaiaVersion)},
 	)
 
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
 	provider := chains[0].(*cosmos.CosmosChain)
-	dockerClient, dockerNetwork := interchaintest.DockerSetup(t)
-
 	ic := interchaintest.NewInterchain().
 		AddChain(provider)
 
-	err = ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
-		Client:           dockerClient,
-		NetworkID:        dockerNetwork,
-		TestName:         t.Name(),
-		SkipPathCreation: false,
-	})
-	require.NoError(t, err)
+	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
+		Client:    dockerClient,
+		NetworkID: dockerNetwork,
+		TestName:  t.Name(),
+	}))
 	t.Cleanup(func() {
 		_ = ic.Close()
 	})
@@ -165,6 +212,19 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 		_, _, err := val.ExecBin(ctx, "keys", "list", "--keyring-backend", "test")
 		require.NoError(t, err)
 	}
+}
+
+func GetTransferChannel(ctx context.Context, chain *cosmos.CosmosChain, relayer ibc.Relayer) (*ibc.ChannelOutput, error) {
+	channels, err := relayer.GetChannels(ctx, GetRelayerExecReporter(ctx), chain.Config().ChainID)
+	if err != nil {
+		return nil, err
+	}
+	for _, ch := range channels {
+		if ch.PortID == "transfer" {
+			return &ch, nil
+		}
+	}
+	return nil, fmt.Errorf("no transfer channel found")
 }
 
 func GetValidatorWallets(ctx context.Context, chain *cosmos.CosmosChain) ([]ValidatorWallet, error) {
