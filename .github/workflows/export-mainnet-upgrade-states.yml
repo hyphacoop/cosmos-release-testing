@@ -175,7 +175,7 @@ jobs:
         run: mkdir -p /home/runner/artifact/config/tinkered && cp -rvp $NODE_HOME/config /home/runner/artifact/config/tinkered/
       - name: Download and install snappy patched gaia build
         run: |
-          sudo wget -nv ${{ env.UPGRADE_BINARY_URL }} -O /usr/local/bin/gaiad
+          sudo wget -nv ${{ vars.UPGRADE_BINARY_URL }} -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
       - name: Start tinkered chain
         run: |
