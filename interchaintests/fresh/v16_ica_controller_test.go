@@ -16,7 +16,6 @@ func TestV16UpgradeICAController(t *testing.T) {
 	fresh.ICAControllerTest(ctx, t, controller, host, relayer, false)
 
 	fresh.UpgradeChain(ctx, t, controller, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
-	fresh.UpgradeChain(ctx, t, host, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
 	fresh.ICAControllerTest(ctx, t, controller, host, relayer, true)
 }
