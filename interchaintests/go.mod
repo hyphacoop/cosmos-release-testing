@@ -6,13 +6,15 @@ replace (
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240325190107-c600b6438585
+	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240326150917-3667d1967030
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
 )
 
 require (
 	cosmossdk.io/math v1.1.2
 	github.com/cosmos/cosmos-sdk v0.47.5
+	github.com/cosmos/gogoproto v1.4.10
+	github.com/cosmos/ibc-go/v7 v7.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.8.4
@@ -65,10 +67,8 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
-	github.com/cosmos/gogoproto v1.4.10 // indirect
 	github.com/cosmos/iavl v0.20.0 // indirect
 	github.com/cosmos/ibc-go/modules/capability v1.0.0-rc1 // indirect
-	github.com/cosmos/ibc-go/v7 v7.3.0 // indirect
 	github.com/cosmos/ics23/go v0.10.0 // indirect
 	github.com/cosmos/interchain-security/v3 v3.1.1-0.20231102122221-81650a84f989 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.13.0 // indirect
