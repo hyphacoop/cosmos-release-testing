@@ -28,7 +28,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller *cosmos.Cos
 	require.NoError(t, err)
 	dstAddress := wallets[0].Address
 
-	srcChannel, err := GetTransferChannel(ctx, controller, relayer)
+	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
 	require.NoError(t, err)
 	srcConnection := srcChannel.ConnectionHops[0]
 
@@ -54,7 +54,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller *cosmos.Cos
 	}, ibc.TransferOptions{})
 	require.NoError(t, err)
 
-	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RELAYER_PATH_NAME, srcChannel.ChannelID))
+	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RelayerTransferPathFor(controller, host), srcChannel.ChannelID))
 
 	balances, err := host.AllBalances(ctx, icaAddress)
 	require.NoError(t, err)
@@ -83,7 +83,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller *cosmos.Cos
 	icaAmount := int64(amountToSend / 3)
 
 	sendICATx(ctx, t, controller, srcAddress, dstAddress, icaAddress, srcConnection, icaAmount, ibcStakeDenom)
-	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RELAYER_PATH_NAME, srcChannel.ChannelID))
+	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RelayerTransferPathFor(controller, host), srcChannel.ChannelID))
 
 	balances, err = host.AllBalances(ctx, dstAddress)
 	require.NoError(t, err)

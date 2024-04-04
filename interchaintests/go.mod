@@ -6,18 +6,22 @@ replace (
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240326150917-3667d1967030
+	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240405165823-4731b92e5442
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
 )
 
 require (
 	cosmossdk.io/math v1.1.2
+	github.com/cometbft/cometbft v0.37.2
 	github.com/cosmos/cosmos-sdk v0.47.5
 	github.com/cosmos/gogoproto v1.4.10
 	github.com/cosmos/ibc-go/v7 v7.3.0
+	github.com/cosmos/interchain-security/v3 v3.1.1-0.20231102122221-81650a84f989
+	github.com/docker/docker v24.0.7+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.8.4
+	github.com/tidwall/gjson v1.17.1
 	go.uber.org/zap v1.26.0
 	golang.org/x/sync v0.4.0
 )
@@ -60,7 +64,6 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/coinbase/rosetta-sdk-go/types v1.0.0 // indirect
-	github.com/cometbft/cometbft v0.37.2 // indirect
 	github.com/cometbft/cometbft-db v0.8.0 // indirect
 	github.com/confio/ics23/go v0.9.0 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
@@ -70,7 +73,6 @@ require (
 	github.com/cosmos/iavl v0.20.0 // indirect
 	github.com/cosmos/ibc-go/modules/capability v1.0.0-rc1 // indirect
 	github.com/cosmos/ics23/go v0.10.0 // indirect
-	github.com/cosmos/interchain-security/v3 v3.1.1-0.20231102122221-81650a84f989 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.13.0 // indirect
 	github.com/cosmos/rosetta-sdk-go v0.10.0 // indirect
 	github.com/creachadair/taskgroup v0.4.2 // indirect
@@ -86,7 +88,6 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -197,6 +198,8 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tidwall/btree v1.6.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tyler-smith/go-bip32 v1.0.0 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect

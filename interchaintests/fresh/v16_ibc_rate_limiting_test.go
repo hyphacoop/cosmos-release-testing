@@ -12,7 +12,7 @@ func TestV16UpgradeIBCRateLimiting(t *testing.T) {
 	require.NoError(t, err)
 
 	chainA, chainB, relayer := fresh.CreateLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion)
-	channel, err := fresh.GetTransferChannel(ctx, chainA, relayer)
+	channel, err := fresh.GetTransferChannel(ctx, relayer, chainA, chainB)
 	require.NoError(t, err)
 
 	fresh.UpgradeChain(ctx, t, chainA, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)

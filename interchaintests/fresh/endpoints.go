@@ -3,6 +3,7 @@ package fresh
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"testing"
 
@@ -92,4 +93,13 @@ func RPCEndpointsTest(ctx context.Context, t *testing.T, chain *cosmos.CosmosCha
 			require.Contains(t, body["result"], tt.key)
 		})
 	}
+}
+
+func CheckEndpoint(ctx context.Context, t *testing.T, url string, f func([]byte) error) {
+	resp, err := http.Get(url)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	bts, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.NoError(t, f(bts))
 }
