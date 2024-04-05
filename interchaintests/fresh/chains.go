@@ -2,6 +2,7 @@ package fresh
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"sync"
@@ -17,6 +18,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/relayer"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/gjson"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -26,24 +28,27 @@ type ValidatorWallet struct {
 	ValoperAddress string
 }
 
-func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *interchaintest.ChainSpec {
+func createConfigToml() testutil.Toml {
 	configToml := make(testutil.Toml)
 	consensusToml := make(testutil.Toml)
-	consensusToml["timeout_commit"] = "10s"
+	consensusToml["timeout_commit"] = COMMIT_TIMEOUT.String()
 	configToml["consensus"] = consensusToml
 	configToml["block_sync"] = false
 	configToml["fast_sync"] = false
+	return configToml
+}
+
+func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *interchaintest.ChainSpec {
 	fullNodes := 0
 	validators := 3
-	shortVoteGenesis := func(denom string) []cosmos.GenesisKV {
-		return []cosmos.GenesisKV{
-			cosmos.NewGenesisKV("app_state.gov.params.voting_period", "40s"),
-			cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "10s"),
-			cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", denom),
-			cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", "1"),
-		}
+	genesisOverrides := []cosmos.GenesisKV{
+		cosmos.NewGenesisKV("app_state.gov.params.voting_period", "40s"),
+		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "10s"),
+		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", DENOM),
+		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", "1"),
+		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_PROVIDER)),
+		cosmos.NewGenesisKV("app_state.slashing.params.downtime_jail_duration", DOWNTIME_JAIL_DURATION.String()),
 	}
-
 	return &interchaintest.ChainSpec{
 		Name:          "gaia",
 		Version:       gaiaVersion,
@@ -55,7 +60,7 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 			GasPrices:     "0.005" + DENOM,
 			GasAdjustment: 2.0,
 			ConfigFileOverrides: map[string]any{
-				"config/config.toml": configToml,
+				"config/config.toml": createConfigToml(),
 			},
 			Images: []ibc.DockerImage{{
 				Repository: GetConfig(ctx).DockerRepository,
@@ -70,19 +75,23 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 						Denom:  DENOM,
 					}
 			},
-			ModifyGenesis: cosmos.ModifyGenesis(shortVoteGenesis(DENOM)),
+			ModifyGenesis: cosmos.ModifyGenesis(genesisOverrides),
 		},
 	}
 }
 
-// CreateProviderConsumerChains creates two new chains, a provider and consumer, with the given versions, sets up ICS, and returns the chain and relayer objects.
-func CreateProviderConsumerChains(ctx context.Context, t *testing.T, providerVersion, consumerICSVersion string) (*cosmos.CosmosChain, *cosmos.CosmosChain, ibc.Relayer) {
-	panic("not implemented")
+func createRelayer(ctx context.Context, t *testing.T) ibc.Relayer {
+	dockerClient, dockerNetwork := GetDockerContext(ctx)
+	return interchaintest.NewBuiltinRelayerFactory(
+		ibc.Hermes, // TODO: allow specifying relayer type
+		GetLogger(ctx),
+		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "v1.8.0", "1000:1000"),
+	).Build(t, dockerClient, dockerNetwork)
 }
 
 // CreateLinkedChains creates two new chains with the given version, links them through IBC, and returns the chain and relayer objects.
 func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (*cosmos.CosmosChain, *cosmos.CosmosChain, ibc.Relayer) {
-	dockerClient, dockerNetwork := interchaintest.DockerSetup(t)
+	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	cf := interchaintest.NewBuiltinChainFactory(
 		GetLogger(ctx),
@@ -93,11 +102,8 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
 	chain1, chain2 := chains[0].(*cosmos.CosmosChain), chains[1].(*cosmos.CosmosChain)
-	relayer := interchaintest.NewBuiltinRelayerFactory(
-		ibc.Hermes, // TODO: allow specifying relayer type
-		GetLogger(ctx),
-		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "v1.8.0", "1000:1000"),
-	).Build(t, dockerClient, dockerNetwork)
+	relayer := createRelayer(ctx, t)
+	pathName := RelayerTransferPathFor(chain1, chain2)
 	ic := interchaintest.NewInterchain().
 		AddChain(chain1).
 		AddChain(chain2).
@@ -106,7 +112,7 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 			Chain1:  chain1,
 			Chain2:  chain2,
 			Relayer: relayer,
-			Path:    RELAYER_PATH_NAME,
+			Path:    pathName,
 		})
 
 	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
@@ -118,7 +124,7 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 		_ = ic.Close()
 	})
 
-	require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx), RELAYER_PATH_NAME))
+	require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx), pathName))
 	t.Cleanup(func() {
 		_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
 	})
@@ -126,8 +132,8 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 }
 
 // CreateChain creates a single new chain with the given version and returns the chain object.
-func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos.CosmosChain {
-	dockerClient, dockerNetwork := interchaintest.DockerSetup(t)
+func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) (*cosmos.CosmosChain, ibc.Relayer) {
+	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	cf := interchaintest.NewBuiltinChainFactory(
 		GetLogger(ctx),
@@ -137,8 +143,24 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos.
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
 	provider := chains[0].(*cosmos.CosmosChain)
-	ic := interchaintest.NewInterchain().
-		AddChain(provider)
+	var relayer ibc.Relayer
+	var relayerWallet ibc.Wallet
+
+	ic := interchaintest.NewInterchain()
+
+	if withRelayer {
+		relayer = createRelayer(ctx, t)
+		ic.AddRelayer(relayer, "relayer")
+		relayerWallet, err = provider.BuildRelayerWallet(ctx, "relayer-"+provider.Config().ChainID)
+		require.NoError(t, err)
+		ic.AddChain(provider, ibc.WalletAmount{
+			Address: relayerWallet.FormattedAddress(),
+			Denom:   provider.Config().Denom,
+			Amount:  sdkmath.NewInt(VALIDATOR_FUNDS),
+		})
+	} else {
+		ic.AddChain(provider)
+	}
 
 	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
 		Client:    dockerClient,
@@ -148,7 +170,14 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string) *cosmos.
 	t.Cleanup(func() {
 		_ = ic.Close()
 	})
-	return provider
+	if withRelayer {
+		setupRelayerKeys(ctx, t, relayer, relayerWallet, provider)
+		require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
+		t.Cleanup(func() {
+			_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
+		})
+	}
+	return provider, relayer
 }
 
 func PassProposal(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, proposalID string) {
@@ -220,17 +249,48 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 	}
 }
 
-func GetTransferChannel(ctx context.Context, chain *cosmos.CosmosChain, relayer ibc.Relayer) (*ibc.ChannelOutput, error) {
-	channels, err := relayer.GetChannels(ctx, GetRelayerExecReporter(ctx), chain.Config().ChainID)
+func GetChannelWithPort(ctx context.Context, relayer ibc.Relayer, chain, counterparty *cosmos.CosmosChain, portID string) (*ibc.ChannelOutput, error) {
+	clients, err := relayer.GetClients(ctx, GetRelayerExecReporter(ctx), chain.Config().ChainID)
 	if err != nil {
 		return nil, err
 	}
-	for _, ch := range channels {
-		if ch.PortID == "transfer" {
-			return &ch, nil
+	var client *ibc.ClientOutput
+	for _, c := range clients {
+		if c.ClientState.ChainID == counterparty.Config().ChainID {
+			client = c
+			break
 		}
 	}
-	return nil, fmt.Errorf("no transfer channel found")
+	if client == nil {
+		return nil, fmt.Errorf("no client found for chain %s", counterparty.Config().ChainID)
+	}
+
+	stdout, _, err := chain.GetNode().ExecQuery(ctx, "ibc", "connection", "connections")
+	if err != nil {
+		return nil, err
+	}
+	connectionID := gjson.GetBytes(stdout, fmt.Sprintf("connections.#(client_id==\"%s\").id", client.ClientID)).String()
+	if connectionID == "" {
+		return nil, fmt.Errorf("no connection found for client %s; connections are %s", client.ClientID, stdout)
+	}
+
+	stdout, _, err = chain.GetNode().ExecQuery(ctx, "ibc", "channel", "connections", connectionID)
+	if err != nil {
+		return nil, err
+	}
+	channelJson := gjson.GetBytes(stdout, fmt.Sprintf("channels.#(port_id==\"%s\")", portID)).String()
+	if channelJson == "" {
+		return nil, fmt.Errorf("no channel found for port %s; channels are %s", portID, stdout)
+	}
+	channelOutput := &ibc.ChannelOutput{}
+	if err := json.Unmarshal([]byte(channelJson), channelOutput); err != nil {
+		return nil, fmt.Errorf("error unmarshalling channel output %s: %w", channelJson, err)
+	}
+	return channelOutput, nil
+}
+
+func GetTransferChannel(ctx context.Context, relayer ibc.Relayer, chain, counterparty *cosmos.CosmosChain) (*ibc.ChannelOutput, error) {
+	return GetChannelWithPort(ctx, relayer, chain, counterparty, TRANSFER_PORT_ID)
 }
 
 func GetValidatorWallets(ctx context.Context, chain *cosmos.CosmosChain) ([]ValidatorWallet, error) {
