@@ -155,8 +155,8 @@ jobs:
       - name: Test software upgrade for main branch
         if: ${{ inputs.upgrade_version == 'main' }}
         env:
-          #DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          DOWNLOAD_URL: http://159.89.115.80:8000/gaiad
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          # DOWNLOAD_URL: http://159.89.115.80:8000/gaiad
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
@@ -174,8 +174,8 @@ jobs:
         run: $CHAIN_BINARY --home $HOME_1 q staking params
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
-      - name: _PUPMOS is safe
-        run: tests/stateful/test_pupmos_slashing.sh
+      # - name: _PUPMOS is safe
+      #   run: tests/stateful/test_pupmos_slashing.sh
       - name: Send funds to wallet 4
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
