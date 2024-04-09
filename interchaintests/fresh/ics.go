@@ -14,6 +14,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 )
@@ -103,9 +104,11 @@ func AddConsumerChain(ctx context.Context, t *testing.T, provider *cosmos.Cosmos
 	}
 
 	chainID := fmt.Sprintf("%s-%d", chainName, len(provider.Consumers)+1)
+	spawnTime := consumerAdditionProposal(ctx, t, chainID, provider)
+
 	cf := interchaintest.NewBuiltinChainFactory(
 		GetLogger(ctx),
-		[]*interchaintest.ChainSpec{createConsumerChainSpec(ctx, chainID, chainName, denom, version, shouldCopyProviderKey)},
+		[]*interchaintest.ChainSpec{createConsumerChainSpec(ctx, provider, chainID, chainName, denom, version, shouldCopyProviderKey, spawnTime)},
 	)
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
@@ -114,8 +117,6 @@ func AddConsumerChain(ctx context.Context, t *testing.T, provider *cosmos.Cosmos
 	// We can't use AddProviderConsumerLink here because the provider chain is already built; we'll have to do everything by hand.
 	provider.Consumers = append(provider.Consumers, consumer)
 	consumer.Provider = provider
-
-	consumerAdditionProposal(ctx, t, chainID, provider)
 
 	wallet, err := consumer.BuildRelayerWallet(ctx, "relayer-"+consumer.Config().ChainID)
 	require.NoError(t, err)
@@ -139,10 +140,14 @@ func AddConsumerChain(ctx context.Context, t *testing.T, provider *cosmos.Cosmos
 	setupRelayerKeys(ctx, t, relayer, wallet, consumer)
 	connectChains(ctx, t, provider, consumer, relayer)
 
+	for _, val := range consumer.Validators {
+		require.NoError(t, val.CreateKey(ctx, VALIDATOR_MONIKER))
+	}
+
 	return consumer
 }
 
-func createConsumerChainSpec(ctx context.Context, chainID, chainType, denom, version string, shouldCopyProviderKey []bool) *interchaintest.ChainSpec {
+func createConsumerChainSpec(ctx context.Context, provider *cosmos.CosmosChain, chainID, chainType, denom, version string, shouldCopyProviderKey []bool, spawnTime time.Time) *interchaintest.ChainSpec {
 	fullNodes := 0
 	validators := 3
 
@@ -187,6 +192,16 @@ func createConsumerChainSpec(ctx context.Context, chainID, chainType, denom, ver
 			GasAdjustment: 2.0,
 			ConfigFileOverrides: map[string]any{
 				"config/config.toml": createConfigToml(),
+			},
+			PreGenesis: func(cc ibc.ChainConfig) error {
+				tCtx, tCancel := context.WithDeadline(ctx, spawnTime)
+				defer tCancel()
+				// interchaintest will set up the validator keys right before PreGenesis.
+				// Now we just need to wait for the chain to spawn before interchaintest can get the ccv file.
+				// This wait is here and not there because of changes we've made to interchaintest that need to be upstreamed in an orderly way.
+				GetLogger(ctx).Sugar().Infof("waiting for chain %s to spawn at %s", chainID, spawnTime)
+				<-tCtx.Done()
+				return testutil.WaitForBlocks(ctx, 2, provider)
 			},
 			Bech32Prefix: bechPrefix,
 			ModifyGenesisAmounts: func(i int) (types.Coin, types.Coin) {
@@ -283,7 +298,8 @@ func connectChains(ctx context.Context, t *testing.T, provider *cosmos.CosmosCha
 	}, 2*time.Minute, 10*time.Second)
 }
 
-func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, provider *cosmos.CosmosChain) {
+func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, provider *cosmos.CosmosChain) time.Time {
+	spawnTime := time.Now().Add(3 * time.Minute)
 	prop := ccvclient.ConsumerAdditionProposalJSON{
 		Title:         fmt.Sprintf("Addition of %s consumer chain", chainID),
 		Summary:       "Proposal to add new consumer chain",
@@ -291,7 +307,7 @@ func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string,
 		InitialHeight: clienttypes.Height{RevisionNumber: clienttypes.ParseChainID(chainID), RevisionHeight: 1},
 		GenesisHash:   []byte("gen_hash"),
 		BinaryHash:    []byte("bin_hash"),
-		SpawnTime:     time.Now(),
+		SpawnTime:     spawnTime,
 
 		BlocksPerDistributionTransmission: 1000,
 		CcvTimeoutPeriod:                  2419200000000000,
@@ -304,4 +320,5 @@ func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string,
 	propTx, err := provider.ConsumerAdditionProposal(ctx, VALIDATOR_MONIKER, prop)
 	require.NoError(t, err)
 	PassProposal(ctx, t, provider, propTx.ProposalID)
+	return spawnTime
 }
