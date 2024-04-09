@@ -161,6 +161,17 @@ func createConsumerChainSpec(ctx context.Context, chainID, chainType, denom, ver
 	}
 	genesisOverrides := []cosmos.GenesisKV{
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_CONSUMER)),
+		cosmos.NewGenesisKV("consensus_params.block.max_gas", "50000000"),
+	}
+	if chainType == "neutron" {
+		genesisOverrides = append(genesisOverrides,
+			cosmos.NewGenesisKV("app_state.globalfee.params.minimum_gas_prices", []interface{}{
+				map[string]interface{}{
+					"amount": "0.005",
+					"denom":  denom,
+				},
+			}),
+		)
 	}
 
 	return &interchaintest.ChainSpec{

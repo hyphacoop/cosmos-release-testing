@@ -18,8 +18,8 @@ stride:
   bin: strided
   bech32-prefix: stride
   denom: ustrd
-  gas-prices: 0.01ustrd
-  gas-adjustment: 1.3
+  gas-prices: 0.005ustrd
+  gas-adjustment: 2.0
   trusting-period: "336h"
   images:
     - repository: ghcr.io/strangelove-ventures/heighliner/stride
@@ -32,8 +32,8 @@ neutron:
   bin: neutrond
   bech32-prefix: neutron
   denom: untrn
-  gas-prices: 0.01untrn
-  gas-adjustment: 1.3
+  gas-prices: 0.005untrn
+  gas-adjustment: 2.0
   trusting-period: "336h"
   images:
     - repository: ghcr.io/strangelove-ventures/heighliner/neutron

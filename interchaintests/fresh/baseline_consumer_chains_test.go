@@ -21,6 +21,7 @@ func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, sh
 
 	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	fresh.SetEpoch(ctx, t, provider, 1)
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer)
 	fresh.IBCTest(ctx, t, provider, consumer, relayer)
 
@@ -47,15 +48,14 @@ func TestConsumerChainLaunchesAfterV16UpgradeICS33NoKeysCopied(t *testing.T) {
 }
 
 func TestMainnetConsumerChainsWithV16Upgrade(t *testing.T) {
-	t.Skip("This test is failing because neutron isn't launching")
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 	const neutronVersion = "v3.0.1"
 	const strideVersion = "v20.0.0"
 
 	provider, relayer := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	stride := fresh.AddConsumerChain(ctx, t, provider, relayer, "stride", strideVersion, fresh.STRIDE_DENOM, []bool{true, true, true})
 	neutron := fresh.AddConsumerChain(ctx, t, provider, relayer, "neutron", neutronVersion, fresh.NEUTRON_DENOM, []bool{true, true, true})
+	stride := fresh.AddConsumerChain(ctx, t, provider, relayer, "stride", strideVersion, fresh.STRIDE_DENOM, []bool{true, true, true})
 
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer)
 	fresh.IBCTest(ctx, t, provider, neutron, relayer)
@@ -66,6 +66,7 @@ func TestMainnetConsumerChainsWithV16Upgrade(t *testing.T) {
 
 	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	fresh.SetEpoch(ctx, t, provider, 1)
 
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer)
 	fresh.IBCTest(ctx, t, provider, neutron, relayer)

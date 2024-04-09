@@ -12,6 +12,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"github.com/cosmos/cosmos-sdk/x/params/client/utils"
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
@@ -324,4 +325,19 @@ func GetValidatorWallets(ctx context.Context, chain *cosmos.CosmosChain) ([]Vali
 		return nil, err
 	}
 	return wallets, nil
+}
+
+func SetEpoch(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, epoch int) {
+	result, err := chain.ParamChangeProposal(ctx, VALIDATOR_MONIKER, &utils.ParamChangeProposalJSON{
+		Changes: []utils.ParamChangeJSON{{
+			Subspace: "provider",
+			Key:      "BlocksPerEpoch",
+			Value:    json.RawMessage(fmt.Sprintf("\"%d\"", epoch)),
+		}},
+		Title:       fmt.Sprintf("Set blocks per epoch to %d", epoch),
+		Description: fmt.Sprintf("Set blocks per epoch to %d", epoch),
+		Deposit:     GOV_DEPOSIT_AMOUNT,
+	})
+	require.NoError(t, err)
+	PassProposal(ctx, t, chain, result.ProposalID)
 }
