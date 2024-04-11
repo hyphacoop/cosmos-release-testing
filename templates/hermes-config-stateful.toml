@@ -94,7 +94,7 @@ trust_threshold = { numerator = '1', denominator = '3' }
 ccv_consumer_chain = true
 
 [[chains]]
-id = 'rs-testnet'
+id = 'local-testnet'
 rpc_addr = 'http://localhost:27001'
 grpc_addr = 'http://localhost:26001'
 websocket_addr = 'ws://localhost:27001/websocket'
