@@ -32,8 +32,6 @@ check_code()
 }
 
 echo "Sending funds with tx bank send..."
-$CHAIN_BINARY tx bank send $WALLET_1 $WALLET_2 $VAL_STAKE_STEP$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-exit 1
 TXHASH=$($CHAIN_BINARY tx bank send $WALLET_1 $WALLET_2 $VAL_STAKE_STEP$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
 # wait for 1 block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
