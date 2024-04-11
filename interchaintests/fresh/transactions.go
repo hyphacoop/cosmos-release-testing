@@ -7,12 +7,11 @@ import (
 
 	"cosmossdk.io/math"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
 )
 
-func TransactionsTest(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain) {
+func TransactionsTest(ctx context.Context, t *testing.T, chain Chain) {
 	t.Run("Transactions", func(t *testing.T) {
 		wallets, err := GetValidatorWallets(ctx, chain)
 		require.NoError(t, err)
@@ -61,7 +60,7 @@ func TransactionsTest(ctx context.Context, t *testing.T, chain *cosmos.CosmosCha
 	})
 }
 
-func IBCTest(ctx context.Context, t *testing.T, chainA *cosmos.CosmosChain, chainB *cosmos.CosmosChain, relayer ibc.Relayer) {
+func IBCTest(ctx context.Context, t *testing.T, chainA Chain, chainB Chain, relayer ibc.Relayer) {
 	wallets, err := GetValidatorWallets(ctx, chainA)
 	require.NoError(t, err)
 	wallet1 := wallets[0]

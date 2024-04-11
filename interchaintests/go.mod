@@ -6,7 +6,7 @@ replace (
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240409184851-0afb5d2d6764
+	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240411173203-b79c6412d77d
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
 )
 
@@ -22,6 +22,7 @@ require (
 	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.17.1
+	github.com/tidwall/sjson v1.2.5
 	go.uber.org/zap v1.26.0
 	golang.org/x/sync v0.4.0
 )

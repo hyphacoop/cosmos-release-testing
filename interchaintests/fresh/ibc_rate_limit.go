@@ -17,8 +17,8 @@ import (
 func IBCTransferRateLimitedTest(
 	ctx context.Context,
 	t *testing.T,
-	chainA *cosmos.CosmosChain,
-	chainB *cosmos.CosmosChain,
+	chainA Chain,
+	chainB Chain,
 	channel *ibc.ChannelOutput,
 ) {
 	addRateLimit(ctx, t, chainA, channel.ChannelID)
@@ -31,8 +31,8 @@ func IBCTransferRateLimitedTest(
 func sendRateLimitedTx(
 	ctx context.Context,
 	t *testing.T,
-	chainA *cosmos.CosmosChain,
-	chainB *cosmos.CosmosChain,
+	chainA Chain,
+	chainB Chain,
 	channel *ibc.ChannelOutput,
 	shouldPass bool,
 ) {
@@ -59,7 +59,7 @@ func sendRateLimitedTx(
 	}
 }
 
-func updateRateLimit(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, channelID string) {
+func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string) {
 	govAuthority, err := chain.GetModuleAddress(ctx, "gov")
 	require.NoError(t, err)
 	msg := map[string]interface{}{
@@ -84,10 +84,10 @@ func updateRateLimit(ctx context.Context, t *testing.T, chain *cosmos.CosmosChai
 	require.NoError(t, err)
 	propID, err := getProposalID(ctx, chain, txhash)
 	require.NoError(t, err)
-	PassProposal(ctx, t, chain, propID)
+	require.NoError(t, PassProposal(ctx, chain, propID))
 }
 
-func addRateLimit(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, channelID string) {
+func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string) {
 	govAuthority, err := chain.GetModuleAddress(ctx, "gov")
 	require.NoError(t, err)
 	msg := map[string]interface{}{
@@ -112,10 +112,10 @@ func addRateLimit(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 	require.NoError(t, err)
 	propID, err := getProposalID(ctx, chain, txhash)
 	require.NoError(t, err)
-	PassProposal(ctx, t, chain, propID)
+	require.NoError(t, PassProposal(ctx, chain, propID))
 }
 
-func getProposalID(ctx context.Context, chain *cosmos.CosmosChain, txhash string) (string, error) {
+func getProposalID(ctx context.Context, chain Chain, txhash string) (string, error) {
 	// we need to do this because the rate limit proposals aren't in the sdk yet,
 	// so there'll be an error if we go through chain.SubmitProposal and expect it to parse the proposal ID
 	stdout, _, err := chain.GetNode().ExecQuery(ctx, "tx", txhash)

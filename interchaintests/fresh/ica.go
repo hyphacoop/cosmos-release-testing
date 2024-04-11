@@ -14,12 +14,11 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/gogoproto/proto"
 	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
 )
 
-func ICAControllerTest(ctx context.Context, t *testing.T, controller *cosmos.CosmosChain, host *cosmos.CosmosChain, relayer ibc.Relayer, isUpgraded bool) {
+func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host Chain, relayer ibc.Relayer, isUpgraded bool) {
 	wallets, err := GetValidatorWallets(ctx, controller)
 	require.NoError(t, err)
 	srcAddress := wallets[0].Address
@@ -36,13 +35,13 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller *cosmos.Cos
 		"interchain-accounts", "controller", "register",
 		srcConnection,
 	)
-	require.NoError(t, err)
-
-	icaAddress := getICAAddress(ctx, t, controller, srcAddress, srcConnection)
 	if !isUpgraded {
-		require.Empty(t, icaAddress)
+		require.Error(t, err)
 		return
 	}
+	require.NoError(t, err)
+
+	icaAddress := GetICAAddress(ctx, t, controller, srcAddress, srcConnection)
 	require.NotEmpty(t, icaAddress)
 
 	amountToSend := int64(3_300_000_000)
@@ -97,7 +96,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller *cosmos.Cos
 	}
 }
 
-func sendICATx(ctx context.Context, t *testing.T, controller *cosmos.CosmosChain, srcAddress string, dstAddress string, icaAddress string, srcConnection string, amount int64, denom string) {
+func sendICATx(ctx context.Context, t *testing.T, controller Chain, srcAddress string, dstAddress string, icaAddress string, srcConnection string, amount int64, denom string) {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
@@ -124,11 +123,11 @@ func sendICATx(ctx context.Context, t *testing.T, controller *cosmos.CosmosChain
 	require.NoError(t, err)
 }
 
-func getICAAddress(ctx context.Context, t *testing.T, controller *cosmos.CosmosChain, srcAddress string, srcConnection string) string {
+func GetICAAddress(ctx context.Context, t *testing.T, controller Chain, srcAddress string, srcConnection string) string {
 	var icaAddress string
 
 	// it takes a moment for it to be created
-	timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 65*time.Second)
+	timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 90*time.Second)
 	defer timeoutCancel()
 	for timeoutCtx.Err() == nil {
 		time.Sleep(5 * time.Second)

@@ -6,10 +6,9 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 )
 
-func QuerySupply(ctx context.Context, chain *cosmos.CosmosChain, denom string) (sdk.Coin, error) {
+func QuerySupply(ctx context.Context, chain Chain, denom string) (sdk.Coin, error) {
 	stdout, _, err := chain.GetNode().ExecQuery(ctx, "bank", "total")
 	if err != nil {
 		return sdk.Coin{}, err

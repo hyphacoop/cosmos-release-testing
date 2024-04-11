@@ -29,6 +29,19 @@ type ValidatorWallet struct {
 	ValoperAddress string
 }
 
+type Chain struct {
+	*cosmos.CosmosChain
+}
+
+func (c Chain) QueryJSON(ctx context.Context, t *testing.T, path string, query ...string) gjson.Result {
+	t.Helper()
+	stdout, _, err := c.GetNode().ExecQuery(ctx, query...)
+	require.NoError(t, err)
+	retval := gjson.GetBytes(stdout, path)
+	require.True(t, retval.Exists(), "path %s does not exist in %s", path, stdout)
+	return retval
+}
+
 func createConfigToml() testutil.Toml {
 	configToml := make(testutil.Toml)
 	consensusToml := make(testutil.Toml)
@@ -91,7 +104,7 @@ func createRelayer(ctx context.Context, t *testing.T) ibc.Relayer {
 }
 
 // CreateLinkedChains creates two new chains with the given version, links them through IBC, and returns the chain and relayer objects.
-func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (*cosmos.CosmosChain, *cosmos.CosmosChain, ibc.Relayer) {
+func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (Chain, Chain, ibc.Relayer) {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	cf := interchaintest.NewBuiltinChainFactory(
@@ -102,16 +115,16 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 		})
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	chain1, chain2 := chains[0].(*cosmos.CosmosChain), chains[1].(*cosmos.CosmosChain)
+	chain1, chain2 := Chain{chains[0].(*cosmos.CosmosChain)}, Chain{chains[1].(*cosmos.CosmosChain)}
 	relayer := createRelayer(ctx, t)
 	pathName := RelayerTransferPathFor(chain1, chain2)
 	ic := interchaintest.NewInterchain().
-		AddChain(chain1).
-		AddChain(chain2).
+		AddChain(chain1.CosmosChain).
+		AddChain(chain2.CosmosChain).
 		AddRelayer(relayer, "relayer").
 		AddLink(interchaintest.InterchainLink{
-			Chain1:  chain1,
-			Chain2:  chain2,
+			Chain1:  chain1.CosmosChain,
+			Chain2:  chain2.CosmosChain,
 			Relayer: relayer,
 			Path:    pathName,
 		})
@@ -133,7 +146,7 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 }
 
 // CreateChain creates a single new chain with the given version and returns the chain object.
-func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) (*cosmos.CosmosChain, ibc.Relayer) {
+func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) (Chain, ibc.Relayer) {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	cf := interchaintest.NewBuiltinChainFactory(
@@ -143,7 +156,7 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	provider := chains[0].(*cosmos.CosmosChain)
+	provider := Chain{chains[0].(*cosmos.CosmosChain)}
 	var relayer ibc.Relayer
 	var relayerWallet ibc.Wallet
 
@@ -154,13 +167,13 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 		ic.AddRelayer(relayer, "relayer")
 		relayerWallet, err = provider.BuildRelayerWallet(ctx, "relayer-"+provider.Config().ChainID)
 		require.NoError(t, err)
-		ic.AddChain(provider, ibc.WalletAmount{
+		ic.AddChain(provider.CosmosChain, ibc.WalletAmount{
 			Address: relayerWallet.FormattedAddress(),
 			Denom:   provider.Config().Denom,
 			Amount:  sdkmath.NewInt(VALIDATOR_FUNDS),
 		})
 	} else {
-		ic.AddChain(provider)
+		ic.AddChain(provider.CosmosChain)
 	}
 
 	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
@@ -181,19 +194,25 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 	return provider, relayer
 }
 
-func PassProposal(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, proposalID string) {
+func PassProposal(ctx context.Context, chain Chain, proposalID string) error {
 	propID, err := strconv.ParseInt(proposalID, 10, 64)
-	require.NoError(t, err)
+	if err != nil {
+		return err
+	}
 	err = chain.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
-	require.NoError(t, err)
+	if err != nil {
+		return err
+	}
 	chainHeight, err := chain.Height(ctx)
-	require.NoError(t, err)
+	if err != nil {
+		return err
+	}
 	maxHeight := chainHeight + UPGRADE_DELTA
-	_, err = cosmos.PollForProposalStatus(ctx, chain, chainHeight, maxHeight, propID, govv1beta1.StatusPassed)
-	require.NoError(t, err)
+	_, err = cosmos.PollForProposalStatus(ctx, chain.CosmosChain, chainHeight, maxHeight, propID, govv1beta1.StatusPassed)
+	return err
 }
 
-func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, proposalKey, upgradeName, version string) {
+func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, upgradeName, version string) {
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
 
@@ -208,7 +227,7 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 	}
 	upgradeTx, err := chain.UpgradeProposal(ctx, proposalKey, proposal)
 	require.NoError(t, err, "error submitting upgrade proposal")
-	PassProposal(ctx, t, chain, upgradeTx.ProposalID)
+	require.NoError(t, PassProposal(ctx, chain, upgradeTx.ProposalID))
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after upgrade proposal passed")
@@ -250,7 +269,7 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, 
 	}
 }
 
-func GetChannelWithPort(ctx context.Context, relayer ibc.Relayer, chain, counterparty *cosmos.CosmosChain, portID string) (*ibc.ChannelOutput, error) {
+func GetChannelWithPort(ctx context.Context, relayer ibc.Relayer, chain, counterparty Chain, portID string) (*ibc.ChannelOutput, error) {
 	clients, err := relayer.GetClients(ctx, GetRelayerExecReporter(ctx), chain.Config().ChainID)
 	if err != nil {
 		return nil, err
@@ -290,11 +309,11 @@ func GetChannelWithPort(ctx context.Context, relayer ibc.Relayer, chain, counter
 	return channelOutput, nil
 }
 
-func GetTransferChannel(ctx context.Context, relayer ibc.Relayer, chain, counterparty *cosmos.CosmosChain) (*ibc.ChannelOutput, error) {
+func GetTransferChannel(ctx context.Context, relayer ibc.Relayer, chain, counterparty Chain) (*ibc.ChannelOutput, error) {
 	return GetChannelWithPort(ctx, relayer, chain, counterparty, TRANSFER_PORT_ID)
 }
 
-func GetValidatorWallets(ctx context.Context, chain *cosmos.CosmosChain) ([]ValidatorWallet, error) {
+func GetValidatorWallets(ctx context.Context, chain Chain) ([]ValidatorWallet, error) {
 	wallets := make([]ValidatorWallet, NUM_VALIDATORS)
 	lock := new(sync.Mutex)
 	eg := new(errgroup.Group)
@@ -327,7 +346,7 @@ func GetValidatorWallets(ctx context.Context, chain *cosmos.CosmosChain) ([]Vali
 	return wallets, nil
 }
 
-func SetEpoch(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, epoch int) {
+func SetEpoch(ctx context.Context, chain Chain, epoch int) error {
 	result, err := chain.ParamChangeProposal(ctx, VALIDATOR_MONIKER, &utils.ParamChangeProposalJSON{
 		Changes: []utils.ParamChangeJSON{{
 			Subspace: "provider",
@@ -338,6 +357,8 @@ func SetEpoch(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain, epoc
 		Description: fmt.Sprintf("Set blocks per epoch to %d", epoch),
 		Deposit:     GOV_DEPOSIT_AMOUNT,
 	})
-	require.NoError(t, err)
-	PassProposal(ctx, t, chain, result.ProposalID)
+	if err != nil {
+		return err
+	}
+	return PassProposal(ctx, chain, result.ProposalID)
 }
