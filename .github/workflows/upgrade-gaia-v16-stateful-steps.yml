@@ -163,7 +163,8 @@ jobs:
       - name: Start chain
         env:
           START_VERSION: ${{inputs.gaia_version}}
-          ARCHIVE_URL: "https://files.polypore.xyz/archived-state/rs-testnet-provider/latest_v15.json.gz"
+          # ARCHIVE_URL: "https://files.polypore.xyz/archived-state/rs-testnet-provider/latest_v15.json.gz"
+          ARCHIVE_URL: "https://files.polypore.xyz/archived-state/v15.2.0-19610700-stateful-upgrade.tar.gz"
         run: scripts/stateful/start_chain.sh
       - name: _Blocks produced after upgrade to v16
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 200 12600
@@ -174,8 +175,8 @@ jobs:
         run: $CHAIN_BINARY --home $HOME_1 q staking params
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
-      # - name: _PUPMOS is safe
-      #   run: tests/stateful/test_pupmos_slashing.sh
+      - name: _PUPMOS is safe
+        run: tests/stateful/test_pupmos_slashing.sh
       - name: Send funds to wallet 4
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
