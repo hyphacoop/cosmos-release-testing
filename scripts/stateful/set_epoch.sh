@@ -27,6 +27,7 @@ echo "Voting on proposal $proposal_id..."
 $CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y
 $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
 echo "Waiting for proposal to pass..."
+let waittime=$VOTING_PERIOD+6
 sleep $VOTING_PERIOD
 
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
