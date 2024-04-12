@@ -185,7 +185,7 @@ jobs:
         run: |
           BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
           echo "BlocksPerEpoch is: $BPE"
-          if [ $BPE != "1" ]
+          if [ $BPE != "\"1\"" ]
           then
             echo "BlocksPerEpoch is not 1"
             exit 1
@@ -262,7 +262,7 @@ jobs:
         run: |
           BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
           echo "BlocksPerEpoch is: $BPE"
-          if [ $BPE != "100" ]
+          if [ $BPE != "\"100\"" ]
           then
             echo "BlocksPerEpoch is not 100"
             exit 1
