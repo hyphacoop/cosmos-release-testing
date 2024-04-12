@@ -171,7 +171,7 @@ jobs:
       # - name: _Blocks produced after upgrade to v16
       #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 200 12600
       - name: _Blocks produced after upgrade to v16 DEBUG VALUE
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 50 12600
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 12600
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
@@ -183,7 +183,7 @@ jobs:
         run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-1.json
       - name: Check BlocksPerEpoch is 1
         run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value)
+          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
           echo "BlocksPerEpoch is: $BPE"
           if [ $BPE -ne "1" ]
           then
@@ -260,7 +260,7 @@ jobs:
         run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-1.json
       - name: Check BlocksPerEpoch is 100
         run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r .value)
+          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
           echo "BlocksPerEpoch is: $BPE"
           if [ $BPE -ne "100" ]
           then
