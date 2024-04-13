@@ -278,6 +278,7 @@ jobs:
           CON1_P2P_PORT: 28201
           CON1_PPROF_PORT: 6165
           CONSUMER_SERVICE_1: conb1.service
+          CONSUMER_NEW: true
           DOWNTIME_BLOCKS: 1000
         run: scripts/stateful/init_consumer.sh
       - name: Launch consumer chain b
