@@ -15,7 +15,7 @@ concurrency:
 
 env:
   # Versions
-  VERSION_CUTOFF: v15.0.0
+  VERSION_CUTOFF: v15.2.0
   TARGET_VERSION: v16
   # All chain variables
   COMMIT_TIMEOUT: 3
@@ -518,7 +518,7 @@ jobs:
 
           echo "Creating vesting wallet..."
           end_time=$(date -d '1 minute'  +%s)
-          command=$($CHAIN_BINARY tx vesting create-vesting-account $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y)
+          command="$CHAIN_BINARY tx vesting create-vesting-account $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y"
           echo "Command:"
           echo $command
           $command
