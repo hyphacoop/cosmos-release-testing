@@ -555,6 +555,7 @@ jobs:
 
       - name: Tokenize with vesting wallet
         run: |
+          $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
 
           echo "vesting_start_time = $vesting_start_time"
           echo "vesting_end_time = $vesting_end_time"
@@ -570,7 +571,9 @@ jobs:
           vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
           echo "vested amount: $vested_amount"
 
-          $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+
           sleep $COMMIT_TIMEOUT
 
       # - name: Test software upgrade for published releases
