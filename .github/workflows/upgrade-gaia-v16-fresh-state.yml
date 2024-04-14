@@ -571,7 +571,7 @@ jobs:
           echo "vested amount: $vested_amount"
 
           # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash'
+          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
           echo "txhash: $txhash"
 
           sleep $COMMIT_TIMEOUT
@@ -614,7 +614,7 @@ jobs:
           echo "vested amount: $vested_amount"
 
           # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash'
+          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
           echo "txhash: $txhash"
 
           sleep $COMMIT_TIMEOUT
