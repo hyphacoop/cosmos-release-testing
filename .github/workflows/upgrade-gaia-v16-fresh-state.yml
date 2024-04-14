@@ -618,7 +618,8 @@ jobs:
           echo "txhash: $txhash"
 
           sleep $COMMIT_TIMEOUT
-          $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+          $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[]'
+          $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
 
   # Baseline-3a-icsv310:
   #   runs-on: ubuntu-22.04
