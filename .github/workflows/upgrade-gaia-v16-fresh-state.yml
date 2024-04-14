@@ -405,6 +405,8 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
 
       - name: Test globalfee module
+        env:
+          COSMOS_SDK: v47
         run: |
           tests/test_globalfee.sh
 
@@ -509,13 +511,27 @@ jobs:
       - name: Block production check
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
 
-      - name: Create vesting account
+      - name: Set up vesting account delegation
         run: |
+          echo "Adding key..."
+          echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
+
           end_time=$(date -d '1 minute'  +%s)
           $CHAIN_BINARY tx vesting create-vesting-account \
-          $VESTING_WALLET $WALLET_1 10000000$DENOM $end_time \
+          $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time \
           --from $WALLET_1 --home $HOME_1 \
-          --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y 
+          --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          sleep $COMMIT_TIMEOUT
+          sleep $COMMIT_TIMEOUT
+
+          $CHAIN_BINARY tx staking delegate $VALOPER_1 10000000uatom \
+          --from $VESTING_WALLET --home $HOME_1 \
+          --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+
+          sleep $COMMIT_TIMEOUT
+          sleep $COMMIT_TIMEOUT
+
+          $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
 
       # - name: Test software upgrade for published releases
       #   if: ${{ matrix.upgrade_version != 'main' }}
