@@ -516,14 +516,20 @@ jobs:
           echo "Adding key..."
           echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
 
+          echo "Creating vesting wallet..."
           end_time=$(date -d '1 minute'  +%s)
-          $CHAIN_BINARY tx vesting create-vesting-account \
-          $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time \
-          --from $WALLET_1 --home $HOME_1 \
-          --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          command=$($CHAIN_BINARY tx vesting create-vesting-account $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y)
+          echo "Command:"
+          echo $command
+          $command
+          # $CHAIN_BINARY tx vesting create-vesting-account \
+          # $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time \
+          # --from $WALLET_1 --home $HOME_1 \
+          # --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
           sleep $COMMIT_TIMEOUT
           sleep $COMMIT_TIMEOUT
 
+          echo "Delegating from vesting wallet..."
           $CHAIN_BINARY tx staking delegate $VALOPER_1 10000000uatom \
           --from $VESTING_WALLET --home $HOME_1 \
           --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
