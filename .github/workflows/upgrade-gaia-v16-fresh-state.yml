@@ -455,8 +455,8 @@ jobs:
     env:
       COSMOVISOR_VERSION: ${{ matrix.cv_version }}
       UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-      VESTING_AMOUNT: 11000000
-      VESTING_DELEGATED_AMOUNT: 10000000
+      VESTING_AMOUNT: 110000000
+      VESTING_DELEGATED_AMOUNT: 100000000
       VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
       VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
     steps:
