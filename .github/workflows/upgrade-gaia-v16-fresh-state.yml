@@ -537,7 +537,6 @@ jobs:
           echo "vesting_end_time=$end_time" >> $GITHUB_ENV
           echo "vesting_duration=$duration" >> $GITHUB_ENV
 
-
       - name: Set up bonding
         run: |
           $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
@@ -572,29 +571,53 @@ jobs:
           echo "vested amount: $vested_amount"
 
           # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash'
+          echo "txhash: $txhash"
 
           sleep $COMMIT_TIMEOUT
 
-      # - name: Test software upgrade for published releases
-      #   if: ${{ matrix.upgrade_version != 'main' }}
-      #   env:
-      #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-      #   run: |
-      #     echo $DOWNLOAD_URL
-      #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-      # - name: Test software upgrade for main branch
-      #   if: ${{ matrix.upgrade_version == 'main' }}
-      #   env:
-      #     DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-      #   run: |
-      #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+      - name: Test software upgrade for published releases
+        if: ${{ matrix.upgrade_version != 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+        run: |
+          echo $DOWNLOAD_URL
+          scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+      - name: Test software upgrade for main branch
+        if: ${{ matrix.upgrade_version == 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+        run: |
+          scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
 
-      # - name: _Blocks produced after upgrade
-      #   run: |
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+      - name: _Blocks produced after upgrade
+        run: |
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 3
 
 
+      - name: Tokenize with vesting wallet
+        run: |
+          $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+
+          echo "vesting_start_time = $vesting_start_time"
+          echo "vesting_end_time = $vesting_end_time"
+          echo "vesting_duration = $vesting_duration"
+
+          echo "Calculating vested delegation..."
+          current_epoch=$(date +%s)
+          echo "epoch: $current_epoch"
+          elapsed_time=$(echo "$current_epoch - $vesting_start_time" | bc)
+          echo "elapsed_time: $elapsed_time"
+          vested_ratio=$(echo "$elapsed_time / $vesting_duration" | bc -l)
+          echo "vested ratio: $vested_ratio"
+          vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
+          echo "vested amount: $vested_amount"
+
+          # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash'
+          echo "txhash: $txhash"
+
+          sleep $COMMIT_TIMEOUT
 
   # Baseline-3a-icsv310:
   #   runs-on: ubuntu-22.04
