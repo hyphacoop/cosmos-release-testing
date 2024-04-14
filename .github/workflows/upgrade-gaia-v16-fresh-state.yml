@@ -542,11 +542,6 @@ jobs:
         run: |
           $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
 
-          echo "vesting_start_time = $vesting_start_time"
-          echo "vesting_end_time = $vesting_end_time"
-          echo "vesting_duration = $vesting_duration"
-
-
       - name: Delegate with vesting wallet
         run: |
 
@@ -560,9 +555,17 @@ jobs:
 
       - name: Tokenize with vesting wallet
         run: |
+
+          echo "vesting_start_time = $vesting_start_time"
+          echo "vesting_end_time = $vesting_end_time"
+          echo "vesting_duration = $vesting_duration"
+
           echo "Calculating vested delegation..."
           current_epoch=$(date +%s)
-          vested_ratio=$(echo "(($current_epoch - $vesting_start_time)/$vesting_duration)/1" | bc)
+          echo "epoch: $current_epoch"
+          elapsed_time=$(echo "current_epoch-$vesting_start_time" | bc)
+          echo "elapsed_time: $elapsed_time"
+          vested_ratio=$(echo "($elapsed_time/$vesting_duration)/1" | bc)
           echo "vested ratio: $vested_ratio"
           vested_amount=$(echo "$vested_ratio * $VESTING_DELEGATED_AMOUNT" | bc -l)
           echo "vested amount: $vested_amount"
