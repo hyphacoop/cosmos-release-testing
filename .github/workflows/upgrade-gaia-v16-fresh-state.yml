@@ -521,7 +521,7 @@ jobs:
           echo "Creating vesting wallet..."
           start_time=$(date +%s)
           echo "start time: $start_time"
-          end_time=$(date -d '1 minute'  +%s)
+          end_time=$(date -d '10 minutes'  +%s)
           echo "end time: $end_time"
           $CHAIN_BINARY tx vesting create-vesting-account \
           $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
@@ -571,10 +571,10 @@ jobs:
           echo "vested amount: $vested_amount"
 
           # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
+          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
           echo "txhash: $txhash"
-
           sleep $COMMIT_TIMEOUT
+          $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
 
       - name: Test software upgrade for published releases
         if: ${{ matrix.upgrade_version != 'main' }}
@@ -614,10 +614,11 @@ jobs:
           echo "vested amount: $vested_amount"
 
           # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
+          txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
           echo "txhash: $txhash"
 
           sleep $COMMIT_TIMEOUT
+          $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
 
   # Baseline-3a-icsv310:
   #   runs-on: ubuntu-22.04
