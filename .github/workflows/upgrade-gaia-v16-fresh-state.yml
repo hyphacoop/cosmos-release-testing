@@ -527,7 +527,7 @@ jobs:
 
       - name: Set up bonding
         run: |
-          $CHAIN_BINARY tx staking validator-bond --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
 
       - name: Delegate with vesting wallet
         run: |
