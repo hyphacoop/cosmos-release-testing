@@ -522,6 +522,7 @@ jobs:
           start_time=$(date +%s)
           echo "start time: $start_time"
           end_time=$(date -d '1 minute'  +%s)
+          echo "end time: $end_time"
           $CHAIN_BINARY tx vesting create-vesting-account \
           $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
           --from $WALLET_1 --home $HOME_1 \
@@ -531,6 +532,7 @@ jobs:
 
           echo "Saving vesting times..."
           duration=$(echo "$end_time - $start_time" | bc -l)
+          echo "duration: $duration"
           echo "vesting_start_time=$start_time" >> $GITHUB_ENV
           echo "vesting_end_time=$end_time" >> $GITHUB_ENV
           echo "vesting_duration=$duration" >> $GITHUB_ENV
