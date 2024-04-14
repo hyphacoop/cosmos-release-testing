@@ -455,6 +455,8 @@ jobs:
     env:
       COSMOVISOR_VERSION: ${{ matrix.cv_version }}
       UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+      VESTING_AMOUNT: 11000000
+      VESTING_DELEGATED_AMOUNT: 10000000
       VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
       VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
     steps:
@@ -517,13 +519,24 @@ jobs:
           echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
 
           echo "Creating vesting wallet..."
+          start_time=$(date +%s)
           end_time=$(date -d '1 minute'  +%s)
           $CHAIN_BINARY tx vesting create-vesting-account \
-          $VESTING_WALLET 11000000$DENOM $end_time \
+          $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
           --from $WALLET_1 --home $HOME_1 \
           --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
           sleep $COMMIT_TIMEOUT
           sleep $COMMIT_TIMEOUT
+
+          echo "Saving vesting times..."
+          duration=$(echo "$end_time - $start_time" | bc -l)
+          echo "vesting_start_time=$start_time" >> GITHUB_ENV
+          echo "vesting_end_time=$end_time" >> GITHUB_ENV
+          echo "vesting_duration=$duration" >> GITHUB_ENV
+
+          echo "vesting_start_time = $vesting_start_time"
+          echo "vesting_end_time = $vesting_end_time"
+          echo "vesting_duration = $vesting_duration"
 
       - name: Set up bonding
         run: |
@@ -534,7 +547,7 @@ jobs:
 
           $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
           echo "Delegating from vesting wallet..."
-          $CHAIN_BINARY tx staking delegate $VALOPER_1 10000000uatom \
+          $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
           --from $VESTING_WALLET --home $HOME_1 \
           --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
           sleep $COMMIT_TIMEOUT
@@ -542,7 +555,14 @@ jobs:
 
       - name: Tokenize with vesting wallet
         run: |
-          $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000uatom $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          echo "Calculating vested delegation..."
+          current_epoch=$(date +%s)
+          vested_ratio=$(echo "(($current_epoch - $vesting_start_time)/$vesting_duration)/1" | bc)
+          echo "vested ratio: $vested_ratio"
+          vested_amount=$(echo "$vested_ratio * $VESTING_DELEGATED_AMOUNT" | bc -l)
+          echo "vested amount: $vested_amount"
+
+          $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
           sleep $COMMIT_TIMEOUT
 
       # - name: Test software upgrade for published releases
