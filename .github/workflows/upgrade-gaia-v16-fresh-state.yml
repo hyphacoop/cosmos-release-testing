@@ -518,26 +518,32 @@ jobs:
 
           echo "Creating vesting wallet..."
           end_time=$(date -d '1 minute'  +%s)
-          command="$CHAIN_BINARY tx vesting create-vesting-account $VESTING_WALLET 11000000$DENOM $end_time --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y"
-          echo "Command:"
-          echo $command
-          $command
-          # $CHAIN_BINARY tx vesting create-vesting-account \
-          # $VESTING_WALLET $WALLET_1 11000000$DENOM $end_time \
-          # --from $WALLET_1 --home $HOME_1 \
-          # --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          $CHAIN_BINARY tx vesting create-vesting-account \
+          $VESTING_WALLET 11000000$DENOM $end_time \
+          --from $WALLET_1 --home $HOME_1 \
+          --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
           sleep $COMMIT_TIMEOUT
           sleep $COMMIT_TIMEOUT
 
+      - name: Set up bonding
+        run: |
+          $CHAIN_BINARY tx staking validator-bond --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+
+      - name: Delegate with vesting wallet
+        run: |
+
+          $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
           echo "Delegating from vesting wallet..."
           $CHAIN_BINARY tx staking delegate $VALOPER_1 10000000uatom \
           --from $VESTING_WALLET --home $HOME_1 \
           --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-
           sleep $COMMIT_TIMEOUT
           sleep $COMMIT_TIMEOUT
 
-          $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+      - name: Tokenize with vesting wallet
+        run: |
+          $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 5000000uatom $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          sleep $COMMIT_TIMEOUT
 
       # - name: Test software upgrade for published releases
       #   if: ${{ matrix.upgrade_version != 'main' }}
