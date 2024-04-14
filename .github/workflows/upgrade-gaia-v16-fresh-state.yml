@@ -520,6 +520,7 @@ jobs:
 
           echo "Creating vesting wallet..."
           start_time=$(date +%s)
+          echo "start time: $start_time"
           end_time=$(date -d '1 minute'  +%s)
           $CHAIN_BINARY tx vesting create-vesting-account \
           $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
