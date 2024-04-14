@@ -513,7 +513,7 @@ jobs:
       - name: Block production check
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
 
-      - name: Set up vesting account delegation
+      - name: Set up vesting account
         run: |
           echo "Adding key..."
           echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
@@ -530,9 +530,9 @@ jobs:
 
           echo "Saving vesting times..."
           duration=$(echo "$end_time - $start_time" | bc -l)
-          echo "vesting_start_time=$start_time" >> GITHUB_ENV
-          echo "vesting_end_time=$end_time" >> GITHUB_ENV
-          echo "vesting_duration=$duration" >> GITHUB_ENV
+          echo "vesting_start_time=$start_time" >> $GITHUB_ENV
+          echo "vesting_end_time=$end_time" >> $GITHUB_ENV
+          echo "vesting_duration=$duration" >> $GITHUB_ENV
 
           echo "vesting_start_time = $vesting_start_time"
           echo "vesting_end_time = $vesting_end_time"
