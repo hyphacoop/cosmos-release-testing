@@ -17,15 +17,16 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
-func isValoperJailed(ctx context.Context, t *testing.T, provider *cosmos.CosmosChain, valoper string) bool {
+func isValoperJailed(ctx context.Context, t *testing.T, provider Chain, valoper string) bool {
 	out, _, err := provider.Validators[0].ExecQuery(ctx, "staking", "validator", valoper)
 	require.NoError(t, err)
 	return gjson.GetBytes(out, "jailed").Bool()
 }
 
-func ValidatorJailedTest(ctx context.Context, t *testing.T, provider *cosmos.CosmosChain, consumer *cosmos.CosmosChain, relayer ibc.Relayer) {
+func ValidatorJailedTest(ctx context.Context, t *testing.T, provider Chain, consumer Chain, relayer ibc.Relayer) {
 	require.NoError(t, consumer.Validators[1].StopContainer(ctx))
 	require.NoError(t, consumer.Validators[2].StopContainer(ctx))
 
@@ -40,11 +41,25 @@ func ValidatorJailedTest(ctx context.Context, t *testing.T, provider *cosmos.Cos
 	require.False(t, isValoperJailed(ctx, t, provider, valoper3))
 
 	require.NoError(t, consumer.Validators[1].StartContainer(ctx))
-	provider.Validators[1].ExecTx(ctx, wallets[1].Moniker, "slashing", "unjail")
+	time.Sleep(10 * COMMIT_TIMEOUT)
+	_, err = provider.Validators[1].ExecTx(ctx, wallets[1].Moniker, "slashing", "unjail")
+	require.NoError(t, err)
 	require.False(t, isValoperJailed(ctx, t, provider, valoper2))
 }
 
-func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer *cosmos.CosmosChain, relayer ibc.Relayer) {
+func getPower(ctx context.Context, t *testing.T, chain Chain, hexaddr string) int64 {
+	var power int64
+	CheckEndpoint(ctx, t, chain.GetHostRPCAddress()+"/validators", func(b []byte) error {
+		power = gjson.GetBytes(b, fmt.Sprintf("result.validators.#(address==\"%s\").voting_power", hexaddr)).Int()
+		if power == 0 {
+			return fmt.Errorf("validator %s power not found; validators are: %s", hexaddr, string(b))
+		}
+		return nil
+	})
+	return power
+}
+
+func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer Chain, relayer ibc.Relayer, blocksPerEpoch int) {
 	wallets, err := GetValidatorWallets(ctx, provider)
 	require.NoError(t, err)
 	providerAddress := wallets[0]
@@ -56,14 +71,7 @@ func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer 
 	require.NoError(t, err)
 	consumerHex := gjson.GetBytes(json, "address").String()
 
-	var providerPowerBefore int64
-	CheckEndpoint(ctx, t, provider.GetHostRPCAddress()+"/validators", func(b []byte) error {
-		providerPowerBefore = gjson.GetBytes(b, fmt.Sprintf("result.validators.#(address==\"%s\").voting_power", providerHex)).Int()
-		if providerPowerBefore == 0 {
-			return fmt.Errorf("provider validator %s power not found; validators are: %s", providerHex, string(b))
-		}
-		return nil
-	})
+	providerPowerBefore := getPower(ctx, t, provider, providerHex)
 
 	_, err = provider.Validators[0].ExecTx(ctx, providerAddress.Moniker,
 		"staking", "delegate",
@@ -71,24 +79,15 @@ func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer 
 	)
 	require.NoError(t, err)
 
-	require.Eventually(t, func() bool {
-		var providerPower int64
-		CheckEndpoint(ctx, t, provider.GetHostRPCAddress()+"/validators", func(b []byte) error {
-			providerPower = gjson.GetBytes(b, fmt.Sprintf("result.validators.#(address==\"%s\").voting_power", providerHex)).Int()
-			if providerPower == 0 {
-				return fmt.Errorf("provider validator %s power not found; validators are: %s", providerHex, string(b))
-			}
-			return nil
-		})
+	if blocksPerEpoch > 1 {
+		require.Greater(t, getPower(ctx, t, provider, providerHex), providerPowerBefore)
+		require.NotEqual(t, getPower(ctx, t, provider, providerHex), getPower(ctx, t, consumer, consumerHex))
+		require.NoError(t, testutil.WaitForBlocks(ctx, blocksPerEpoch, provider))
+	}
 
-		var consumerPower int64
-		CheckEndpoint(ctx, t, consumer.GetHostRPCAddress()+"/validators", func(b []byte) error {
-			consumerPower = gjson.GetBytes(b, fmt.Sprintf("result.validators.#(address==\"%s\").voting_power", consumerHex)).Int()
-			if consumerPower == 0 {
-				return fmt.Errorf("consumer validator %s power not found; validators are: %s", consumerHex, string(b))
-			}
-			return nil
-		})
+	require.Eventually(t, func() bool {
+		providerPower := getPower(ctx, t, provider, providerHex)
+		consumerPower := getPower(ctx, t, consumer, consumerHex)
 		if providerPowerBefore >= providerPower {
 			return false
 		}
@@ -96,7 +95,7 @@ func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer 
 	}, 10*time.Minute, COMMIT_TIMEOUT)
 }
 
-func AddConsumerChain(ctx context.Context, t *testing.T, provider *cosmos.CosmosChain, relayer ibc.Relayer, chainName, version, denom string, shouldCopyProviderKey []bool) *cosmos.CosmosChain {
+func AddConsumerChain(ctx context.Context, t *testing.T, provider Chain, relayer ibc.Relayer, chainName, version, denom string, shouldCopyProviderKey []bool) Chain {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	if len(shouldCopyProviderKey) != NUM_VALIDATORS {
@@ -112,20 +111,30 @@ func AddConsumerChain(ctx context.Context, t *testing.T, provider *cosmos.Cosmos
 	)
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	consumer := chains[0].(*cosmos.CosmosChain)
+	consumer := Chain{chains[0].(*cosmos.CosmosChain)}
 
 	// We can't use AddProviderConsumerLink here because the provider chain is already built; we'll have to do everything by hand.
-	provider.Consumers = append(provider.Consumers, consumer)
-	consumer.Provider = provider
+	provider.Consumers = append(provider.Consumers, consumer.CosmosChain)
+	consumer.Provider = provider.CosmosChain
 
-	wallet, err := consumer.BuildRelayerWallet(ctx, "relayer-"+consumer.Config().ChainID)
+	relayerWallet, err := consumer.BuildRelayerWallet(ctx, "relayer-"+consumer.Config().ChainID)
 	require.NoError(t, err)
-	ic := interchaintest.NewInterchain().
-		AddChain(consumer, ibc.WalletAmount{
+	wallets := make([]ibc.Wallet, len(provider.Validators)+1)
+	wallets[0] = relayerWallet
+	for i := 1; i <= len(provider.Validators); i++ {
+		wallets[i], err = consumer.BuildRelayerWallet(ctx, VALIDATOR_MONIKER)
+		require.NoError(t, err)
+	}
+	walletAmounts := make([]ibc.WalletAmount, len(wallets))
+	for i, wallet := range wallets {
+		walletAmounts[i] = ibc.WalletAmount{
 			Address: wallet.FormattedAddress(),
 			Denom:   consumer.Config().Denom,
 			Amount:  sdkmath.NewInt(VALIDATOR_FUNDS),
-		}).
+		}
+	}
+	ic := interchaintest.NewInterchain().
+		AddChain(consumer.CosmosChain, walletAmounts...).
 		AddRelayer(relayer, "relayer")
 
 	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
@@ -137,17 +146,17 @@ func AddConsumerChain(ctx context.Context, t *testing.T, provider *cosmos.Cosmos
 		_ = ic.Close()
 	})
 
-	setupRelayerKeys(ctx, t, relayer, wallet, consumer)
+	setupRelayerKeys(ctx, t, relayer, relayerWallet, consumer)
 	connectChains(ctx, t, provider, consumer, relayer)
 
-	for _, val := range consumer.Validators {
-		require.NoError(t, val.CreateKey(ctx, VALIDATOR_MONIKER))
+	for i, val := range consumer.Validators {
+		require.NoError(t, val.RecoverKey(ctx, VALIDATOR_MONIKER, wallets[i+1].Mnemonic()))
 	}
 
 	return consumer
 }
 
-func createConsumerChainSpec(ctx context.Context, provider *cosmos.CosmosChain, chainID, chainType, denom, version string, shouldCopyProviderKey []bool, spawnTime time.Time) *interchaintest.ChainSpec {
+func createConsumerChainSpec(ctx context.Context, provider Chain, chainID, chainType, denom, version string, shouldCopyProviderKey []bool, spawnTime time.Time) *interchaintest.ChainSpec {
 	fullNodes := 0
 	validators := 3
 
@@ -179,6 +188,24 @@ func createConsumerChainSpec(ctx context.Context, provider *cosmos.CosmosChain, 
 		)
 	}
 
+	modifyGenesis := cosmos.ModifyGenesis(genesisOverrides)
+	if chainType == "stride" {
+		genesisOverrides = append(genesisOverrides,
+			cosmos.NewGenesisKV("app_state.gov.params.voting_period", "30s"),
+		)
+		modifyGenesis = func(cc ibc.ChainConfig, b []byte) ([]byte, error) {
+			b, err := cosmos.ModifyGenesis(genesisOverrides)(cc, b)
+			if err != nil {
+				return nil, err
+			}
+			b, err = sjson.SetBytes(b, "app_state.epochs.epochs.#(identifier==\"day\").duration", "120s")
+			if err != nil {
+				return nil, err
+			}
+			return sjson.SetBytes(b, "app_state.epochs.epochs.#(identifier==\"stride_epoch\").duration", "30s")
+		}
+	}
+
 	return &interchaintest.ChainSpec{
 		Name:          chainType,
 		Version:       version,
@@ -188,8 +215,8 @@ func createConsumerChainSpec(ctx context.Context, provider *cosmos.CosmosChain, 
 		ChainConfig: ibc.ChainConfig{
 			Denom:         denom,
 			GasPrices:     "0.005" + denom,
-			ChainID:       chainID,
 			GasAdjustment: 2.0,
+			ChainID:       chainID,
 			ConfigFileOverrides: map[string]any{
 				"config/config.toml": createConfigToml(),
 			},
@@ -213,7 +240,7 @@ func createConsumerChainSpec(ctx context.Context, provider *cosmos.CosmosChain, 
 						Denom:  denom,
 					}
 			},
-			ModifyGenesis: cosmos.ModifyGenesis(genesisOverrides),
+			ModifyGenesis: modifyGenesis,
 			ConsumerCopyProviderKey: func(i int) bool {
 				return shouldCopyProviderKey[i]
 			},
@@ -221,7 +248,7 @@ func createConsumerChainSpec(ctx context.Context, provider *cosmos.CosmosChain, 
 	}
 }
 
-func setupRelayerKeys(ctx context.Context, t *testing.T, relayer ibc.Relayer, wallet ibc.Wallet, chain *cosmos.CosmosChain) error {
+func setupRelayerKeys(ctx context.Context, t *testing.T, relayer ibc.Relayer, wallet ibc.Wallet, chain Chain) error {
 	rep := GetRelayerExecReporter(ctx)
 	rpcAddr, grpcAddr := chain.GetRPCAddress(), chain.GetGRPCAddress()
 	if !relayer.UseDockerNetwork() {
@@ -244,7 +271,7 @@ func setupRelayerKeys(ctx context.Context, t *testing.T, relayer ibc.Relayer, wa
 	return nil
 }
 
-func connectChains(ctx context.Context, t *testing.T, provider *cosmos.CosmosChain, consumer *cosmos.CosmosChain, relayer ibc.Relayer) {
+func connectChains(ctx context.Context, t *testing.T, provider Chain, consumer Chain, relayer ibc.Relayer) {
 	icsPath := RelayerICSPathFor(provider, consumer)
 	rep := GetRelayerExecReporter(ctx)
 	require.NoError(t, relayer.GeneratePath(ctx, rep, consumer.Config().ChainID, provider.Config().ChainID, icsPath))
@@ -298,8 +325,8 @@ func connectChains(ctx context.Context, t *testing.T, provider *cosmos.CosmosCha
 	}, 2*time.Minute, 10*time.Second)
 }
 
-func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, provider *cosmos.CosmosChain) time.Time {
-	spawnTime := time.Now().Add(3 * time.Minute)
+func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, provider Chain) time.Time {
+	spawnTime := time.Now().Add(120 * time.Second)
 	prop := ccvclient.ConsumerAdditionProposalJSON{
 		Title:         fmt.Sprintf("Addition of %s consumer chain", chainID),
 		Summary:       "Proposal to add new consumer chain",
@@ -319,6 +346,6 @@ func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string,
 	}
 	propTx, err := provider.ConsumerAdditionProposal(ctx, VALIDATOR_MONIKER, prop)
 	require.NoError(t, err)
-	PassProposal(ctx, t, provider, propTx.ProposalID)
+	require.NoError(t, PassProposal(ctx, provider, propTx.ProposalID))
 	return spawnTime
 }

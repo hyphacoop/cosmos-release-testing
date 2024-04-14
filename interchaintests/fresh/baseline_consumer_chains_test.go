@@ -14,19 +14,19 @@ func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, sh
 	provider, relayer := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
 	consumer := fresh.AddConsumerChain(ctx, t, provider, relayer, otherChain, otherChainVersion, fresh.CONSUMER_DENOM, shouldCopyProviderKey)
 
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, consumer, relayer)
 
 	fresh.UpgradeChain(ctx, t, provider, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
 	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
-	fresh.SetEpoch(ctx, t, provider, 1)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer)
+	require.NoError(t, fresh.SetEpoch(ctx, provider, 1))
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, consumer, relayer)
 
 	consumer2 := fresh.AddConsumerChain(ctx, t, provider, relayer, otherChain, otherChainVersion, fresh.CONSUMER_DENOM, shouldCopyProviderKey)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer2, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer2, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, consumer2, relayer)
 	fresh.ValidatorJailedTest(ctx, t, provider, consumer2, relayer)
 }
@@ -57,19 +57,38 @@ func TestMainnetConsumerChainsWithV16Upgrade(t *testing.T) {
 	neutron := fresh.AddConsumerChain(ctx, t, provider, relayer, "neutron", neutronVersion, fresh.NEUTRON_DENOM, []bool{true, true, true})
 	stride := fresh.AddConsumerChain(ctx, t, provider, relayer, "stride", strideVersion, fresh.STRIDE_DENOM, []bool{true, true, true})
 
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, neutron, relayer)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, stride, relayer)
 
 	fresh.UpgradeChain(ctx, t, provider, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
 	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
-	fresh.SetEpoch(ctx, t, provider, 1)
+	require.NoError(t, fresh.SetEpoch(ctx, provider, 1))
 
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, neutron, relayer)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, relayer, 1)
 	fresh.IBCTest(ctx, t, provider, stride, relayer)
+}
+
+func TestEpochsAfterV16(t *testing.T) {
+	ctx, err := fresh.NewTestContext(t)
+	require.NoError(t, err)
+
+	provider, relayer := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
+	consumer := fresh.AddConsumerChain(ctx, t, provider, relayer, "ics-consumer", "v4.0.0", fresh.CONSUMER_DENOM, []bool{true, true, true})
+
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 1)
+
+	fresh.UpgradeChain(ctx, t, provider, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+
+	require.NoError(t, fresh.SetEpoch(ctx, provider, 20))
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 20)
+
+	require.Error(t, fresh.SetEpoch(ctx, provider, 0))
 }

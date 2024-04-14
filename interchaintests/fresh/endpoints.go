@@ -7,11 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/stretchr/testify/require"
 )
 
-func APIEndpointsTest(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain) {
+func APIEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 	wallets, err := GetValidatorWallets(ctx, chain)
 	require.NoError(t, err)
 	const proposalID = "1"
@@ -57,7 +56,7 @@ func APIEndpointsTest(ctx context.Context, t *testing.T, chain *cosmos.CosmosCha
 	}
 }
 
-func RPCEndpointsTest(ctx context.Context, t *testing.T, chain *cosmos.CosmosChain) {
+func RPCEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 	tests := []struct {
 		name string
 		path string

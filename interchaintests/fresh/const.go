@@ -3,8 +3,6 @@ package fresh
 import (
 	"fmt"
 	"time"
-
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 )
 
 const (
@@ -32,10 +30,10 @@ func getValidatorStake() [NUM_VALIDATORS]int64 {
 	return [NUM_VALIDATORS]int64{80_000_000, 12_000_000, 8_000_000}
 }
 
-func RelayerTransferPathFor(chainA, chainB *cosmos.CosmosChain) string {
+func RelayerTransferPathFor(chainA, chainB Chain) string {
 	return fmt.Sprintf("tx-%s-%s", chainA.Config().ChainID, chainB.Config().ChainID)
 }
 
-func RelayerICSPathFor(chainA, chainB *cosmos.CosmosChain) string {
+func RelayerICSPathFor(chainA, chainB Chain) string {
 	return fmt.Sprintf("ics-%s-%s", chainA.Config().ChainID, chainB.Config().ChainID)
 }
