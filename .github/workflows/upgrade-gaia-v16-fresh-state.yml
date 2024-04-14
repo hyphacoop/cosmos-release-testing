@@ -565,7 +565,7 @@ jobs:
           echo "epoch: $current_epoch"
           elapsed_time=$(echo "$current_epoch - $vesting_start_time" | bc)
           echo "elapsed_time: $elapsed_time"
-          vested_ratio=$(echo "($elapsed_time/$vesting_duration)/1" | bc)
+          vested_ratio=$(echo "$elapsed_time/$vesting_duration" | bc)
           echo "vested ratio: $vested_ratio"
           vested_amount=$(echo "$vested_ratio * $VESTING_DELEGATED_AMOUNT" | bc -l)
           echo "vested amount: $vested_amount"
