@@ -567,7 +567,7 @@ jobs:
           echo "elapsed_time: $elapsed_time"
           vested_ratio=$(echo "$elapsed_time / $vesting_duration" | bc -l)
           echo "vested ratio: $vested_ratio"
-          vested_amount=$(echo "$vested_ratio * $VESTING_DELEGATED_AMOUNT" | bc -l)
+          vested_amount=$(echo "$vested_ratio * $VESTING_DELEGATED_AMOUNT" | bc)
           echo "vested amount: $vested_amount"
 
           $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
