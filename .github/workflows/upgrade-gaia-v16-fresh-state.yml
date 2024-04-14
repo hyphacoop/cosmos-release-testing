@@ -618,8 +618,16 @@ jobs:
           echo "txhash: $txhash"
 
           sleep $COMMIT_TIMEOUT
-          $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[]'
           $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
+          liquid_tokens=$($CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
+          echo "liquid tokens: $liquid_tokens"
+          if [[ "$liquid_tokens" -gt "0" ]]; then
+            echo "PASS: Greater than zero amount in liquid tokens balance."
+          else
+            echo "FAIL: No liquid tokens balance."
+            exit 0
+          fi
+
 
   # Baseline-3a-icsv310:
   #   runs-on: ubuntu-22.04
