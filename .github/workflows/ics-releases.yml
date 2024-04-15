@@ -148,6 +148,7 @@
             run: scripts/ics/setup_relayer.sh
           - name: Download consumer chain binaries
             run: |
+              wget $CONSUMER_CHAIN_V330_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V330_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V330_BINARY
               wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
