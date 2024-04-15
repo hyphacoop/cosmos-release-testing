@@ -433,37 +433,42 @@
             scripts/start_chain_secondary.sh
         - name: Generate osmosis-1 channels
           env:
+            TARGET_CHAIN_ID: osmosis-1
             CLIENT_COUNT: 0
             CHANNEL_START: 0
-            CHANNEL_END: 191
+            CHANNEL_END: 141
+            TRANSFER_CHANNEL: channel-141
+            RPC_PORT: 27011
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID osmosis-1 0 0 10
-            $CHAIN_BINARY tx ibc-transfer transfer transfer channel-10 $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --home /home/runner/.osmosis
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        # - name: Start core-1 chain
-        #   env:
-        #     CHAIN_SERVICE: core.service
-        #     CHAIN_HOME: /home/runner/.core
-        #     CHAIN_ID: core-1
-        #     API_PORT: 25021
-        #     GRPC_PORT: 26021
-        #     RPC_PORT: 27021
-        #     P2P_PORT: 28021
-        #     PPROF_PORT: 29021
-        #   run: |
-        #     scripts/start_chain_secondary.sh
-        # - name: Generate core-1 channels
-        #   env:
-        #     CLIENT_COUNT: 1
-        #     CHANNEL_START: 143
-        #     CHANNEL_END: 191
-        #   run: |
-        #     scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID osmosis-1 1 143 191
-        #     $CHAIN_BINARY tx ibc-transfer transfer transfer channel-10 $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-        #     sleep 10
-        #     $CHAIN_BINARY q bank balances $WALLET_1 --home /home/runner/.osmosis
+        - name: Start core-1 chain
+          env:
+            CHAIN_SERVICE: core.service
+            CHAIN_HOME: /home/runner/.core
+            CHAIN_ID: core-1
+            API_PORT: 25021
+            GRPC_PORT: 26021
+            RPC_PORT: 27021
+            P2P_PORT: 28021
+            PPROF_PORT: 29021
+          run: |
+            scripts/start_chain_secondary.sh
+        - name: Generate core-1 channels
+          env:
+            CLIENT_COUNT: 1
+            CHANNEL_START: 142
+            CHANNEL_END: 191
+            TRANSFER_CHANNEL: channel-190
+            RPC_PORT: 27021
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
         
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
