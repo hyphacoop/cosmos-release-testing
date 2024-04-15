@@ -462,7 +462,7 @@
             TARGET_CHAIN_ID: core-1
             CLIENT_COUNT: 1
             CHANNEL_START: 142
-            CHANNEL_END: 191
+            CHANNEL_END: 190
             TRANSFER_CHANNEL: channel-190
             RPC_PORT: 27021
           run: |
@@ -488,9 +488,113 @@
             TARGET_CHAIN_ID: injective-1
             CLIENT_COUNT: 2
             CHANNEL_START: 191
-            CHANNEL_END: 221
+            CHANNEL_END: 220
             TRANSFER_CHANNEL: channel-220
             RPC_PORT: 27031
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+
+        - name: Start secret-4 chain
+          env:
+            CHAIN_SERVICE: secret.service
+            CHAIN_HOME: /home/runner/.secret
+            CHAIN_ID: secret-4
+            API_PORT: 25041
+            GRPC_PORT: 26041
+            RPC_PORT: 27041
+            P2P_PORT: 28041
+            PPROF_PORT: 29041
+          run: |
+            scripts/start_chain_secondary.sh
+        - name: Generate secret-4 channels
+          env:
+            TARGET_CHAIN_ID: secret-4
+            CLIENT_COUNT: 3
+            CHANNEL_START: 221
+            CHANNEL_END: 235
+            TRANSFER_CHANNEL: channel-235
+            RPC_PORT: 27041
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+
+        - name: Start kaiyo-1 chain
+          env:
+            CHAIN_SERVICE: kaiyo.service
+            CHAIN_HOME: /home/runner/.kaiyo
+            CHAIN_ID: kaiyo-1
+            API_PORT: 25051
+            GRPC_PORT: 26051
+            RPC_PORT: 27051
+            P2P_PORT: 28051
+            PPROF_PORT: 29051
+          run: |
+            scripts/start_chain_secondary.sh
+        - name: Generate kaiyo-1 channels
+          env:
+            TARGET_CHAIN_ID: kaiyo-1
+            CLIENT_COUNT: 4
+            CHANNEL_START: 236
+            CHANNEL_END: 343
+            TRANSFER_CHANNEL: channel-343
+            RPC_PORT: 27051
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+
+        - name: Start stride-1 chain
+          env:
+            CHAIN_SERVICE: stride.service
+            CHAIN_HOME: /home/runner/.stride
+            CHAIN_ID: stride-1
+            API_PORT: 25061
+            GRPC_PORT: 26061
+            RPC_PORT: 27061
+            P2P_PORT: 28061
+            PPROF_PORT: 29061
+          run: |
+            scripts/start_chain_secondary.sh
+        - name: Generate stride-1 channels
+          env:
+            TARGET_CHAIN_ID: stride-1
+            CLIENT_COUNT: 5
+            CHANNEL_START: 344
+            CHANNEL_END: 391
+            TRANSFER_CHANNEL: channel-391
+            RPC_PORT: 27061
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+
+        - name: Start neutron-1 chain
+          env:
+            CHAIN_SERVICE: neutron.service
+            CHAIN_HOME: /home/runner/.neutron
+            CHAIN_ID: neutron-1
+            API_PORT: 25071
+            GRPC_PORT: 26071
+            RPC_PORT: 27071
+            P2P_PORT: 28071
+            PPROF_PORT: 29071
+          run: |
+            scripts/start_chain_secondary.sh
+        - name: Generate neutron-1 channels
+          env:
+            TARGET_CHAIN_ID: neutron-1
+            CLIENT_COUNT: 6
+            CHANNEL_START: 392
+            CHANNEL_END: 569
+            TRANSFER_CHANNEL: channel-569
+            RPC_PORT: 27071
           run: |
             scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
