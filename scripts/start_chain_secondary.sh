@@ -97,7 +97,7 @@ echo "After=network-online.target"          | sudo tee /etc/systemd/system/$CHAI
 echo ""                                     | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
-echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_SECONDARY_SECONDARY start --x-crisis-skip-assert-invariants --home $CHAIN_HOME" | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_SECONDARY start --x-crisis-skip-assert-invariants --home $CHAIN_HOME" | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
 echo ""                                     | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
