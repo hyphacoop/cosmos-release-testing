@@ -76,7 +76,7 @@
           # Consumer chain variables
           DOWNTIME_BLOCKS: 100000
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-          HERMES_VERSION: v1.7.3
+          HERMES_VERSION: v1.8.2
           PROVIDER_V3: false
           PROVIDER_V4: false
           CONSUMER_V120: false

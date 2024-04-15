@@ -17,14 +17,14 @@ hermes keys add --chain $CHAIN_ID --mnemonic-file mnemonic.txt
 hermes keys add --chain v330-one --mnemonic-file mnemonic.txt
     
 echo "Creating service..."
-sudo touch /etc/systemd/system/$RELAYER.service
+sudo touch /etc/systemd/system/hermes.service
 echo "[Unit]"                               | sudo tee /etc/systemd/system/$RELAYER.service
 echo "Description=Relayer service"          | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo "After=network-online.target"          | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo ""                                     | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+echo "ExecStart=$HOME/.hermes/hermes start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo ""                                     | sudo tee /etc/systemd/system/$RELAYER.service -a
@@ -32,4 +32,4 @@ echo "[Install]"                            | sudo tee /etc/systemd/system/$RELA
 echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
 sudo systemctl daemon-reload
-sudo systemctl enable $RELAYER
+sudo systemctl enable hermes
