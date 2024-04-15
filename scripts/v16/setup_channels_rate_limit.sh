@@ -7,7 +7,7 @@ start_channel=$4
 end_channel=$5
 
 hermes create client --host-chain $CHAIN_1 --reference-chain $CHAIN_2
-hermes create client --reference-chain $CHAIN_2 --host-chain $CHAIN_1
+hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
 hermes create connection --a-chain $CHAIN_1 --a-client 07-tendermint-$client_count --b-client 07-tendermint-0
 
 for i in {$start_channel..$end_channel}
