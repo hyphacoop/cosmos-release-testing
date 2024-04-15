@@ -3,6 +3,7 @@ package fresh
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -14,50 +15,63 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/gogoproto/proto"
 	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
+	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/require"
 )
 
-func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host Chain, relayer ibc.Relayer, isUpgraded bool) {
-	wallets, err := GetValidatorWallets(ctx, controller)
-	require.NoError(t, err)
-	srcAddress := wallets[0].Address
-
-	wallets, err = GetValidatorWallets(ctx, host)
-	require.NoError(t, err)
-	dstAddress := wallets[0].Address
-
+func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer ibc.Relayer, srcAddress string, initialFunds int64) (string, error) {
 	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
-	require.NoError(t, err)
+	if err != nil {
+		return "", err
+	}
 	srcConnection := srcChannel.ConnectionHops[0]
 
 	_, err = controller.Validators[0].ExecTx(ctx, srcAddress,
 		"interchain-accounts", "controller", "register",
 		srcConnection,
 	)
+	if err != nil {
+		return "", err
+	}
+
+	icaAddress := GetICAAddress(ctx, controller, srcAddress, srcConnection)
+	if icaAddress == "" {
+		return "", fmt.Errorf("ICA address not found")
+	}
+
+	err = host.SendFunds(ctx, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
+		Denom:   host.Config().Denom,
+		Amount:  sdkmath.NewInt(initialFunds),
+		Address: icaAddress,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return icaAddress, nil
+}
+
+func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host Chain, relayer ibc.Relayer, isUpgraded bool) {
+	const amountToSend = int64(3_300_000_000)
+	wallets, err := GetValidatorWallets(ctx, controller)
+	require.NoError(t, err)
+	srcAddress := wallets[0].Address
+
+	icaAddress, err := SetupICAAccount(ctx, controller, host, relayer, srcAddress, amountToSend)
 	if !isUpgraded {
 		require.Error(t, err)
 		return
 	}
 	require.NoError(t, err)
 
-	icaAddress := GetICAAddress(ctx, t, controller, srcAddress, srcConnection)
-	require.NotEmpty(t, icaAddress)
-
-	amountToSend := int64(3_300_000_000)
-
-	_, err = controller.SendIBCTransfer(ctx, srcChannel.ChannelID, VALIDATOR_MONIKER, ibc.WalletAmount{
-		Denom:   DENOM,
-		Amount:  sdkmath.NewInt(amountToSend),
-		Address: icaAddress,
-	}, ibc.TransferOptions{})
-	require.NoError(t, err)
-
-	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RelayerTransferPathFor(controller, host), srcChannel.ChannelID))
-
 	balances, err := host.AllBalances(ctx, icaAddress)
 	require.NoError(t, err)
 	require.NotEmpty(t, balances)
+
+	wallets, err = GetValidatorWallets(ctx, host)
+	require.NoError(t, err)
+	dstAddress := wallets[0].Address
 
 	var ibcStakeDenom string
 	for _, c := range balances {
@@ -80,6 +94,10 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 		}
 	}
 	icaAmount := int64(amountToSend / 3)
+
+	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
+	require.NoError(t, err)
+	srcConnection := srcChannel.ConnectionHops[0]
 
 	sendICATx(ctx, t, controller, srcAddress, dstAddress, icaAddress, srcConnection, icaAmount, ibcStakeDenom)
 	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RelayerTransferPathFor(controller, host), srcChannel.ChannelID))
@@ -123,7 +141,7 @@ func sendICATx(ctx context.Context, t *testing.T, controller Chain, srcAddress s
 	require.NoError(t, err)
 }
 
-func GetICAAddress(ctx context.Context, t *testing.T, controller Chain, srcAddress string, srcConnection string) string {
+func GetICAAddress(ctx context.Context, controller Chain, srcAddress string, srcConnection string) string {
 	var icaAddress string
 
 	// it takes a moment for it to be created
@@ -136,13 +154,13 @@ func GetICAAddress(ctx context.Context, t *testing.T, controller Chain, srcAddre
 			srcAddress, srcConnection,
 		)
 		if err != nil {
-			t.Logf("error querying interchain account: %s", err)
+			GetLogger(ctx).Sugar().Warnf("error querying interchain account: %s", err)
 			continue
 		}
 		result := map[string]interface{}{}
 		err = json.Unmarshal(stdout, &result)
 		if err != nil {
-			t.Logf("error unmarshalling interchain account: %s", err)
+			GetLogger(ctx).Sugar().Warnf("error unmarshalling interchain account: %s", err)
 			continue
 		}
 		icaAddress = result["address"].(string)
