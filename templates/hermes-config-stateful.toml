@@ -48,7 +48,7 @@ rpc_addr = 'http://localhost:27201'
 grpc_addr = 'http://localhost:26201'
 websocket_addr = 'ws://localhost:27201/websocket'
 rpc_timeout = '15s'
-account_prefix = 'cosmos'
+account_prefix = 'consumer'
 key_name = 'wallet'
 store_prefix = 'ibc'
 gas_price = { price = 0.0, denom = 'ucon' }
