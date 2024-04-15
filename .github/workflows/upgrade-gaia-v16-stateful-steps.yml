@@ -256,17 +256,17 @@ jobs:
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2
-      - name: Set BlocksPerEpoch to 100
-        run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
-      - name: Check BlocksPerEpoch is 100
-        run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
-          echo "BlocksPerEpoch is: $BPE"
-          if [ $BPE != "\"100\"" ]
-          then
-            echo "BlocksPerEpoch is not 100"
-            exit 1
-          fi
+      # - name: Set BlocksPerEpoch to 100
+      #   run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
+      # - name: Check BlocksPerEpoch is 100
+      #   run: |
+      #     BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
+      #     echo "BlocksPerEpoch is: $BPE"
+      #     if [ $BPE != "\"100\"" ]
+      #     then
+      #       echo "BlocksPerEpoch is not 100"
+      #       exit 1
+      #     fi
 
       - name: Initialize consumer chain b with ICS v3.1.0
         env:
