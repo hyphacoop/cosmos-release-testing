@@ -459,6 +459,7 @@
             scripts/start_chain_secondary.sh
         - name: Generate core-1 channels
           env:
+            TARGET_CHAIN_ID: core-1
             CLIENT_COUNT: 1
             CHANNEL_START: 142
             CHANNEL_END: 191
@@ -470,6 +471,32 @@
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
         
+        - name: Start injective-1 chain
+          env:
+            CHAIN_SERVICE: injective.service
+            CHAIN_HOME: /home/runner/.injective
+            CHAIN_ID: injective-1
+            API_PORT: 25031
+            GRPC_PORT: 26031
+            RPC_PORT: 27031
+            P2P_PORT: 28031
+            PPROF_PORT: 29031
+          run: |
+            scripts/start_chain_secondary.sh
+        - name: Generate injective-1 channels
+          env:
+            TARGET_CHAIN_ID: injective-1
+            CLIENT_COUNT: 2
+            CHANNEL_START: 191
+            CHANNEL_END: 221
+            TRANSFER_CHANNEL: channel-220
+            RPC_PORT: 27031
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
           env:
