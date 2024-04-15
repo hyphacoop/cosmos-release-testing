@@ -431,9 +431,12 @@
             PPROF_PORT: 29011
           run: |
             scripts/start_chain_secondary.sh
-        # - name: Generate osmosis-1 channels
-          # run: |
-            # hermes create client --host-chain $CHAIN_ID --reference-chain $CHAIN_H_ID 
+        - name: Generate osmosis-1 channels
+          run: |
+            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID osmosis-1 0 1 11
+            $CHAIN_BINARY tx ibc-transfer transfer transfer channel-10 $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 10
+            $CHAIN_BINARY q bank balances $WALLET_1 --home /home/runner/.osmosis
 
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
@@ -453,11 +456,6 @@
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
             
-        - name: Check secondary chain
-          run: |
-            journalctl -u osmosis.service | tail -n 100
-  
-  
     # Baseline-2-globalfee:
     #   runs-on: ubuntu-22.04
     #   needs: set-version-matrix
