@@ -12,6 +12,7 @@ hermes create connection --a-chain $CHAIN_1 --a-client 07-tendermint-$client_cou
 
 for i in {$start_channel..$end_channel}
 do
+    echo "creating channel-$i..."
     hermes create channel --a-chain $CHAIN_1 --a-connection connection-$client_count --a-port transfer --b-port transfer
 done
 sudo systemctl restart hermes
