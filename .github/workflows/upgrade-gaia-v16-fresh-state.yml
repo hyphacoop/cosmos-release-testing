@@ -342,10 +342,10 @@
   
     v16-2-ibc-rate-limit:
       runs-on: ubuntu-22.04
-      needs: set-version-matrix-cosmovisor
+      needs: set-version-matrix
       strategy:
         matrix:
-          ${{ fromJSON(needs.set-version-matrix-cosmovisor.outputs.upgrade_versions) }}
+          ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
         fail-fast: false
       env:
         COSMOVISOR_VERSION: ${{ matrix.cv_version }}
@@ -393,6 +393,9 @@
             go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
             echo "COSMOVISOR=true" >> $GITHUB_ENV
             echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Set up relayer
+          run: scripts/v16/setup_relayer_rate_limit.sh
+          
         - name: Start chain
           env:
             START_VERSION: ${{matrix.gaia_version}}
@@ -428,7 +431,10 @@
             PPROF_PORT: 29011
           run: |
             scripts/start_chain_secondary.sh
-  
+        # - name: Generate osmosis-1 channels
+          # run: |
+            # hermes 
+
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
           env:
