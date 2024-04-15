@@ -143,7 +143,7 @@
             run: |
               $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.'
           - name: Set up relayer
-            run: tests/ics_tests/setup_relayer.sh
+            run: scripts/ics/setup_relayer.sh
           - name: Download consumer chain binaries
             run: |
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V330_BINARY
