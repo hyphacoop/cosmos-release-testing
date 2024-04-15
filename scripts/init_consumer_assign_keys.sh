@@ -20,6 +20,8 @@ $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_3
 $CHAIN_BINARY config node tcp://localhost:$CON3_RPC_PORT --home $CONSUMER_HOME_3
 $CONSUMER_CHAIN_BINARY init $MONIKER_3 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_3
 
+$CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
+
 echo "Submit key assignment tx..."
 CON1_PUBKEY=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1)
 CON2_PUBKEY=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_2)

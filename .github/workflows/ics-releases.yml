@@ -4,6 +4,10 @@
     on:
       workflow_dispatch:
       push:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     jobs:
       test-consumer-launches:
         runs-on: ubuntu-22.04
@@ -191,6 +195,7 @@
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
               scripts/init_consumer_assign_keys.sh
+              sleep 20
           - name: Prepare consumer v330-one
             env:
               CONSUMER_CHAIN_ID: v330-one
