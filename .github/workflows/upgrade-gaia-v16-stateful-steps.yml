@@ -164,14 +164,14 @@ jobs:
         env:
           START_VERSION: ${{inputs.gaia_version}}
           # ARCHIVE_URL: "https://files.polypore.xyz/archived-state/rs-testnet-provider/latest_v15.json.gz"
-          # ARCHIVE_URL: "https://files.polypore.xyz/archived-state/v15.2.0-19610700-stateful-upgrade.tar.gz"
+          ARCHIVE_URL: "https://files.polypore.xyz/archived-state/v15.2.0-19610700-stateful-upgrade.tar.gz"
           # Upgraded state
-          ARCHIVE_URL: "http://159.89.115.80/gaia-v15.tar.gz"
+          # ARCHIVE_URL: "http://159.89.115.80/gaia-v15.tar.gz"
         run: scripts/stateful/start_chain.sh
-      # - name: _Blocks produced after upgrade to v16
-      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 200 12600
-      - name: _Blocks produced after upgrade to v16 DEBUG VALUE
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 50 12600
+      - name: _Blocks produced after upgrade to v16
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 200 12600
+      # - name: _Blocks produced after upgrade to v16 DEBUG VALUE
+      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 50 12600
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
