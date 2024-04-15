@@ -143,6 +143,8 @@
             run: |
               $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.'
           - name: Set up relayer
+            env:
+              RELAYER: hermes
             run: scripts/ics/setup_relayer.sh
           - name: Download consumer chain binaries
             run: |
