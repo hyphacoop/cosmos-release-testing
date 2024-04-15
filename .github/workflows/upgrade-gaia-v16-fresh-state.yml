@@ -394,7 +394,7 @@
             echo "COSMOVISOR=true" >> $GITHUB_ENV
             echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
         - name: Set up relayer
-          run: scripts/v16/setup_relayer_rate_limit.sh
+          run: scripts/gaia-v16/setup_relayer_rate_limit.sh
           
         - name: Start chain
           env:
@@ -440,7 +440,7 @@
             TRANSFER_CHANNEL: channel-141
             RPC_PORT: 27011
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -466,7 +466,7 @@
             TRANSFER_CHANNEL: channel-190
             RPC_PORT: 27021
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -492,7 +492,7 @@
             TRANSFER_CHANNEL: channel-220
             RPC_PORT: 27031
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -518,7 +518,7 @@
             TRANSFER_CHANNEL: channel-235
             RPC_PORT: 27041
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -544,7 +544,7 @@
             TRANSFER_CHANNEL: channel-343
             RPC_PORT: 27051
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -570,7 +570,7 @@
             TRANSFER_CHANNEL: channel-391
             RPC_PORT: 27061
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -596,7 +596,7 @@
             TRANSFER_CHANNEL: channel-569
             RPC_PORT: 27071
           run: |
-            scripts/v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
             $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep 10
             $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
@@ -618,6 +618,13 @@
         - name: _Blocks produced after upgrade
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+
+        - name: _Test IBC rate limits - osmosis-1
+          env:
+            CHANNEL: channel-141
+            RATE: 0.05
+          run: |
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
             
     # Baseline-2-globalfee:
     #   runs-on: ubuntu-22.04
