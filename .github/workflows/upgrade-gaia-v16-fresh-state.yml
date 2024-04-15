@@ -133,7 +133,7 @@
     # Relayer variables
     
     RELAYER: hermes
-    HERMES_VERSION: v1.8.0
+    HERMES_VERSION: v1.8.2
     RLY_VERSION: "2.5.0"
   jobs:
     set-version-matrix:

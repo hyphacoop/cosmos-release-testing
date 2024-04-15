@@ -97,21 +97,21 @@ toml set --toml-path $CHAIN_HOME/config/config.toml fast_sync false
 
 echo "Setting up services..."
 
-sudo touch /etc/systemd/system/$SERVICE
-echo "[Unit]"                               | sudo tee /etc/systemd/system/$SERVICE
-echo "Description=Gaia service"             | sudo tee /etc/systemd/system/$SERVICE -a
-echo "After=network-online.target"          | sudo tee /etc/systemd/system/$SERVICE -a
-echo ""                                     | sudo tee /etc/systemd/system/$SERVICE -a
-echo "[Service]"                            | sudo tee /etc/systemd/system/$SERVICE -a
-echo "User=$USER"                           | sudo tee /etc/systemd/system/$SERVICE -a
-echo "ExecStart=$CHAIN_HOME/go/bin/$CHAIN_BINARY_SECONDARY start --x-crisis-skip-assert-invariants --home $CHAIN_HOME" | sudo tee /etc/systemd/system/$SERVICE -a
-echo "Restart=no"                           | sudo tee /etc/systemd/system/$SERVICE -a
-echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$SERVICE -a
-echo ""                                     | sudo tee /etc/systemd/system/$SERVICE -a
-echo "[Install]"                            | sudo tee /etc/systemd/system/$SERVICE -a
-echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$SERVICE -a
+sudo touch /etc/systemd/system/$CHAIN_SERVICE
+echo "[Unit]"                               | sudo tee /etc/systemd/system/$CHAIN_SERVICE
+echo "Description=Gaia service"             | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "After=network-online.target"          | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo ""                                     | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "[Service]"                            | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "User=$USER"                           | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "ExecStart=$CHAIN_HOME/go/bin/$CHAIN_BINARY_SECONDARY start --x-crisis-skip-assert-invariants --home $CHAIN_HOME" | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "Restart=no"                           | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo ""                                     | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "[Install]"                            | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
+echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$CHAIN_SERVICE -a
 
-sudo cat /etc/systemd/system/$SERVICE
+sudo cat /etc/systemd/system/$CHAIN_SERVICE
 
 sudo systemctl daemon-reload
-sudo systemctl enable $SERVICE --now
+sudo systemctl enable $CHAIN_SERVICE --now
