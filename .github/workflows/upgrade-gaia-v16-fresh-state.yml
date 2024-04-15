@@ -393,8 +393,8 @@
             go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
             echo "COSMOVISOR=true" >> $GITHUB_ENV
             echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Set up relayer
-          run: scripts/v16/setup_relayer_rate_limit.sh
+        # - name: Set up relayer
+          # run: scripts/v16/setup_relayer_rate_limit.sh
           
         - name: Start chain
           env:
@@ -433,7 +433,7 @@
             scripts/start_chain_secondary.sh
         # - name: Generate osmosis-1 channels
           # run: |
-            # hermes 
+            # hermes create client --host-chain $CHAIN_ID --reference-chain $CHAIN_H_ID 
 
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
