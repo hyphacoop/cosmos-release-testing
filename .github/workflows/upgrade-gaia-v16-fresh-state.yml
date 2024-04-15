@@ -393,8 +393,8 @@
             go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
             echo "COSMOVISOR=true" >> $GITHUB_ENV
             echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        # - name: Set up relayer
-          # run: scripts/v16/setup_relayer_rate_limit.sh
+        - name: Set up relayer
+          run: scripts/v16/setup_relayer_rate_limit.sh
           
         - name: Start chain
           env:
