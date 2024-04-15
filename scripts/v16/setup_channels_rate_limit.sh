@@ -14,5 +14,5 @@ for i in {$start_channel..$end_channel}
 do
     hermes create channel --a-chain $CHAIN_1 --a-connection connection-$client_count --a-port transfer --b-port transfer
 done
-systemctl restart hermes
+sudo systemctl restart hermes
 sleep 5

@@ -108,3 +108,4 @@ sudo cat /etc/systemd/system/$CHAIN_SERVICE
 
 sudo systemctl daemon-reload
 sudo systemctl enable $CHAIN_SERVICE --now
+sleep 10
