@@ -27,7 +27,7 @@
           BASE_FEES: 1500
           HIGH_FEES: 10000
           GAS: auto
-          GAS_ADJUSTMENT: 1.2
+          GAS_ADJUSTMENT: 1.618
           GAS_PRICE: 0.005
           VOTING_PERIOD: 10s
           # Provider node variables
