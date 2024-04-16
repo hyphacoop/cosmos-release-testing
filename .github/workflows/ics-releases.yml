@@ -127,7 +127,7 @@
             run: |
               echo "PROVIDER_V3=true" >> $GITHUB_ENV
           - name: Use legacy proposal command for v4
-            if: ${{ (matrix.provider == 'v4.0.0' || matrix.provider == 'v4.1.0-rc0') }}
+            if: ${{ (matrix.provider == 'v4.0.0' || matrix.provider == 'v4.1.0-rc2') }}
             run: |
               echo "PROVIDER_V4=true" >> $GITHUB_ENV
     
