@@ -208,11 +208,10 @@
               PROVIDER_VERSION: ${{ matrix.provider }}
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
-              export CONSUMER_V330=true
+              export CONSUMER_ICS=v3.3.0
               scripts/ics/prepare_consumer.sh
           - name: Start consumer chain v330-one
             env:
-              CONSUMER_CHAIN_ID: v330-one
               CONSUMER_SERVICE_1: v330-one-1.service
               CONSUMER_SERVICE_2: v330-one-2.service
               CONSUMER_SERVICE_3: v330-one-3.service
