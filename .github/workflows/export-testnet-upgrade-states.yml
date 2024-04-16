@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   export-release-testnet:
-    runs-on: self-hosted-ubuntu-22.04
+    runs-on: self-hosted-debian-12
     environment: export-rs-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
@@ -84,7 +84,7 @@ jobs:
           SERVICE_NAME: release-testnet
           CHAIN_ID: theta-testnet-001
           CHAIN_BINARY: 'gaiad'
-          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/public/genesis.json.gz
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/release/genesis.json.gz
           SEEDS: "639d50339d7045436c756a042906b9a69970913f@seed-01.theta-testnet.polypore.xyz:26656,3e506472683ceb7ed75c1578d092c79785c27857@seed-02.theta-testnet.polypore.xyz:26656"
           SYNC_RPC_1: https://rpc.state-sync-01.theta-testnet.polypore.xyz:443
           SYNC_RPC_2: https://rpc.state-sync-02.theta-testnet.polypore.xyz:443
@@ -227,8 +227,8 @@ jobs:
         with:
           name: export-release-testnet
           path: ~/artifact/
-  export-rs-testnet-provider:
-    runs-on: self-hosted-ubuntu-22.04
+  export-ics-testnet-provider:
+    runs-on: self-hosted-debian-12
     environment: export-rs-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
@@ -287,7 +287,7 @@ jobs:
 
       - name: Get current running gaiad version
         run: |
-          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.rs-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.ics-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Download binary from cosmos/gaia repo
@@ -301,10 +301,10 @@ jobs:
           SERVICE_NAME: provider
           CHAIN_ID: provider
           CHAIN_BINARY: 'gaiad'
-          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/replicated-security/provider/provider-genesis.json
-          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.rs-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.rs-testnet.polypore.xyz:26656"
-          SYNC_RPC_1: https://rpc.provider-state-sync-01.rs-testnet.polypore.xyz:443
-          SYNC_RPC_2: https://rpc.provider-state-sync-02.rs-testnet.polypore.xyz:443
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/interchain-security/provider/provider-genesis.json
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.ics-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.rs-testnet.polypore.xyz:26656"
+          SYNC_RPC_1: https://rpc.provider-state-sync-01.ics-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.provider-state-sync-02.ics-testnet.polypore.xyz:443
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
