@@ -16,6 +16,8 @@ CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.re
 
 echo "Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
 
+echo "Waiting for $wait blocks for epoch"
+CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 tests/test_block_production.sh localhost $CON1_RPC_PORT $wait
 
 if [ $PROVIDER_POWER != $CONSUMER_POWER ]; then
