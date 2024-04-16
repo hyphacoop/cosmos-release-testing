@@ -205,7 +205,7 @@
               CONSUMER_SERVICE_1: v330-one-1.service
               CONSUMER_SERVICE_2: v330-one-2.service
               CONSUMER_SERVICE_3: v330-one-3.service
-              PROVIDER_VERSION: ${{ matrix.provider }}
+              PROVIDER_ICS: ${{ matrix.provider }}
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
               export CONSUMER_ICS=v3.3.0
