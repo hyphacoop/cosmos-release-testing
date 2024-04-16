@@ -25,6 +25,7 @@ if [ "$CONSUMER_ICS" == "v3.3.0" ]; then
         echo "Patching for ICS compatibility: provider $PROVIDER_ICS | consumer $CONSUMER_ICS"
         ics-cd-transform genesis transform --to v3.3.x ccv.json > ccv-330-1.json
         cp ccv-330-1.json ccv.json
+    fi
 fi
 
 if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
