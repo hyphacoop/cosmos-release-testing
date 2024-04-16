@@ -46,6 +46,16 @@ fi
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
+if [[ "$result" == "0" ]]; then
+    echo "PASS: Transaction below rate limit was accepted."
+else
+    echo "FAIL: Transaction below rate limit was not accepted."
+    exit 1
+fi
+
+echo "Sending $amount..."
+result=$(test_transfer $amount)
+echo "test transfer result: $result"
 if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
