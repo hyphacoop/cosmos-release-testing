@@ -350,7 +350,7 @@
           - name: _Final CCV channel check> ICS v3.3.0
             env:
               CON1_RPC_PORT: 33021
-            run: tests/ics_tests/test_ccv.sh
+            run: tests/test_ccv_key_assignment.sh
         #   - name: _Final CCV channel check> ICS v4.0.0
         #     env:
         #       CON1_RPC_PORT: 27601
