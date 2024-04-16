@@ -321,7 +321,7 @@ jobs:
       - name: _VSC successful epoch> ICS conb1
         env:
           CON1_RPC_PORT: 27201
-        run: tests/stateful/test_ccv_epoch.sh 50
+        run: tests/stateful/test_ccv_epoch.sh 100
       - name: Stop services
         if: always()
         run: |
