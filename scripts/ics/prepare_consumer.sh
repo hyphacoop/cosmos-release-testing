@@ -21,15 +21,10 @@ jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv-optout.j
 cp ccv-reward.json ccv.json
 
 if [ "$CONSUMER_ICS" == "v3.3.0" ]; then
-    if [ "$PROVIDER_ICS" == "v4.0.0" ]; then
-        echo "Patching for ICS compatibility: provider v4.0.0 | consumer v3.3.0"
+    if [ "$PROVIDER_ICS" == "v4.0.0" || "$PROVIDER_ICS" == "v4.1.0-rc2" ]; then
+        echo "Patching for ICS compatibility: provider $PROVIDER_ICS | consumer $CONSUMER_ICS"
         ics-cd-transform genesis transform --to v3.3.x ccv.json > ccv-330-1.json
         cp ccv-330-1.json ccv.json
-    elif [ "$PROVIDER_ICS" == "v4.1.0-rc2" ]; then
-        echo "Patching for ICS compatibility: provider v4.1.0-rc2 | consumer v3.3.0"
-        ics-cd-transform genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-        cp ccv-330-1.json ccv.json
-    fi  
 fi
 
 if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
