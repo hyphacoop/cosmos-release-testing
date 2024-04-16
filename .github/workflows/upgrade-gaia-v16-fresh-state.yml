@@ -623,50 +623,57 @@
           env:
             CHANNEL: channel-141
             RATE: 0.05
+            RPC_PORT: 27011
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
             
         - name: _Test IBC rate limits - core-1
           env:
             CHANNEL: channel-190
             RATE: 0.01
+            RPC_PORT: 27021
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+           tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - injective-1
           env:
             CHANNEL: channel-220
             RATE: 0.01
+            RPC_PORT: 27031
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - secret-4
           env:
             CHANNEL: channel-235
             RATE: 0.01
+            RPC_PORT: 27041
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - kaiyo-1
           env:
             CHANNEL: channel-343
             RATE: 0.01
+            RPC_PORT: 27051
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - stride-1
           env:
             CHANNEL: channel-391
             RATE: 0.01
+            RPC_PORT: 27061
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - neutron-1
           env:
             CHANNEL: channel-569
             RATE: 0.01
+            RPC_PORT: 27071
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE
+            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
             
     # Baseline-2-globalfee:
     #   runs-on: ubuntu-22.04

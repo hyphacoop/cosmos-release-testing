@@ -3,6 +3,7 @@
 
 channel_id=$1
 rate_limit=$2
+rpc_port=$3
 
 echo "***** TESTING CHANNEL $channel_id RATE LIMIT: $rate_limit *****"
 
@@ -28,6 +29,8 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
+    sleep 10
+    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
 
@@ -38,6 +41,8 @@ result=$(test_transfer $amount)
 echo "test transfer result: $result"
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
+    sleep 10
+    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
@@ -48,6 +53,8 @@ result=$(test_transfer $amount)
 echo "test transfer result: $result"
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
+    sleep 10
+    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
@@ -60,5 +67,7 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
+    sleep 10
+    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
