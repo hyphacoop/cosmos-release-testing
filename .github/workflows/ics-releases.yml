@@ -100,6 +100,8 @@
           CONSUMER_CHAIN_V400_BINARY: consumerd_v4.0.0
           CONSUMER_CHAIN_V410_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v4.1.0-rc2/interchain-security-cd-linux
           CONSUMER_CHAIN_V410_BINARY: consumerd_v4.1.0-rc2
+          PROVIDER_ICS: ${{ matrix.provider }}
+          BLOCKS_PER_EPOCH: 1
         steps:
           - name: Consumer chain binary URLs
             run: |
@@ -131,6 +133,7 @@
             if: ${{ (matrix.provider == 'v4.0.0' || matrix.provider == 'v4.1.0-rc2') }}
             run: |
               echo "PROVIDER_V4=true" >> $GITHUB_ENV
+              
     
           - name: Start chain
             env:
@@ -204,7 +207,7 @@
               CONSUMER_SERVICE_1: v330-one-1.service
               CONSUMER_SERVICE_2: v330-one-2.service
               CONSUMER_SERVICE_3: v330-one-3.service
-              PROVIDER_ICS: ${{ matrix.provider }}
+              # PROVIDER_ICS: ${{ matrix.provider }}
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
               export CONSUMER_ICS=v3.3.0

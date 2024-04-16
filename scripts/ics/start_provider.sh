@@ -84,6 +84,11 @@ jq -r --arg denom "$DENOM" '.app_state.staking.params.bond_denom |= $denom' mint
 jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $denom' bond_denom.json > reward_reg.json
 cp reward_reg.json $HOME_1/config/genesis.json
 
+echo "Setting blocks_per_epoch=1..."
+if [ "$PROVIDER_ICS" == "v4.1.0-rc2" ]; then
+    jq -r --arg bpe "$BLOCKS_PER_EPOCH" '.app_state.provider.params.blocks_per_epoch |= $bpe' $HOME_1/config/genesis.json > blocks-per-epoch.json
+    cp blocks-per-epoch.json $HOME_1/config/genesis.json
+fi
 
 if $PROVIDER_V3 ; then
     echo "Patching genesis file for fast governance (v3)..."
