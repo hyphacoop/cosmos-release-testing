@@ -256,7 +256,7 @@ jobs:
           echo "Connection ID: $connection_id"
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
-          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 WALLET_1 
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 WALLET_1 WALLET_CONSUMER_1
       # - name: Set BlocksPerEpoch to 100
       #   run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
       # - name: Check BlocksPerEpoch is 100
@@ -320,7 +320,7 @@ jobs:
           echo "Connection ID: $connection_id"
           channel_id=$(hermes --json query connection channels --chain local-testnet --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
-          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 3
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 3 WALLET_1 WALLET_CONSUMER_1
       - name: Stop services
         if: always()
         run: |
