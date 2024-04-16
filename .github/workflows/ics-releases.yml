@@ -82,6 +82,7 @@
           DOWNTIME_BLOCKS: 100000
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           HERMES_VERSION: v1.8.2
+          RELAYER: hermes
           PROVIDER_V3: false
           PROVIDER_V4: false
           CONSUMER_V120: false
@@ -148,8 +149,6 @@
             run: |
               $CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.'
           - name: Set up relayer
-            env:
-              RELAYER: hermes
             run: scripts/ics/setup_relayer.sh
           - name: Download consumer chain binaries
             run: |
