@@ -20,16 +20,12 @@ $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_3
 $CHAIN_BINARY config node tcp://localhost:$CON3_RPC_PORT --home $CONSUMER_HOME_3
 $CONSUMER_CHAIN_BINARY init $MONIKER_3 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_3
 
-$CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
-
 echo "Submit key assignment tx..."
 CON1_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1)
-echo "val1 pubkey: $CON1_PUBKEY"
 CON2_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_2)
 CON3_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_3)
-hash=$($CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+$CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
 sleep $COMMIT_TIMEOUT
-$CHAIN_BINARY q tx $hash --home $HOME_1 -o json | jq '.'
 $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
 sleep $COMMIT_TIMEOUT
 $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y

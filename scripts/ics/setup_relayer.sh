@@ -9,7 +9,7 @@ cp hermes ~/.hermes/hermes
 export PATH="$PATH:~/.hermes"
 
 echo "Setting up Hermes config..."
-cp templates/hermes-config.toml ~/.hermes/config.toml
+cp templates/ics/hermes-config.toml ~/.hermes/config.toml
 
 echo "Adding relayer keys..."
 echo $MNEMONIC_RELAYER > mnemonic.txt
