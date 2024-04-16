@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
-	"strings"
 	"testing"
 	"time"
 
@@ -41,22 +40,6 @@ func LSMAccountSetup(ctx context.Context, t *testing.T, provider Chain) map[stri
 	}
 	require.NoError(t, eg.Wait())
 	return wallets
-}
-
-func strToSDKInt(t *testing.T, s string) sdkmath.Int {
-	t.Helper()
-	s, _, _ = strings.Cut(s, ".")
-	i, ok := sdkmath.NewIntFromString(s)
-	require.Truef(t, ok, "s: %s", s)
-	return i
-}
-
-func checkAMinusBEqualsX(t *testing.T, a, b string, x int64) {
-	t.Helper()
-	// trim the .00s from the string
-	intA := strToSDKInt(t, a)
-	intB := strToSDKInt(t, b)
-	require.Equal(t, x, intA.Sub(intB).Int64())
 }
 
 func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain, relayer ibc.Relayer, lsmWallets map[string]ibc.Wallet) {

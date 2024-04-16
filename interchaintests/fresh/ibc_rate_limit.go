@@ -21,11 +21,19 @@ func IBCTransferRateLimitedTest(
 	chainB Chain,
 	channel *ibc.ChannelOutput,
 ) {
-	addRateLimit(ctx, t, chainA, channel.ChannelID)
-	sendRateLimitedTx(ctx, t, chainA, chainB, channel, true)
+	addRateLimit(ctx, t, chainA, channel.ChannelID, 1)
+	sendRateLimitedTx(ctx, t, chainA, chainB, channel, 1, false)
 
-	updateRateLimit(ctx, t, chainA, channel.ChannelID)
-	sendRateLimitedTx(ctx, t, chainA, chainB, channel, false)
+	updateRateLimit(ctx, t, chainA, channel.ChannelID, 2)
+	sendRateLimitedTx(ctx, t, chainA, chainB, channel, 2, false)
+	sendRateLimitedTx(ctx, t, chainA, chainB, channel, 1, true)
+
+	outflow := chainA.QueryJSON(ctx, t, "flow.outflow", "ratelimit", "rate-limit", channel.ChannelID, "--denom", DENOM).String()
+	channelValue := chainA.QueryJSON(ctx, t, "flow.channel_value", "ratelimit", "rate-limit", channel.ChannelID, "--denom", DENOM).String()
+	ratio := strToSDKInt(t, outflow).Mul(sdkmath.NewInt(100)).Quo(strToSDKInt(t, channelValue)).Int64()
+	require.Equal(t, int64(1), ratio)
+
+	sendRateLimitedTx(ctx, t, chainA, chainB, channel, 1, false)
 }
 
 func sendRateLimitedTx(
@@ -34,6 +42,7 @@ func sendRateLimitedTx(
 	chainA Chain,
 	chainB Chain,
 	channel *ibc.ChannelOutput,
+	pctOfSupply int64,
 	shouldPass bool,
 ) {
 	wallets, err := GetValidatorWallets(ctx, chainB)
@@ -43,8 +52,7 @@ func sendRateLimitedTx(
 	supply, err := QuerySupply(ctx, chainA, DENOM)
 	require.NoError(t, err)
 
-	threshold := supply.Amount.Quo(sdkmath.NewInt(100))
-	amount := threshold.Add(sdkmath.NewInt(10))
+	amount := supply.Amount.Mul(sdkmath.NewInt(pctOfSupply)).Quo(sdkmath.NewInt(100))
 
 	// Use the faucet to send because it has a ton of tokens (~100T); other accounts may not have 1% of the supply
 	_, err = chainA.SendIBCTransfer(ctx, channel.ChannelID, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
@@ -59,7 +67,7 @@ func sendRateLimitedTx(
 	}
 }
 
-func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string) {
+func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string, pctOfSupply int64) {
 	govAuthority, err := chain.GetModuleAddress(ctx, "gov")
 	require.NoError(t, err)
 	msg := map[string]interface{}{
@@ -67,8 +75,8 @@ func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID s
 		"authority":        govAuthority,
 		"denom":            DENOM,
 		"channel_id":       channelID,
-		"max_percent_send": sdkmath.NewInt(1).String(),
-		"max_percent_recv": sdkmath.NewInt(1).String(),
+		"max_percent_send": sdkmath.NewInt(pctOfSupply).String(),
+		"max_percent_recv": sdkmath.NewInt(pctOfSupply).String(),
 		"duration_hours":   "48",
 	}
 	marshaled, err := json.Marshal(msg)
@@ -87,7 +95,7 @@ func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID s
 	require.NoError(t, PassProposal(ctx, chain, propID))
 }
 
-func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string) {
+func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string, pctOfSupply int64) {
 	govAuthority, err := chain.GetModuleAddress(ctx, "gov")
 	require.NoError(t, err)
 	msg := map[string]interface{}{
@@ -95,8 +103,8 @@ func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID stri
 		"authority":        govAuthority,
 		"denom":            DENOM,
 		"channel_id":       channelID,
-		"max_percent_send": sdkmath.NewInt(2).String(),
-		"max_percent_recv": sdkmath.NewInt(1).String(),
+		"max_percent_send": sdkmath.NewInt(pctOfSupply).String(),
+		"max_percent_recv": sdkmath.NewInt(pctOfSupply).String(),
 		"duration_hours":   "24",
 	}
 	marshaled, err := json.Marshal(msg)
