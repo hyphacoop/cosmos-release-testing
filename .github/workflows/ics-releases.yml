@@ -349,6 +349,7 @@
         #     run: tests/ics_tests/test_ccv.sh
           - name: _Final CCV channel check> ICS v3.3.0
             env:
+              CONSUMER_HOME_1: /home/runner/.v330-one-1
               CON1_RPC_PORT: 33021
             run: tests/test_ccv_key_assignment.sh
         #   - name: _Final CCV channel check> ICS v4.0.0
