@@ -44,5 +44,5 @@ cp consumer-genesis.json $CONSUMER_HOME_3/config/genesis.json
 
 jq '.' ccv.json
 $CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1
-$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-validator --home $HOME_1) --home $HOME_1
+$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
 $CHAIN_BINARY tendermint show-address --home $CONSUMER_HOME_1
