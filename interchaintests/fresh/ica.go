@@ -17,6 +17,7 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -65,53 +66,49 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 	}
 	require.NoError(t, err)
 
-	balances, err := host.AllBalances(ctx, icaAddress)
+	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
 	require.NoError(t, err)
-	require.NotEmpty(t, balances)
+
+	_, err = controller.SendIBCTransfer(ctx, srcChannel.ChannelID, VALIDATOR_MONIKER, ibc.WalletAmount{
+		Address: icaAddress,
+		Amount:  sdkmath.NewInt(amountToSend),
+		Denom:   DENOM,
+	}, ibc.TransferOptions{})
+	require.NoError(t, err)
 
 	wallets, err = GetValidatorWallets(ctx, host)
 	require.NoError(t, err)
 	dstAddress := wallets[0].Address
 
 	var ibcStakeDenom string
-	for _, c := range balances {
-		if strings.Contains(c.Denom, "ibc") {
-			ibcStakeDenom = c.Denom
-			break
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		balances, err := host.AllBalances(ctx, icaAddress)
+		require.NoError(t, err)
+		require.NotEmpty(t, balances)
+		for _, c := range balances {
+			if strings.Contains(c.Denom, "ibc") {
+				ibcStakeDenom = c.Denom
+				break
+			}
 		}
-	}
-	require.NotEmpty(t, ibcStakeDenom)
+		assert.NotEmpty(c, ibcStakeDenom)
+	}, 10*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 
-	balances, err = host.AllBalances(ctx, dstAddress)
+	recipientBalanceBefore, err := host.GetBalance(ctx, dstAddress, ibcStakeDenom)
 	require.NoError(t, err)
-	require.NotEmpty(t, balances)
 
-	var recipientBalanceBefore int64
-	for _, c := range balances {
-		if c.Denom == ibcStakeDenom {
-			recipientBalanceBefore = c.Amount.Int64()
-			break
-		}
-	}
 	icaAmount := int64(amountToSend / 3)
 
-	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
-	require.NoError(t, err)
 	srcConnection := srcChannel.ConnectionHops[0]
 
 	sendICATx(ctx, t, controller, srcAddress, dstAddress, icaAddress, srcConnection, icaAmount, ibcStakeDenom)
-	require.NoError(t, relayer.Flush(ctx, GetRelayerExecReporter(ctx), RelayerTransferPathFor(controller, host), srcChannel.ChannelID))
 
-	balances, err = host.AllBalances(ctx, dstAddress)
-	require.NoError(t, err)
-	require.NotEmpty(t, balances)
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		recipientBalanceAfter, err := host.GetBalance(ctx, dstAddress, ibcStakeDenom)
+		assert.NoError(c, err)
 
-	for _, c := range balances {
-		if c.Denom == ibcStakeDenom {
-			require.Equal(t, recipientBalanceBefore+icaAmount, c.Amount.Int64())
-			break
-		}
-	}
+		assert.Equal(c, recipientBalanceBefore.Add(sdkmath.NewInt(icaAmount)), recipientBalanceAfter)
+	}, 10*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 }
 
 func sendICATx(ctx context.Context, t *testing.T, controller Chain, srcAddress string, dstAddress string, icaAddress string, srcConnection string, amount int64, denom string) {
