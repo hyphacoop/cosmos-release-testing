@@ -258,17 +258,17 @@ jobs:
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
 
-      # - name: Set BlocksPerEpoch to 100
-      #   run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
-      # - name: Check BlocksPerEpoch is 100
-      #   run: |
-      #     BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
-      #     echo "BlocksPerEpoch is: $BPE"
-      #     if [ $BPE != "\"100\"" ]
-      #     then
-      #       echo "BlocksPerEpoch is not 100"
-      #       exit 1
-      #     fi
+      - name: Set BlocksPerEpoch to 100
+        run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
+      - name: Check BlocksPerEpoch is 100
+        run: |
+          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
+          echo "BlocksPerEpoch is: $BPE"
+          if [ $BPE != "\"100\"" ]
+          then
+            echo "BlocksPerEpoch is not 100"
+            exit 1
+          fi
 
       - name: Initialize consumer chain b with ICS v4.0.0
         env:
