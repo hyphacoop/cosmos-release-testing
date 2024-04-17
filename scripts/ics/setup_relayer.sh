@@ -15,6 +15,8 @@ echo "Adding relayer keys..."
 echo $MNEMONIC_RELAYER > mnemonic.txt
 hermes keys add --chain $CHAIN_ID --mnemonic-file mnemonic.txt
 hermes keys add --chain v330-one --mnemonic-file mnemonic.txt
+hermes keys add --chain v400-one --mnemonic-file mnemonic.txt
+hermes keys add --chain v410-one --mnemonic-file mnemonic.txt
     
 echo "Creating service..."
 sudo touch /etc/systemd/system/$RELAYER.service
