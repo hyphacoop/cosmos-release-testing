@@ -158,6 +158,8 @@
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V330_BINARY
               wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
+              wget $CONSUMER_CHAIN_V410_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V410_BINARY -q
+              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V410_BINARY
     
               wget https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd -q -O $HOME/go/bin/ics-cd-transform
               chmod +x $HOME/go/bin/ics-cd-transform
@@ -367,7 +369,7 @@
               CON3_PPROF_PORT: 41043
               DOWNTIME_BLOCKS: 100000
             run: |
-              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V410_BINARY
               scripts/init_consumer_assign_keys.sh
           - name: Prepare consumer chain v410-one
             env:
