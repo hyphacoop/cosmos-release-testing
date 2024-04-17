@@ -160,17 +160,13 @@ jobs:
         if: ${{ inputs.upgrade_version == 'main' }}
         env:
           DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          # DOWNLOAD_URL: http://159.89.115.80:8000/gaiad
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
       - name: Start chain
         env:
           START_VERSION: ${{inputs.gaia_version}}
-          # ARCHIVE_URL: "https://files.polypore.xyz/archived-state/rs-testnet-provider/latest_v15.json.gz"
-          ARCHIVE_URL: "https://files.polypore.xyz/archived-state/v15.2.0-19610700-stateful-upgrade.tar.gz"
-          # Upgraded state
-          # ARCHIVE_URL: "http://159.89.115.80/gaia-v15.tar.gz"
+          ARCHIVE_URL: ${{ vars.ARCHIVE_URL }}
         run: scripts/stateful/start_chain.sh
       - name: _Blocks produced after upgrade to v16
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 200 12600
