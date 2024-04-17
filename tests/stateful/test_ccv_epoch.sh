@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test Validator Set Changes
-wait=$1
+epoch=$1
 
 # Delegate additional stake to val 1
 echo "Delegating additional stake to $MONIKER_1..."
@@ -15,9 +15,13 @@ PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.re
 CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 
 echo "Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
+if [ $PROVIDER_POWER == $CONSUMER_POWER ]; then
+    echo "Consumer chain validator set match the provider's before the epoch."
+    exit 1
+fi
 
-echo "Waiting for $wait blocks for epoch"
-tests/test_block_production.sh localhost $CON1_RPC_PORT $wait 120
+echo "Waiting for $epoch blocks for epoch"
+tests/test_block_production.sh localhost $CON1_RPC_PORT $epoch 120
 
 PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
@@ -26,6 +30,6 @@ echo "Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
 
 if [ $PROVIDER_POWER != $CONSUMER_POWER ]; then
     echo "Consumer chain validator set does not match the provider's."
-    exit 1
+    exit 2
 fi
 echo "Consumer chain validator set matches the provider's."
