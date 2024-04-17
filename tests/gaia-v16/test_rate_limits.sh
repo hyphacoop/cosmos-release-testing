@@ -22,7 +22,7 @@ function test_transfer {
 # supply=$($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')
 supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
 fraction=$(echo "$rate_limit" | bc)
-amount=$(echo "($supply *  $fraction)/1 " | bc )
+amount=$(echo "($supply *  $fraction)/1 + 1" | bc )
 echo "uatom supply: $supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
@@ -30,7 +30,7 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    sleep 10
+    sleep 30
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
@@ -42,7 +42,7 @@ result=$(test_transfer $amount)
 echo "test transfer result: $result"
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    sleep 10
+    sleep 30
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
@@ -68,7 +68,7 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    sleep 10
+    sleep 30
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
