@@ -20,7 +20,7 @@ function test_transfer {
 }
 
 # supply=$($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')
-supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOM_1 -o json | jq -r '.[0].flow.channel_value')
+supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
 fraction=$(echo "$rate_limit" | bc)
 amount=$(echo "($supply *  $fraction)/1 " | bc )
 echo "uatom supply: $supply"
