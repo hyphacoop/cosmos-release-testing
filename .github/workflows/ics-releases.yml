@@ -334,25 +334,94 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
-    
-          # - name: _Final CCV channel check> ICS v1.2.0-multiden
-          #   env:
-          #     CON1_RPC_PORT: 27101
-          #   run: tests/ics_tests/test_ccv.sh
-        #   - name: _Final CCV channel check> ICS v2.0.0
-        #     if: ${{ (matrix.provider != 'v4.0.0' )}}
-        #     env:
-        #       CON1_RPC_PORT: 27201
-        #     run: tests/ics_tests/test_ccv.sh
-        #   - name: _Final CCV channel check> ICS v3.1.0
-        #     if: ${{ (matrix.provider != 'v4.0.0' )}}
-        #     env:
-        #       CON1_RPC_PORT: 27301
-        #     run: tests/ics_tests/test_ccv.sh
-        #   - name: _Final CCV channel check> ICS v3.2.0
-        #     env:
-        #       CON1_RPC_PORT: 27401
-        #     run: tests/ics_tests/test_ccv.sh
+
+          - name: Add consumer chain v410-one
+            env:
+              COSMOS_SDK: v47
+              CONSUMER_CHAIN_ID: v410-one
+            run: |
+              scripts/add_consumer.sh
+          - name: Initialize consumer chain with ICS v4.1.0
+            env:
+              CONSUMER_CHAIN_ID: v410-one
+              CONSUMER_HOME_1: /home/runner/.v410-one-1
+              CONSUMER_HOME_2: /home/runner/.v410-one-2
+              CONSUMER_HOME_3: /home/runner/.v410-one-3
+              CONSUMER_SERVICE_1: v410-one-1.service
+              CONSUMER_SERVICE_2: v410-one-2.service
+              CONSUMER_SERVICE_3: v410-one-3.service
+              CON1_API_PORT: 41001
+              CON2_API_PORT: 41002
+              CON3_API_PORT: 41003
+              CON1_GRPC_PORT: 41011
+              CON2_GRPC_PORT: 41012
+              CON3_GRPC_PORT: 41013
+              CON1_RPC_PORT: 41021
+              CON2_RPC_PORT: 41022
+              CON3_RPC_PORT: 41023
+              CON1_P2P_PORT: 41031
+              CON2_P2P_PORT: 41032
+              CON3_P2P_PORT: 41033
+              CON1_PPROF_PORT: 41041
+              CON2_PPROF_PORT: 41042
+              CON3_PPROF_PORT: 41043
+              DOWNTIME_BLOCKS: 100000
+            run: |
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              scripts/init_consumer_assign_keys.sh
+          - name: Prepare consumer chain v410-one
+            env:
+              CONSUMER_CHAIN_ID: v410-one
+              CONSUMER_HOME_1: /home/runner/.v410-one-1
+              CONSUMER_HOME_2: /home/runner/.v410-one-2
+              CONSUMER_HOME_3: /home/runner/.v410-one-3
+              CONSUMER_SERVICE_1: v410-one-1.service
+              CONSUMER_SERVICE_2: v410-one-2.service
+              CONSUMER_SERVICE_3: v410-one-3.service
+            run: |
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V410_BINARY
+              export CONSUMER_ICS=v4.1.0-rc2
+              scripts/ics/prepare_consumer.sh
+          - name: Start consumer chain v410-one
+            env:
+              CONSUMER_CHAIN_ID: v410-one
+              CONSUMER_SERVICE_1: v410-one-1.service
+              CONSUMER_SERVICE_2: v410-one-2.service
+              CONSUMER_SERVICE_3: v410-one-3.service
+            run: |
+              sudo systemctl enable $CONSUMER_SERVICE_1 --now
+              sleep 5
+              journalctl -u $CONSUMER_SERVICE_1
+          - name: _Consumer chain produces blocks> ICS v4.1.0
+            env:
+              CON1_RPC_PORT: 41021
+            run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+          - name: Establish CCV channel for v410-one
+            env:
+              CONSUMER_CHAIN_ID: v410-one
+            run: |
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              sudo systemctl restart hermes
+              sleep 10
+          - name: _CCV channel verified> ICS v4.1.0
+            env:
+              CON1_RPC_PORT: 41021
+              CONSUMER_HOME_1: /home/runner/.v410-one-1
+            run: tests/test_ccv_key_assignment.sh
+          - name: _IBC transfer successful> ICS v4.1.0
+            env:
+              CONSUMER_CHAIN_ID: v410-one
+              CONSUMER_HOME_1: /home/runner/.v410-one-1
+              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+            run: |
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V410_BINARY
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
+             
           - name: _Final CCV channel check> ICS v3.3.0
             env:
               CONSUMER_HOME_1: /home/runner/.v330-one-1
@@ -363,7 +432,13 @@
               CONSUMER_HOME_1: /home/runner/.v400-one-1
               CON1_RPC_PORT: 40021
             run: tests/test_ccv_key_assignment.sh
-    
+          - name: _Final CCV channel check> ICS v4.1.0
+            env:
+              CONSUMER_HOME_1: /home/runner/.v410-one-1
+              CON1_RPC_PORT: 41021
+            run: tests/test_ccv_key_assignment.sh
+
+            
       #     - name: _Soft opt-out test> Validator must be jailed
       #       run: tests/test_validator_jailed.sh $VALOPER_2 true
       #     - name: _Soft opt-out test> Validator must not be jailed
