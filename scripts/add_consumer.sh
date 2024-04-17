@@ -38,3 +38,4 @@ $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
 
 echo "Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
+$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq '.'
