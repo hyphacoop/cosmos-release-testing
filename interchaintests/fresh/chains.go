@@ -104,12 +104,12 @@ func createRelayer(ctx context.Context, t *testing.T) ibc.Relayer {
 }
 
 // CreateLinkedChains creates two new chains with the given version, links them through IBC, and returns the chain and relayer objects.
-func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (Chain, Chain, ibc.Relayer) {
-	chains, relayer := CreateNLinkedChains(ctx, t, gaiaVersion, 2)
+func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion, channelVersion string) (Chain, Chain, ibc.Relayer) {
+	chains, relayer := CreateNLinkedChains(ctx, t, gaiaVersion, channelVersion, 2)
 	return chains[0], chains[1], relayer
 }
 
-func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string, n int) ([]Chain, ibc.Relayer) {
+func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion, channelVersion string, n int) ([]Chain, ibc.Relayer) {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	chainspecs := make([]*interchaintest.ChainSpec, n)
@@ -138,6 +138,12 @@ func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string, 
 			Chain2:  chainB.CosmosChain,
 			Relayer: relayer,
 			Path:    RelayerTransferPathFor(chainA, chainB),
+			CreateChannelOpts: ibc.CreateChannelOptions{
+				DestPortName:   TRANSFER_PORT_ID,
+				SourcePortName: TRANSFER_PORT_ID,
+				Version:        channelVersion,
+				Order:          ibc.Unordered,
+			},
 		})
 	}
 
