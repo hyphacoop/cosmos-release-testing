@@ -13,6 +13,9 @@ on:
       upgrade_version:
         required: true
         type: string
+      env_name:
+        required: true
+        type: string
 jobs:
   test-upgrade:
     runs-on: ${{ inputs.runs-on-os }}
