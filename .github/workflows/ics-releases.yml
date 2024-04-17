@@ -321,6 +321,7 @@
           - name: _CCV channel verified> ICS v4.0.0
             env:
               CON1_RPC_PORT: 40021
+              CONSUMER_HOME_1: /home/runner/.v400-one-1
             run: tests/test_ccv_key_assignment.sh
           - name: _IBC transfer successful> ICS v4.0.0
             env:
@@ -359,6 +360,7 @@
             run: tests/test_ccv_key_assignment.sh
           - name: _Final CCV channel check> ICS v4.0.0
             env:
+              CONSUMER_HOME_1: /home/runner/.v400-one-1
               CON1_RPC_PORT: 40021
             run: tests/test_ccv_key_assignment.sh
     
