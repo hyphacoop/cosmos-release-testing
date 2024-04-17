@@ -3,7 +3,7 @@
     name: Test ICS Releases
     on:
       workflow_dispatch:
-      push:
+      # push:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
