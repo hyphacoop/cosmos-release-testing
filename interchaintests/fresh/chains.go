@@ -105,29 +105,41 @@ func createRelayer(ctx context.Context, t *testing.T) ibc.Relayer {
 
 // CreateLinkedChains creates two new chains with the given version, links them through IBC, and returns the chain and relayer objects.
 func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (Chain, Chain, ibc.Relayer) {
+	chains, relayer := CreateNLinkedChains(ctx, t, gaiaVersion, 2)
+	return chains[0], chains[1], relayer
+}
+
+func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string, n int) ([]Chain, ibc.Relayer) {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
-	cf := interchaintest.NewBuiltinChainFactory(
-		GetLogger(ctx),
-		[]*interchaintest.ChainSpec{
-			createGaiaChainSpec(ctx, "gaia-1", gaiaVersion),
-			createGaiaChainSpec(ctx, "gaia-2", gaiaVersion),
-		})
+	chainspecs := make([]*interchaintest.ChainSpec, n)
+	for i := 0; i < n; i++ {
+		chainspecs[i] = createGaiaChainSpec(ctx, fmt.Sprintf("gaia-%d", i), gaiaVersion)
+	}
+	cf := interchaintest.NewBuiltinChainFactory(GetLogger(ctx), chainspecs)
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	chain1, chain2 := Chain{chains[0].(*cosmos.CosmosChain)}, Chain{chains[1].(*cosmos.CosmosChain)}
 	relayer := createRelayer(ctx, t)
-	pathName := RelayerTransferPathFor(chain1, chain2)
-	ic := interchaintest.NewInterchain().
-		AddChain(chain1.CosmosChain).
-		AddChain(chain2.CosmosChain).
-		AddRelayer(relayer, "relayer").
-		AddLink(interchaintest.InterchainLink{
-			Chain1:  chain1.CosmosChain,
-			Chain2:  chain2.CosmosChain,
+	retval := make([]Chain, n)
+	for i := 0; i < n; i++ {
+		retval[i] = Chain{chains[i].(*cosmos.CosmosChain)}
+	}
+
+	ic := interchaintest.NewInterchain()
+	ic.AddRelayer(relayer, "relayer")
+	for _, chain := range retval {
+		ic.AddChain(chain.CosmosChain)
+	}
+	for i := 0; i < n-1; i++ {
+		chainA := retval[i]
+		chainB := retval[i+1]
+		ic.AddLink(interchaintest.InterchainLink{
+			Chain1:  chainA.CosmosChain,
+			Chain2:  chainB.CosmosChain,
 			Relayer: relayer,
-			Path:    pathName,
+			Path:    RelayerTransferPathFor(chainA, chainB),
 		})
+	}
 
 	require.NoError(t, ic.Build(ctx, GetRelayerExecReporter(ctx), interchaintest.InterchainBuildOptions{
 		Client:    dockerClient,
@@ -138,11 +150,11 @@ func CreateLinkedChains(ctx context.Context, t *testing.T, gaiaVersion string) (
 		_ = ic.Close()
 	})
 
-	require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx), pathName))
+	require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
 	t.Cleanup(func() {
 		_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
 	})
-	return chain1, chain2, relayer
+	return retval, relayer
 }
 
 // CreateChain creates a single new chain with the given version and returns the chain object.
