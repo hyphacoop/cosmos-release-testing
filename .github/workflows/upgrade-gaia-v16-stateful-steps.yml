@@ -16,7 +16,7 @@ on:
 jobs:
   test-upgrade:
     runs-on: ${{ inputs.runs-on-os }}
-    environment: ${{ inputs.env }}
+    environment: ${{ inputs.env_name }}
     env:
       SSH_KEYS: ${{ vars.SSH_KEYS }}
       PROVIDER_SERVICE_1: ${{ vars.PROVIDER_SERVICE_1 }}

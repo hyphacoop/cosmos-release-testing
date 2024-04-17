@@ -66,7 +66,7 @@ jobs:
       runs-on-os: self-hosted-ubuntu-22.04
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
-      env: major-upgrade-stateful-workflow
+      env_name: major-upgrade-stateful-workflow
     uses: ./.github/workflows/upgrade-gaia-v16-stateful-steps.yml
   test-upgrade-release-testnet:
     needs: set-version-matrix
@@ -79,5 +79,5 @@ jobs:
       runs-on-os: self-hosted-ubuntu-22.04
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
-      env: major-upgrade-theta-stateful-workflow
+      env_name: major-upgrade-theta-stateful-workflow
     uses: ./.github/workflows/upgrade-gaia-v16-stateful-steps.yml
