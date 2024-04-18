@@ -214,7 +214,7 @@ jobs:
           scp theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-tinkered/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
-          tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
+          tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet/
           # Update latest file symlinks
@@ -430,7 +430,7 @@ jobs:
           scp rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-tinkered/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
-          tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
+          tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
           # Update latest file symlinks
