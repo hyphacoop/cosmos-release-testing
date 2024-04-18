@@ -19,22 +19,25 @@ function test_transfer {
     fi
 }
 
-echo "Bank supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
+echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
 supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
 fraction=$(echo "$rate_limit" | bc)
 amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
-echo "uatom supply: $supply"
+echo "Rate limit channel value: $supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    sleep 30
+    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
 
+echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
+new_supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
+echo "New rate limit channel value: $new_supply"
 fraction=$(echo "$rate_limit / 2" | bc -l )
 amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
 echo "Sending $amount..."
@@ -42,25 +45,31 @@ result=$(test_transfer $amount)
 echo "test transfer result: $result"
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    sleep 30
+    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
 fi
 
+echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
+new_supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
+echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    sleep 10
+    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
 fi
 
+echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
+new_supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
+echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
@@ -68,7 +77,7 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    sleep 30
+    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
