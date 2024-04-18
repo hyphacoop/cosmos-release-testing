@@ -76,6 +76,7 @@ jobs:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: false
+      max-parallel: 5
     steps:
       - name: start-version
         run: echo ${{matrix.gaia_version}}
