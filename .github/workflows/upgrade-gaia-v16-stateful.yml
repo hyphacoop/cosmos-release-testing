@@ -81,3 +81,16 @@ jobs:
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-theta-stateful-workflow
     uses: ./.github/workflows/upgrade-gaia-v16-stateful-steps.yml
+  test-upgrade-ics-testnet:
+    needs: set-version-matrix
+    strategy:
+      matrix:
+        ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+      fail-fast: false
+      #max-parallel: 3
+    with:
+      runs-on-os: self-hosted-ubuntu-22.04
+      gaia_version: ${{ matrix.gaia_version }}
+      upgrade_version: ${{ matrix.upgrade_version }}
+      env_name: major-upgrade-ics-stateful-workflow
+    uses: ./.github/workflows/upgrade-gaia-v16-stateful-steps.yml
