@@ -11,7 +11,7 @@ func TestV16UpgradeICAController(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 
-	controller, host, relayer := fresh.CreateLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion)
+	controller, host, relayer := fresh.CreateLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion, fresh.DEFAULT_CHANNEL_VERSION)
 
 	fresh.ICAControllerTest(ctx, t, controller, host, relayer, false)
 

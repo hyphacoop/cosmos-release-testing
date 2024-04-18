@@ -147,7 +147,10 @@ func AddConsumerChain(ctx context.Context, t *testing.T, provider Chain, relayer
 	})
 
 	setupRelayerKeys(ctx, t, relayer, relayerWallet, consumer)
-	connectChains(ctx, t, provider, consumer, relayer)
+	rep := GetRelayerExecReporter(ctx)
+	require.NoError(t, relayer.StopRelayer(ctx, rep))
+	require.NoError(t, relayer.StartRelayer(ctx, rep))
+	connectProviderConsumer(ctx, t, provider, consumer, relayer)
 
 	for i, val := range consumer.Validators {
 		require.NoError(t, val.RecoverKey(ctx, VALIDATOR_MONIKER, wallets[i+1].Mnemonic()))
@@ -248,30 +251,7 @@ func createConsumerChainSpec(ctx context.Context, provider Chain, chainID, chain
 	}
 }
 
-func setupRelayerKeys(ctx context.Context, t *testing.T, relayer ibc.Relayer, wallet ibc.Wallet, chain Chain) error {
-	rep := GetRelayerExecReporter(ctx)
-	rpcAddr, grpcAddr := chain.GetRPCAddress(), chain.GetGRPCAddress()
-	if !relayer.UseDockerNetwork() {
-		rpcAddr, grpcAddr = chain.GetHostRPCAddress(), chain.GetHostGRPCAddress()
-	}
-
-	chainName := chain.Config().ChainID
-	require.NoError(t, relayer.AddChainConfiguration(ctx,
-		rep,
-		chain.Config(), chainName,
-		rpcAddr, grpcAddr,
-	))
-
-	require.NoError(t, relayer.RestoreKey(ctx,
-		rep,
-		chain.Config(), chainName,
-		wallet.Mnemonic(),
-	))
-
-	return nil
-}
-
-func connectChains(ctx context.Context, t *testing.T, provider Chain, consumer Chain, relayer ibc.Relayer) {
+func connectProviderConsumer(ctx context.Context, t *testing.T, provider Chain, consumer Chain, relayer ibc.Relayer) {
 	icsPath := RelayerICSPathFor(provider, consumer)
 	rep := GetRelayerExecReporter(ctx)
 	require.NoError(t, relayer.GeneratePath(ctx, rep, consumer.Config().ChainID, provider.Config().ChainID, icsPath))
@@ -317,8 +297,6 @@ func connectChains(ctx context.Context, t *testing.T, provider Chain, consumer C
 		Version:        "1",
 	}))
 
-	require.NoError(t, relayer.StopRelayer(ctx, rep))
-	require.NoError(t, relayer.StartRelayer(ctx, rep))
 	require.Eventually(t, func() bool {
 		providerTxChannel, err := GetTransferChannel(ctx, relayer, provider, consumer)
 		return err == nil && providerTxChannel != nil
