@@ -349,7 +349,7 @@ jobs:
           cp -p ~/go/bin/* ~/artifact/bin/ || true
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.runs-on-os }}_archived-upgrade-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
           path: ~/artifact/
