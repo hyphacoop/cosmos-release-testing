@@ -10,7 +10,7 @@ echo "***** TESTING CHANNEL $channel_id RATE LIMIT: $rate_limit *****"
 function test_transfer {
     send_amount=$1
     txhash=$($CHAIN_BINARY tx ibc-transfer transfer transfer $channel_id $WALLET_1 $send_amount$DENOM --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
-    sleep 3
+    sleep 5
     code=$(gaiad q tx $txhash -o json --home ~/.val1 | jq '.code')
     if [[ "$code" == "0" ]]; then
         echo 0 # transaction was successful
@@ -26,12 +26,14 @@ amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
 echo "Rate limit channel value: $supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
+echo "test transfer result: $result"
+sleep 1m
+$CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
+
 if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    sleep 45
-    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
 
@@ -43,6 +45,9 @@ amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
+sleep 1m
+$CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
+
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
     sleep 45
@@ -58,6 +63,9 @@ echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
+sleep 1m
+$CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
+
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
     sleep 45
@@ -73,6 +81,9 @@ echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
+sleep 1m
+$CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
+
 if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
