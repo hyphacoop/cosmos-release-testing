@@ -253,15 +253,15 @@ jobs:
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
 
-      - name: Set BlocksPerEpoch to 150
-        run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-150.json
-      - name: Check BlocksPerEpoch is 150
+      - name: Set BlocksPerEpoch to 100
+        run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
+      - name: Check BlocksPerEpoch is 100
         run: |
           BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
           echo "BlocksPerEpoch is: $BPE"
-          if [ $BPE != "\"150\"" ]
+          if [ $BPE != "\"100\"" ]
           then
-            echo "BlocksPerEpoch is not 150"
+            echo "BlocksPerEpoch is not 100"
             exit 1
           fi
 
@@ -301,10 +301,20 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
+      - name: Waiting for 100th block
+        run: |
+          cur_height=0
+          to_height=$(curl 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height' | sed 's|.*|(&+50)/100*100|' | bc)
+          until [[ "${cur_height}" -gt "${to_height}" ]]
+          do
+              cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+              echo "$to_height $cur_height"
+              sleep 1
+          done
       - name: _VSC successful epoch> ICS conb1
         env:
           CON1_RPC_PORT: 27201
-        run: tests/stateful/test_ccv_epoch.sh 150
+        run: tests/stateful/test_ccv_epoch.sh 100
       - name: _IBC transfer successful> ICS conb1
         env:
           CONSUMER_CHAIN_ID: consumerb
