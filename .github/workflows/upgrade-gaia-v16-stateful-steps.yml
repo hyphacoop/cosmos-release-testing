@@ -301,6 +301,10 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
+      - name: _VSC successful epoch> ICS conb1
+        env:
+          CON1_RPC_PORT: 27201
+        run: tests/stateful/test_ccv_epoch.sh 100
       - name: _IBC transfer successful> ICS conb1
         env:
           CONSUMER_CHAIN_ID: consumerb
@@ -313,10 +317,6 @@ jobs:
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 3 $WALLET_1 $WALLET_CONSUMER_1
-      - name: _VSC successful epoch> ICS conb1
-        env:
-          CON1_RPC_PORT: 27201
-        run: tests/stateful/test_ccv_epoch.sh 100
       - name: Stop services
         if: always()
         run: |

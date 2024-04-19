@@ -22,7 +22,7 @@ CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.re
 
 # Wait 60 more seconds if VP stll the same
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
-    echo "VP is the same as starting value, we will wait 60 seconds more"
+    echo "WARNING: VP is the same as starting value, we will wait 60 seconds more"
     sleep 60
 fi
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
