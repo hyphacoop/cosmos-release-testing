@@ -1850,13 +1850,13 @@
             DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
           run: |
             echo $DOWNLOAD_URL
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
         - name: Test software upgrade for main branch
           if: ${{ matrix.upgrade_version == 'main' }}
           env:
             DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
           run: |
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
         - name: _Blocks produced after upgrade
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
