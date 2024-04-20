@@ -308,7 +308,6 @@ jobs:
           until [[ "${cur_height}" -gt "${to_height}" ]]
           do
               cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
-              echo "$to_height $cur_height"
               sleep 1
           done
       - name: _VSC successful epoch> ICS conb1
