@@ -6,7 +6,7 @@ while true
 do
     pid=$(pidof $1)
     if [ ! -z "$pid" ] ; then
-        ps -o rss= $(pidof htop) | awk '{printf strftime("%s")",%.0f\n", $1 / 1024 * 1024 *1024}'
+        ps -o rss= $(pidof $1) | awk '{printf strftime("%s")",%.0f\n", $1 / 1024 * 1024 *1024}'
     else
         echo "$(date +"%s"),0"
     fi >> $2
