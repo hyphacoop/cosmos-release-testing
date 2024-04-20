@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   export-release-testnet:
-    runs-on: self-hosted-debian-12
+    runs-on: self-hosted-ubuntu-22.04
     environment: export-rs-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
@@ -214,13 +214,13 @@ jobs:
           scp theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-tinkered/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
-          tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
+          tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-tinkered/theta-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/theta-testnet/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/theta-testnet/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/theta-testnet/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/theta-testnet/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v3
@@ -228,7 +228,7 @@ jobs:
           name: export-release-testnet
           path: ~/artifact/
   export-ics-testnet-provider:
-    runs-on: self-hosted-debian-12
+    runs-on: self-hosted-ubuntu-22.04
     environment: export-rs-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
@@ -302,7 +302,7 @@ jobs:
           CHAIN_ID: provider
           CHAIN_BINARY: 'gaiad'
           GENESIS_URL: https://github.com/cosmos/testnets/raw/master/interchain-security/provider/provider-genesis.json
-          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.ics-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.rs-testnet.polypore.xyz:26656"
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.ics-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.ics-testnet.polypore.xyz:26656"
           SYNC_RPC_1: https://rpc.provider-state-sync-01.ics-testnet.polypore.xyz:443
           SYNC_RPC_2: https://rpc.provider-state-sync-02.ics-testnet.polypore.xyz:443
           GAS_PRICES: "0.0025uatom"
@@ -430,16 +430,16 @@ jobs:
           scp rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-tinkered/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
-          tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
+          tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-tinkered/rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: export-rs-testnet-provider
+          name: export-ics-testnet-provider
           path: ~/artifact/
