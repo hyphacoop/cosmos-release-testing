@@ -27,7 +27,7 @@ echo "Rate limit channel value: $supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 4m
+sleep 3m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "1" ]]; then
@@ -45,7 +45,7 @@ amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 4m
+sleep 3m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "0" ]]; then
@@ -63,7 +63,7 @@ echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 4m
+sleep 3m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "0" ]]; then
@@ -81,7 +81,7 @@ echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 4m
+sleep 3m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "1" ]]; then
