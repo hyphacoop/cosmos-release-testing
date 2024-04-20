@@ -64,6 +64,11 @@ toml set --toml-path $CHAIN_HOME/config/app.toml grpc.address "0.0.0.0:$GRPC_POR
 # Turn off grpc web
 toml set --toml-path $CHAIN_HOME/config/app.toml grpc-web.enable false
 
+echo "Setting pruning config..."
+toml set --toml-path $CHAIN_HOME/config/app.toml pruning "custom"
+toml set --toml-path $CHAIN_HOME/config/app.toml pruning-keep-recent "200"
+toml set --toml-path $CHAIN_HOME/config/app.toml pruning-interval "100"
+
 # config.toml
 # Set log level to debug
 # toml set --toml-path $CHAIN_HOME/config/config.toml log_level "debug"

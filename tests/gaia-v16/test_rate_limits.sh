@@ -27,7 +27,6 @@ echo "Rate limit channel value: $supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 3m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "1" ]]; then
@@ -45,12 +44,10 @@ amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 3m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
@@ -63,12 +60,11 @@ echo "New rate limit channel value: $new_supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-sleep 3m
+sleep 5m
 $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
@@ -88,7 +84,6 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    sleep 45
     $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
