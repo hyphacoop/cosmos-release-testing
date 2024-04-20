@@ -5,11 +5,9 @@ source ~/env/bin/activate
 
 # Download archived home directory
 echo "Initializing node homes..."
-echo "Downloading archived state"
-wget -nv -O $HOME/archived-state.gz $ARCHIVE_URL
-echo "Extracting archive"
+echo "Downloading and extracting archived state"
 mkdir -p $HOME_1 
-tar xf $HOME/archived-state.gz -C $HOME_1 --strip-components=1
+wget -qO- $HOME/archived-state.gz $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
 
 # echo "Patching genesis file for fast governance..."
 # jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
