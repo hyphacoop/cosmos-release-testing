@@ -22,15 +22,19 @@ cp ccv-reward.json ccv.json
 
 if [ "$CONSUMER_ICS" == "v3.3.0" ]; then
     if [ "$PROVIDER_ICS" == "v4.0.0" ]; then
-        echo "Patching for ICS compatibility:"
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
+        $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
+        cp ccv-330-1.json ccv.json
+    elif [ "$PROVIDER_ICS" == "v4.1.0" ]; then
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
         $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
         cp ccv-330-1.json ccv.json
     fi
 fi
 
 if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
-    if [ "$PROVIDER_ICS" != "v4.0.0" ]; then
-        echo "Patching for ICS v4.0.0 consumer"
+    if [ "$PROVIDER_ICS" == "v3.3.0" ]; then
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
         $CONSUMER_CHAIN_BINARY genesis transform ccv.json > ccv-400-1.json
         cp ccv-400-1.json ccv.json
     fi
