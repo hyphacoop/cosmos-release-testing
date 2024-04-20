@@ -1173,6 +1173,10 @@
         - name: _Blocks produced after upgrade
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+
+        - name: Set blocks_per_epoch to 1
+          run: |
+            scripts/param_change.sh templates/proposal-blocks-per-epoch.json
   
         - name: Restart relayer
           run: sudo systemctl restart $RELAYER
