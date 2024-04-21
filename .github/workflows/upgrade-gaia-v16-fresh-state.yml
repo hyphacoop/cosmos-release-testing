@@ -91,18 +91,10 @@
     # Reference ICS chain variables
     CONSUMER_DENOM: ucon
     CONSUMER_FEES: 500
-    CONSUMER_CHAIN_V12_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v1.2.0-multiden/interchain-security-cd-linux
-    CONSUMER_CHAIN_V12_BINARY: consumerd_v1.2.0
-    CONSUMER_CHAIN_V2_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v2.0.0/interchain-security-cd-linux
-    CONSUMER_CHAIN_V2_BINARY: consumerd_v2.0.0
-    CONSUMER_CHAIN_V310_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.1.0/interchain-security-cd-linux
-    CONSUMER_CHAIN_V310_BINARY: consumerd_v3.1.0
-    CONSUMER_CHAIN_V320_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v3.2.0/interchain-security-cd-linux
-    CONSUMER_CHAIN_V320_BINARY: consumerd_v3.2.0
     CONSUMER_CHAIN_V330_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v3.3.0/interchain-security-cd-linux
-    CONSUMER_CHAIN_V330_BINARY: consumerd_v3.3.0
-    STRIDE_V18_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-consumer-v18.0.0/strided-consumer-linux
-    NEUTRON_V2_BINARY_URL: https://github.com/neutron-org/neutron/releases/download/v2.0.1/neutrond-linux-amd64
+    CONSUMER_CHAIN_V330_BINARY: consumerd_v4.0.0
+    CONSUMER_CHAIN_V400_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v4.0.0/interchain-security-cd-linux
+    CONSUMER_CHAIN_V400_BINARY: consumerd_v4.0.0
     ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
     ICS_TRANSFORM_BINARY: cd-transform
     # Stride chain variables
@@ -246,101 +238,8 @@
             echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
       outputs:
         upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
-  
-    # Baseline-1-upgrade:
-    #   runs-on: ubuntu-22.04
-    #   needs: set-version-matrix-cosmovisor
-    #   strategy:
-    #     matrix:
-    #       ${{ fromJSON(needs.set-version-matrix-cosmovisor.outputs.upgrade_versions) }}
-    #     fail-fast: false
-    #   env:
-    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-    #   steps:
-    #     - name: start-version
-    #       run: echo ${{matrix.gaia_version}}
-    #     - name: target-version
-    #       run: echo ${{matrix.upgrade_version}}
-    #     - name: target-commit
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       run: |
-    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-    #         echo TARGET_COMMIT: $TARGET_COMMIT
-    #     - name: Update PATH
-    #       run: |
-    #         mkdir -p $HOME/go/bin
-    #         echo "$HOME/go/bin" >> $GITHUB_PATH
-    #         echo "$HOME/.hermes" >> $GITHUB_PATH
-    #         echo "$HOME/.relayer" >> $GITHUB_PATH
-    #     - name: Bypass the grub-efi-amd64-signed package
-    #       run: sudo apt-mark hold grub-efi-amd64-signed
-    #     - name: Check out repository code
-    #       uses: actions/checkout@v3
-    #     - name: Set up Python
-    #       uses: actions/setup-python@v3
-    #       with:
-    #         python-version: '3.10'
-    #     - name: Install dependencies
-    #       run: |
-    #         python -m pip install --upgrade pip
-    #         python -m pip install toml-cli
-    #     - name: Install Cosmovisor > v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-    #       run: |
-    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Install Cosmovisor v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-    #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Start chain
-    #       env:
-    #         START_VERSION: ${{matrix.gaia_version}}
-    #       run: |
-    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-    #         scripts/start_chain.sh
-    #     - name: Check Gaia log
-    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
-    #     - name: Print Gaia version
-    #       run: $CHAIN_BINARY version --long
-    #     - name: Block production check
-    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-  
-    #     - name: Test software upgrade for published releases
-    #       if: ${{ matrix.upgrade_version != 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-    #       run: |
-    #         echo $DOWNLOAD_URL
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-    #     - name: Test software upgrade for main branch
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-    #       run: |
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-  
-    #     - name: _Blocks produced after upgrade
-    #       run: |
-    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-  
-    #     - name: Flush "migration successful" lines
-    #       run: |
-    #         $CHAIN_BINARY keys list --home $HOME_1
-  
-    #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-    #       run: tests/test_tx_fresh.sh
-    #     - name: _API endpoints check
-    #       run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-    #     - name: _RPC endpoints check
-    #       run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
-
-    Baseline-2-globalfee:
+     
+    v16-1-vesting-liquid-staking:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
       strategy:
@@ -350,6 +249,10 @@
       env:
         COSMOVISOR_VERSION: ${{ matrix.cv_version }}
         UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+        VESTING_AMOUNT: 110000000
+        VESTING_DELEGATED_AMOUNT: 100000000
+        VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
+        VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
       steps:
         - name: start-version
           run: echo ${{matrix.gaia_version}}
@@ -404,9 +307,76 @@
         - name: Block production check
           run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-        - name: Test globalfee module
+        - name: Set up vesting account
           run: |
-            tests/test_globalfee.sh
+            echo "Adding key..."
+            echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
+  
+            echo "Creating vesting wallet..."
+            start_time=$(date +%s)
+            echo "start time: $start_time"
+            end_time=$(date -d '10 minutes'  +%s)
+            echo "end time: $end_time"
+            $CHAIN_BINARY tx vesting create-vesting-account \
+            $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
+            --from $WALLET_1 --home $HOME_1 \
+            --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep $COMMIT_TIMEOUT
+            sleep $COMMIT_TIMEOUT
+  
+            echo "Saving vesting times..."
+            duration=$(echo "$end_time - $start_time" | bc -l)
+            echo "duration: $duration"
+            echo "vesting_start_time=$start_time" >> $GITHUB_ENV
+            echo "vesting_end_time=$end_time" >> $GITHUB_ENV
+            echo "vesting_duration=$duration" >> $GITHUB_ENV
+  
+        - name: Set up bonding
+          run: |
+            $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+  
+        - name: Delegate with vesting wallet
+          run: |
+            $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+            echo "Delegating from vesting wallet..."
+            $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
+            --from $VESTING_WALLET --home $HOME_1 \
+            --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep $COMMIT_TIMEOUT
+            sleep $COMMIT_TIMEOUT
+  
+        - name: Tokenize with vesting wallet
+          run: |
+            $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+  
+            echo "vesting_start_time = $vesting_start_time"
+            echo "vesting_end_time = $vesting_end_time"
+            echo "vesting_duration = $vesting_duration"
+  
+            echo "Calculating vested delegation..."
+            current_epoch=$(date +%s)
+            echo "epoch: $current_epoch"
+            elapsed_time=$(echo "$current_epoch - $vesting_start_time" | bc)
+            echo "elapsed_time: $elapsed_time"
+            vested_ratio=$(echo "$elapsed_time / $vesting_duration" | bc -l)
+            echo "vested ratio: $vested_ratio"
+            vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
+            echo "vested amount: $vested_amount"
+  
+            # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
+            echo "txhash: $txhash"
+            sleep $COMMIT_TIMEOUT
+            $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+  
+            liquid_tokens=$($CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
+            echo "liquid tokens: $liquid_tokens"
+            if [[ "$liquid_tokens" -gt "0" ]]; then
+              echo "FAIL: Greater than zero amount in liquid tokens balance."
+              exit 0
+            else
+              echo "PASS: No liquid tokens balance."
+            fi
   
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
@@ -424,25 +394,41 @@
   
         - name: _Blocks produced after upgrade
           run: |
-            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 3
   
-        - name: Flush "migration successful" lines
+        - name: Tokenize with vesting wallet
           run: |
-            $CHAIN_BINARY keys list --home $HOME_1
+            $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
   
-        - name: _Transactions verified> bank send, delegate, and withdraw rewards
-          run: tests/test_tx_fresh.sh
-        - name: _API endpoints check
-          run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-        - name: _RPC endpoints check
-          run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+            echo "vesting_start_time = $vesting_start_time"
+            echo "vesting_end_time = $vesting_end_time"
+            echo "vesting_duration = $vesting_duration"
   
-        - name: Test globalfee module
-          env:
-            COSMOS_SDK: v47
-          run: |
-            tests/test_globalfee.sh
-
+            echo "Calculating vested delegation..."
+            current_epoch=$(date +%s)
+            echo "epoch: $current_epoch"
+            elapsed_time=$(echo "$current_epoch - $vesting_start_time" | bc)
+            echo "elapsed_time: $elapsed_time"
+            vested_ratio=$(echo "$elapsed_time / $vesting_duration" | bc -l)
+            echo "vested ratio: $vested_ratio"
+            vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
+            echo "vested amount: $vested_amount"
+  
+            # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
+            echo "txhash: $txhash"
+  
+            sleep $COMMIT_TIMEOUT
+            $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
+            liquid_tokens=$($CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
+            echo "liquid tokens: $liquid_tokens"
+            if [[ "$liquid_tokens" -gt "0" ]]; then
+              echo "PASS: Greater than zero amount in liquid tokens balance."
+            else
+              echo "FAIL: No liquid tokens balance."
+              exit 0
+            fi
+   
     v16-2-ibc-rate-limit:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
@@ -780,200 +766,203 @@
             RPC_PORT: 27071
           run: |
             tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
-       
-    # v16-1-vesting-liquid-staking:
-    #   runs-on: ubuntu-22.04
-    #   needs: set-version-matrix
-    #   strategy:
-    #     matrix:
-    #       ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-    #     fail-fast: false
-    #   env:
-    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-    #     VESTING_AMOUNT: 110000000
-    #     VESTING_DELEGATED_AMOUNT: 100000000
-    #     VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
-    #     VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
-    #   steps:
-    #     - name: start-version
-    #       run: echo ${{matrix.gaia_version}}
-    #     - name: target-version
-    #       run: echo ${{matrix.upgrade_version}}
-    #     - name: target-commit
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       run: |
-    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-    #         echo TARGET_COMMIT: $TARGET_COMMIT
-    #     - name: Update PATH
-    #       run: |
-    #         mkdir -p $HOME/go/bin
-    #         echo "$HOME/go/bin" >> $GITHUB_PATH
-    #         echo "$HOME/.hermes" >> $GITHUB_PATH
-    #         echo "$HOME/.relayer" >> $GITHUB_PATH
-    #     - name: Bypass the grub-efi-amd64-signed package
-    #       run: sudo apt-mark hold grub-efi-amd64-signed
-    #     - name: Check out repository code
-    #       uses: actions/checkout@v3
-    #     - name: Set up Python
-    #       uses: actions/setup-python@v3
-    #       with:
-    #         python-version: '3.10'
-    #     - name: Install dependencies
-    #       run: |
-    #         python -m pip install --upgrade pip
-    #         python -m pip install toml-cli
-    #     - name: Install Cosmovisor > v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-    #       run: |
-    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Install Cosmovisor v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-    #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Start chain
-    #       env:
-    #         START_VERSION: ${{matrix.gaia_version}}
-    #       run: |
-    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-    #         scripts/start_chain.sh
-    #     - name: Check Gaia log
-    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
-    #     - name: Print Gaia version
-    #       run: $CHAIN_BINARY version --long
-    #     - name: Block production check
-    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+
+    Baseline-1-upgrade:
+      runs-on: ubuntu-22.04
+      needs: set-version-matrix-cosmovisor
+      strategy:
+        matrix:
+          ${{ fromJSON(needs.set-version-matrix-cosmovisor.outputs.upgrade_versions) }}
+        fail-fast: false
+      env:
+        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+      steps:
+        - name: start-version
+          run: echo ${{matrix.gaia_version}}
+        - name: target-version
+          run: echo ${{matrix.upgrade_version}}
+        - name: target-commit
+          if: ${{ matrix.upgrade_version == 'main' }}
+          run: |
+            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+            echo TARGET_COMMIT: $TARGET_COMMIT
+        - name: Update PATH
+          run: |
+            mkdir -p $HOME/go/bin
+            echo "$HOME/go/bin" >> $GITHUB_PATH
+            echo "$HOME/.hermes" >> $GITHUB_PATH
+            echo "$HOME/.relayer" >> $GITHUB_PATH
+        - name: Bypass the grub-efi-amd64-signed package
+          run: sudo apt-mark hold grub-efi-amd64-signed
+        - name: Check out repository code
+          uses: actions/checkout@v3
+        - name: Set up Python
+          uses: actions/setup-python@v3
+          with:
+            python-version: '3.10'
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            python -m pip install toml-cli
+        - name: Install Cosmovisor > v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+          run: |
+            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Install Cosmovisor v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+          run: |
+            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Start chain
+          env:
+            START_VERSION: ${{matrix.gaia_version}}
+          run: |
+            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+            scripts/start_chain.sh
+        - name: Check Gaia log
+          run: sudo journalctl -u $PROVIDER_SERVICE_1
+        - name: Print Gaia version
+          run: $CHAIN_BINARY version --long
+        - name: Block production check
+          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-    #     - name: Set up vesting account
-    #       run: |
-    #         echo "Adding key..."
-    #         echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
+        - name: Test software upgrade for published releases
+          if: ${{ matrix.upgrade_version != 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          run: |
+            echo $DOWNLOAD_URL
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+        - name: Test software upgrade for main branch
+          if: ${{ matrix.upgrade_version == 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          run: |
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
   
-    #         echo "Creating vesting wallet..."
-    #         start_time=$(date +%s)
-    #         echo "start time: $start_time"
-    #         end_time=$(date -d '10 minutes'  +%s)
-    #         echo "end time: $end_time"
-    #         $CHAIN_BINARY tx vesting create-vesting-account \
-    #         $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
-    #         --from $WALLET_1 --home $HOME_1 \
-    #         --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-    #         sleep $COMMIT_TIMEOUT
-    #         sleep $COMMIT_TIMEOUT
+        - name: _Blocks produced after upgrade
+          run: |
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
   
-    #         echo "Saving vesting times..."
-    #         duration=$(echo "$end_time - $start_time" | bc -l)
-    #         echo "duration: $duration"
-    #         echo "vesting_start_time=$start_time" >> $GITHUB_ENV
-    #         echo "vesting_end_time=$end_time" >> $GITHUB_ENV
-    #         echo "vesting_duration=$duration" >> $GITHUB_ENV
+        - name: Flush "migration successful" lines
+          run: |
+            $CHAIN_BINARY keys list --home $HOME_1
   
-    #     - name: Set up bonding
-    #       run: |
-    #         $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+        - name: _Transactions verified> bank send, delegate, and withdraw rewards
+          run: tests/test_tx_fresh.sh
+        - name: _API endpoints check
+          run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+        - name: _RPC endpoints check
+          run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+
+    Baseline-2-globalfee:
+      runs-on: ubuntu-22.04
+      needs: set-version-matrix
+      strategy:
+        matrix:
+          ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+        fail-fast: false
+      env:
+        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+      steps:
+        - name: start-version
+          run: echo ${{matrix.gaia_version}}
+        - name: target-version
+          run: echo ${{matrix.upgrade_version}}
+        - name: target-commit
+          if: ${{ matrix.upgrade_version == 'main' }}
+          run: |
+            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+            echo TARGET_COMMIT: $TARGET_COMMIT
+        - name: Update PATH
+          run: |
+            mkdir -p $HOME/go/bin
+            echo "$HOME/go/bin" >> $GITHUB_PATH
+            echo "$HOME/.hermes" >> $GITHUB_PATH
+            echo "$HOME/.relayer" >> $GITHUB_PATH
+        - name: Bypass the grub-efi-amd64-signed package
+          run: sudo apt-mark hold grub-efi-amd64-signed
+        - name: Check out repository code
+          uses: actions/checkout@v3
+        - name: Set up Python
+          uses: actions/setup-python@v3
+          with:
+            python-version: '3.10'
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            python -m pip install toml-cli
+        - name: Install Cosmovisor > v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+          run: |
+            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Install Cosmovisor v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+          run: |
+            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Start chain
+          env:
+            START_VERSION: ${{matrix.gaia_version}}
+          run: |
+            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+            scripts/start_chain.sh
+        - name: Check Gaia log
+          run: sudo journalctl -u $PROVIDER_SERVICE_1
+        - name: Print Gaia version
+          run: $CHAIN_BINARY version --long
+        - name: Block production check
+          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-    #     - name: Delegate with vesting wallet
-    #       run: |
+        - name: Test globalfee module
+          run: |
+            tests/test_globalfee.sh
   
-    #         $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
-    #         echo "Delegating from vesting wallet..."
-    #         $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
-    #         --from $VESTING_WALLET --home $HOME_1 \
-    #         --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-    #         sleep $COMMIT_TIMEOUT
-    #         sleep $COMMIT_TIMEOUT
+        - name: Test software upgrade for published releases
+          if: ${{ matrix.upgrade_version != 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          run: |
+            echo $DOWNLOAD_URL
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+        - name: Test software upgrade for main branch
+          if: ${{ matrix.upgrade_version == 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          run: |
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
   
-    #     - name: Tokenize with vesting wallet
-    #       run: |
-    #         $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+        - name: _Blocks produced after upgrade
+          run: |
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
   
-    #         echo "vesting_start_time = $vesting_start_time"
-    #         echo "vesting_end_time = $vesting_end_time"
-    #         echo "vesting_duration = $vesting_duration"
+        - name: Flush "migration successful" lines
+          run: |
+            $CHAIN_BINARY keys list --home $HOME_1
   
-    #         echo "Calculating vested delegation..."
-    #         current_epoch=$(date +%s)
-    #         echo "epoch: $current_epoch"
-    #         elapsed_time=$(echo "$current_epoch - $vesting_start_time" | bc)
-    #         echo "elapsed_time: $elapsed_time"
-    #         vested_ratio=$(echo "$elapsed_time / $vesting_duration" | bc -l)
-    #         echo "vested ratio: $vested_ratio"
-    #         vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
-    #         echo "vested amount: $vested_amount"
+        - name: _Transactions verified> bank send, delegate, and withdraw rewards
+          run: tests/test_tx_fresh.sh
+        - name: _API endpoints check
+          run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+        - name: _RPC endpoints check
+          run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
-    #         # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-    #         txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
-    #         echo "txhash: $txhash"
-    #         sleep $COMMIT_TIMEOUT
-    #         $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
-  
-    #         liquid_tokens=$($CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
-    #         echo "liquid tokens: $liquid_tokens"
-    #         if [[ "$liquid_tokens" -gt "0" ]]; then
-    #           echo "FAIL: Greater than zero amount in liquid tokens balance."
-    #           exit 0
-    #         else
-    #           echo "PASS: No liquid tokens balance."
-    #         fi
-  
-  
-    #     - name: Test software upgrade for published releases
-    #       if: ${{ matrix.upgrade_version != 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-    #       run: |
-    #         echo $DOWNLOAD_URL
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-    #     - name: Test software upgrade for main branch
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-    #       run: |
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-  
-    #     - name: _Blocks produced after upgrade
-    #       run: |
-    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 3
-  
-  
-    #     - name: Tokenize with vesting wallet
-    #       run: |
-    #         $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
-  
-    #         echo "vesting_start_time = $vesting_start_time"
-    #         echo "vesting_end_time = $vesting_end_time"
-    #         echo "vesting_duration = $vesting_duration"
-  
-    #         echo "Calculating vested delegation..."
-    #         current_epoch=$(date +%s)
-    #         echo "epoch: $current_epoch"
-    #         elapsed_time=$(echo "$current_epoch - $vesting_start_time" | bc)
-    #         echo "elapsed_time: $elapsed_time"
-    #         vested_ratio=$(echo "$elapsed_time / $vesting_duration" | bc -l)
-    #         echo "vested ratio: $vested_ratio"
-    #         vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
-    #         echo "vested amount: $vested_amount"
-  
-    #         # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-    #         txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
-    #         echo "txhash: $txhash"
-  
-    #         sleep $COMMIT_TIMEOUT
-    #         $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
-    #         liquid_tokens=$($CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
-    #         echo "liquid tokens: $liquid_tokens"
-    #         if [[ "$liquid_tokens" -gt "0" ]]; then
-    #           echo "PASS: Greater than zero amount in liquid tokens balance."
-    #         else
-    #           echo "FAIL: No liquid tokens balance."
-    #           exit 0
-    #         fi
-   
+        - name: Test globalfee module
+          env:
+            COSMOS_SDK: v47
+          run: |
+            tests/test_globalfee.sh
+
     Baseline-3-icsv330:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
@@ -1344,8 +1333,6 @@
         # Reference ICS chain variables
         CONSUMER_DENOM: ucon
         CONSUMER_FEES: 500
-        CONSUMER_CHAIN_V400_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v4.0.0/interchain-security-cd-linux
-        CONSUMER_CHAIN_V400_BINARY: consumerd_v4.0.0
         ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
         ICS_TRANSFORM_BINARY: cd-transform
       steps:
@@ -1887,749 +1874,666 @@
           run: |
             tests/test_pfm_transfers.sh
   
-    # Baseline-8-lsm:
-    #   runs-on: ubuntu-22.04
-    #   needs: set-version-matrix-relayer
-    #   strategy:
-    #     matrix:
-    #       ${{ fromJSON(needs.set-version-matrix-relayer.outputs.upgrade_versions) }}
-    #     fail-fast: false
-    #   env:
-    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-    #     # Consumer chain variables
-    #     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-    #     CONSUMER_ICS: v3.2.0
-    #     PROVIDER_ICS: v2.4.0
-    #     # Reference ICS chain variables
-    #     STRIDE_V18_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-consumer-v18.0.0/strided-consumer-linux
-    #     ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-    #     ICS_TRANSFORM_BINARY: cd-transform
-    #     STRIDE_CHAIN_BINARY: strided
-    #     STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-    #     STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
-    #   steps:
-    #     - name: start-version
-    #       run: echo ${{matrix.gaia_version}}
-    #     - name: target-version
-    #       run: echo ${{matrix.upgrade_version}}
-    #     - name: target-commit
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       run: |
-    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-    #         echo TARGET_COMMIT: $TARGET_COMMIT
-    #     - name: Update PATH
-    #       run: |
-    #         mkdir -p $HOME/go/bin
-    #         echo "$HOME/go/bin" >> $GITHUB_PATH
-    #         echo "$HOME/.hermes" >> $GITHUB_PATH
-    #         echo "$HOME/.relayer" >> $GITHUB_PATH
-    #     - name: Bypass the grub-efi-amd64-signed package
-    #       run: sudo apt-mark hold grub-efi-amd64-signed
-    #     - name: Check out repository code
-    #       uses: actions/checkout@v3
-    #     - name: Set up Python
-    #       uses: actions/setup-python@v3
-    #       with:
-    #         python-version: '3.10'
-    #     - name: Install dependencies
-    #       run: |
-    #         python -m pip install --upgrade pip
-    #         python -m pip install toml-cli
-    #     - name: Install Cosmovisor > v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-    #       run: |
-    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Install Cosmovisor v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-    #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Select Hermes
-    #       if: ${{ matrix.relayer == 'hermes' }}
-    #       run: echo "RELAYER=hermes" >> $GITHUB_ENV
-    #     - name: Select Go Relayer
-    #       if: ${{ matrix.relayer == 'rly' }}
-    #       run: echo "RELAYER=rly" >> $GITHUB_ENV
-    #     - name: Set up relayer
-    #       run: scripts/setup_relayer.sh
-    #     - name: Download consumer chain binaries
-    #       run: |
-    #         wget $STRIDE_V18_BINARY_URL -O $HOME/go/bin/$STRIDE_CHAIN_BINARY -q
-    #         chmod +x $HOME/go/bin/$STRIDE_CHAIN_BINARY
-    #         wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-    #         chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
-    #     - name: Consumer chain binary URLs
-    #       run: |
-    #         echo "$STRIDE_BINARY runs off $STRIDE_V18_BINARY_URL"
-    #     - name: Start chain
-    #       env:
-    #         START_VERSION: ${{matrix.gaia_version}}
-    #       run: |
-    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-    #         scripts/start_chain.sh
-    #     - name: Check Gaia log
-    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
-    #     - name: Print Gaia version
-    #       run: $CHAIN_BINARY version --long
-    #     - name: Block production check
-    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+    Baseline-6-lsm:
+      runs-on: ubuntu-22.04
+      needs: set-version-matrix-relayer
+      strategy:
+        matrix:
+          ${{ fromJSON(needs.set-version-matrix-relayer.outputs.upgrade_versions) }}
+        fail-fast: false
+      env:
+        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+        # Consumer chain variables
+        RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+        CONSUMER_ICS: v4.0.0
+        PROVIDER_ICS: v3.3.0
+        # Reference ICS chain variables
+        ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
+        ICS_TRANSFORM_BINARY: cd-transform
+        STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+        STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+      steps:
+        - name: start-version
+          run: echo ${{matrix.gaia_version}}
+        - name: target-version
+          run: echo ${{matrix.upgrade_version}}
+        - name: target-commit
+          if: ${{ matrix.upgrade_version == 'main' }}
+          run: |
+            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+            echo TARGET_COMMIT: $TARGET_COMMIT
+        - name: Update PATH
+          run: |
+            mkdir -p $HOME/go/bin
+            echo "$HOME/go/bin" >> $GITHUB_PATH
+            echo "$HOME/.hermes" >> $GITHUB_PATH
+            echo "$HOME/.relayer" >> $GITHUB_PATH
+        - name: Bypass the grub-efi-amd64-signed package
+          run: sudo apt-mark hold grub-efi-amd64-signed
+        - name: Check out repository code
+          uses: actions/checkout@v3
+        - name: Set up Python
+          uses: actions/setup-python@v3
+          with:
+            python-version: '3.10'
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            python -m pip install toml-cli
+        - name: Install Cosmovisor > v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+          run: |
+            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Install Cosmovisor v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+          run: |
+            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Select Hermes
+          if: ${{ matrix.relayer == 'hermes' }}
+          run: echo "RELAYER=hermes" >> $GITHUB_ENV
+        - name: Select Go Relayer
+          if: ${{ matrix.relayer == 'rly' }}
+          run: echo "RELAYER=rly" >> $GITHUB_ENV
+        - name: Set up relayer
+          run: scripts/setup_relayer.sh
+        - name: Download consumer chain binaries
+          run: |
+            wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
+            chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+        - name: Install Stride binary
+          run: |
+            go version
+            git clone https://github.com/Stride-Labs/stride.git 
+            git checkout v22.0.0
+            make install
+        - name: Consumer chain binary version
+          run: |
+            echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
+        - name: Start chain
+          env:
+            START_VERSION: ${{matrix.gaia_version}}
+          run: |
+            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+            scripts/start_chain.sh
+        - name: Check Gaia log
+          run: sudo journalctl -u $PROVIDER_SERVICE_1
+        - name: Print Gaia version
+          run: $CHAIN_BINARY version --long
+        - name: Block production check
+          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-    #     - name: Add Stride consumer chain
-    #       env:
-    #         COSMOS_SDK: v45
-    #         CONSUMER_CHAIN_ID: stride-test
-    #       run: |
-    #         scripts/add_consumer.sh
-    #     - name: Initialize Stride consumer chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_DENOM: ustrd
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_HOME_2: /home/runner/.stride-2
-    #         CONSUMER_HOME_3: /home/runner/.stride-3
-    #         CONSUMER_SERVICE_1: stride-1.service
-    #         CONSUMER_SERVICE_2: stride-2.service
-    #         CONSUMER_SERVICE_3: stride-3.service
-    #         CON1_API_PORT: 32301
-    #         CON2_API_PORT: 32302
-    #         CON3_API_PORT: 32303
-    #         CON1_GRPC_PORT: 32311
-    #         CON2_GRPC_PORT: 32312
-    #         CON3_GRPC_PORT: 32313
-    #         CON1_RPC_PORT: 32321
-    #         CON2_RPC_PORT: 32322
-    #         CON3_RPC_PORT: 32323
-    #         CON1_P2P_PORT: 32331
-    #         CON2_P2P_PORT: 32332
-    #         CON3_P2P_PORT: 32333
-    #         CON1_PPROF_PORT: 32341
-    #         CON2_PPROF_PORT: 32342
-    #         CON3_PPROF_PORT: 32343
-    #         DOWNTIME_BLOCKS: 100000
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         scripts/init_consumer_assign_keys.sh
-    #         sleep 20
-    #     - name: Prepare consumer chain stride-test
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_HOME_2: /home/runner/.stride-2
-    #         CONSUMER_HOME_3: /home/runner/.stride-3
-    #         CONSUMER_ICS: v3.2.0
-    #         PROVIDER_ICS: v2.4.0
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         scripts/prepare_consumer.sh
-    #     - name: Start consumer chain stride-test
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_SERVICE_1: stride-1.service
-    #         CONSUMER_SERVICE_2: stride-2.service
-    #         CONSUMER_SERVICE_3: stride-3.service
-    #       run: |
-    #         sudo systemctl enable $CONSUMER_SERVICE_1 --now
-    #         sleep 5
-    #         journalctl -u $CONSUMER_SERVICE_1
-    #     - name: _Pre-upgrade consumer chain produces blocks> Stride chain
-    #       env:
-    #         CON1_RPC_PORT: 32321
-    #       run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-    #     - name: Establish CCV channel for Stride chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #       run: |
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         if [ $RELAYER == "hermes" ]; then
-    #           echo "Creating channel with Hermes..."
-    #           hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-    #           hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-    #         elif [ $RELAYER == "rly" ]; then
-    #           echo "Creating channel with Go relayer..."
-    #           jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > stride-1.json
-    #           jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' stride-1.json > stride-2.json
-    #           rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID stride --file stride-2.json
-    #           rly transact connection stride
-    #           rly transact channel stride --src-port consumer --dst-port provider --order ordered --version 1
-    #         fi
-    #         sudo systemctl restart $RELAYER
-    #         sleep 10
-    #     - name: _Pre-upgrade CCV channel verified> Stride chain
-    #       env:
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CON1_RPC_PORT: 32321
-    #       run: tests/test_ccv_key_assignment.sh
-    #     - name: _Pre-upgrade IBC transfer successful> Stride chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_CHAIN_BINARY: strided
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_DENOM: ustrd
-    #         RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_consumer_ibc_transfer.sh $channel_id
-    #     - name: Register and fund ICA
-    #       env:
-    #         ICA_CHAIN_HOME: /home/runner/.stride-1
-    #       run: scripts/setup_ica.sh
-    #     - name: Set up happy path LSM accounts
-    #       run: |
-    #         scripts/lsm_account_setup.sh
-    #     - name: Set test LSM params
-    #       run: |
-    #         scripts/param_change.sh templates/proposal-global-liquid-cap.json
-    #         scripts/param_change.sh templates/proposal-validator-liquid-cap.json
-    #         scripts/param_change.sh templates/proposal-validator-bond-factor.json
-    #     - name: Create LSM log file
-    #       run: |
-    #         touch lsm_log.csv
-    #         echo "user flow,action,account,amount,balance,del_shares,del_balance,val1_tokens,val1_shares,val1_bond_shares,val1_liquid_shares,val2_tokens,val2_shares,val2_bond_shares,val2_liquid_shares" >> lsm_log.csv
-    #     - name: _Pre-upgrade LSM happy path
-    #       env:
-    #         BASE_FEES: 3000
-    #         CONSUMER_FEES: 1000
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         STRIDE_HOME_1: /home/runner/.stride-1
-    #         VALOPER_TOKENIZATION: 1
-    #       run: |
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_lsm_happy_path.sh
-    #     - name: _Pre-upgrade LSM Liquid Staking Provider happy path
-    #       env:
-    #         STRIDE_HOME_1: /home/runner/.stride-1
-    #         LSP_COUNT: 1
-    #         COSMOS_SDK: v45
-    #       run: tests/test_ica_delegate_happy.sh
+        - name: Add Stride consumer chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+          run: |
+            scripts/add_consumer.sh
+        - name: Initialize Stride consumer chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_DENOM: ustrd
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_HOME_2: /home/runner/.stride-2
+            CONSUMER_HOME_3: /home/runner/.stride-3
+            CONSUMER_SERVICE_1: stride-1.service
+            CONSUMER_SERVICE_2: stride-2.service
+            CONSUMER_SERVICE_3: stride-3.service
+            CON1_API_PORT: 32301
+            CON2_API_PORT: 32302
+            CON3_API_PORT: 32303
+            CON1_GRPC_PORT: 32311
+            CON2_GRPC_PORT: 32312
+            CON3_GRPC_PORT: 32313
+            CON1_RPC_PORT: 32321
+            CON2_RPC_PORT: 32322
+            CON3_RPC_PORT: 32323
+            CON1_P2P_PORT: 32331
+            CON2_P2P_PORT: 32332
+            CON3_P2P_PORT: 32333
+            CON1_PPROF_PORT: 32341
+            CON2_PPROF_PORT: 32342
+            CON3_PPROF_PORT: 32343
+            DOWNTIME_BLOCKS: 100000
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            scripts/init_consumer_assign_keys.sh
+            sleep 20
+        - name: Prepare consumer chain stride-test
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_HOME_2: /home/runner/.stride-2
+            CONSUMER_HOME_3: /home/runner/.stride-3
+            CONSUMER_ICS: v4.0.0
+            PROVIDER_ICS: v3.3.0
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            scripts/prepare_consumer.sh
+        - name: Start consumer chain stride-test
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_SERVICE_1: stride-1.service
+            CONSUMER_SERVICE_2: stride-2.service
+            CONSUMER_SERVICE_3: stride-3.service
+          run: |
+            sudo systemctl enable $CONSUMER_SERVICE_1 --now
+            sleep 5
+            journalctl -u $CONSUMER_SERVICE_1
+        - name: _Pre-upgrade consumer chain produces blocks> Stride chain
+          env:
+            CON1_RPC_PORT: 32321
+          run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+        - name: Establish CCV channel for Stride chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+          run: |
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            if [ $RELAYER == "hermes" ]; then
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+            elif [ $RELAYER == "rly" ]; then
+              echo "Creating channel with Go relayer..."
+              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > stride-1.json
+              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' stride-1.json > stride-2.json
+              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID stride --file stride-2.json
+              rly transact connection stride
+              rly transact channel stride --src-port consumer --dst-port provider --order ordered --version 1
+            fi
+            sudo systemctl restart $RELAYER
+            sleep 10
+        - name: _Pre-upgrade CCV channel verified> Stride chain
+          env:
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CON1_RPC_PORT: 32321
+          run: tests/test_ccv_key_assignment.sh
+        - name: _Pre-upgrade IBC transfer successful> Stride chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_CHAIN_BINARY: strided
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_DENOM: ustrd
+            RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_consumer_ibc_transfer.sh $channel_id
+        - name: Register and fund ICA
+          env:
+            ICA_CHAIN_HOME: /home/runner/.stride-1
+          run: scripts/setup_ica.sh
+        - name: Set up happy path LSM accounts
+          run: |
+            scripts/lsm_account_setup.sh
+        - name: Set test LSM params
+          run: |
+            scripts/param_change.sh templates/proposal-global-liquid-cap.json
+            scripts/param_change.sh templates/proposal-validator-liquid-cap.json
+            scripts/param_change.sh templates/proposal-validator-bond-factor.json
+        - name: Create LSM log file
+          run: |
+            touch lsm_log.csv
+            echo "user flow,action,account,amount,balance,del_shares,del_balance,val1_tokens,val1_shares,val1_bond_shares,val1_liquid_shares,val2_tokens,val2_shares,val2_bond_shares,val2_liquid_shares" >> lsm_log.csv
+        - name: _Pre-upgrade LSM happy path
+          env:
+            BASE_FEES: 3000
+            CONSUMER_FEES: 1000
+            CONSUMER_CHAIN_ID: stride-test
+            STRIDE_HOME_1: /home/runner/.stride-1
+            VALOPER_TOKENIZATION: 1
+          run: |
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_lsm_happy_path.sh
+        - name: _Pre-upgrade LSM Liquid Staking Provider happy path
+          env:
+            STRIDE_HOME_1: /home/runner/.stride-1
+            LSP_COUNT: 1
+            COSMOS_SDK: v45
+          run: tests/test_ica_delegate_happy.sh
   
-    #     - name: Test software upgrade for published releases
-    #       if: ${{ matrix.upgrade_version != 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-    #       run: |
-    #         echo $DOWNLOAD_URL
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
-    #     - name: Test software upgrade for main branch
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-    #       run: |
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
+        - name: Test software upgrade for published releases
+          if: ${{ matrix.upgrade_version != 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          run: |
+            echo $DOWNLOAD_URL
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
+        - name: Test software upgrade for main branch
+          if: ${{ matrix.upgrade_version == 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          run: |
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
   
-    #     - name: _Blocks produced after upgrade
-    #       run: |
-    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+        - name: _Blocks produced after upgrade
+          run: |
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
   
-    #     - name: Restart relayer
-    #       run: sudo systemctl restart $RELAYER
+        - name: Set blocks_per_epoch to 1
+          run: |
+            scripts/param_change.sh templates/proposal-blocks-per-epoch.json
+
+        - name: Restart relayer
+          run: sudo systemctl restart $RELAYER
   
-    #     - name: Flush "migration successful" lines
-    #       run: |
-    #         $CHAIN_BINARY keys list --home $HOME_1
+        - name: Flush "migration successful" lines
+          run: |
+            $CHAIN_BINARY keys list --home $HOME_1
   
-    #     - name: _CCV channel verified> Stride chain
-    #       env:
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CON1_RPC_PORT: 32321
-    #       run: tests/test_ccv_key_assignment.sh
-    #     - name: _IBC transfer successful> Stride chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_CHAIN_BINARY: strided
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_DENOM: ustrd
-    #         RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_consumer_ibc_transfer.sh $channel_id
-    #     - name: _LSM happy path
-    #       env:
-    #         BASE_FEES: 3000
-    #         CONSUMER_FEES: 1000
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         STRIDE_HOME_1: /home/runner/.stride-1
-    #         VALOPER_TOKENIZATION: 2
-    #       run: |
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_lsm_happy_path.sh
-    #     - name: _LSM Liquid Staking Provider happy path
-    #       env:
-    #         STRIDE_HOME_1: /home/runner/.stride-1
-    #         LSP_COUNT: 2
-    #         COSMOS_SDK: v47
-    #       run: tests/test_ica_delegate_happy.sh
+        - name: _CCV channel verified> Stride chain
+          env:
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CON1_RPC_PORT: 32321
+          run: tests/test_ccv_key_assignment.sh
+        - name: _IBC transfer successful> Stride chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_CHAIN_BINARY: strided
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_DENOM: ustrd
+            RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_consumer_ibc_transfer.sh $channel_id
+        - name: _LSM happy path
+          env:
+            BASE_FEES: 3000
+            CONSUMER_FEES: 1000
+            CONSUMER_CHAIN_ID: stride-test
+            STRIDE_HOME_1: /home/runner/.stride-1
+            VALOPER_TOKENIZATION: 2
+          run: |
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_lsm_happy_path.sh
+        - name: _LSM Liquid Staking Provider happy path
+          env:
+            STRIDE_HOME_1: /home/runner/.stride-1
+            LSP_COUNT: 2
+            COSMOS_SDK: v47
+          run: tests/test_ica_delegate_happy.sh
   
-    # Baseline-9-mainnet-consumer-chains:
-    #   runs-on: ubuntu-22.04
-    #   needs: set-version-matrix-relayer
-    #   strategy:
-    #     matrix:
-    #       ${{ fromJSON(needs.set-version-matrix-relayer.outputs.upgrade_versions) }}
-    #     fail-fast: false
-    #   env:
-    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-    #     # Consumer chain variables
-    #     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-    #     CONSUMER_ICS: v3.2.0
-    #     PROVIDER_ICS: v2.4.0
-    #     # Reference ICS chain variables
-    #     STRIDE_V18_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-consumer-v18.0.0/strided-consumer-linux
-    #     ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-    #     ICS_TRANSFORM_BINARY: cd-transform
-    #     STRIDE_CHAIN_BINARY: strided
-    #     STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-    #     STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
-    #   steps:
-    #     - name: start-version
-    #       run: echo ${{matrix.gaia_version}}
-    #     - name: target-version
-    #       run: echo ${{matrix.upgrade_version}}
-    #     - name: target-commit
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       run: |
-    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-    #         echo TARGET_COMMIT: $TARGET_COMMIT
-    #     - name: Update PATH
-    #       run: |
-    #         mkdir -p $HOME/go/bin
-    #         echo "$HOME/go/bin" >> $GITHUB_PATH
-    #         echo "$HOME/.hermes" >> $GITHUB_PATH
-    #         echo "$HOME/.relayer" >> $GITHUB_PATH
-    #     - name: Bypass the grub-efi-amd64-signed package
-    #       run: sudo apt-mark hold grub-efi-amd64-signed
-    #     - name: Check out repository code
-    #       uses: actions/checkout@v3
-    #     - name: Set up Python
-    #       uses: actions/setup-python@v3
-    #       with:
-    #         python-version: '3.10'
-    #     - name: Install dependencies
-    #       run: |
-    #         python -m pip install --upgrade pip
-    #         python -m pip install toml-cli
-    #     - name: Install Cosmovisor > v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-    #       run: |
-    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Install Cosmovisor v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-    #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Select Hermes
-    #       if: ${{ matrix.relayer == 'hermes' }}
-    #       run: echo "RELAYER=hermes" >> $GITHUB_ENV
-    #     - name: Select Go Relayer
-    #       if: ${{ matrix.relayer == 'rly' }}
-    #       run: echo "RELAYER=rly" >> $GITHUB_ENV
-    #     - name: Set up relayer
-    #       run: scripts/setup_relayer.sh
-    #     - name: Download consumer chain binaries
-    #       run: |
-    #         wget $NEUTRON_V2_BINARY_URL -O $HOME/go/bin/$NEUTRON_CHAIN_BINARY -q
-    #         chmod +x $HOME/go/bin/$NEUTRON_CHAIN_BINARY
-    #         wget $STRIDE_V18_BINARY_URL -O $HOME/go/bin/$STRIDE_CHAIN_BINARY -q
-    #         chmod +x $HOME/go/bin/$STRIDE_CHAIN_BINARY
-    #         wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-    #         chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
-    #     - name: Consumer chain binary URLs
-    #       run: |
-    #         echo "$NEUTRON_BINARY runs off $NEUTRON_V2_BINARY_URL"
-    #         echo "$STRIDE_BINARY runs off $STRIDE_V18_BINARY_URL"
-    #     - name: Start chain
-    #       env:
-    #         START_VERSION: ${{matrix.gaia_version}}
-    #       run: |
-    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-    #         scripts/start_chain.sh
-    #     - name: Check Gaia log
-    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
-    #     - name: Print Gaia version
-    #       run: $CHAIN_BINARY version --long
-    #     - name: Block production check
-    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+    Baseline-9-mainnet-consumer-chains:
+      runs-on: ubuntu-22.04
+      needs: set-version-matrix-relayer
+      strategy:
+        matrix:
+          ${{ fromJSON(needs.set-version-matrix-relayer.outputs.upgrade_versions) }}
+        fail-fast: false
+      env:
+        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+        # Consumer chain variables
+        RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+        CONSUMER_ICS: v4.0.0
+        PROVIDER_ICS: v3.3.0
+        # Reference ICS chain variables
+        ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
+        ICS_TRANSFORM_BINARY: cd-transform
+        STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+        STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+      steps:
+        - name: start-version
+          run: echo ${{matrix.gaia_version}}
+        - name: target-version
+          run: echo ${{matrix.upgrade_version}}
+        - name: target-commit
+          if: ${{ matrix.upgrade_version == 'main' }}
+          run: |
+            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+            echo TARGET_COMMIT: $TARGET_COMMIT
+        - name: Update PATH
+          run: |
+            mkdir -p $HOME/go/bin
+            echo "$HOME/go/bin" >> $GITHUB_PATH
+            echo "$HOME/.hermes" >> $GITHUB_PATH
+            echo "$HOME/.relayer" >> $GITHUB_PATH
+        - name: Bypass the grub-efi-amd64-signed package
+          run: sudo apt-mark hold grub-efi-amd64-signed
+        - name: Check out repository code
+          uses: actions/checkout@v3
+        - name: Set up Python
+          uses: actions/setup-python@v3
+          with:
+            python-version: '3.10'
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            python -m pip install toml-cli
+        - name: Install Cosmovisor > v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+          run: |
+            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Install Cosmovisor v1.3.0
+          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+          run: |
+            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            echo "COSMOVISOR=true" >> $GITHUB_ENV
+            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+        - name: Select Hermes
+          if: ${{ matrix.relayer == 'hermes' }}
+          run: echo "RELAYER=hermes" >> $GITHUB_ENV
+        - name: Select Go Relayer
+          if: ${{ matrix.relayer == 'rly' }}
+          run: echo "RELAYER=rly" >> $GITHUB_ENV
+        - name: Set up relayer
+          run: scripts/setup_relayer.sh
+        - name: Download consumer chain binaries
+          run: |
+            wget $STRIDE_V18_BINARY_URL -O $HOME/go/bin/$STRIDE_CHAIN_BINARY -q
+            chmod +x $HOME/go/bin/$STRIDE_CHAIN_BINARY
+            wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
+            chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+        - name: Install Neutron binary
+          run: |
+            go version
+            git clone https://github.com/neutron-org/neutron.git 
+            git checkout v3.0.2
+            make install
+        - name: Install Stride binary
+          run: |
+            go version
+            git clone https://github.com/Stride-Labs/stride.git 
+            git checkout v22.0.0
+            make install
+
+        - name: Consumer chain binary URLs
+          run: |
+            echo "$NEUTRON_BINARY runs $($NEUTRON_BINARY version)"
+            echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
+        - name: Start chain
+          env:
+            START_VERSION: ${{matrix.gaia_version}}
+          run: |
+            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+            scripts/start_chain.sh
+        - name: Check Gaia log
+          run: sudo journalctl -u $PROVIDER_SERVICE_1
+        - name: Print Gaia version
+          run: $CHAIN_BINARY version --long
+        - name: Block production check
+          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-    #     - name: Add Neutron consumer chain
-    #       env:
-    #         COSMOS_SDK: v45
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #       run: |
-    #         scripts/add_consumer.sh
-    #     - name: Initialize Neutron consumer chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #         CONSUMER_DENOM: untrn
-    #         CONSUMER_HOME_1: /home/runner/.neutron-1
-    #         CONSUMER_HOME_2: /home/runner/.neutron-2
-    #         CONSUMER_HOME_3: /home/runner/.neutron-3
-    #         CONSUMER_SERVICE_1: neutron-1.service
-    #         CONSUMER_SERVICE_2: neutron-2.service
-    #         CONSUMER_SERVICE_3: neutron-3.service
-    #         CON1_API_PORT: 31301
-    #         CON2_API_PORT: 31302
-    #         CON3_API_PORT: 31303
-    #         CON1_GRPC_PORT: 31311
-    #         CON2_GRPC_PORT: 31312
-    #         CON3_GRPC_PORT: 31313
-    #         CON1_RPC_PORT: 31321
-    #         CON2_RPC_PORT: 31322
-    #         CON3_RPC_PORT: 31323
-    #         CON1_P2P_PORT: 31331
-    #         CON2_P2P_PORT: 31332
-    #         CON3_P2P_PORT: 31333
-    #         CON1_PPROF_PORT: 31341
-    #         CON2_PPROF_PORT: 31342
-    #         CON3_PPROF_PORT: 31343
-    #         DOWNTIME_BLOCKS: 100000
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
-    #         scripts/init_consumer_assign_keys.sh
-    #         sleep 20
-    #     - name: Prepare consumer chain neutron-test
-    #       env:
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #         CONSUMER_HOME_1: /home/runner/.neutron-1
-    #         CONSUMER_HOME_2: /home/runner/.neutron-2
-    #         CONSUMER_HOME_3: /home/runner/.neutron-3
-    #         CONSUMER_ICS: v3.1.0
-    #         PROVIDER_ICS: v2.4.0
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
-    #         scripts/prepare_consumer.sh
-    #     - name: Start consumer chain neutron-test
-    #       env:
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #         CONSUMER_SERVICE_1: neutron-1.service
-    #         CONSUMER_SERVICE_2: neutron-2.service
-    #         CONSUMER_SERVICE_3: neutron-3.service
-    #       run: |
-    #         sudo systemctl enable $CONSUMER_SERVICE_1 --now
-    #         sleep 5
-    #         journalctl -u $CONSUMER_SERVICE_1
-    #     - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
-    #       env:
-    #         CON1_RPC_PORT: 31321
-    #       run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-    #     - name: Establish CCV channel for Neutron chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #       run: |
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         if [ $RELAYER == "hermes" ]; then
-    #           echo "Creating channel with Hermes..."
-    #           hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-    #           hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-    #         elif [ $RELAYER == "rly" ]; then
-    #           echo "Creating channel with Go relayer..."
-    #           jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > neutron-1.json
-    #           jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' neutron-1.json > neutron-2.json
-    #           rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID neutron --file neutron-2.json
-    #           rly transact connection neutron
-    #           rly transact channel neutron --src-port consumer --dst-port provider --order ordered --version 1
-    #         fi
-    #         sudo systemctl restart $RELAYER
-    #         sleep 10
-    #     - name: _Pre-upgrade CCV channel verified> Neutron chain
-    #       env:
-    #         CONSUMER_HOME_1: /home/runner/.neutron-1
-    #         CON1_RPC_PORT: 31321
-    #       run: tests/test_ccv_key_assignment.sh
-    #     - name: _Pre-upgrade IBC transfer successful> Neutron chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #         CONSUMER_CHAIN_BINARY: neutrond
-    #         CONSUMER_HOME_1: /home/runner/.neutron-1
-    #         CONSUMER_DENOM: untrn
-    #         RECIPIENT: neutron1r5v5srda7xfth3hn2s26txvrcrntldjul5wedc
-    #         GAS_PRICE: 0.02
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_consumer_ibc_transfer.sh $channel_id
+        - name: Add Neutron consumer chain
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+          run: |
+            scripts/add_consumer.sh
+        - name: Initialize Neutron consumer chain
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+            CONSUMER_DENOM: untrn
+            CONSUMER_HOME_1: /home/runner/.neutron-1
+            CONSUMER_HOME_2: /home/runner/.neutron-2
+            CONSUMER_HOME_3: /home/runner/.neutron-3
+            CONSUMER_SERVICE_1: neutron-1.service
+            CONSUMER_SERVICE_2: neutron-2.service
+            CONSUMER_SERVICE_3: neutron-3.service
+            CON1_API_PORT: 31301
+            CON2_API_PORT: 31302
+            CON3_API_PORT: 31303
+            CON1_GRPC_PORT: 31311
+            CON2_GRPC_PORT: 31312
+            CON3_GRPC_PORT: 31313
+            CON1_RPC_PORT: 31321
+            CON2_RPC_PORT: 31322
+            CON3_RPC_PORT: 31323
+            CON1_P2P_PORT: 31331
+            CON2_P2P_PORT: 31332
+            CON3_P2P_PORT: 31333
+            CON1_PPROF_PORT: 31341
+            CON2_PPROF_PORT: 31342
+            CON3_PPROF_PORT: 31343
+            DOWNTIME_BLOCKS: 100000
+          run: |
+            export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
+            scripts/init_consumer_assign_keys.sh
+            sleep 20
+        - name: Prepare consumer chain neutron-test
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+            CONSUMER_HOME_1: /home/runner/.neutron-1
+            CONSUMER_HOME_2: /home/runner/.neutron-2
+            CONSUMER_HOME_3: /home/runner/.neutron-3
+            CONSUMER_ICS: v4.0.0
+            PROVIDER_ICS: v3.3.0
+          run: |
+            export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
+            scripts/prepare_consumer.sh
+        - name: Start consumer chain neutron-test
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+            CONSUMER_SERVICE_1: neutron-1.service
+            CONSUMER_SERVICE_2: neutron-2.service
+            CONSUMER_SERVICE_3: neutron-3.service
+          run: |
+            sudo systemctl enable $CONSUMER_SERVICE_1 --now
+            sleep 5
+            journalctl -u $CONSUMER_SERVICE_1
+        - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
+          env:
+            CON1_RPC_PORT: 31321
+          run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+        - name: Establish CCV channel for Neutron chain
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+          run: |
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            if [ $RELAYER == "hermes" ]; then
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+            elif [ $RELAYER == "rly" ]; then
+              echo "Creating channel with Go relayer..."
+              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > neutron-1.json
+              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' neutron-1.json > neutron-2.json
+              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID neutron --file neutron-2.json
+              rly transact connection neutron
+              rly transact channel neutron --src-port consumer --dst-port provider --order ordered --version 1
+            fi
+            sudo systemctl restart $RELAYER
+            sleep 10
+        - name: _Pre-upgrade CCV channel verified> Neutron chain
+          env:
+            CONSUMER_HOME_1: /home/runner/.neutron-1
+            CON1_RPC_PORT: 31321
+          run: tests/test_ccv_key_assignment.sh
+        - name: _Pre-upgrade IBC transfer successful> Neutron chain
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+            CONSUMER_CHAIN_BINARY: neutrond
+            CONSUMER_HOME_1: /home/runner/.neutron-1
+            CONSUMER_DENOM: untrn
+            RECIPIENT: neutron1r5v5srda7xfth3hn2s26txvrcrntldjul5wedc
+            GAS_PRICE: 0.02
+          run: |
+            export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_consumer_ibc_transfer.sh $channel_id
   
-    #     - name: Add Stride consumer chain
-    #       env:
-    #         COSMOS_SDK: v45
-    #         CONSUMER_CHAIN_ID: stride-test
-    #       run: |
-    #         scripts/add_consumer.sh
-    #     - name: Initialize Stride consumer chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_DENOM: ustrd
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_HOME_2: /home/runner/.stride-2
-    #         CONSUMER_HOME_3: /home/runner/.stride-3
-    #         CONSUMER_SERVICE_1: stride-1.service
-    #         CONSUMER_SERVICE_2: stride-2.service
-    #         CONSUMER_SERVICE_3: stride-3.service
-    #         CON1_API_PORT: 32301
-    #         CON2_API_PORT: 32302
-    #         CON3_API_PORT: 32303
-    #         CON1_GRPC_PORT: 32311
-    #         CON2_GRPC_PORT: 32312
-    #         CON3_GRPC_PORT: 32313
-    #         CON1_RPC_PORT: 32321
-    #         CON2_RPC_PORT: 32322
-    #         CON3_RPC_PORT: 32323
-    #         CON1_P2P_PORT: 32331
-    #         CON2_P2P_PORT: 32332
-    #         CON3_P2P_PORT: 32333
-    #         CON1_PPROF_PORT: 32341
-    #         CON2_PPROF_PORT: 32342
-    #         CON3_PPROF_PORT: 32343
-    #         DOWNTIME_BLOCKS: 100000
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         scripts/init_consumer_assign_keys.sh
-    #         sleep 20
-    #     - name: Prepare consumer chain stride-test
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_HOME_2: /home/runner/.stride-2
-    #         CONSUMER_HOME_3: /home/runner/.stride-3
-    #         CONSUMER_ICS: v3.2.0
-    #         PROVIDER_ICS: v2.4.0
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         scripts/prepare_consumer.sh
-    #     - name: Start consumer chain stride-test
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_SERVICE_1: stride-1.service
-    #         CONSUMER_SERVICE_2: stride-2.service
-    #         CONSUMER_SERVICE_3: stride-3.service
-    #       run: |
-    #         sudo systemctl enable $CONSUMER_SERVICE_1 --now
-    #         sleep 5
-    #         journalctl -u $CONSUMER_SERVICE_1
-    #     - name: _Pre-upgrade consumer chain produces blocks> Stride chain
-    #       env:
-    #         CON1_RPC_PORT: 32321
-    #       run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-    #     - name: Establish CCV channel for Stride chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #       run: |
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         if [ $RELAYER == "hermes" ]; then
-    #           echo "Creating channel with Hermes..."
-    #           hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-    #           hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-    #         elif [ $RELAYER == "rly" ]; then
-    #           echo "Creating channel with Go relayer..."
-    #           jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > stride-1.json
-    #           jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' stride-1.json > stride-2.json
-    #           rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID stride --file stride-2.json
-    #           rly transact connection stride
-    #           rly transact channel stride --src-port consumer --dst-port provider --order ordered --version 1
-    #         fi
-    #         sudo systemctl restart $RELAYER
-    #         sleep 10
-    #     - name: _Pre-upgrade CCV channel verified> Stride chain
-    #       env:
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CON1_RPC_PORT: 32321
-    #       run: tests/test_ccv_key_assignment.sh
-    #     - name: _Pre-upgrade IBC transfer successful> Stride chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_CHAIN_BINARY: strided
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_DENOM: ustrd
-    #         RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_consumer_ibc_transfer.sh $channel_id
+        - name: Add Stride consumer chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+          run: |
+            scripts/add_consumer.sh
+        - name: Initialize Stride consumer chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_DENOM: ustrd
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_HOME_2: /home/runner/.stride-2
+            CONSUMER_HOME_3: /home/runner/.stride-3
+            CONSUMER_SERVICE_1: stride-1.service
+            CONSUMER_SERVICE_2: stride-2.service
+            CONSUMER_SERVICE_3: stride-3.service
+            CON1_API_PORT: 32301
+            CON2_API_PORT: 32302
+            CON3_API_PORT: 32303
+            CON1_GRPC_PORT: 32311
+            CON2_GRPC_PORT: 32312
+            CON3_GRPC_PORT: 32313
+            CON1_RPC_PORT: 32321
+            CON2_RPC_PORT: 32322
+            CON3_RPC_PORT: 32323
+            CON1_P2P_PORT: 32331
+            CON2_P2P_PORT: 32332
+            CON3_P2P_PORT: 32333
+            CON1_PPROF_PORT: 32341
+            CON2_PPROF_PORT: 32342
+            CON3_PPROF_PORT: 32343
+            DOWNTIME_BLOCKS: 100000
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            scripts/init_consumer_assign_keys.sh
+            sleep 20
+        - name: Prepare consumer chain stride-test
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_HOME_2: /home/runner/.stride-2
+            CONSUMER_HOME_3: /home/runner/.stride-3
+            CONSUMER_ICS: v4.0.0
+            PROVIDER_ICS: v3.3.0
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            scripts/prepare_consumer.sh
+        - name: Start consumer chain stride-test
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_SERVICE_1: stride-1.service
+            CONSUMER_SERVICE_2: stride-2.service
+            CONSUMER_SERVICE_3: stride-3.service
+          run: |
+            sudo systemctl enable $CONSUMER_SERVICE_1 --now
+            sleep 5
+            journalctl -u $CONSUMER_SERVICE_1
+        - name: _Pre-upgrade consumer chain produces blocks> Stride chain
+          env:
+            CON1_RPC_PORT: 32321
+          run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+        - name: Establish CCV channel for Stride chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+          run: |
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            if [ $RELAYER == "hermes" ]; then
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+            elif [ $RELAYER == "rly" ]; then
+              echo "Creating channel with Go relayer..."
+              jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > stride-1.json
+              jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' stride-1.json > stride-2.json
+              rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID stride --file stride-2.json
+              rly transact connection stride
+              rly transact channel stride --src-port consumer --dst-port provider --order ordered --version 1
+            fi
+            sudo systemctl restart $RELAYER
+            sleep 10
+        - name: _Pre-upgrade CCV channel verified> Stride chain
+          env:
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CON1_RPC_PORT: 32321
+          run: tests/test_ccv_key_assignment.sh
+        - name: _Pre-upgrade IBC transfer successful> Stride chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_CHAIN_BINARY: strided
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_DENOM: ustrd
+            RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_consumer_ibc_transfer.sh $channel_id
   
-    #     - name: Test software upgrade for published releases
-    #       if: ${{ matrix.upgrade_version != 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-    #       run: |
-    #         echo $DOWNLOAD_URL
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
-    #     - name: Test software upgrade for main branch
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-    #       run: |
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
+        - name: Test software upgrade for published releases
+          if: ${{ matrix.upgrade_version != 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+          run: |
+            echo $DOWNLOAD_URL
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
+        - name: Test software upgrade for main branch
+          if: ${{ matrix.upgrade_version == 'main' }}
+          env:
+            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          run: |
+            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
   
-    #     - name: _Blocks produced after upgrade
-    #       run: |
-    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+        - name: _Blocks produced after upgrade
+          run: |
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
   
-    #     - name: Restart relayer
-    #       run: sudo systemctl restart $RELAYER
+        - name: Set blocks_per_epoch to 1
+          run: |
+            scripts/param_change.sh templates/proposal-blocks-per-epoch.json
+
+        - name: Restart relayer
+          run: sudo systemctl restart $RELAYER
   
-    #     - name: Flush "migration successful" lines
-    #       run: |
-    #         $CHAIN_BINARY keys list --home $HOME_1
+        - name: Flush "migration successful" lines
+          run: |
+            $CHAIN_BINARY keys list --home $HOME_1
   
-    #     - name: _CCV channel verified> Neutron chain
-    #       env:
-    #         CONSUMER_HOME_1: /home/runner/.neutron-1
-    #         CON1_RPC_PORT: 31321
-    #       run: tests/test_ccv_key_assignment.sh
+        - name: _CCV channel verified> Neutron chain
+          env:
+            CONSUMER_HOME_1: /home/runner/.neutron-1
+            CON1_RPC_PORT: 31321
+          run: tests/test_ccv_key_assignment.sh
         
-    #     - name: _CCV channel verified> Stride chain
-    #       env:
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CON1_RPC_PORT: 32321
-    #       run: tests/test_ccv_key_assignment.sh
+        - name: _CCV channel verified> Stride chain
+          env:
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CON1_RPC_PORT: 32321
+          run: tests/test_ccv_key_assignment.sh
   
-    #     - name: _IBC transfer successful> Neutron chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: neutron-test
-    #         CONSUMER_CHAIN_BINARY: neutrond
-    #         CONSUMER_HOME_1: /home/runner/.neutron-1
-    #         CONSUMER_DENOM: untrn
-    #         RECIPIENT: neutron1r5v5srda7xfth3hn2s26txvrcrntldjul5wedc
-    #         GAS_PRICE: 0.02
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_consumer_ibc_transfer.sh $channel_id
+        - name: _IBC transfer successful> Neutron chain
+          env:
+            CONSUMER_CHAIN_ID: neutron-test
+            CONSUMER_CHAIN_BINARY: neutrond
+            CONSUMER_HOME_1: /home/runner/.neutron-1
+            CONSUMER_DENOM: untrn
+            RECIPIENT: neutron1r5v5srda7xfth3hn2s26txvrcrntldjul5wedc
+            GAS_PRICE: 0.02
+          run: |
+            export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_consumer_ibc_transfer.sh $channel_id
   
-    #     - name: _IBC transfer successful> Stride chain
-    #       env:
-    #         CONSUMER_CHAIN_ID: stride-test
-    #         CONSUMER_CHAIN_BINARY: strided
-    #         CONSUMER_HOME_1: /home/runner/.stride-1
-    #         CONSUMER_DENOM: ustrd
-    #         RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-    #       run: |
-    #         export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-    #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-    #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-    #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-    #         tests/test_consumer_ibc_transfer.sh $channel_id
-  
-    # v16-1-tbd:
-    #   runs-on: ubuntu-22.04
-    #   needs: set-version-matrix
-    #   strategy:
-    #     matrix:
-    #       ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-    #     fail-fast: false
-    #   env:
-    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-    #   steps:
-    #     - name: start-version
-    #       run: echo ${{matrix.gaia_version}}
-    #     - name: target-version
-    #       run: echo ${{matrix.upgrade_version}}
-    #     - name: target-commit
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       run: |
-    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-    #         echo TARGET_COMMIT: $TARGET_COMMIT
-    #     - name: Update PATH
-    #       run: |
-    #         mkdir -p $HOME/go/bin
-    #         echo "$HOME/go/bin" >> $GITHUB_PATH
-    #         echo "$HOME/.hermes" >> $GITHUB_PATH
-    #         echo "$HOME/.relayer" >> $GITHUB_PATH
-    #     - name: Bypass the grub-efi-amd64-signed package
-    #       run: sudo apt-mark hold grub-efi-amd64-signed
-    #     - name: Check out repository code
-    #       uses: actions/checkout@v3
-    #     - name: Set up Python
-    #       uses: actions/setup-python@v3
-    #       with:
-    #         python-version: '3.10'
-    #     - name: Install dependencies
-    #       run: |
-    #         python -m pip install --upgrade pip
-    #         python -m pip install toml-cli
-    #     - name: Install Cosmovisor > v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-    #       run: |
-    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Install Cosmovisor v1.3.0
-    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-    #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
-    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-    #     - name: Start chain
-    #       env:
-    #         START_VERSION: ${{matrix.gaia_version}}
-    #       run: |
-    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-    #         scripts/start_chain.sh
-    #     - name: Check Gaia log
-    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
-    #     - name: Print Gaia version
-    #       run: $CHAIN_BINARY version --long
-    #     - name: Block production check
-    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-  
-    #     - name: _Pre-upgrade test
-    #       env:
-    #         UPGRADED_V16: false
-    #       run: |
-    #         tests/gaia-v16/test.sh
-  
-    #     - name: Test software upgrade for published releases
-    #       if: ${{ matrix.upgrade_version != 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-    #       run: |
-    #         echo $DOWNLOAD_URL
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
-    #     - name: Test software upgrade for main branch
-    #       if: ${{ matrix.upgrade_version == 'main' }}
-    #       env:
-    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-    #       run: |
-    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT v15
-  
-    #     - name: _Blocks produced after upgrade
-    #       run: |
-    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-  
-    #     - name: Flush "migration successful" lines
-    #       run: |
-    #         $CHAIN_BINARY keys list --home $HOME_1
-  
-    #     - name: _Post-upgrade test
-    #       env:
-    #         UPGRADED_V16: true
-    #       run: |
-    #         tests/gaia-v16/test.sh
-  
+        - name: _IBC transfer successful> Stride chain
+          env:
+            CONSUMER_CHAIN_ID: stride-test
+            CONSUMER_CHAIN_BINARY: strided
+            CONSUMER_HOME_1: /home/runner/.stride-1
+            CONSUMER_DENOM: ustrd
+            RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          run: |
+            export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+            connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+            channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+            tests/test_consumer_ibc_transfer.sh $channel_id
   

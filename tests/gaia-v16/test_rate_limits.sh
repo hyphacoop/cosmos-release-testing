@@ -48,7 +48,6 @@ $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
@@ -65,7 +64,6 @@ $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
-    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
 else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
@@ -84,6 +82,5 @@ if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
 else
     echo "FAIL: Rate limit was not detected."
-    $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$rpc_port
     exit 1
 fi
