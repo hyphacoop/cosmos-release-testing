@@ -892,7 +892,7 @@
             CLIENT_COUNT: 0
             RPC_PORT: 27011
           run: |
-            scripts/gaia-v16/setup_cconnection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
+            scripts/gaia-v16/setup_connection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
 
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
