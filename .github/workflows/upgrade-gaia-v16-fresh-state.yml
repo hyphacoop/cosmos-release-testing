@@ -2241,13 +2241,15 @@
         - name: Install Neutron binary
           run: |
             go version
-            git clone https://github.com/neutron-org/neutron.git 
+            git clone https://github.com/neutron-org/neutron.git
+            cd neutron
             git checkout v3.0.2
             make install
         - name: Install Stride binary
           run: |
             go version
             git clone https://github.com/Stride-Labs/stride.git 
+            cd stride
             git checkout v22.0.0
             make install
 
