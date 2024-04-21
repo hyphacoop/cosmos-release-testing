@@ -147,6 +147,7 @@ jobs:
           source ~/env/bin/activate
           python -m pip install --upgrade pip
           python -m pip install toml-cli
+          python -m pip install graph-cli
       - name: Print RPC port
         run: echo $VAL1_RPC_PORT
       - name: Test software upgrade for published releases
@@ -346,6 +347,11 @@ jobs:
           killall ${{ env.STRIDE_CHAIN_BINARY }}  || true
           screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
           sleep 20
+      - name: Generate info graphs
+        if: always()
+        run: |
+          # Main gaia service
+          graph $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv -o $HOME/artifact/mem-$PROVIDER_SERVICE_1.png --fill --time-format-input epoch --time-format-output %H:%M:%S --fontsize 8 --title Gaiad RAM Usages --ylabel Memory Used --xlabel Time --figsize 1920x1080
       - name: Save config files
         if: always()
         run: |
