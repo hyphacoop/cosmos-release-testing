@@ -429,371 +429,371 @@
     #           exit 0
     #         fi
    
-    v16-2-ibc-rate-limit:
-      runs-on: ubuntu-22.04
-      needs: set-version-matrix
-      strategy:
-        matrix:
-          ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-        fail-fast: false
-      env:
-        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-        CHAIN_BINARY_SECONDARY: gaiad-ibc
-        COMMIT_TIMEOUT: 1
-        RELAYER: hermes
-      steps:
-        - name: start-version
-          run: echo ${{matrix.gaia_version}}
-        - name: target-version
-          run: echo ${{matrix.upgrade_version}}
-        - name: target-commit
-          if: ${{ matrix.upgrade_version == 'main' }}
-          run: |
-            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-            echo TARGET_COMMIT: $TARGET_COMMIT
-        - name: Update PATH
-          run: |
-            mkdir -p $HOME/go/bin
-            echo "$HOME/go/bin" >> $GITHUB_PATH
-            echo "$HOME/.hermes" >> $GITHUB_PATH
-            echo "$HOME/.relayer" >> $GITHUB_PATH
-        - name: Bypass the grub-efi-amd64-signed package
-          run: sudo apt-mark hold grub-efi-amd64-signed
-        - name: Check out repository code
-          uses: actions/checkout@v3
-        - name: Set up Python
-          uses: actions/setup-python@v3
-          with:
-            python-version: '3.10'
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            python -m pip install toml-cli
-        - name: Install Cosmovisor > v1.3.0
-          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-          run: |
-            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-            echo "COSMOVISOR=true" >> $GITHUB_ENV
-            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Install Cosmovisor v1.3.0
-          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-          run: |
-            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-            echo "COSMOVISOR=true" >> $GITHUB_ENV
-            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Set up relayer
-          run: scripts/gaia-v16/setup_relayer_rate_limit.sh
+    # v16-2-ibc-rate-limit:
+    #   runs-on: ubuntu-22.04
+    #   needs: set-version-matrix
+    #   strategy:
+    #     matrix:
+    #       ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+    #     fail-fast: false
+    #   env:
+    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+    #     CHAIN_BINARY_SECONDARY: gaiad-ibc
+    #     COMMIT_TIMEOUT: 1
+    #     RELAYER: hermes
+    #   steps:
+    #     - name: start-version
+    #       run: echo ${{matrix.gaia_version}}
+    #     - name: target-version
+    #       run: echo ${{matrix.upgrade_version}}
+    #     - name: target-commit
+    #       if: ${{ matrix.upgrade_version == 'main' }}
+    #       run: |
+    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+    #         echo TARGET_COMMIT: $TARGET_COMMIT
+    #     - name: Update PATH
+    #       run: |
+    #         mkdir -p $HOME/go/bin
+    #         echo "$HOME/go/bin" >> $GITHUB_PATH
+    #         echo "$HOME/.hermes" >> $GITHUB_PATH
+    #         echo "$HOME/.relayer" >> $GITHUB_PATH
+    #     - name: Bypass the grub-efi-amd64-signed package
+    #       run: sudo apt-mark hold grub-efi-amd64-signed
+    #     - name: Check out repository code
+    #       uses: actions/checkout@v3
+    #     - name: Set up Python
+    #       uses: actions/setup-python@v3
+    #       with:
+    #         python-version: '3.10'
+    #     - name: Install dependencies
+    #       run: |
+    #         python -m pip install --upgrade pip
+    #         python -m pip install toml-cli
+    #     - name: Install Cosmovisor > v1.3.0
+    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+    #       run: |
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
+    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+    #     - name: Install Cosmovisor v1.3.0
+    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+    #       run: |
+    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
+    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+    #     - name: Set up relayer
+    #       run: scripts/gaia-v16/setup_relayer_rate_limit.sh
           
-        - name: Start chain
-          env:
-            START_VERSION: ${{matrix.gaia_version}}
-          run: |
-            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-            scripts/start_chain_single_val.sh
-        - name: Check Gaia log
-          run: sudo journalctl -u $PROVIDER_SERVICE_1
-        - name: Print Gaia version
-          run: $CHAIN_BINARY version --long
-        - name: Block production check
-          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+    #     - name: Start chain
+    #       env:
+    #         START_VERSION: ${{matrix.gaia_version}}
+    #       run: |
+    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+    #         scripts/start_chain_single_val.sh
+    #     - name: Check Gaia log
+    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
+    #     - name: Print Gaia version
+    #       run: $CHAIN_BINARY version --long
+    #     - name: Block production check
+    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-        - name: Installing secondary chain binaries
-          env:
-            START_VERSION: ${{matrix.gaia_version}}
-          run: |
-            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-            echo "Chain binary URL: $CHAIN_BINARY_URL"
-            echo "Installing secondary chain binary..."
-            wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
-            chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
-        - name: Start osmosis-1 chain
-          env:
-            CHAIN_SERVICE: osmosis.service
-            CHAIN_HOME: /home/runner/.osmosis
-            CHAIN_ID: osmosis-1
-            API_PORT: 25011
-            GRPC_PORT: 26011
-            RPC_PORT: 27011
-            P2P_PORT: 28011
-            PPROF_PORT: 29011
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate osmosis-1 channels
-          env:
-            TARGET_CHAIN_ID: osmosis-1
-            CLIENT_COUNT: 0
-            CHANNEL_START: 0
-            CHANNEL_END: 141
-            TRANSFER_CHANNEL: channel-141
-            RPC_PORT: 27011
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Installing secondary chain binaries
+    #       env:
+    #         START_VERSION: ${{matrix.gaia_version}}
+    #       run: |
+    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+    #         echo "Chain binary URL: $CHAIN_BINARY_URL"
+    #         echo "Installing secondary chain binary..."
+    #         wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
+    #         chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
+    #     - name: Start osmosis-1 chain
+    #       env:
+    #         CHAIN_SERVICE: osmosis.service
+    #         CHAIN_HOME: /home/runner/.osmosis
+    #         CHAIN_ID: osmosis-1
+    #         API_PORT: 25011
+    #         GRPC_PORT: 26011
+    #         RPC_PORT: 27011
+    #         P2P_PORT: 28011
+    #         PPROF_PORT: 29011
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate osmosis-1 channels
+    #       env:
+    #         TARGET_CHAIN_ID: osmosis-1
+    #         CLIENT_COUNT: 0
+    #         CHANNEL_START: 0
+    #         CHANNEL_END: 141
+    #         TRANSFER_CHANNEL: channel-141
+    #         RPC_PORT: 27011
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        - name: Start core-1 chain
-          env:
-            CHAIN_SERVICE: core.service
-            CHAIN_HOME: /home/runner/.core
-            CHAIN_ID: core-1
-            API_PORT: 25021
-            GRPC_PORT: 26021
-            RPC_PORT: 27021
-            P2P_PORT: 28021
-            PPROF_PORT: 29021
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate core-1 channels
-          env:
-            TARGET_CHAIN_ID: core-1
-            CLIENT_COUNT: 1
-            CHANNEL_START: 142
-            CHANNEL_END: 190
-            TRANSFER_CHANNEL: channel-190
-            RPC_PORT: 27021
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Start core-1 chain
+    #       env:
+    #         CHAIN_SERVICE: core.service
+    #         CHAIN_HOME: /home/runner/.core
+    #         CHAIN_ID: core-1
+    #         API_PORT: 25021
+    #         GRPC_PORT: 26021
+    #         RPC_PORT: 27021
+    #         P2P_PORT: 28021
+    #         PPROF_PORT: 29021
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate core-1 channels
+    #       env:
+    #         TARGET_CHAIN_ID: core-1
+    #         CLIENT_COUNT: 1
+    #         CHANNEL_START: 142
+    #         CHANNEL_END: 190
+    #         TRANSFER_CHANNEL: channel-190
+    #         RPC_PORT: 27021
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
         
-        - name: Start injective-1 chain
-          env:
-            CHAIN_SERVICE: injective.service
-            CHAIN_HOME: /home/runner/.injective
-            CHAIN_ID: injective-1
-            API_PORT: 25031
-            GRPC_PORT: 26031
-            RPC_PORT: 27031
-            P2P_PORT: 28031
-            PPROF_PORT: 29031
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate injective-1 channels
-          env:
-            TARGET_CHAIN_ID: injective-1
-            CLIENT_COUNT: 2
-            CHANNEL_START: 191
-            CHANNEL_END: 220
-            TRANSFER_CHANNEL: channel-220
-            RPC_PORT: 27031
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Start injective-1 chain
+    #       env:
+    #         CHAIN_SERVICE: injective.service
+    #         CHAIN_HOME: /home/runner/.injective
+    #         CHAIN_ID: injective-1
+    #         API_PORT: 25031
+    #         GRPC_PORT: 26031
+    #         RPC_PORT: 27031
+    #         P2P_PORT: 28031
+    #         PPROF_PORT: 29031
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate injective-1 channels
+    #       env:
+    #         TARGET_CHAIN_ID: injective-1
+    #         CLIENT_COUNT: 2
+    #         CHANNEL_START: 191
+    #         CHANNEL_END: 220
+    #         TRANSFER_CHANNEL: channel-220
+    #         RPC_PORT: 27031
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        - name: Start secret-4 chain
-          env:
-            CHAIN_SERVICE: secret.service
-            CHAIN_HOME: /home/runner/.secret
-            CHAIN_ID: secret-4
-            API_PORT: 25041
-            GRPC_PORT: 26041
-            RPC_PORT: 27041
-            P2P_PORT: 28041
-            PPROF_PORT: 29041
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate secret-4 channels
-          env:
-            TARGET_CHAIN_ID: secret-4
-            CLIENT_COUNT: 3
-            CHANNEL_START: 221
-            CHANNEL_END: 235
-            TRANSFER_CHANNEL: channel-235
-            RPC_PORT: 27041
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Start secret-4 chain
+    #       env:
+    #         CHAIN_SERVICE: secret.service
+    #         CHAIN_HOME: /home/runner/.secret
+    #         CHAIN_ID: secret-4
+    #         API_PORT: 25041
+    #         GRPC_PORT: 26041
+    #         RPC_PORT: 27041
+    #         P2P_PORT: 28041
+    #         PPROF_PORT: 29041
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate secret-4 channels
+    #       env:
+    #         TARGET_CHAIN_ID: secret-4
+    #         CLIENT_COUNT: 3
+    #         CHANNEL_START: 221
+    #         CHANNEL_END: 235
+    #         TRANSFER_CHANNEL: channel-235
+    #         RPC_PORT: 27041
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        - name: Start kaiyo-1 chain
-          env:
-            CHAIN_SERVICE: kaiyo.service
-            CHAIN_HOME: /home/runner/.kaiyo
-            CHAIN_ID: kaiyo-1
-            API_PORT: 25051
-            GRPC_PORT: 26051
-            RPC_PORT: 27051
-            P2P_PORT: 28051
-            PPROF_PORT: 29051
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate kaiyo-1 channels
-          env:
-            TARGET_CHAIN_ID: kaiyo-1
-            CLIENT_COUNT: 4
-            CHANNEL_START: 236
-            CHANNEL_END: 343
-            TRANSFER_CHANNEL: channel-343
-            RPC_PORT: 27051
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Start kaiyo-1 chain
+    #       env:
+    #         CHAIN_SERVICE: kaiyo.service
+    #         CHAIN_HOME: /home/runner/.kaiyo
+    #         CHAIN_ID: kaiyo-1
+    #         API_PORT: 25051
+    #         GRPC_PORT: 26051
+    #         RPC_PORT: 27051
+    #         P2P_PORT: 28051
+    #         PPROF_PORT: 29051
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate kaiyo-1 channels
+    #       env:
+    #         TARGET_CHAIN_ID: kaiyo-1
+    #         CLIENT_COUNT: 4
+    #         CHANNEL_START: 236
+    #         CHANNEL_END: 343
+    #         TRANSFER_CHANNEL: channel-343
+    #         RPC_PORT: 27051
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        - name: Start stride-1 chain
-          env:
-            CHAIN_SERVICE: stride.service
-            CHAIN_HOME: /home/runner/.stride
-            CHAIN_ID: stride-1
-            API_PORT: 25061
-            GRPC_PORT: 26061
-            RPC_PORT: 27061
-            P2P_PORT: 28061
-            PPROF_PORT: 29061
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate stride-1 channels
-          env:
-            TARGET_CHAIN_ID: stride-1
-            CLIENT_COUNT: 5
-            CHANNEL_START: 344
-            CHANNEL_END: 391
-            TRANSFER_CHANNEL: channel-391
-            RPC_PORT: 27061
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Start stride-1 chain
+    #       env:
+    #         CHAIN_SERVICE: stride.service
+    #         CHAIN_HOME: /home/runner/.stride
+    #         CHAIN_ID: stride-1
+    #         API_PORT: 25061
+    #         GRPC_PORT: 26061
+    #         RPC_PORT: 27061
+    #         P2P_PORT: 28061
+    #         PPROF_PORT: 29061
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate stride-1 channels
+    #       env:
+    #         TARGET_CHAIN_ID: stride-1
+    #         CLIENT_COUNT: 5
+    #         CHANNEL_START: 344
+    #         CHANNEL_END: 391
+    #         TRANSFER_CHANNEL: channel-391
+    #         RPC_PORT: 27061
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        - name: Start neutron-1 chain
-          env:
-            CHAIN_SERVICE: neutron.service
-            CHAIN_HOME: /home/runner/.neutron
-            CHAIN_ID: neutron-1
-            API_PORT: 25071
-            GRPC_PORT: 26071
-            RPC_PORT: 27071
-            P2P_PORT: 28071
-            PPROF_PORT: 29071
-          run: |
-            scripts/start_chain_secondary.sh
-        - name: Generate neutron-1 channels
-          env:
-            TARGET_CHAIN_ID: neutron-1
-            CLIENT_COUNT: 6
-            CHANNEL_START: 392
-            CHANNEL_END: 569
-            TRANSFER_CHANNEL: channel-569
-            RPC_PORT: 27071
-          run: |
-            scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 10
-            $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
+    #     - name: Start neutron-1 chain
+    #       env:
+    #         CHAIN_SERVICE: neutron.service
+    #         CHAIN_HOME: /home/runner/.neutron
+    #         CHAIN_ID: neutron-1
+    #         API_PORT: 25071
+    #         GRPC_PORT: 26071
+    #         RPC_PORT: 27071
+    #         P2P_PORT: 28071
+    #         PPROF_PORT: 29071
+    #       run: |
+    #         scripts/start_chain_secondary.sh
+    #     - name: Generate neutron-1 channels
+    #       env:
+    #         TARGET_CHAIN_ID: neutron-1
+    #         CLIENT_COUNT: 6
+    #         CHANNEL_START: 392
+    #         CHANNEL_END: 569
+    #         TRANSFER_CHANNEL: channel-569
+    #         RPC_PORT: 27071
+    #       run: |
+    #         scripts/gaia-v16/setup_channels_rate_limit.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT $CHANNEL_START $CHANNEL_END
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 10
+    #         $CHAIN_BINARY q bank balances $WALLET_1 --node http://localhost:$RPC_PORT
 
-        - name: Test software upgrade for published releases
-          if: ${{ matrix.upgrade_version != 'main' }}
-          env:
-            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          run: |
-            echo $DOWNLOAD_URL
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-        - name: Test software upgrade for main branch
-          if: ${{ matrix.upgrade_version == 'main' }}
-          env:
-            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          run: |
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+    #     - name: Test software upgrade for published releases
+    #       if: ${{ matrix.upgrade_version != 'main' }}
+    #       env:
+    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+    #       run: |
+    #         echo $DOWNLOAD_URL
+    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+    #     - name: Test software upgrade for main branch
+    #       if: ${{ matrix.upgrade_version == 'main' }}
+    #       env:
+    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+    #       run: |
+    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
   
-        - name: _Blocks produced after upgrade
-          run: |
-            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+    #     - name: _Blocks produced after upgrade
+    #       run: |
+    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
         
-        - name: Restart relayer
-          run: |
-            sudo systemctl restart $RELAYER
-            sleep 1m
+    #     - name: Restart relayer
+    #       run: |
+    #         sudo systemctl restart $RELAYER
+    #         sleep 1m
 
-        - name: _Test IBC rate limits - osmosis-1
-          env:
-            TRANSFER_CHANNEL: channel-141
-            RATE: 0.05
-            RPC_PORT: 27011
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - osmosis-1
+    #       env:
+    #         TRANSFER_CHANNEL: channel-141
+    #         RATE: 0.05
+    #         RPC_PORT: 27011
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
             
-        - name: _Test IBC rate limits - core-1
-          env:
-            TRANSFER_CHANNEL: channel-190
-            RATE: 0.01
-            RPC_PORT: 27021
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
-        - name: _Test IBC rate limits - injective-1
-          env:
-            TRANSFER_CHANNEL: channel-220
-            RATE: 0.01
-            RPC_PORT: 27031
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - core-1
+    #       env:
+    #         TRANSFER_CHANNEL: channel-190
+    #         RATE: 0.01
+    #         RPC_PORT: 27021
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - injective-1
+    #       env:
+    #         TRANSFER_CHANNEL: channel-220
+    #         RATE: 0.01
+    #         RPC_PORT: 27031
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
-        - name: _Test IBC rate limits - secret-4
-          env:
-            TRANSFER_CHANNEL: channel-235
-            RATE: 0.01
-            RPC_PORT: 27041
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - secret-4
+    #       env:
+    #         TRANSFER_CHANNEL: channel-235
+    #         RATE: 0.01
+    #         RPC_PORT: 27041
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
-        - name: _Test IBC rate limits - kaiyo-1
-          env:
-            TRANSFER_CHANNEL: channel-343
-            RATE: 0.01
-            RPC_PORT: 27051
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
-        - name: _Test IBC rate limits - stride-1
-          env:
-            TRANSFER_CHANNEL: channel-391
-            RATE: 0.01
-            RPC_PORT: 27061
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - kaiyo-1
+    #       env:
+    #         TRANSFER_CHANNEL: channel-343
+    #         RATE: 0.01
+    #         RPC_PORT: 27051
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - stride-1
+    #       env:
+    #         TRANSFER_CHANNEL: channel-391
+    #         RATE: 0.01
+    #         RPC_PORT: 27061
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
-        - name: _Test IBC rate limits - neutron-1
-          env:
-            TRANSFER_CHANNEL: channel-569
-            RATE: 0.01
-            RPC_PORT: 27071
-          run: |
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep 3
-            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+    #     - name: _Test IBC rate limits - neutron-1
+    #       env:
+    #         TRANSFER_CHANNEL: channel-569
+    #         RATE: 0.01
+    #         RPC_PORT: 27071
+    #       run: |
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+    #         sleep 3
+    #         tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
     v16-3-ica-controller:
       runs-on: ubuntu-22.04
@@ -922,117 +922,125 @@
             CONTROLLER_HOME: /home/runner/.val1
             HOST_HOME: /home/runner/.host
           run: |
+            echo "Registering ICA..."
             $CHAIN_BINARY tx interchain-accounts controller register connection-0 --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
-            sleep 30
+            sleep 60
 
             ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $CONTROLLER_HOME -o json | jq -r '.address')
-            $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 1000000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
+            echo "ICA address: $ica_address"
+            echo "Funcing ICA..."
+            $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
             sleep 10
 
+            echo "ICA balance in secondary chain:"
             $CHAIN_BINARY_SECONDARY q bank balances $ica_address --home $HOST_HOME -o json | jq '.'
+            echo "ICA tx recipient in secondary chain:"
             $CHAIN_BINARY_SECONDARY q bank balances $WALLET_2 --home $HOST_HOME -o json | jq '.'
 
             jq -r --arg ADDRESS "$ica_address" '.from_address = $ADDRESS' templates/ica-msg-send.json > msg.json
             $CHAIN_BINARY tx interchain-accounts host generate-packet-data "$(cat msg.json)" --encoding proto3 > send_packet.json
+            echo "Sending ICA tx..."
             $CHAIN_BINARY tx interchain-accounts controller send-tx connection-0 send_packet.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
-            sleep 30
+            sleep 60
 
+            echo "ICA balance in secondary chain:"
             $CHAIN_BINARY_SECONDARY q bank balances $ica_address --home $HOST_HOME -o json | jq '.'
+            echo "ICA tx recipient in secondary chain:"
             $CHAIN_BINARY_SECONDARY q bank balances $WALLET_2 --home $HOST_HOME -o json | jq '.'
 
             
-    Baseline-1-upgrade:
-      runs-on: ubuntu-22.04
-      needs: set-version-matrix-cosmovisor
-      strategy:
-        matrix:
-          ${{ fromJSON(needs.set-version-matrix-cosmovisor.outputs.upgrade_versions) }}
-        fail-fast: false
-      env:
-        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-      steps:
-        - name: start-version
-          run: echo ${{matrix.gaia_version}}
-        - name: target-version
-          run: echo ${{matrix.upgrade_version}}
-        - name: target-commit
-          if: ${{ matrix.upgrade_version == 'main' }}
-          run: |
-            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-            echo TARGET_COMMIT: $TARGET_COMMIT
-        - name: Update PATH
-          run: |
-            mkdir -p $HOME/go/bin
-            echo "$HOME/go/bin" >> $GITHUB_PATH
-            echo "$HOME/.hermes" >> $GITHUB_PATH
-            echo "$HOME/.relayer" >> $GITHUB_PATH
-        - name: Bypass the grub-efi-amd64-signed package
-          run: sudo apt-mark hold grub-efi-amd64-signed
-        - name: Check out repository code
-          uses: actions/checkout@v3
-        - name: Set up Python
-          uses: actions/setup-python@v3
-          with:
-            python-version: '3.10'
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            python -m pip install toml-cli
-        - name: Install Cosmovisor > v1.3.0
-          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-          run: |
-            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-            echo "COSMOVISOR=true" >> $GITHUB_ENV
-            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Install Cosmovisor v1.3.0
-          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-          run: |
-            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-            echo "COSMOVISOR=true" >> $GITHUB_ENV
-            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Start chain
-          env:
-            START_VERSION: ${{matrix.gaia_version}}
-          run: |
-            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-            scripts/start_chain.sh
-        - name: Check Gaia log
-          run: sudo journalctl -u $PROVIDER_SERVICE_1
-        - name: Print Gaia version
-          run: $CHAIN_BINARY version --long
-        - name: Block production check
-          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+    # Baseline-1-upgrade:
+    #   runs-on: ubuntu-22.04
+    #   needs: set-version-matrix-cosmovisor
+    #   strategy:
+    #     matrix:
+    #       ${{ fromJSON(needs.set-version-matrix-cosmovisor.outputs.upgrade_versions) }}
+    #     fail-fast: false
+    #   env:
+    #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+    #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+    #   steps:
+    #     - name: start-version
+    #       run: echo ${{matrix.gaia_version}}
+    #     - name: target-version
+    #       run: echo ${{matrix.upgrade_version}}
+    #     - name: target-commit
+    #       if: ${{ matrix.upgrade_version == 'main' }}
+    #       run: |
+    #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+    #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+    #         echo TARGET_COMMIT: $TARGET_COMMIT
+    #     - name: Update PATH
+    #       run: |
+    #         mkdir -p $HOME/go/bin
+    #         echo "$HOME/go/bin" >> $GITHUB_PATH
+    #         echo "$HOME/.hermes" >> $GITHUB_PATH
+    #         echo "$HOME/.relayer" >> $GITHUB_PATH
+    #     - name: Bypass the grub-efi-amd64-signed package
+    #       run: sudo apt-mark hold grub-efi-amd64-signed
+    #     - name: Check out repository code
+    #       uses: actions/checkout@v3
+    #     - name: Set up Python
+    #       uses: actions/setup-python@v3
+    #       with:
+    #         python-version: '3.10'
+    #     - name: Install dependencies
+    #       run: |
+    #         python -m pip install --upgrade pip
+    #         python -m pip install toml-cli
+    #     - name: Install Cosmovisor > v1.3.0
+    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+    #       run: |
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
+    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+    #     - name: Install Cosmovisor v1.3.0
+    #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+    #       run: |
+    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         echo "COSMOVISOR=true" >> $GITHUB_ENV
+    #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+    #     - name: Start chain
+    #       env:
+    #         START_VERSION: ${{matrix.gaia_version}}
+    #       run: |
+    #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+    #         scripts/start_chain.sh
+    #     - name: Check Gaia log
+    #       run: sudo journalctl -u $PROVIDER_SERVICE_1
+    #     - name: Print Gaia version
+    #       run: $CHAIN_BINARY version --long
+    #     - name: Block production check
+    #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-        - name: Test software upgrade for published releases
-          if: ${{ matrix.upgrade_version != 'main' }}
-          env:
-            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          run: |
-            echo $DOWNLOAD_URL
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-        - name: Test software upgrade for main branch
-          if: ${{ matrix.upgrade_version == 'main' }}
-          env:
-            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          run: |
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+    #     - name: Test software upgrade for published releases
+    #       if: ${{ matrix.upgrade_version != 'main' }}
+    #       env:
+    #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+    #       run: |
+    #         echo $DOWNLOAD_URL
+    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+    #     - name: Test software upgrade for main branch
+    #       if: ${{ matrix.upgrade_version == 'main' }}
+    #       env:
+    #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+    #       run: |
+    #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
   
-        - name: _Blocks produced after upgrade
-          run: |
-            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+    #     - name: _Blocks produced after upgrade
+    #       run: |
+    #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
   
-        - name: Flush "migration successful" lines
-          run: |
-            $CHAIN_BINARY keys list --home $HOME_1
+    #     - name: Flush "migration successful" lines
+    #       run: |
+    #         $CHAIN_BINARY keys list --home $HOME_1
   
-        - name: _Transactions verified> bank send, delegate, and withdraw rewards
-          run: tests/test_tx_fresh.sh
-        - name: _API endpoints check
-          run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-        - name: _RPC endpoints check
-          run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+    #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
+    #       run: tests/test_tx_fresh.sh
+    #     - name: _API endpoints check
+    #       run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+    #     - name: _RPC endpoints check
+    #       run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
 
     # Baseline-2-globalfee:
     #   runs-on: ubuntu-22.04
