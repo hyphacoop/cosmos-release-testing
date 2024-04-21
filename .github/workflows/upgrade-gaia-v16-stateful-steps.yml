@@ -352,7 +352,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           # Main gaia service
-          graph $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv -o $HOME/artifact/mem-$PROVIDER_SERVICE_1.png --fill --time-format-input epoch --time-format-output %H:%M:%S --fontsize 8 --title Gaiad RAM Usages --ylabel Memory Used --xlabel Time --figsize 1920x1080
+          graph $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv -o $HOME/artifact/mem-$PROVIDER_SERVICE_1.png --fill --time-format-input epoch --time-format-output %H:%M:%S --fontsize 8 --title "Gaiad RAM Usages" --ylabel "Memory Used" --xlabel Time --figsize 1920x1080
       - name: Save config files
         if: always()
         run: |
