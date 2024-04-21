@@ -709,63 +709,91 @@
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
         
         - name: Restart relayer
-          run: sudo systemctl restart $RELAYER
+          run: |
+            sudo systemctl restart $RELAYER
+            sleep 1m
 
         - name: _Test IBC rate limits - osmosis-1
           env:
-            CHANNEL: channel-141
+            TRANSFER_CHANNEL: channel-141
             RATE: 0.05
             RPC_PORT: 27011
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
             
         - name: _Test IBC rate limits - core-1
           env:
-            CHANNEL: channel-190
+            TRANSFER_CHANNEL: channel-190
             RATE: 0.01
             RPC_PORT: 27021
           run: |
-           tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
-
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
         - name: _Test IBC rate limits - injective-1
           env:
-            CHANNEL: channel-220
+            TRANSFER_CHANNEL: channel-220
             RATE: 0.01
             RPC_PORT: 27031
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - secret-4
           env:
-            CHANNEL: channel-235
+            TRANSFER_CHANNEL: channel-235
             RATE: 0.01
             RPC_PORT: 27041
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - kaiyo-1
           env:
-            CHANNEL: channel-343
+            TRANSFER_CHANNEL: channel-343
             RATE: 0.01
             RPC_PORT: 27051
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
-
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
         - name: _Test IBC rate limits - stride-1
           env:
-            CHANNEL: channel-391
+            TRANSFER_CHANNEL: channel-391
             RATE: 0.01
             RPC_PORT: 27061
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
         - name: _Test IBC rate limits - neutron-1
           env:
-            CHANNEL: channel-569
+            TRANSFER_CHANNEL: channel-569
             RATE: 0.01
             RPC_PORT: 27071
           run: |
-            tests/gaia-v16/test_rate_limits.sh $CHANNEL $RATE $RPC_PORT
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep 3
+            tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
 
     Baseline-1-upgrade:
       runs-on: ubuntu-22.04
