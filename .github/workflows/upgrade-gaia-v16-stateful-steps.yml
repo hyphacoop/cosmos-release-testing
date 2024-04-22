@@ -232,6 +232,7 @@ jobs:
           PPROF_PORT: 39011
           GAS_PRICE: 0
           MONIKER_RELAYER: ${{ vars.MONIKER_2 }}
+          MNEMONIC_RELAYER: ${{ vars.MNEMONIC_2 }}
         run: |
           scripts/stateful/start_chain_secondary.sh
       - name: _ICA chain produces blocks> ica-chain
