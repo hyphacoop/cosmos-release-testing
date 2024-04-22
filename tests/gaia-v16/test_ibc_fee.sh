@@ -4,7 +4,7 @@ ACK_FEE=456
 balance_before=$($CHAIN_BINARY q bank balances $WALLET_RELAYER --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
 
 
-$RELAYER --json create channel --order unordered --a-chain $CHAIN_ID --a-port transfer --b-port transfer --a-connection connection-0 --channel-version "{\"fee_version\":\"ics29-1\",\"app_version\":\"ics20-1\"}"
+hermes --json create channel --order unordered --a-chain $CHAIN_ID --a-port transfer --b-port transfer --a-connection connection-0 --channel-version "{\"fee_version\":\"ics29-1\",\"app_version\":\"ics20-1\"}"
 
 txhash=$($CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 $WALLET_1 1$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --output json -y --home $HOME_1 | jq -r '.txhash')
 sleep $COMMIT_TIMEOUT
@@ -18,8 +18,8 @@ difference=$(echo "$balance_after - $balance_before" | bc)
 echo "Difference: ${difference}$DENOM"
 
 if [ $difference == $ACK_FEE ]; then
-    echo "PASS: Relayer balance increased by the ACK FEE."
+    echo "PASS: Relayer balance increased by ACK_FEE."
 else
-    echo "FAIL: Relayer balance did not increase by the ACK FEE."
+    echo "FAIL: Relayer balance did not increase by ACK_FEE."
     exit 1
 fi
