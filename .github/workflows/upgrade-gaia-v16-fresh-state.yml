@@ -1018,7 +1018,7 @@
             GAS_PRICE: 0
           run: |
             scripts/start_chain_secondary.sh
-        - name: Generate connection connection
+        - name: Generate IBC connection
           env:
             TARGET_CHAIN_ID: two
             CLIENT_COUNT: 0
