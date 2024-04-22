@@ -15,6 +15,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -297,10 +298,11 @@ func connectProviderConsumer(ctx context.Context, t *testing.T, provider Chain, 
 		Version:        "1",
 	}))
 
-	require.Eventually(t, func() bool {
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		providerTxChannel, err := GetTransferChannel(ctx, relayer, provider, consumer)
-		return err == nil && providerTxChannel != nil
-	}, 2*time.Minute, 10*time.Second)
+		assert.NoError(c, err)
+		assert.NotNil(c, providerTxChannel)
+	}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 }
 
 func consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, provider Chain) time.Time {

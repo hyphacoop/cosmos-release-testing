@@ -76,7 +76,7 @@ jobs:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 10
     steps:
       - name: start-version
         run: echo ${{matrix.gaia_version}}
@@ -89,7 +89,14 @@ jobs:
         with:
           cache-dependency-path: |
             interchaintests/go.sum
+      - name: Check docker cache
+        uses: ScribeMD/docker-cache@0.5.0
+        id: docker-cache
+        continue-on-error: true
+        with:
+          key: docker-${{ matrix.gaia_version }}-${{ matrix.upgrade_version }}
       - name: Build docker images
+        if: steps.docker-cache.outputs.cache-hit != 'true'
         run: |
           curl -L https://github.com/strangelove-ventures/heighliner/releases/download/v${{env.HEIGHLINER_VERSION}}/heighliner_${{env.HEIGHLINER_VERSION}}_linux_amd64.tar.gz | tar -xz -C /usr/local/bin heighliner
           heighliner build --git-ref ${{ matrix.gaia_version }} --chain gaia
