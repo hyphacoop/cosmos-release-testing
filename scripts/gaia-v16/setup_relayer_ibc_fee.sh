@@ -15,7 +15,7 @@ if [ $RELAYER == "hermes" ]; then
     echo "Adding relayer keys..."
     echo $MNEMONIC_RELAYER > mnemonic.txt
     hermes keys add --chain $CHAIN_ID --mnemonic-file mnemonic.txt
-    hermes keys add --chain host --mnemonic-file mnemonic.txt
+    hermes keys add --chain two --mnemonic-file mnemonic.txt
 fi
 
 echo "Creating service..."
