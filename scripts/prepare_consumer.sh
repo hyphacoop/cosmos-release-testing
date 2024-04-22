@@ -20,46 +20,22 @@ echo "Patching the CCV state with the provider reward denom"
 jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv-optout.json > ccv-reward.json
 cp ccv-reward.json ccv.json
 
-if $ICS_120 ; then
-    echo "Patching for ICS v1.2.0"
-    jq 'del(.preCCV)' ccv.json > ccv-120.json
-    cp ccv-120.json ccv.json
-fi
-
-if $ICS_200 ; then
-    if [ $COSMOS_SDK == "v47" ]; then
-        $ICS_TRANSFORM_BINARY genesis transform --to v2.x ccv.json > ccv-transform.json
-        cp ccv-transform.json ccv.json
-    fi
-fi
-
-if $ICS_310 ; then
-    if [ $COSMOS_SDK == "v47" ]; then
-        $ICS_TRANSFORM_BINARY genesis transform --to v3.1.x ccv.json > ccv-transform.json
-        cp ccv-transform.json ccv.json
-    fi
-fi
-
-if [ "$CONSUMER_ICS" == "v3.2.0" ]; then
-    if [ "$PROVIDER_ICS" == "v3.3.0" ]; then
-        echo "Provider v3.3.0 / Consumer v3.2.0: using genesis transform operation..."
-        $ICS_TRANSFORM_BINARY genesis transform --to v3.2.x ccv.json > ccv-transform.json
-        cp ccv-transform.json ccv.json
-    fi
-fi
-
 if [ "$CONSUMER_ICS" == "v3.3.0" ]; then
-    if [ "$PROVIDER_ICS" != "v3.3.0" ]; then
-        echo "Patching for ICS v3.3.0"
-        $CONSUMER_CHAIN_BINARY genesis transform ccv.json > ccv-330-1.json
+    if [ "$PROVIDER_ICS" == "v4.0.0" ]; then
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
+        $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
+        cp ccv-330-1.json ccv.json
+    elif [ "$PROVIDER_ICS" == "v4.1.0" ]; then
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
+        $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
         cp ccv-330-1.json ccv.json
     fi
 fi
 
 if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
-    if [ "$PROVIDER_ICS" != "v4.0.0" ]; then
-        echo "Patching for ICS v4.0.0 consumer"
-        $CONSUMER_CHAIN_BINARY genesis transform ccv.json > ccv-400-1.json
+    if [ "$PROVIDER_ICS" == "v3.3.0" ]; then
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
+        $ICS_TRANSFORM_BINARY genesis transform --to v4.x ccv.json > ccv-400-1.json
         cp ccv-400-1.json ccv.json
     fi
 fi

@@ -25,14 +25,14 @@ jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_reg
 cp reward_reg.json $PFM_HOME/config/genesis.json
 
 # Add funds to accounts
-$CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $PFM_HOME
-$CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $PFM_HOME
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $PFM_HOME
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $PFM_HOME
 
 echo "Creating and collecting gentxs..."
 mkdir -p $PFM_HOME/config/gentx
 VAL1_NODE_ID=$($CHAIN_BINARY tendermint show-node-id --home $PFM_HOME)
-$CHAIN_BINARY gentx $MONIKER_1 $VAL1_STAKE$DENOM --pubkey "$($CHAIN_BINARY tendermint show-validator --home $PFM_HOME)" --node-id $VAL1_NODE_ID --moniker $MONIKER_1 --chain-id $PFM_CHAIN_ID --home $PFM_HOME --output-document $PFM_HOME/config/gentx/$MONIKER_1-gentx.json
-$CHAIN_BINARY collect-gentxs --home $PFM_HOME
+$CHAIN_BINARY genesis gentx $MONIKER_1 $VAL1_STAKE$DENOM --pubkey "$($CHAIN_BINARY tendermint show-validator --home $PFM_HOME)" --node-id $VAL1_NODE_ID --moniker $MONIKER_1 --chain-id $PFM_CHAIN_ID --home $PFM_HOME --output-document $PFM_HOME/config/gentx/$MONIKER_1-gentx.json
+$CHAIN_BINARY genesis collect-gentxs --home $PFM_HOME
 
 echo "Patching genesis file for fast governance..."
 jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $PFM_HOME/config/genesis.json  > ./voting.json
@@ -95,8 +95,6 @@ toml set --toml-path $PFM_HOME/config/config.toml consensus.timeout_commit "$COM
 
 # Set fast_sync to false
 toml set --toml-path $PFM_HOME/config/config.toml block_sync false
-toml set --toml-path $PFM_HOME/config/config.toml fast_sync false
-
 
 echo "Setting up services..."
 
