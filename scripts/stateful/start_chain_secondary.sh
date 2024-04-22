@@ -28,7 +28,7 @@ $CHAIN_BINARY_SECONDARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$
 echo "Creating and collecting gentxs..."
 mkdir -p $CHAIN_HOME/config/gentx
 VAL1_NODE_ID=$($CHAIN_BINARY_SECONDARY tendermint show-node-id --home $CHAIN_HOME)
-$CHAIN_BINARY_SECONDARY genesis gentx $MONIKER_1 $VAL1_STAKE$DENOM --pubkey "$($CHAIN_BINARY_SECONDARY tendermint show-validator --home $CHAIN_HOME)" --node-id $VAL1_NODE_ID --moniker $MONIKER_1 --chain-id $CHAIN_ID --home $CHAIN_HOME --output-document $CHAIN_HOME/config/gentx/$MONIKER_1-gentx.json
+$CHAIN_BINARY_SECONDARY genesis gentx $MONIKER_1 $VAL_STAKE$DENOM --pubkey "$($CHAIN_BINARY_SECONDARY tendermint show-validator --home $CHAIN_HOME)" --node-id $VAL1_NODE_ID --moniker $MONIKER_1 --chain-id $CHAIN_ID --home $CHAIN_HOME --output-document $CHAIN_HOME/config/gentx/$MONIKER_1-gentx.json
 $CHAIN_BINARY_SECONDARY genesis collect-gentxs --home $CHAIN_HOME
 
 echo "Patching genesis file for fast governance..."
