@@ -1000,7 +1000,7 @@
             START_VERSION: ${{matrix.gaia_version}}
           run: |
             export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-            export DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/v16.0.0-rc0/gaiad-v16.0.0-rc0-linux-amd64
+            export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/v16.0.0-rc0/gaiad-v16.0.0-rc0-linux-amd64
             echo "Chain binary URL: $CHAIN_BINARY_URL"
             echo "Installing secondary chain binary..."
             wget $DOWNLOAD_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
