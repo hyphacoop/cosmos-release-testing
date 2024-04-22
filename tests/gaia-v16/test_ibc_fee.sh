@@ -1,6 +1,6 @@
 #!/bin/bash
 
-balance_before=$($CHAIN_BINARY q bank balances $RELAYER_WALLET --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
+balance_before=$($CHAIN_BINARY q bank balances $WALLET_RELAYER --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
 
 $RELAYER --json create channel --order unordered --a-chain $CHAIN_ID --a-port transfer --b-port transfer --a-connection connection-0 --channel-version "{\"fee_version\":\"ics29-1\",\"app_version\":\"ics20-1\"}"
 
@@ -10,7 +10,7 @@ sequence=$($CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq -r '.events[] 
 $CHAIN_BINARY tx ibc-fee pay-packet-fee transfer channel-0 $sequence --recv-fee 123uatom --ack-fee 456uatom --timeout-fee 789uatom --from $WALLET_1 --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --home $HOME_1 -y
 
 sleep 30
-balance_after=$($CHAIN_BINARY q bank balances $RELAYER_WALLET --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
+balance_after=$($CHAIN_BINARY q bank balances $WALLET_RELAYER --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
 
 difference=$(echo "$balance_after - $balance_before" | bc)
 echo "Difference: ${difference}$DENOM"
