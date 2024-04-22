@@ -928,8 +928,8 @@
 
             ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $CONTROLLER_HOME -o json | jq -r '.address')
             echo "ICA address: $ica_address"
-            echo "Funcing ICA..."
-            $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
+            echo "Funding ICA..."
+            $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $HOST_HOME
             sleep 10
 
             echo "ICA balance in secondary chain:"
