@@ -922,7 +922,7 @@
             CONTROLLER_HOME: /home/runner/.val1
             HOST_HOME: /home/runner/.host
           run: |
-            tests/gaia-v16-test_ica_controller.sh
+            tests/gaia-v16/test_ica_controller.sh
 
             
     # Baseline-1-upgrade:
