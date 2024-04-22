@@ -8,6 +8,7 @@ import (
 	"cosmossdk.io/math"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -90,16 +91,13 @@ func IBCTest(ctx context.Context, t *testing.T, chainA Chain, chainB Chain, rela
 	}, ibc.TransferOptions{})
 	require.NoError(t, err)
 
-	res := relayer.Exec(ctx, GetRelayerExecReporter(ctx), []string{
-		"hermes", "clear", "packets", "--chain", chainA.Config().ChainID, "--channel", senderTxChannel.ChannelID, "--port", "transfer",
-	}, nil)
-	require.NoError(t, res.Err)
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		final1, err := chainA.GetBalance(ctx, addr1, chainA.Config().Denom)
+		assert.NoError(c, err)
+		final2, err := chainB.GetBalance(ctx, addr2, dstIbcDenom)
+		assert.NoError(c, err)
 
-	final1, err := chainA.GetBalance(ctx, addr1, chainA.Config().Denom)
-	require.NoError(t, err)
-	final2, err := chainB.GetBalance(ctx, addr2, dstIbcDenom)
-	require.NoError(t, err)
-
-	require.Equal(t, initial2.Add(amountToSend), final2)
-	require.True(t, final1.LTE(initial1.Sub(amountToSend)), "final1: %s, initial1 - amountToSend: %s", final1, initial1.Sub(amountToSend))
+		assert.Equal(c, initial2.Add(amountToSend), final2)
+		assert.True(c, final1.LTE(initial1.Sub(amountToSend)), "final1: %s, initial1 - amountToSend: %s", final1, initial1.Sub(amountToSend))
+	}, 15*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 }

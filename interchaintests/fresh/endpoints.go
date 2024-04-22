@@ -41,6 +41,7 @@ func APIEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run("API "+tt.name, func(t *testing.T) {
 			t.Parallel()
 			endpoint := chain.GetHostAPIAddress() + tt.path
@@ -78,6 +79,7 @@ func RPCEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 		{name: "validators", path: "/validators", key: "validators"},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run("RPC "+tt.name, func(t *testing.T) {
 			t.Parallel()
 			endpoint := chain.GetHostRPCAddress() + tt.path
