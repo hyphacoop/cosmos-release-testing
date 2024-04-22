@@ -305,26 +305,27 @@ func GetChannelWithPort(ctx context.Context, relayer ibc.Relayer, chain, counter
 
 	stdout, _, err := chain.GetNode().ExecQuery(ctx, "ibc", "connection", "connections")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error querying connections: %w", err)
 	}
-	connectionID := gjson.GetBytes(stdout, fmt.Sprintf("connections.#(client_id==\"%s\").id", client.ClientID)).String()
-	if connectionID == "" {
-		return nil, fmt.Errorf("no connection found for client %s; connections are %s", client.ClientID, stdout)
+	connections := gjson.GetBytes(stdout, fmt.Sprintf("connections.#(client_id==\"%s\")#.id", client.ClientID)).Array()
+	if len(connections) == 0 {
+		return nil, fmt.Errorf("no connections found for client %s", client.ClientID)
 	}
-
-	stdout, _, err = chain.GetNode().ExecQuery(ctx, "ibc", "channel", "connections", connectionID)
-	if err != nil {
-		return nil, err
+	for _, connID := range connections {
+		stdout, _, err := chain.GetNode().ExecQuery(ctx, "ibc", "channel", "connections", connID.String())
+		if err != nil {
+			return nil, err
+		}
+		channelJson := gjson.GetBytes(stdout, fmt.Sprintf("channels.#(port_id==\"%s\")", portID)).String()
+		if channelJson != "" {
+			channelOutput := &ibc.ChannelOutput{}
+			if err := json.Unmarshal([]byte(channelJson), channelOutput); err != nil {
+				return nil, fmt.Errorf("error unmarshalling channel output %s: %w", channelJson, err)
+			}
+			return channelOutput, nil
+		}
 	}
-	channelJson := gjson.GetBytes(stdout, fmt.Sprintf("channels.#(port_id==\"%s\")", portID)).String()
-	if channelJson == "" {
-		return nil, fmt.Errorf("no channel found for port %s; channels are %s", portID, stdout)
-	}
-	channelOutput := &ibc.ChannelOutput{}
-	if err := json.Unmarshal([]byte(channelJson), channelOutput); err != nil {
-		return nil, fmt.Errorf("error unmarshalling channel output %s: %w", channelJson, err)
-	}
-	return channelOutput, nil
+	return nil, fmt.Errorf("no channel found for port %s", portID)
 }
 
 func GetTransferChannel(ctx context.Context, relayer ibc.Relayer, chain, counterparty Chain) (*ibc.ChannelOutput, error) {
