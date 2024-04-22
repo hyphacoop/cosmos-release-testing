@@ -19,7 +19,7 @@ func PFMTransfersTest(ctx context.Context, t *testing.T, chains []Chain, relayer
 		transferCh, err := GetTransferChannel(ctx, relayer, chains[i], chains[i+1])
 		require.NoError(t, err)
 		forwardChannels = append(forwardChannels, transferCh)
-		targetDenomAD = transfertypes.GetPrefixedDenom(transferCh.PortID, transferCh.ChannelID, targetDenomAD)
+		targetDenomAD = transfertypes.GetPrefixedDenom(transferCh.PortID, transferCh.Counterparty.ChannelID, targetDenomAD)
 	}
 	targetDenomAD = transfertypes.ParseDenomTrace(targetDenomAD).IBCDenom()
 
@@ -30,7 +30,7 @@ func PFMTransfersTest(ctx context.Context, t *testing.T, chains []Chain, relayer
 		transferCh, err := GetTransferChannel(ctx, relayer, chains[i], chains[i-1])
 		require.NoError(t, err)
 		backwardChannels[i-1] = transferCh
-		targetDenomDA = transfertypes.GetPrefixedDenom(transferCh.PortID, transferCh.ChannelID, targetDenomDA)
+		targetDenomDA = transfertypes.GetPrefixedDenom(transferCh.PortID, transferCh.Counterparty.ChannelID, targetDenomDA)
 	}
 	targetDenomDA = transfertypes.ParseDenomTrace(targetDenomDA).IBCDenom()
 
