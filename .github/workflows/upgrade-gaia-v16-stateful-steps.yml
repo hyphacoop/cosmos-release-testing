@@ -254,7 +254,7 @@ jobs:
           CHAIN_SERVICE: ica-chain.service
           CHAIN_HOME: /home/runner/.ica-chain
           CHAIN_ID: ica-chain
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment 
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment 
       - name: Debug sleep
         run: sleep 10h
       - name: Establish Connection to ICA chain
