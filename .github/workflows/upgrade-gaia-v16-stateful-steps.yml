@@ -225,6 +225,7 @@ jobs:
           CHAIN_SERVICE: ica-chain.service
           CHAIN_HOME: /home/runner/.ica-chain
           CHAIN_ID: ica-chain
+          VAL_STAKE: 8000000000000
           API_PORT: 35011
           GRPC_PORT: 36011
           RPC_PORT: 37011
