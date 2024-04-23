@@ -250,7 +250,10 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 37011 10
       - name: Send funds to wallet 4 on ICA chain
         env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+          CHAIN_SERVICE: ica-chain.service
           CHAIN_HOME: /home/runner/.ica-chain
+          CHAIN_ID: ica-chain
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment 
       - name: Debug sleep
         run: sleep 10h
