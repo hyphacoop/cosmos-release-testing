@@ -209,6 +209,14 @@ jobs:
       #   run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
       # - name: _Provider RPC tests> gaiad v16
       #   run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+      - name: Set up relayer
+        run: scripts/stateful/setup_relayer.sh
+      - name: Download consumer chain binaries
+        run: |
+          wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+          wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
 
       - name: Installing secondary chain binaries
         env:
@@ -239,15 +247,25 @@ jobs:
           scripts/stateful/start_chain_secondary.sh
       - name: _ICA chain produces blocks> ica-chain
         run: tests/test_block_production.sh 127.0.0.1 37011 10
-
-      # - name: Set up relayer
-      #   run: scripts/stateful/setup_relayer.sh
-      # - name: Download consumer chain binaries
-      #   run: |
-      #     wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-      #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-      #     wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
-      #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+      - name: Debug sleep
+        run: sleep 10h
+      - name: Establish Connection to ICA chain
+        run: |
+          killall hermes || true
+          screen -XS hermes.service quit || true
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
+          hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
+          hermes create connection --a-chain $CHAIN_ID --a-client 07-tendermint-$client_count --b-client 07-tendermint-0
+          hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      
       # - name: Initialize consumer chain a with ICS v4.0.0
       #   env:
       #     CONSUMER_CHAIN_ID: consumera
