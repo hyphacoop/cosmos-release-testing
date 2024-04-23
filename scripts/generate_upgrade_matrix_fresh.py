@@ -14,7 +14,7 @@ args = parser.parse_args()
 COSMOVISOR = args.cosmovisor
 RELAYER = args.relayer
 
-SKIP_TARGET_VERSIONS = ['v15.0.0-rc0','v15.0.0-rc1','v15.0.0-rc2','v15.0.0-rc3','v15.0.0', 'v15.1.0-rc0']
+SKIP_TARGET_VERSIONS = ['v16.0.0-rc0','v16.0.0-rc1']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 starting_version = args.starting_version.split('.')
