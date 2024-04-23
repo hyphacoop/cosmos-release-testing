@@ -96,7 +96,7 @@ toml set --toml-path $CHAIN_HOME/config/config.toml block_sync false
 echo "Setting up services..."
 echo "Setting up services..."
 echo "Creating script for $CHAIN_BINARY"
-echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home $HOME_1; sleep 1; done" > $HOME/$CHAIN_SERVICE.sh
+echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home $CHAIN_HOME; sleep 1; done" > $HOME/$CHAIN_SERVICE.sh
 chmod +x $HOME/$CHAIN_SERVICE.sh
 
 # Run service in screen session
