@@ -264,7 +264,7 @@ jobs:
           hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
           hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
           sleep 30
-          client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id' | select (.!=null))
+          client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
           echo "Client ID is: $client_id"
           hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
           echo "Starting Hermes"
