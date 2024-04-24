@@ -274,6 +274,7 @@ jobs:
       - name: Test ICA
         env:
           ICA_HOME: /home/runner/.ica-chain
+          CHAIN_HOME: /home/runner/.val1
         run: |
           tests/stateful/test_ica_controller.sh 
       # - name: Initialize consumer chain a with ICS v4.0.0
