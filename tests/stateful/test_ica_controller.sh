@@ -7,13 +7,13 @@ connection_id=$(hermes  --json query client connections --client $client_id --ch
 echo "Connection ID: $connection_id"
 
 echo "Registering ICA..."
-$CHAIN_BINARY tx interchain-accounts controller register $connection_id --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CHAIN_HOME
+$CHAIN_BINARY tx interchain-accounts controller register $connection_id --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM -y -o json --home $CHAIN_HOME
 sleep 60
 
 ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 $connection_id --home $CHAIN_HOME -o json | jq -r '.address')
 echo "ICA address: $ica_address"
 echo "Funding ICA..."
-$CHAIN_BINARY_SECONDARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $ICA_HOME
+$CHAIN_BINARY_SECONDARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM -y -o json --home $ICA_HOME
 sleep 10
 
 echo "ICA balance in secondary chain:"
@@ -24,7 +24,7 @@ $CHAIN_BINARY_SECONDARY q bank balances $WALLET_5 --home $ICA_HOME -o json | jq 
 jq -r --arg ADDRESS "$ica_address" '.from_address = $ADDRESS' templates/ica-msg-send-stateful.json > msg.json
 $CHAIN_BINARY tx interchain-accounts host generate-packet-data "$(cat msg.json)" --encoding proto3 > send_packet.json
 echo "Sending ICA tx..."
-$CHAIN_BINARY tx interchain-accounts controller send-tx $connection_id send_packet.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CHAIN_HOME
+$CHAIN_BINARY tx interchain-accounts controller send-tx $connection_id send_packet.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM -y -o json --home $CHAIN_HOME
 sleep 60
 
 ica_balance=$($CHAIN_BINARY_SECONDARY q bank balances $ica_address --home $ICA_HOME -o json | jq -r '.balances[] | select(.denom == "uatom").amount')
