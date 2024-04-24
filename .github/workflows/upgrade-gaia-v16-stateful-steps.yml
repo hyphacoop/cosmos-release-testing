@@ -254,15 +254,13 @@ jobs:
           CHAIN_SERVICE: ica-chain.service
           CHAIN_HOME: /home/runner/.ica-chain
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
-      - name: Debug sleep
-        run: sleep 10h
       - name: Establish Connection to ICA chain
         run: |
           killall hermes || true
           screen -XS hermes.service quit || true
           hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
           hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
-          client_id=($hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
+          client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
           hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
           echo "Starting Hermes"
           screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
@@ -271,7 +269,11 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      
+      - name: Test ICA
+        env:
+          ICA_HOME: /home/runner/.ica-chain
+        run: |
+          tests/stateful/test_ica_controller.sh 
       # - name: Initialize consumer chain a with ICS v4.0.0
       #   env:
       #     CONSUMER_CHAIN_ID: consumera
