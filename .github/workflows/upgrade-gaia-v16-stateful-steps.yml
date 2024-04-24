@@ -282,7 +282,7 @@ jobs:
         env:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
-        if: ${{ !vars.CHAIN_ID == 'release-testnet' }}
+        if: ${{ vars.CHAIN_ID != 'release-testnet' }}
         run: |
           tests/stateful/test_ica_controller.sh 
       - name: Initialize consumer chain a with ICS v4.0.0
