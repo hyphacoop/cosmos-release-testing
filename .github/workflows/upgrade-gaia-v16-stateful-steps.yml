@@ -255,7 +255,8 @@ jobs:
           CHAIN_HOME: /home/runner/.ica-chain
         run: |
           $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
-          sleep 30
+          sleep 60
+          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME 
       - name: Establish Connection to ICA chain
         run: |
           killall hermes || true
