@@ -260,7 +260,7 @@ jobs:
       - name: Establish Connection to ICA chain
         env:
           CHAIN_HOME: /home/runner/.val1
-        if: ${{ !vars.CHAIN_ID == 'release-testnet' }}
+        if: ${{ vars.CHAIN_ID != 'release-testnet' }}
         run: |
           killall hermes || true
           screen -XS hermes.service quit || true
