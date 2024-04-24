@@ -253,7 +253,9 @@ jobs:
           CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
           CHAIN_SERVICE: ica-chain.service
           CHAIN_HOME: /home/runner/.ica-chain
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+        run: |
+          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+          sleep 30
       - name: Establish Connection to ICA chain
         run: |
           killall hermes || true
