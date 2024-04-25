@@ -1,0 +1,11 @@
+{
+    "@type": "/cosmos.bank.v1beta1.MsgSend",
+    "from_address": "cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl",
+    "to_address": "cosmos17n3vkvg6lwf98p3kanlhlyjk6zkrfla9pgh8fk",
+    "amount": [
+        {
+            "denom": "uatom",
+            "amount": "5555555"
+        }
+    ]
+}
