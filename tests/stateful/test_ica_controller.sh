@@ -4,9 +4,8 @@ echo "Getting connection ID from controller"
 # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
 # echo "client ID: $client_id"
 # connection_id=$(hermes  --json query client connections --client $client_id --chain $CHAIN_ID | jq -r '.result[0] | select (.!=null)')
-connection_id=$(hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty.connection_id')
+connection_id=$(hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq -r '.result.counterparty.connection_id')
 
-hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
 echo "Connection ID: $connection_id"
 
 echo "Registering ICA..."
