@@ -257,8 +257,6 @@ jobs:
           $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
           sleep 60
           $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
-      # - name: debug
-      #   run: sleep 10h
       - name: Establish Connection to ICA chain
         env:
           CHAIN_HOME: /home/runner/.val1
@@ -284,6 +282,8 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
+      - name: debug
+        run: sleep 10h
       - name: Test ICA
         env:
           ICA_HOME: /home/runner/.ica-chain
