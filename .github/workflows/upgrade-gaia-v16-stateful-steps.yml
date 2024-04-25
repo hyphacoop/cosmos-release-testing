@@ -256,11 +256,12 @@ jobs:
         run: |
           $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
           sleep 60
-          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME 
+          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
+      - name: debug
+        run: sleep 10h
       - name: Establish Connection to ICA chain
         env:
           CHAIN_HOME: /home/runner/.val1
-        if: ${{ vars.CHAIN_ID != 'release-testnet' }}
         run: |
           killall hermes || true
           screen -XS hermes.service quit || true
@@ -282,7 +283,6 @@ jobs:
         env:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
-        if: ${{ vars.CHAIN_ID != 'release-testnet' }}
         run: |
           tests/stateful/test_ica_controller.sh 
       - name: Initialize consumer chain a with ICS v4.0.0
