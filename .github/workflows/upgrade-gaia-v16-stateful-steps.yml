@@ -282,8 +282,8 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      - name: debug
-        run: sleep 10h
+      # - name: debug
+      #   run: sleep 10h
       - name: Test ICA
         env:
           ICA_HOME: /home/runner/.ica-chain
