@@ -256,21 +256,25 @@ jobs:
         run: |
           $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
           sleep 60
-          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME 
+          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
       - name: Establish Connection to ICA chain
         env:
           CHAIN_HOME: /home/runner/.val1
-        if: ${{ vars.CHAIN_ID != 'release-testnet' }}
         run: |
           killall hermes || true
           screen -XS hermes.service quit || true
+          echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
           hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
+          echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
           hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
           sleep 30
           # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
-          client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
-          echo "Client ID is: $client_id"
-          hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
+          # client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
+          # echo "Client ID is: $client_id"
+          # hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
+          hermes create connection --a-chain ica-chain --b-chain $CHAIN_ID
+          echo "ica-chain connection-0 info:"
+          hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
           echo "Starting Hermes"
           screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
           # set screen to flush log to 0
@@ -278,11 +282,12 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
+      # - name: debug
+      #   run: sleep 10h
       - name: Test ICA
         env:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
-        if: ${{ vars.CHAIN_ID != 'release-testnet' }}
         run: |
           tests/stateful/test_ica_controller.sh 
       - name: Initialize consumer chain a with ICS v4.0.0
