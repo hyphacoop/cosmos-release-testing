@@ -4,7 +4,7 @@ import json
 import sys
 import re
 
-SKIP_STARTING_VERSIONS = ['v16.0.0-rc0','v16.0.0-rc1','v16.0.0-rc2','v16.0.0-rc3','v16.0.0','v16.1.0','v17.0.0-rc0','v17.0.0-rc1','v17.0.0-rc2','v17.0.0-rc3','v17.0.0']
+SKIP_STARTING_VERSIONS = ['v17.0.0-rc0','v17.0.0-rc1','v17.0.0-rc2','v17.0.0-rc3','v17.0.0']
 SKIP_TARGET_VERSIONS = []
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
