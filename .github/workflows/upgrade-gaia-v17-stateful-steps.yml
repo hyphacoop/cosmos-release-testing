@@ -341,9 +341,9 @@ jobs:
           GAS_PRICE: ${{ env.GAS_PRICES }}
         run: |
           $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          sleep 3
+          sleep 12
           $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-          sleep 3
+          sleep 12
           tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
       - name: Set BlocksPerEpoch to 100
         run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
