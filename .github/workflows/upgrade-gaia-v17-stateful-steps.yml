@@ -161,7 +161,8 @@ jobs:
       - name: Test software upgrade for main branch
         if: ${{ inputs.upgrade_version == 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          # DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-provider-pss-devnet-1/interchain-security-pd-linux
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
