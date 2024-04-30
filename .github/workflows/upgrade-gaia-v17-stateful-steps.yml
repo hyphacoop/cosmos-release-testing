@@ -290,7 +290,7 @@ jobs:
           CHAIN_HOME: /home/runner/.val1
         run: |
           tests/stateful/test_ica_controller.sh 
-      - name: Initialize consumer chain a with ICS v4.0.0
+      - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
           DOWNTIME_BLOCKS: 20
@@ -318,9 +318,9 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      - name: _VSC successful> ICS v4.0.0
+      - name: _VSC successful> Interchain Security (Consumer) PSS
         run: tests/stateful/test_ccv.sh
-      - name: _IBC transfer successful> ICS v4.0.0
+      - name: _IBC transfer successful> Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
         run: |
@@ -332,7 +332,18 @@ jobs:
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
-
+          echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
+      - name: _Test IBC rate limits - consumera
+        env:
+          TRANSFER_CHANNEL: ${{ env.CONSUMERA_CHAN_ID }}
+          RATE: 0.05
+          RPC_PORT: 27011
+        run: |
+          $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          sleep 3
+          $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+          sleep 3
+          tests/gaia-v16/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
       - name: Set BlocksPerEpoch to 100
         run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
       - name: Check BlocksPerEpoch is 100
