@@ -161,8 +161,7 @@ jobs:
       - name: Test software upgrade for main branch
         if: ${{ inputs.upgrade_version == 'main' }}
         env:
-          # DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-provider-pss-devnet-1/interchain-security-pd-linux
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
@@ -296,10 +295,12 @@ jobs:
           CONSUMER_CHAIN_ID: consumera
           DOWNTIME_BLOCKS: 20
           CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
         run: scripts/stateful/init_consumer.sh
       - name: Launch consumer chain a
         env:
           CONSUMER_CHAIN_ID: consumera
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
         run: scripts/stateful/launch_consumer.sh v4.x
       - name: _Consumer chain produces blocks> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10

@@ -439,7 +439,7 @@ jobs:
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: export-ics-testnet-provider
           path: ~/artifact/
