@@ -338,6 +338,7 @@ jobs:
           TRANSFER_CHANNEL: ${{ env.CONSUMERA_CHAN_ID }}
           RATE: 0.05
           RPC_PORT: 27011
+          GAS_PRICE: ${{ env.GAS_PRICES }}
         run: |
           $CHAIN_BINARY tx ibc-transfer transfer transfer $TRANSFER_CHANNEL $WALLET_1 1000$DENOM --home $HOME_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
           sleep 3
