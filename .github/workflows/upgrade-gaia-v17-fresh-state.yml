@@ -88,6 +88,8 @@
     ICS_330: false
     ICS_400: false
     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+    PSS_ENABLED: false
+    TOPN: "100"
     # Reference ICS chain variables
     CONSUMER_DENOM: ucon
     CONSUMER_FEES: 500
@@ -669,6 +671,7 @@
         - name: Add consumer chain with ICS v3.3.0
           env:
             CONSUMER_CHAIN_ID: v330-two
+            PSS_ENABLED: true
           run: |
             scripts/add_consumer.sh
         - name: Initialize consumer chain with ICS v3.3.0
@@ -1023,6 +1026,7 @@
         - name: Add consumer chain with ICS v4.0.0
           env:
             CONSUMER_CHAIN_ID: v400-two
+            PSS_ENABLED: true
           run: |
             scripts/add_consumer.sh
         - name: Initialize consumer chain with ICS v4.0.0

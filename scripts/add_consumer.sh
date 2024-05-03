@@ -4,6 +4,14 @@ echo "Patching add template with spawn time..."
 spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
 jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/proposal-add-template.json > proposal-add-spawn.json
 
+if [ $PSS_ENABLED == true ]; then
+    echo "Patching for PSS..."
+    jq -r --argjson TOPN "$TOPN" '.initial_height.top_N |= $TOPN' templates/proposal-add-spawn.json > proposal-add-topn.json
+    cp proposal-add-topn.json proposal-add-spawn.json
+    cat proposal-add-spawn.json
+fi
+
+
 # if $CHANGEOVER_HEIGHT_OFFSET ; then
 #     jq -r --argjson HEIGHT "$CHANGEOVER_REV_HEIGHT" '.initial_height.revision_height |= $HEIGHT' templates/proposal-add-template.json > proposal-add-height.json
 #     spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
