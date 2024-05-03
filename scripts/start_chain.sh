@@ -97,9 +97,9 @@ fi
 cp gov.json $HOME_1/config/genesis.json
 
 # echo "Setting slashing window to 10..."
-# jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' ./gov.json > ./slashing.json
-# jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json > slashing-2.json
-# mv slashing-2.json $HOME_1/config/genesis.json
+jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' $HOME_1/config/genesis.json > ./slashing.json
+jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json > slashing-2.json
+mv slashing-2.json $HOME_1/config/genesis.json
 
 # echo "Patching genesis file for LSM params..."
 # jq -r '.app_state.staking.params.validator_bond_factor = "10.000000000000000000"' slashing-2.json > lsm-1.json
@@ -112,7 +112,7 @@ cp blocks_per_epoch.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for ICA messages..."
 # Gaia
-jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' slashing-2.json > ./ica_host.json
+jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' $HOME_1/config/genesis.json > ./ica_host.json
 mv ica_host.json $HOME_1/config/genesis.json
 # pd
 
