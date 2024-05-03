@@ -179,6 +179,8 @@ jobs:
           $CHAIN_BINARY keys list --home $HOME_1
       - name: Query unbonding time
         run: $CHAIN_BINARY --home $HOME_1 q staking params
+      - name: Query gov params time
+        run: $CHAIN_BINARY --home $HOME_1 q gov params
       - name: Query BlocksPerEpoch
         run: $CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch
       - name: Set BlocksPerEpoch to 1
