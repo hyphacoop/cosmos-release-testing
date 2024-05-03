@@ -11,6 +11,12 @@ jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/propos
 sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" proposal-add-spawn.json > proposal-add-$CONSUMER_CHAIN_ID.json
 rm proposal-add-spawn.json
 
+if [ $PSS_ENABLED == true ]; then
+    echo "Patching for PSS..."
+    jq -r --argjson TOPN $TOPN '.initial_height.top_N |= $TOPN' proposal-add-$CONSUMER_CHAIN_ID.json > proposal-add-topn.json
+    mv proposal-add-topn.json proposal-add-$CONSUMER_CHAIN_ID.json
+fi
+
 echo "Proposal file proposal-add-$CONSUMER_CHAIN_ID.json"
 jq -r '.' proposal-add-$CONSUMER_CHAIN_ID.json
 cp proposal-add-$CONSUMER_CHAIN_ID.json ~/artifact/
