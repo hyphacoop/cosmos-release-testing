@@ -448,7 +448,7 @@
         # Consumer chain variables
         RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
         CONSUMER_ICS: v3.3.0
-        PROVIDER_ICS: v3.3.0
+        PROVIDER_ICS: v4.1.1
         # Reference ICS chain variables
         CONSUMER_DENOM: ucon
         CONSUMER_FEES: 500
@@ -568,7 +568,7 @@
             CONSUMER_HOME_2: /home/runner/.v330-1-2
             CONSUMER_HOME_3: /home/runner/.v330-1-3
             CONSUMER_ICS: v3.3.0
-            PROVIDER_ICS: v3.3.0
+            PROVIDER_ICS: v4.1.1
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
             scripts/prepare_consumer.sh
@@ -708,7 +708,7 @@
             CONSUMER_HOME_3: /home/runner/.v330-2-3
             ICS_330: true
             CONSUMER_ICS: v3.3.0
-            PROVIDER_ICS: v4.1.0
+            PROVIDER_ICS: v4.2.0
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V330_BINARY
             scripts/prepare_consumer.sh
@@ -801,7 +801,7 @@
         RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
         ICS_400: true
         CONSUMER_ICS: v4.0.0
-        PROVIDER_ICS: v3.3.0
+        PROVIDER_ICS: v4.1.1
         # Reference ICS chain variables
         CONSUMER_DENOM: ucon
         CONSUMER_FEES: 500
@@ -919,7 +919,7 @@
             CONSUMER_HOME_2: /home/runner/.v400-1-2
             CONSUMER_HOME_3: /home/runner/.v400-1-3
             ICS_400: true
-            CONSUMER_ICS: v4.0.0
+            CONSUMER_ICS: v4.1.1
             PROVIDER_ICS: v3.3.0
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
@@ -1062,7 +1062,7 @@
             CONSUMER_HOME_3: /home/runner/.v400-2-3
             ICS_400: true
             CONSUMER_ICS: v4.0.0
-            PROVIDER_ICS: v4.1.0
+            PROVIDER_ICS: v4.2.0
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/prepare_consumer.sh
