@@ -6,7 +6,7 @@ jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/propos
 
 if [ $PSS_ENABLED == true ]; then
     echo "Patching for PSS..."
-    jq -r --argjson TOPN "$TOPN" '.initial_height.top_N |= $TOPN' templates/proposal-add-spawn.json > proposal-add-topn.json
+    jq -r --argjson TOPN $TOPN '.initial_height.top_N |= $TOPN' templates/proposal-add-spawn.json > proposal-add-topn.json
     cp proposal-add-topn.json proposal-add-spawn.json
     cat proposal-add-spawn.json
 fi

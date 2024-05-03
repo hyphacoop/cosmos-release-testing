@@ -89,7 +89,7 @@
     ICS_400: false
     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
     PSS_ENABLED: false
-    TOPN: "100"
+    TOPN: 100
     # Reference ICS chain variables
     CONSUMER_DENOM: ucon
     CONSUMER_FEES: 500
