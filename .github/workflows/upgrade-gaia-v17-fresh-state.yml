@@ -2683,7 +2683,26 @@
             tests/test_consumer_ibc_transfer.sh $channel_id
         - name: _Soft opt-out test> Validator must not be jailed
           run: tests/test_validator_jailed.sh $VALOPER_3 false
-        
+        - name: Opt-in with val3
+          env:
+            CONSUMER_CHAIN_ID: v400-two
+          run: |
+            $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+            sleep $((COMMIT_TIMEOUT*20))
+        - name: _Soft opt-out test> Validator must not be jailed
+          run: tests/test_validator_jailed.sh $VALOPER_3 true
+        - name: Start val3
+          env:
+            CONSUMER_CHAIN_ID: v330-two
+            CONSUMER_SERVICE_1: v400-2-1.service
+            CONSUMER_SERVICE_2: v400-2-2.service
+            CONSUMER_SERVICE_3: v400-2-3.service
+            CONSUMER_HOME_3: /home/runner/.v400-2-3
+          run: |
+            sudo systemctl enable $CONSUMER_SERVICE_3 --now
+            sleep $((COMMIT_TIMEOUT*20))
+            echo "Catching up: $($CHAIN_BINARY status --home $CONSUMER_HOME_3 | jq -r '.')"
+            
         # - name: Stop validator services
         #   env:
         #     CONSUMER_SERVICE_2: v400-2-2.service
