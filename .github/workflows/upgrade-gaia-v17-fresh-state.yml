@@ -2681,7 +2681,7 @@
             connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
-        - name: _Soft opt-out test> Validator must not be jailed
+        - name: _PSS test> Validator must not be jailed
           run: tests/test_validator_jailed.sh $VALOPER_3 false
         - name: Opt-in with val3
           env:
@@ -2690,9 +2690,9 @@
           run: |
             $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep $((COMMIT_TIMEOUT*20))
-            $CHAIN_BINARY q provider has-to-validate $(CHAIN_BINARY tendermint show-address --home $CONSUMER_HOME_3) --home $HOME_1
+            $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $CONSUMER_HOME_3) --home $HOME_1
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
-        - name: _Soft opt-out test> Validator must be jailed
+        - name: _PSS test> Validator must be jailed
           run: tests/test_validator_jailed.sh $VALOPER_3 true
         - name: Start val3
           env:
