@@ -2700,11 +2700,17 @@
             CONSUMER_SERVICE_1: v400-2-1.service
             CONSUMER_SERVICE_2: v400-2-2.service
             CONSUMER_SERVICE_3: v400-2-3.service
+            CONSUMER_HOME_1: /home/runner/.v400-2-1
+            CONSUMER_HOME_2: /home/runner/.v400-2-2
             CONSUMER_HOME_3: /home/runner/.v400-2-3
           run: |
             sudo systemctl enable $CONSUMER_SERVICE_3 --now
             sleep $((COMMIT_TIMEOUT*20))
             echo "Catching up: $($CHAIN_BINARY status --home $CONSUMER_HOME_3 | jq -r '.SyncInfo.catching_up')"
+            $CHAIN_BINARY q block --home $CONSUMER_HOME_1 | jq '.block.header.height'
+            $CHAIN_BINARY q block --home $CONSUMER_HOME_2 | jq '.block.header.height'
+            $CHAIN_BINARY q block --home $CONSUMER_HOME_3 | jq '.block.header.height'
+
         - name: Unjail validator
           run: tests/test_validator_jailed.sh $VALOPER_3 true
             $CHAIN_BINARY tx slashing unjail --from $WALLET_3 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
