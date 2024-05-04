@@ -2586,7 +2586,7 @@
           run: |
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
             $CHAIN_BINARY q provider params --home $HOME_1
-            jq '.app_state.provider.params' --home $HOME_1
+            jq '.app_state.provider.params' --home $HOME_1/config/genesis.json
 
         - name: Add consumer chain with ICS v4.0.0
           env:
