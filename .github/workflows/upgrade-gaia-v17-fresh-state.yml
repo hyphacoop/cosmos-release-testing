@@ -2690,6 +2690,7 @@
           run: |
             $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep $((COMMIT_TIMEOUT*20))
+            $CHAIN_BINARY tendermint show-address --home $HOME_3
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
         - name: _PSS test> Validator must be jailed
@@ -2724,6 +2725,7 @@
           run: |
             $CHAIN_BINARY tx provider opt-out $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep $((COMMIT_TIMEOUT*20))
+            $CHAIN_BINARY tendermint show-address --home $HOME_3
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
         - name: Stop val3
@@ -2746,6 +2748,9 @@
             sleep $((COMMIT_TIMEOUT*2))
             $CHAIN_BINARY tx provider opt-out $CONSUMER_CHAIN_ID --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
             sleep $((COMMIT_TIMEOUT*30))
+            $CHAIN_BINARY tendermint show-address --home $HOME_3
+            $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+            $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
         - name: _PSS test> Validator must not be jailed
           run: tests/test_validator_jailed.sh $VALOPER_2 false
         - name: _PSS test> Validator must be jailed
