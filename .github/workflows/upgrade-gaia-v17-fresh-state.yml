@@ -2707,6 +2707,7 @@
         - name: Print throttling info
           run: |
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
+            $CHAIN_BINARY q slashing signing-infos --home $CONSUMER_HOME_1
 
         - name: _PSS test> Validator must be jailed
           run: tests/test_validator_jailed.sh $VALOPER_3 true
