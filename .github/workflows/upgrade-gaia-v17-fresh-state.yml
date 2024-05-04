@@ -2746,6 +2746,7 @@
           run: |
             $CHAIN_BINARY tx staking redelegate $VALOPER_2 $VALOPER_3 100000000$DENOM --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
             sleep $((COMMIT_TIMEOUT*2))
+            $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
             $CHAIN_BINARY tx provider opt-out $CONSUMER_CHAIN_ID --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
             sleep $((COMMIT_TIMEOUT*30))
             $CHAIN_BINARY tendermint show-address --home $HOME_3
