@@ -2768,6 +2768,7 @@
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
         - name: Push val3 into topN
           env:
+            CONSUMER_HOME_1: /home/runner/.v400-2-1
             CONSUMER_CHAIN_ID: v400-two
           run: |
             $CHAIN_BINARY tx staking redelegate $VALOPER_2 $VALOPER_3 100000000$DENOM --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
@@ -2779,6 +2780,7 @@
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
+            $CHAIN_BINARY q slashing signing-infos --home $CONSUMER_HOME_1
         - name: Print throttling info
           run: |
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
@@ -2786,9 +2788,13 @@
         - name: _PSS test> Validator must not be jailed
           run: tests/test_validator_jailed.sh $VALOPER_2 false
         - name: _PSS test> Validator must be jailed
+          env:
+            CONSUMER_HOME_1: /home/runner/.v400-2-1
           run: |
-            tests/test_validator_jailed.sh $VALOPER_3 true
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
+            $CHAIN_BINARY q slashing signing-infos --home $CONSUMER_HOME_1
+            tests/test_validator_jailed.sh $VALOPER_3 true
+            
         - name: Print validators in provider and top N chain
           env:
             CONSUMER_HOME_1: /home/runner/.v400-2-1
