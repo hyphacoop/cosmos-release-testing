@@ -111,8 +111,8 @@ jq -r --arg BLOCKS "1" '.app_state.provider.params.blocks_per_epoch |= $BLOCKS' 
 cp blocks_per_epoch.json $HOME_1/config/genesis.json
 
 echo "Speed up slash meter replenishment..."
-jq -r '.app_state.provider.params.slash_meter_replenish_period |= "10s"' $HOME_1/config/genesis.json > ./slash-meter-period.json
-jq -r '.app_state.provider.params.slash_meter_replenish_fraction |= "0.50"' slash-meter-period.json > ./slash-meter-fraction.json
+jq -r '.app_state.provider.params.slash_meter_replenish_period |= "2s"' $HOME_1/config/genesis.json > ./slash-meter-period.json
+jq -r '.app_state.provider.params.slash_meter_replenish_fraction |= "1.00"' slash-meter-period.json > ./slash-meter-fraction.json
 cp slash-meter-fraction.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for ICA messages..."
