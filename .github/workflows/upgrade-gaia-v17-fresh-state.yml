@@ -2712,7 +2712,7 @@
             $CHAIN_BINARY q block --home $CONSUMER_HOME_3 | jq '.block.header.height'
 
         - name: Unjail validator
-          run: tests/test_validator_jailed.sh $VALOPER_3 true
+          run: |
             $CHAIN_BINARY tx slashing unjail --from $WALLET_3 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
             sleep $((COMMIT_TIMEOUT*30))
         - name: _PSS test> Validator must not be jailed
