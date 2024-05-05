@@ -39,6 +39,12 @@ $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINA
 echo "val3 key in consumer:"
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
 
+if [ $TOPN -eq "0" ]; then
+ echo "Opting in with val1..."
+ $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+ sleep $COMMIT_TIMEOUT
+fi
+
 # Update genesis file with right denom
 # sed -i s%stake%$CONSUMER_DENOM%g $CONSUMER_HOME_1/config/genesis.json
 jq --arg DENOM "$CONSUMER_DENOM" '.app_state.crisis.constant_fee.denom = $DENOM' $CONSUMER_HOME_1/config/genesis.json > genesis-1.json
