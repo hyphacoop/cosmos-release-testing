@@ -2702,7 +2702,9 @@
             $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
             sleep $((COMMIT_TIMEOUT*20))
             $CHAIN_BINARY tendermint show-address --home $HOME_3
+            echo "Has to validate:"
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+            echo "Consumer opted-in validators:"
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
         - name: Print throttling info
           env:
@@ -2726,14 +2728,11 @@
             sudo systemctl enable $CONSUMER_SERVICE_3 --now
             sleep $((COMMIT_TIMEOUT*20))
             echo "Catching up: $($CHAIN_BINARY status --home $CONSUMER_HOME_3 | jq -r '.SyncInfo.catching_up')"
-            $CHAIN_BINARY q block --home $CONSUMER_HOME_1 | jq '.block.header.height'
-            $CHAIN_BINARY q block --home $CONSUMER_HOME_2 | jq '.block.header.height'
-            $CHAIN_BINARY q block --home $CONSUMER_HOME_3 | jq '.block.header.height'
 
         - name: Unjail validator
           run: |
             $CHAIN_BINARY tx slashing unjail --from $WALLET_3 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-            sleep $((COMMIT_TIMEOUT*30))
+            sleep $((COMMIT_TIMEOUT*2))
         - name: Print throttling info
           run: |
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
@@ -2746,7 +2745,7 @@
             CONSUMER_HOME_3: /home/runner/.v400-2-3
           run: |
             $CHAIN_BINARY tx provider opt-out $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep $((COMMIT_TIMEOUT*20))
+            sleep $((COMMIT_TIMEOUT*5))
             $CHAIN_BINARY tendermint show-address --home $HOME_3
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
@@ -2759,7 +2758,7 @@
             CONSUMER_HOME_3: /home/runner/.v400-2-3
           run: |
             sudo systemctl disable $CONSUMER_SERVICE_3 --now
-            sleep $((COMMIT_TIMEOUT*30))
+            sleep $((COMMIT_TIMEOUT*20))
 
         - name: Print throttling info
           run: |
@@ -2778,11 +2777,13 @@
             sleep $((COMMIT_TIMEOUT*2))
             $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
             $CHAIN_BINARY tx provider opt-out $CONSUMER_CHAIN_ID --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-            sleep $((COMMIT_TIMEOUT*100))
+            sleep $((COMMIT_TIMEOUT*20))
+            $CHAIN_BINARY q tendermint-validator-set --home $CONSUMER_HOME_1
             $CHAIN_BINARY tendermint show-address --home $HOME_3
+            echo "Has to validate:"
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+            echo "Consumer opted-in validators:"
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
-            $CHAIN_BINARY q provider throttle-state --home $HOME_1
             $CHAIN_BINARY q slashing signing-infos --home $CONSUMER_HOME_1
         - name: Print throttling info
           run: |
@@ -2804,22 +2805,3 @@
           run: |
             $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
             $CHAIN_BINARY q tendermint-validator-set --home $CONSUMER_HOME_1
-        # - name: Stop validator services
-        #   env:
-        #     CONSUMER_SERVICE_2: v400-2-2.service
-        #     CONSUMER_SERVICE_3: v400-2-3.service
-        #   run: |
-        #     # sudo systemctl disable $CONSUMER_SERVICE_2 --now
-        #     # sudo systemctl disable $CONSUMER_SERVICE_3 --now
-        #     sleep $(($COMMIT_TIMEOUT*30))
-        # - name: Unjail validator
-        #   env:
-        #     CONSUMER_SERVICE_2: v400-2-2.service
-        #   run: |
-        #     sudo systemctl enable $CONSUMER_SERVICE_2 --now
-        #     sleep $(($COMMIT_TIMEOUT*10))
-        #     $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-        #     sleep $(($COMMIT_TIMEOUT*2))
-        # - name: _Soft opt-out test> Validator must be unjailed
-        #   run: tests/test_validator_jailed.sh $VALOPER_2 false
-
