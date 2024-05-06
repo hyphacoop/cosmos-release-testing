@@ -2701,13 +2701,14 @@
             CONSUMER_HOME_3: /home/runner/.v400-2-3
           run: |
             $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep $((COMMIT_TIMETOU*2))
-            $CHAIN_BINARY tendermint show-address --home $HOME_3
+            sleep $((COMMIT_TIMEOUT*2))
+            consensus_addr=$($CHAIN_BINARY tendermint show-address --home $HOME_3)
+            echo "consensus address: $consensus_addr"
             echo "Has to validate:"
-            $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+            $CHAIN_BINARY q provider has-to-validate $consensus_addr --home $HOME_1
             sleep $((COMMIT_TIMEOUT*20))
             echo "Has to validate:"
-            $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+            $CHAIN_BINARY q provider has-to-validate $consensus_addr --home $HOME_1
             echo "Consumer opted-in validators:"
             $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID --home $HOME_1
         - name: Print throttling info
