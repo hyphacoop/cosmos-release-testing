@@ -13,7 +13,7 @@ rm proposal-add-spawn.json
 
 if [ $PSS_ENABLED == true ]; then
     echo "Patching for PSS..."
-    jq -r --argjson TOPN $TOPN '.initial_height.top_N |= $TOPN' proposal-add-$CONSUMER_CHAIN_ID.json > proposal-add-topn.json
+    jq -r --argjson TOPN $TOPN '.top_N |= $TOPN' proposal-add-$CONSUMER_CHAIN_ID.json > proposal-add-topn.json
     mv proposal-add-topn.json proposal-add-$CONSUMER_CHAIN_ID.json
 fi
 
@@ -50,6 +50,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "Collecting the CCV state..."
 $CHAIN_BINARY q provider consumer-genesis $CONSUMER_CHAIN_ID -o json --home $HOME_1 > ccv-pre.json
+$CHAIN_BINARY q provider consumer-genesis $CONSUMER_CHAIN_ID -o json --home $HOME_1 >  ~/artifact/$CONSUMER_CHAIN_ID-ccv-pre.txt
 jq '.params |= . + {"soft_opt_out_threshold": "0.05"}' ccv-pre.json > ccv.json
 jq '.' ccv.json
 
@@ -61,6 +62,8 @@ then
     ./ics-transform genesis transform --to $transform ccv.json > ccv-transform.json
     cp ccv-transform.json ccv.json
 fi
+
+cp ccv.json ~/artifact/$CONSUMER_CHAIN_ID-ccv.json
 
 echo "Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json ccv.json > consumer-genesis.json
