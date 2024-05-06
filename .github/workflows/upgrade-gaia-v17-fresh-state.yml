@@ -3489,7 +3489,7 @@
           env:
             CONSUMER_CHAIN_ID_1: v400-one
             CONSUMER_CHAIN_ID_2: v400-two
-            CONSUMER_RATE_1: 0.5
+            CONSUMER_RATE_1: 0.25
             CONSUMER_RATE_2: 0.5
             RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             CONSUMER_HOME_1: /home/runner/.v400-1-1
