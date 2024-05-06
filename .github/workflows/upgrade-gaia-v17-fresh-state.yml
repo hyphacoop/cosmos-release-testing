@@ -3236,8 +3236,8 @@
           env:
             CONSUMER_DENOM: ucon
           run: |
-            denom_400_1=$(echo -n "transfer/channel-1/$CONSUMER_DENOM_1" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
-            denom_400_2=$(echo -n "transfer/channel-3/$CONSUMER_DENOM_2" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
+            denom_400_1=$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+            denom_400_2=$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
             scripts/register_denoms.sh $denom_400_1
             scripts/register_denoms.sh $denom_400_2
             $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.denoms'
