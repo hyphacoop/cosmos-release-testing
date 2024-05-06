@@ -92,6 +92,7 @@
     TOPN: 100
     # Reference ICS chain variables
     CONSUMER_DENOM: ucon
+    CONSUMER_GAS_PRICE: 0.005
     CONSUMER_FEES: 500
     CONSUMER_CHAIN_V330_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v3.3.0/interchain-security-cd-linux
     CONSUMER_CHAIN_V330_BINARY: consumerd_v4.0.0
@@ -3231,6 +3232,16 @@
           run: |
             $CHAIN_BINARY keys list --home $HOME_1
   
+        - name: Register consumer reward denoms
+          env:
+            CONSUMER_DENOM: ucon
+          run: |
+            denom_400_1=$(echo -n "transfer/channel-1/$CONSUMER_DENOM_1" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
+            denom_400_2=$(echo -n "transfer/channel-3/$CONSUMER_DENOM_2" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z'
+            scripts/register_denoms.sh $denom_400_1
+            scripts/register_denoms.sh $denom_400_2
+            $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.denoms'
+
         - name: Add consumer chain with ICS v4.0.0
           env:
             CONSUMER_CHAIN_ID: v400-one
@@ -3366,7 +3377,7 @@
             CON2_PPROF_PORT: 40242
             CON3_PPROF_PORT: 40243
             DOWNTIME_BLOCKS: 10
-            GAS_PRICE: 0
+            CONSUMER_GAS_PRICE: 0
             TOPN: 0
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
