@@ -3183,7 +3183,7 @@
           run: echo "RELAYER=rly" >> $GITHUB_ENV
         - name: Set up relayer - set 0 gas prices for all consumer chains
           run: |
-            sed -i "s/gas_price = { price = 0.0025, denom = 'ucon' }/gas_price = { price = 0, denom = 'ucon' }/" templates/hermes-config.toml
+            sed -i "s/gas_price = { price = 0.005, denom = 'ucon' }/gas_price = { price = 0, denom = 'ucon' }/" templates/hermes-config.toml
             cat templates/hermes-config.toml
             scripts/setup_relayer.sh
         - name: Download consumer chain binaries
