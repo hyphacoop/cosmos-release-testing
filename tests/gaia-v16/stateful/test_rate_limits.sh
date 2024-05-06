@@ -27,7 +27,7 @@ echo "Rate limit channel value: $supply"
 echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
-$CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --node http://localhost:$rpc_port
+$CONSUMER_CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --home $CONSUMER_HOME_1
 
 if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
@@ -45,7 +45,7 @@ echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
 sleep 30s
-$CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --node http://localhost:$rpc_port
+$CONSUMER_CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --home $CONSUMER_HOME_1
 
 if [[ "$result" == "0" ]]; then
     echo "PASS: Transaction below rate limit was accepted."
@@ -61,7 +61,7 @@ echo "Sending $amount..."
 result=$(test_transfer $amount)
 echo "test transfer result: $result"
 sleep 30s
-$CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --node http://localhost:$rpc_port
+$CONSUMER_CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --home $CONSUMER_HOME_1
 
 if [[ "$result" == "1" ]]; then
     echo "PASS: Rate limit was detected."
@@ -77,7 +77,7 @@ fi
 # result=$(test_transfer $amount)
 # echo "test transfer result: $result"
 # sleep 1m
-# $CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --node http://localhost:$rpc_port
+# $CONSUMER_CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --home $CONSUMER_HOME_1
 
 # if [[ "$result" == "1" ]]; then
 #     echo "PASS: Rate limit was detected."
