@@ -41,8 +41,10 @@ $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINA
 
 if [ $TOPN -eq "0" ]; then
  echo "Opting in with val1..."
- $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+ txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json) | jq -r '.txhash'
+ echo "opt-in tx: $txhash"
  sleep $COMMIT_TIMEOUT
+ $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 fi
 
 # Update genesis file with right denom
