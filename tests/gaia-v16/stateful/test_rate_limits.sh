@@ -21,6 +21,7 @@ function test_transfer {
 
 echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
 supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
+$CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1
 fraction=$(echo "$rate_limit" | bc)
 amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
 echo "Rate limit channel value: $supply"
@@ -38,7 +39,6 @@ fi
 
 echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
 new_supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
-$CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1
 echo "New rate limit channel value: $new_supply"
 fraction=$(echo "$rate_limit / 2" | bc -l )
 amount=$(echo "($supply *  $fraction)/1 + 1000000" | bc )
