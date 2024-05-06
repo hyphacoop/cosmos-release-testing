@@ -2701,8 +2701,11 @@
             CONSUMER_HOME_3: /home/runner/.v400-2-3
           run: |
             $CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_3 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-            sleep $((COMMIT_TIMEOUT*20))
+            sleep $((COMMIT_TIMETOU*2))
             $CHAIN_BINARY tendermint show-address --home $HOME_3
+            echo "Has to validate:"
+            $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+            sleep $((COMMIT_TIMEOUT*20))
             echo "Has to validate:"
             $CHAIN_BINARY q provider has-to-validate $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
             echo "Consumer opted-in validators:"
