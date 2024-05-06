@@ -3464,8 +3464,8 @@
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            sleep $(($COMMIT_TIMEOUT+2))
             # echo "withdraw hash: $txhash"
-            # sleep $(($COMMIT_TIMEOUT+2))
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
             $CHAIN_BINARY tx provider set-consumer-commission-rate $CONSUMER_CHAIN_ID_1 $CONSUMER_RATE_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y 
             sleep $(($COMMIT_TIMEOUT+2))
@@ -3478,8 +3478,8 @@
             sleep $(($COMMIT_TIMEOUT+20))
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            sleep $(($COMMIT_TIMEOUT+2))
             # echo "withdraw hash: $txhash"
-            # sleep $(($COMMIT_TIMEOUT+2))
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
         - name: Set different commission rates for consumer chains
@@ -3495,8 +3495,8 @@
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            sleep $(($COMMIT_TIMEOUT+2))
             # echo "withdraw hash: $txhash"
-            # sleep $(($COMMIT_TIMEOUT+2))
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
             $CHAIN_BINARY tx provider set-consumer-commission-rate $CONSUMER_CHAIN_ID_1 $CONSUMER_RATE_1 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y 
             sleep $(($COMMIT_TIMEOUT+2))
@@ -3509,8 +3509,8 @@
             sleep $(($COMMIT_TIMEOUT+20))
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            sleep $(($COMMIT_TIMEOUT+2))
             # echo "withdraw hash: $txhash"
-            # sleep $(($COMMIT_TIMEOUT+2))
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
         # - name: Set different commission rates for consumer chains
