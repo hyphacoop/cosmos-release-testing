@@ -2647,8 +2647,9 @@
             sudo systemctl enable $CONSUMER_SERVICE_1 --now
             sudo systemctl enable $CONSUMER_SERVICE_2 --now
             # sudo systemctl enable $CONSUMER_SERVICE_3 --now
-            sleep 10
+            sleep 20
             journalctl -u $CONSUMER_SERVICE_1
+            journalctl -u $CONSUMER_SERVICE_2
         - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
           env:
             CON1_RPC_PORT: 40221
