@@ -24,8 +24,17 @@ echo "Submit key assignment tx..."
 CON1_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1)
 CON2_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_2)
 CON3_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_3)
-$CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-sleep $COMMIT_TIMEOUT
+if [ $TOPN -eq "0" ]; then
+    echo "Opting in with val1..."
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    echo "opt-in tx: $txhash"
+    sleep $(($COMMIT_TIMEOUT+2))
+    $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+else
+    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    sleep $COMMIT_TIMEOUT
+fi
+
 $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
 sleep $COMMIT_TIMEOUT
 $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
@@ -39,13 +48,6 @@ $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINA
 echo "val3 key in consumer:"
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
 
-if [ $TOPN -eq "0" ]; then
- echo "Opting in with val1..."
- txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
- echo "opt-in tx: $txhash"
- sleep $COMMIT_TIMEOUT
- $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
-fi
 
 # Update genesis file with right denom
 # sed -i s%stake%$CONSUMER_DENOM%g $CONSUMER_HOME_1/config/genesis.json
