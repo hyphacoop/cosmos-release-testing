@@ -15,6 +15,7 @@ echo "Collecting the CCV state..."
 $CHAIN_BINARY q provider consumer-genesis $CONSUMER_CHAIN_ID -o json --home $HOME_1 > ccv-pre.json
 jq '.params |= . + {"soft_opt_out_threshold": "0.10"}' ccv-pre.json > ccv-optout.json
 
+jq '.' ccv-optout.json
 
 echo "Patching the CCV state with the provider reward denom"
 jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv-optout.json > ccv-reward.json
