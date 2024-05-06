@@ -99,9 +99,9 @@ echo "Patching config files..."
 # sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0.0025$CONSUMER_DENOM\"^" $CONSUMER_HOME_1/config/app.toml
 # sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0.0025$CONSUMER_DENOM\"^" $CONSUMER_HOME_2/config/app.toml
 # sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0.0025$CONSUMER_DENOM\"^" $CONSUMER_HOME_3/config/app.toml
-toml set --toml-path $CONSUMER_HOME_1/config/app.toml minimum-gas-prices "$GAS_PRICE$CONSUMER_DENOM"
-toml set --toml-path $CONSUMER_HOME_2/config/app.toml minimum-gas-prices "$GAS_PRICE$CONSUMER_DENOM"
-toml set --toml-path $CONSUMER_HOME_3/config/app.toml minimum-gas-prices "$GAS_PRICE$CONSUMER_DENOM"
+toml set --toml-path $CONSUMER_HOME_1/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE$CONSUMER_DENOM"
+toml set --toml-path $CONSUMER_HOME_2/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE$CONSUMER_DENOM"
+toml set --toml-path $CONSUMER_HOME_3/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE$CONSUMER_DENOM"
 
 # Enable API
 toml set --toml-path $CONSUMER_HOME_1/config/app.toml api.enable true
