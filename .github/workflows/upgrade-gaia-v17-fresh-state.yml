@@ -3463,10 +3463,25 @@
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
 
+        - name: Query commission rates
+          run: |
+            echo "v400-one:"
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            echo "v400-two:"
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+
         - name: Query outstanding rewards
           run: |
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
+        - name: Withdraw all rewards
+          run: |
+            txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            sleep $(($COMMIT_TIMEOUT+2))
+
+        - name: Query outstanding rewards
+          run: |
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
         - name: Set equal commission rates for consumer chains
           env:
@@ -3502,6 +3517,13 @@
             # echo "withdraw hash: $txhash"
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
+        - name: Query commission rates
+          run: |
+            echo "v400-one:"
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            echo "v400-two:"
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+
         - name: Set different commission rates for consumer chains
           env:
             CONSUMER_CHAIN_ID_1: v400-one
@@ -3535,6 +3557,13 @@
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             # echo "withdraw hash: $txhash"
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+
+        - name: Query commission rates
+          run: |
+            echo "v400-one:"
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            echo "v400-two:"
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
 
         # - name: Set different commission rates for consumer chains
         #   env:
