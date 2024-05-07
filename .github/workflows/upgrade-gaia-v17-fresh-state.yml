@@ -3478,10 +3478,11 @@
             sleep $(($COMMIT_TIMEOUT+50))
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_1 -y
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_2 -y
-            sleep $(($COMMIT_TIMEOUT+20))
+            sleep $(($COMMIT_TIMEOUT+50))
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
             sleep $(($COMMIT_TIMEOUT+2))
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             # echo "withdraw hash: $txhash"
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
@@ -3511,10 +3512,11 @@
             sleep $(($COMMIT_TIMEOUT+50))
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_1 -y
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_2 -y
-            sleep $(($COMMIT_TIMEOUT+20))
+            sleep $(($COMMIT_TIMEOUT+50))
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-            sleep $(($COMMIT_TIMEOUT+2))
+            sleep $(($COMMIT_TIMEOUT+2))\
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             # echo "withdraw hash: $txhash"
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
