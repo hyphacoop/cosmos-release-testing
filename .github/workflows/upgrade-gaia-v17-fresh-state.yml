@@ -3515,7 +3515,7 @@
             sleep $(($COMMIT_TIMEOUT+50))
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-all-rewards --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-            sleep $(($COMMIT_TIMEOUT+2))\
+            sleep $(($COMMIT_TIMEOUT+2))
             $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
             # echo "withdraw hash: $txhash"
             # $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
