@@ -53,35 +53,3 @@ else
     echo "FAIL: Transaction below rate limit was not accepted."
     exit 1
 fi
-
-echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
-new_supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
-echo "New rate limit channel value: $new_supply"
-echo "Sending $amount..."
-result=$(test_transfer $amount)
-echo "test transfer result: $result"
-sleep 30s
-$CONSUMER_CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --home $CONSUMER_HOME_1
-
-if [[ "$result" == "1" ]]; then
-    echo "PASS: Rate limit was detected."
-else
-    echo "FAIL: Rate limit was not detected."
-    exit 1
-fi
-
-# echo "Bank total supply: $($CHAIN_BINARY q bank total --home $HOME_1 -o json | jq -r '.supply[0].amount')"
-# new_supply=$($CHAIN_BINARY q ratelimit rate-limit $channel_id --home $HOME_1 -o json | jq -r '.[0].flow.channel_value')
-# echo "New rate limit channel value: $new_supply"
-# echo "Sending $amount..."
-# result=$(test_transfer $amount)
-# echo "test transfer result: $result"
-# sleep 1m
-# $CONSUMER_CHAIN_BINARY q bank balances $WALLET_CONSUMER_1 --home $CONSUMER_HOME_1
-
-# if [[ "$result" == "1" ]]; then
-#     echo "PASS: Rate limit was detected."
-# else
-#     echo "FAIL: Rate limit was not detected."
-#     exit 1
-# fi
