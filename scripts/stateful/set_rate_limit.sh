@@ -3,11 +3,11 @@
 channel_id=$1
 
 # Patch prop template
-sed "s/_CHANNEL_ID_/$channel_id/g" templates/proposal-rate-limit.json > ~/proposal-rate-limit.json
+sed "s/_CHANNEL_ID_/$channel_id/g" templates/proposal-rate-limit.json > templates/proposal-rate-limit-patched.json
 
 # Change Rate Limit
 echo "Set Rate Limit for $channel_id..."
-proposal="$CHAIN_BINARY tx gov submit-proposal ~/proposal-rate-limit.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
+proposal="$CHAIN_BINARY tx gov submit-proposal templates/proposal-rate-limit-patched.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
 echo $proposal
 gaiadout=$($proposal)
 echo "gaiad output:"
