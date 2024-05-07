@@ -3237,6 +3237,10 @@
           run: |
             $CHAIN_BINARY keys list --home $HOME_1
   
+        - name: Query outstanding rewards
+          run: |
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+
         - name: Register consumer reward denoms
           env:
             CONSUMER_DENOM: ucon
@@ -3246,6 +3250,10 @@
             scripts/register_denoms.sh $denom_400_1
             scripts/register_denoms.sh $denom_400_2
             $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.denoms'
+
+        - name: Query outstanding rewards
+          run: |
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
         - name: Add consumer chain with ICS v4.0.0
           env:
@@ -3349,6 +3357,9 @@
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
 
+        - name: Query outstanding rewards
+          run: |
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
         - name: Add consumer chain with ICS v4.0.0
           env:
@@ -3451,6 +3462,11 @@
             connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
+
+        - name: Query outstanding rewards
+          run: |
+            $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+
 
         - name: Set equal commission rates for consumer chains
           env:
