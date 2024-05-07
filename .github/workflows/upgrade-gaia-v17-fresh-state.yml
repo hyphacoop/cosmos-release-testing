@@ -3466,9 +3466,9 @@
         - name: Query commission rates
           run: |
             echo "v400-one:"
-            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
             echo "v400-two:"
-            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
 
         - name: Query outstanding rewards
           run: |
@@ -3520,9 +3520,9 @@
         - name: Query commission rates
           run: |
             echo "v400-one:"
-            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
             echo "v400-two:"
-            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
 
         - name: Set different commission rates for consumer chains
           env:
@@ -3561,9 +3561,9 @@
         - name: Query commission rates
           run: |
             echo "v400-one:"
-            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-one $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
             echo "v400-two:"
-            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $(CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+            $CHAIN_BINARY q provider validator-consumer-commission-rate v400-two $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
 
         # - name: Set different commission rates for consumer chains
         #   env:
