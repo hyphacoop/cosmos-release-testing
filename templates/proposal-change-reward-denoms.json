@@ -1,0 +1,6 @@
+{
+	"title": "Change reward denoms",
+	"summary": "Change reward denoms",
+	"denoms_to_add": ["ibc/42C7464F6415DC7529A8C7581FE0991C7A090D60176BC90998B1DAF75B868635"],
+	"deposit": "10000000uatom"
+}
