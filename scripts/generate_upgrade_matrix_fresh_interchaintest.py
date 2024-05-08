@@ -48,7 +48,8 @@ for name in release_names:
 # Remove all rcs from the list if there is a final release available
 for rc in rc_releases:
     components = rc.split('.')
-    if int(components[0][1:]) > version_major:
+    # We only want the next major version.
+    if version_major - int(components[0][1:]) == 1:
         releases.append(rc)
 
 # Set upgrade versions to target for each release
