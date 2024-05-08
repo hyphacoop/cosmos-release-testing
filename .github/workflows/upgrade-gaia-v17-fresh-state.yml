@@ -3510,7 +3510,7 @@
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_1 -y
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_2 -y
             sleep $(($COMMIT_TIMEOUT+50))
-            
+
             denom_1="ibc/$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')"
             echo "denom_1: $denom_1"
             denom_2="ibc/$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')"
@@ -3528,7 +3528,7 @@
               exit 1
             else
               echo "PASS: Rewards match when rates are the same for both consumer chains."
-              exit 1
+              exit 0
             fi
             
         - name: Query commission rates
