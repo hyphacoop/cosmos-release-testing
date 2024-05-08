@@ -24,7 +24,7 @@ func AddLinkedChain(ctx context.Context, t *testing.T, chainA Chain, relayer ibc
 
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	chainB := Chain{chains[0].(*cosmos.CosmosChain)}
+	chainB := Chain{chains[0].(*cosmos.CosmosChain), relayer}
 	relayerWallet, err := chainB.BuildRelayerWallet(ctx, "relayer-"+chainB.Config().ChainID)
 	require.NoError(t, err)
 

@@ -20,15 +20,29 @@ const (
 	TRANSFER_PORT_ID         = "transfer"
 	PROVIDER_PORT_ID         = "provider"
 	CONSUMER_PORT_ID         = "consumer"
-	COMMIT_TIMEOUT           = 10 * time.Second
+	COMMIT_TIMEOUT           = 5 * time.Second
 	SLASHING_WINDOW_PROVIDER = 10
 	SLASHING_WINDOW_CONSUMER = 20
 	DOWNTIME_JAIL_DURATION   = 10 * time.Second
 	DEFAULT_CHANNEL_VERSION  = "ics20-1"
+	PSS_DISABLED             = -1
+	PSS_OPT_IN               = 0
 )
 
 func getValidatorStake() [NUM_VALIDATORS]int64 {
 	return [NUM_VALIDATORS]int64{80_000_000, 12_000_000, 8_000_000}
+}
+
+func NoProviderKeysCopied() [NUM_VALIDATORS]bool {
+	return [NUM_VALIDATORS]bool{false, false, false}
+}
+
+func SomeProviderKeysCopied() [NUM_VALIDATORS]bool {
+	return [NUM_VALIDATORS]bool{true, false, false}
+}
+
+func AllProviderKeysCopied() [NUM_VALIDATORS]bool {
+	return [NUM_VALIDATORS]bool{true, true, true}
 }
 
 func RelayerTransferPathFor(chainA, chainB Chain) string {

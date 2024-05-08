@@ -12,7 +12,7 @@ func TestBaselineTXsAfterV16Upgrade(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 
-	chain, _ := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, false)
+	chain := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, false)
 
 	fresh.TransactionsTest(ctx, t, chain)
 

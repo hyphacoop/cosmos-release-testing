@@ -31,15 +31,7 @@ type ValidatorWallet struct {
 
 type Chain struct {
 	*cosmos.CosmosChain
-}
-
-func (c Chain) QueryJSON(ctx context.Context, t *testing.T, path string, query ...string) gjson.Result {
-	t.Helper()
-	stdout, _, err := c.GetNode().ExecQuery(ctx, query...)
-	require.NoError(t, err)
-	retval := gjson.GetBytes(stdout, path)
-	require.True(t, retval.Exists(), "path %s does not exist in %s", path, stdout)
-	return retval
+	Relayer ibc.Relayer
 }
 
 func createConfigToml() testutil.Toml {
@@ -57,7 +49,7 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 	validators := 3
 	genesisOverrides := []cosmos.GenesisKV{
 		cosmos.NewGenesisKV("app_state.gov.params.voting_period", "40s"),
-		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "10s"),
+		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "30s"),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", DENOM),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", "1"),
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_PROVIDER)),
@@ -122,7 +114,7 @@ func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion, channel
 	relayer := createRelayer(ctx, t)
 	retval := make([]Chain, n)
 	for i := 0; i < n; i++ {
-		retval[i] = Chain{chains[i].(*cosmos.CosmosChain)}
+		retval[i] = Chain{chains[i].(*cosmos.CosmosChain), relayer}
 	}
 
 	ic := interchaintest.NewInterchain()
@@ -164,7 +156,7 @@ func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion, channel
 }
 
 // CreateChain creates a single new chain with the given version and returns the chain object.
-func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) (Chain, ibc.Relayer) {
+func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) Chain {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	cf := interchaintest.NewBuiltinChainFactory(
@@ -174,7 +166,7 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	provider := Chain{chains[0].(*cosmos.CosmosChain)}
+	provider := Chain{chains[0].(*cosmos.CosmosChain), nil}
 	var relayer ibc.Relayer
 	var relayerWallet ibc.Wallet
 
@@ -182,6 +174,7 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 
 	if withRelayer {
 		relayer = createRelayer(ctx, t)
+		provider.Relayer = relayer
 		ic.AddRelayer(relayer, "relayer")
 		relayerWallet, err = provider.BuildRelayerWallet(ctx, "relayer-"+provider.Config().ChainID)
 		require.NoError(t, err)
@@ -209,24 +202,41 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 			_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
 		})
 	}
-	return provider, relayer
+	return provider
 }
 
-func PassProposal(ctx context.Context, chain Chain, proposalID string) error {
+func (c Chain) QueryJSON(ctx context.Context, t *testing.T, path string, query ...string) gjson.Result {
+	t.Helper()
+	stdout, _, err := c.GetNode().ExecQuery(ctx, query...)
+	require.NoError(t, err)
+	retval := gjson.GetBytes(stdout, path)
+	require.True(t, retval.Exists(), "path %s does not exist in %s", path, stdout)
+	return retval
+}
+
+func (c Chain) PassProposal(ctx context.Context, proposalID string) error {
 	propID, err := strconv.ParseInt(proposalID, 10, 64)
 	if err != nil {
 		return err
 	}
-	err = chain.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
+	err = c.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
 	if err != nil {
 		return err
 	}
-	chainHeight, err := chain.Height(ctx)
+	return c.WaitForProposalStatus(ctx, proposalID, govv1beta1.StatusPassed)
+}
+
+func (c Chain) WaitForProposalStatus(ctx context.Context, proposalID string, status govv1beta1.ProposalStatus) error {
+	propID, err := strconv.ParseInt(proposalID, 10, 64)
+	if err != nil {
+		return err
+	}
+	chainHeight, err := c.Height(ctx)
 	if err != nil {
 		return err
 	}
 	maxHeight := chainHeight + UPGRADE_DELTA
-	_, err = cosmos.PollForProposalStatus(ctx, chain.CosmosChain, chainHeight, maxHeight, propID, govv1beta1.StatusPassed)
+	_, err = cosmos.PollForProposalStatus(ctx, c.CosmosChain, chainHeight, maxHeight, propID, status)
 	return err
 }
 
@@ -245,7 +255,7 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, u
 	}
 	upgradeTx, err := chain.UpgradeProposal(ctx, proposalKey, proposal)
 	require.NoError(t, err, "error submitting upgrade proposal")
-	require.NoError(t, PassProposal(ctx, chain, upgradeTx.ProposalID))
+	require.NoError(t, chain.PassProposal(ctx, upgradeTx.ProposalID))
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after upgrade proposal passed")
@@ -379,5 +389,5 @@ func SetEpoch(ctx context.Context, chain Chain, epoch int) error {
 	if err != nil {
 		return err
 	}
-	return PassProposal(ctx, chain, result.ProposalID)
+	return chain.PassProposal(ctx, result.ProposalID)
 }
