@@ -3515,11 +3515,21 @@
             sleep $(($COMMIT_TIMEOUT+2))
             
             denom_1=$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+            echo $denom_1
             denom_2=$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+            echo $denom_2
+            $CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_1" '.rewards[]'
             rewards_denom_1=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_1" '.rewards[] | select(.denom == $DENOM).amount')
             rewards_denom_2=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_2" '.rewards[] | select(.denom == $DENOM).amount')
             echo "rewards denom 1: $rewards_denom_1"
             echo "rewards denom 2: $rewards_denom_2"
+            if $[[ $rewards_denom_1 -ne $rewards_denom_2 ]]; then
+              echo "FAIL: Rewards do not match when rates are the same for both consumer chains."
+              exit 1
+            else
+              echo "PASS: Rewards match when rates are the same for both consumer chains."
+              exit 1
+            fi
             
         - name: Query commission rates
           run: |
@@ -3558,13 +3568,22 @@
             $CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq '.'
             txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --commission --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
             sleep $(($COMMIT_TIMEOUT+2))
-            
+
             denom_1=$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+            echo $denom_1
             denom_2=$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+            echo $denom_2
             rewards_denom_1=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_1" '.rewards[] | select(.denom == $DENOM).amount')
             rewards_denom_2=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_2" '.rewards[] | select(.denom == $DENOM).amount')
             echo "rewards denom 1: $rewards_denom_1"
-            echo "rewards denom 2: $rewards_denom_2
+            echo "rewards denom 2: $rewards_denom_2"
+            if $[[ $rewards_denom_1 -gt $rewards_denom_2 ]]; then
+              echo "FAIL: Rewards do not match when rates are the same for both consumer chains."
+              exit 1
+            else
+              echo "PASS: Rewards match when rates are the same for both consumer chains."
+              exit 1
+            fi
 
         - name: Query commission rates
           run: |
