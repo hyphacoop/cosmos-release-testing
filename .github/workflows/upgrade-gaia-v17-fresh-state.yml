@@ -3577,7 +3577,7 @@
             rewards_denom_2=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_2" '.rewards[] | select(.denom == $DENOM).amount')
             echo "rewards denom 1: $rewards_denom_1"
             echo "rewards denom 2: $rewards_denom_2"
-            if [ $rewards_denom_1 -gt $rewards_denom_2 ]; then
+            if [ "$rewards_denom_1" -gt "$rewards_denom_2" ]; then
               echo "PASS: Rewards for $denom_1 are greater than for $denom_2."
               exit 0
             else
