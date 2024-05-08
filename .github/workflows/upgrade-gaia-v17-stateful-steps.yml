@@ -342,7 +342,7 @@ jobs:
       - name: _Test IBC rate limits - consumera
         env:
           TRANSFER_CHANNEL: ${{ env.CONSUMERA_CHAN_ID }}
-          RATE: 0.2
+          RATE: 0.1
           RPC_PORT: ${{ env.CON1_RPC_PORT }}
           GAS_PRICE: ${{ env.GAS_PRICES }}
         run: |
