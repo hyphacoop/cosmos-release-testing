@@ -5,8 +5,8 @@
       "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
       "denom": "uatom",
       "channel_id": "_CHANNEL_ID_",
-      "max_percent_send": "1",
-      "max_percent_recv": "1",
+      "max_percent_send": "0.1",
+      "max_percent_recv": "0.1",
       "duration_hours": "24"
      }
     ],
