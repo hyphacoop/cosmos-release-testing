@@ -3510,9 +3510,6 @@
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_1 -y
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_2 -y
             sleep $(($COMMIT_TIMEOUT+50))
-            $CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq '.'
-            txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --commission --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-            sleep $(($COMMIT_TIMEOUT+2))
             
             denom_1="ibc/$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')"
             echo "denom_1: $denom_1"
@@ -3568,9 +3565,6 @@
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_1 -y
             $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $RECIPIENT 1$CONSUMER_DENOM --from $WALLET_1 --gas $GAS --fees 100000000$CONSUMER_DENOM --home $CONSUMER_HOME_2 -y
             sleep $(($COMMIT_TIMEOUT+50))
-            $CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq '.'
-            txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --commission --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-            sleep $(($COMMIT_TIMEOUT+2))
 
             denom_1="ibc/$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')"
             echo "denom_1: $denom_1"
