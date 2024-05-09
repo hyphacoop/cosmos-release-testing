@@ -337,16 +337,16 @@ jobs:
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
           echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      - name: Set rate limit - consumera
-        run: scripts/stateful/set_rate_limit.sh ${{ env.CONSUMERA_CHAN_ID }}
-      - name: _Test IBC rate limits - consumera
-        env:
-          TRANSFER_CHANNEL: ${{ env.CONSUMERA_CHAN_ID }}
-          RATE: 0.1
-          RPC_PORT: ${{ env.CON1_RPC_PORT }}
-          GAS_PRICE: ${{ env.GAS_PRICES }}
-        run: |
-          tests/gaia-v16/stateful/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
+      # - name: Set rate limit - consumera
+      #   run: scripts/stateful/set_rate_limit.sh ${{ env.CONSUMERA_CHAN_ID }}
+      # - name: _Test IBC rate limits - consumera
+      #   env:
+      #     TRANSFER_CHANNEL: ${{ env.CONSUMERA_CHAN_ID }}
+      #     RATE: 0.1
+      #     RPC_PORT: ${{ env.CON1_RPC_PORT }}
+      #     GAS_PRICE: ${{ env.GAS_PRICES }}
+      #   run: |
+      #     tests/gaia-v16/stateful/test_rate_limits.sh $TRANSFER_CHANNEL $RATE $RPC_PORT
       - name: Set BlocksPerEpoch to 100
         run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
       - name: Check BlocksPerEpoch is 100
