@@ -1,6 +1,6 @@
 ---
 
-name: Gaia v16 Upgrade - Fresh State Interchain
+name: Gaia v17 Upgrade - Fresh State Interchain
 on:
     # push:
     repository_dispatch:
