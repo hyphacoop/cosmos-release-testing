@@ -16,7 +16,7 @@ func TestBaselineTXsAfterV16Upgrade(t *testing.T) {
 
 	fresh.TransactionsTest(ctx, t, chain)
 
-	fresh.UpgradeChain(ctx, t, chain, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChain(ctx, t, chain, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
 	fresh.TransactionsTest(ctx, t, chain)
 

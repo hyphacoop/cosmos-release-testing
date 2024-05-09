@@ -31,7 +31,7 @@ func LSMAccountSetup(ctx context.Context, t *testing.T, provider Chain) map[stri
 			amount = 10_000_000
 		}
 		eg.Go(func() error {
-			return provider.SendFunds(ctx, VALIDATOR_MONIKER, ibc.WalletAmount{
+			return provider.SendFunds(ctx, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
 				Amount:  sdkmath.NewInt(int64(amount)),
 				Denom:   DENOM,
 				Address: wallet.FormattedAddress(),

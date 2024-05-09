@@ -15,7 +15,7 @@ func TestV16UpgradeIBCRateLimiting(t *testing.T) {
 	channel, err := fresh.GetTransferChannel(ctx, relayer, chainA, chainB)
 	require.NoError(t, err)
 
-	fresh.UpgradeChain(ctx, t, chainA, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChain(ctx, t, chainA, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
 	fresh.IBCTransferRateLimitedTest(ctx, t, chainA, chainB, channel)
 }

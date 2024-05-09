@@ -45,15 +45,17 @@ func createConfigToml() testutil.Toml {
 }
 
 func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *interchaintest.ChainSpec {
-	fullNodes := 0
-	validators := 3
+	fullNodes := 1
+	validators := NUM_VALIDATORS
 	genesisOverrides := []cosmos.GenesisKV{
-		cosmos.NewGenesisKV("app_state.gov.params.voting_period", "40s"),
-		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "30s"),
+		cosmos.NewGenesisKV("app_state.gov.params.voting_period", GOV_VOTING_PERIOD.String()),
+		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", GOV_DEPOSIT_PERIOD.String()),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", DENOM),
-		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", "1"),
+		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", strconv.Itoa(GOV_MIN_DEPOSIT_AMOUNT)),
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_PROVIDER)),
 		cosmos.NewGenesisKV("app_state.slashing.params.downtime_jail_duration", DOWNTIME_JAIL_DURATION.String()),
+		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_period", "2s"),
+		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_fraction", "1.00"),
 	}
 	return &interchaintest.ChainSpec{
 		Name:          "gaia",
@@ -240,7 +242,7 @@ func (c Chain) WaitForProposalStatus(ctx context.Context, proposalID string, sta
 	return err
 }
 
-func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, upgradeName, version string) {
+func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, version string) {
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
 
@@ -253,24 +255,24 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, u
 		Description: "Upgrade to " + upgradeName,
 		Height:      haltHeight,
 	}
-	upgradeTx, err := chain.UpgradeProposal(ctx, proposalKey, proposal)
+	upgradeTx, err := chain.UpgradeProposal(ctx, interchaintest.FaucetAccountKeyName, proposal)
 	require.NoError(t, err, "error submitting upgrade proposal")
 	require.NoError(t, chain.PassProposal(ctx, upgradeTx.ProposalID))
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after upgrade proposal passed")
 
-	// wait for the chain to halt. We're asking for one more block than the halt height, so we should time out.
-	timeoutCtx, timeoutCtxCancel := context.WithTimeout(ctx, time.Second*60)
+	// wait for the chain to halt. We're asking for blocks after the halt height, so we should time out.
+	timeoutCtx, timeoutCtxCancel := context.WithTimeout(ctx, (time.Duration(haltHeight-height)+6)*COMMIT_TIMEOUT)
 	defer timeoutCtxCancel()
-	err = testutil.WaitForBlocks(timeoutCtx, int(haltHeight-height)+1, chain)
+	err = testutil.WaitForBlocks(timeoutCtx, int(haltHeight-height)+3, chain)
 	require.Error(t, err, "chain should not produce blocks after halt height")
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after chain should have halted")
 
-	// make sure that chain is halted
-	require.Equal(t, haltHeight, height, "height is not equal to halt height")
+	// make sure that chain is halted; some chains may produce one more block after halt height
+	require.LessOrEqual(t, height-haltHeight, int64(1), "height %d is not within one block of halt height %d; chain isn't halted", height, haltHeight)
 
 	// bring down nodes to prepare for upgrade
 	err = chain.StopAllNodes(ctx)
@@ -376,7 +378,7 @@ func GetValidatorWallets(ctx context.Context, chain Chain) ([]ValidatorWallet, e
 }
 
 func SetEpoch(ctx context.Context, chain Chain, epoch int) error {
-	result, err := chain.ParamChangeProposal(ctx, VALIDATOR_MONIKER, &utils.ParamChangeProposalJSON{
+	result, err := chain.ParamChangeProposal(ctx, interchaintest.FaucetAccountKeyName, &utils.ParamChangeProposalJSON{
 		Changes: []utils.ParamChangeJSON{{
 			Subspace: "provider",
 			Key:      "BlocksPerEpoch",

@@ -16,7 +16,7 @@ func TestIBCFeeMiddlewareAfterV16(t *testing.T) {
 	chainA, chainB, relayer := fresh.CreateLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion, fresh.DEFAULT_CHANNEL_VERSION)
 	fresh.IBCTxWithFeeTest(ctx, t, chainA, chainB, relayer, false)
 
-	fresh.UpgradeChain(ctx, t, chainA, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChain(ctx, t, chainA, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 	fresh.IBCTxWithFeeTest(ctx, t, chainA, chainB, relayer, false)
 
 	// We can't launch a chain on the old version with the fee module enabled, so that case isn't tested.

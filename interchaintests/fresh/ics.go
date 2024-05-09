@@ -22,6 +22,8 @@ import (
 	"github.com/tidwall/sjson"
 )
 
+type ConsumerBootstrapCb func(ctx context.Context, consumer ibc.Chain)
+
 type ConsumerConfig struct {
 	ChainName             string
 	Version               string
@@ -29,10 +31,58 @@ type ConsumerConfig struct {
 	ShouldCopyProviderKey [NUM_VALIDATORS]bool
 	TopN                  int
 
-	DuringDepositPeriod func()
-	DuringVotingPeriod  func()
-	BeforeSpawnTime     func()
-	AfterSpawnTime      func()
+	DuringDepositPeriod ConsumerBootstrapCb
+	DuringVotingPeriod  ConsumerBootstrapCb
+	BeforeSpawnTime     ConsumerBootstrapCb
+	AfterSpawnTime      ConsumerBootstrapCb
+}
+
+type proposalWaiter struct {
+	canDeposit chan struct{}
+	isInVoting chan struct{}
+	canVote    chan struct{}
+	isPassed   chan struct{}
+}
+
+func (pw *proposalWaiter) waitForDepositAllowed() {
+	<-pw.canDeposit
+}
+
+func (pw *proposalWaiter) allowDeposit() {
+	close(pw.canDeposit)
+}
+
+func (pw *proposalWaiter) waitForVotingPeriod() {
+	<-pw.isInVoting
+}
+
+func (pw *proposalWaiter) startVotingPeriod() {
+	close(pw.isInVoting)
+}
+
+func (pw *proposalWaiter) waitForVoteAllowed() {
+	<-pw.canVote
+}
+
+func (pw *proposalWaiter) allowVote() {
+	close(pw.canVote)
+}
+
+func (pw *proposalWaiter) waitForPassed() {
+	<-pw.isPassed
+}
+
+func (pw *proposalWaiter) pass() {
+	close(pw.isPassed)
+}
+
+func newProposalWaiter() *proposalWaiter {
+	return &proposalWaiter{
+		canDeposit: make(chan struct{}),
+		isInVoting: make(chan struct{}),
+		canVote:    make(chan struct{}),
+		isPassed:   make(chan struct{}),
+	}
 }
 
 func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config ConsumerConfig) Chain {
@@ -42,12 +92,14 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 		panic(fmt.Sprintf("shouldCopyProviderKey must be the same length as the number of validators (%d)", NUM_VALIDATORS))
 	}
 
+	spawnTime := time.Now().Add(CHAIN_SPAWN_WAIT)
 	chainID := fmt.Sprintf("%s-%d", config.ChainName, len(p.Consumers)+1)
-	spawnTime := p.consumerAdditionProposal(ctx, t, chainID, config)
+
+	proposalWaiter := p.consumerAdditionProposal(ctx, t, chainID, config, spawnTime)
 
 	cf := interchaintest.NewBuiltinChainFactory(
 		GetLogger(ctx),
-		[]*interchaintest.ChainSpec{createConsumerChainSpec(ctx, p, chainID, config, spawnTime)},
+		[]*interchaintest.ChainSpec{p.createConsumerChainSpec(ctx, chainID, config, spawnTime, proposalWaiter)},
 	)
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
@@ -87,8 +139,9 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 	})
 
 	if config.AfterSpawnTime != nil {
-		config.AfterSpawnTime()
+		config.AfterSpawnTime(ctx, consumer)
 	}
+	// require.NoError(t, consumer.fundFullNode(ctx))
 
 	setupRelayerKeys(ctx, t, p.Relayer, relayerWallet, consumer)
 	rep := GetRelayerExecReporter(ctx)
@@ -99,13 +152,12 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 	for i, val := range consumer.Validators {
 		require.NoError(t, val.RecoverKey(ctx, VALIDATOR_MONIKER, wallets[i+1].Mnemonic()))
 	}
-
 	return consumer
 }
 
-func createConsumerChainSpec(ctx context.Context, provider Chain, chainID string, config ConsumerConfig, spawnTime time.Time) *interchaintest.ChainSpec {
-	fullNodes := 0
-	validators := 3
+func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, config ConsumerConfig, spawnTime time.Time, proposalWaiter *proposalWaiter) *interchaintest.ChainSpec {
+	fullNodes := 1
+	validators := NUM_VALIDATORS
 
 	chainType := config.ChainName
 	version := config.Version
@@ -143,7 +195,7 @@ func createConsumerChainSpec(ctx context.Context, provider Chain, chainID string
 	modifyGenesis := cosmos.ModifyGenesis(genesisOverrides)
 	if chainType == "stride" {
 		genesisOverrides = append(genesisOverrides,
-			cosmos.NewGenesisKV("app_state.gov.params.voting_period", "30s"),
+			cosmos.NewGenesisKV("app_state.gov.params.voting_period", GOV_VOTING_PERIOD.String()),
 		)
 		modifyGenesis = func(cc ibc.ChainConfig, b []byte) ([]byte, error) {
 			b, err := cosmos.ModifyGenesis(genesisOverrides)(cc, b)
@@ -172,18 +224,28 @@ func createConsumerChainSpec(ctx context.Context, provider Chain, chainID string
 			ConfigFileOverrides: map[string]any{
 				"config/config.toml": createConfigToml(),
 			},
-			PreGenesis: func(cc ibc.ChainConfig) error {
+			PreGenesis: func(consumer ibc.Chain) error {
+				if config.DuringDepositPeriod != nil {
+					config.DuringDepositPeriod(ctx, consumer)
+				}
+				proposalWaiter.allowDeposit()
+				proposalWaiter.waitForVotingPeriod()
+				if config.DuringVotingPeriod != nil {
+					config.DuringVotingPeriod(ctx, consumer)
+				}
+				proposalWaiter.allowVote()
+				proposalWaiter.waitForPassed()
 				tCtx, tCancel := context.WithDeadline(ctx, spawnTime)
 				defer tCancel()
 				if config.BeforeSpawnTime != nil {
-					config.BeforeSpawnTime()
+					config.BeforeSpawnTime(tCtx, consumer)
 				}
 				// interchaintest will set up the validator keys right before PreGenesis.
 				// Now we just need to wait for the chain to spawn before interchaintest can get the ccv file.
 				// This wait is here and not there because of changes we've made to interchaintest that need to be upstreamed in an orderly way.
 				GetLogger(ctx).Sugar().Infof("waiting for chain %s to spawn at %s", chainID, spawnTime)
 				<-tCtx.Done()
-				return testutil.WaitForBlocks(ctx, 2, provider)
+				return testutil.WaitForBlocks(ctx, 2, p)
 			},
 			Bech32Prefix: bechPrefix,
 			ModifyGenesisAmounts: func(i int) (types.Coin, types.Coin) {
@@ -256,8 +318,8 @@ func connectProviderConsumer(ctx context.Context, t *testing.T, provider Chain, 
 	}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 }
 
-func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, config ConsumerConfig) time.Time {
-	spawnTime := time.Now().Add(120 * time.Second)
+func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chainID string, config ConsumerConfig, spawnTime time.Time) *proposalWaiter {
+	propWaiter := newProposalWaiter()
 	prop := ccvclient.ConsumerAdditionProposalJSON{
 		Title:         fmt.Sprintf("Addition of %s consumer chain", chainID),
 		Summary:       "Proposal to add new consumer chain",
@@ -273,23 +335,28 @@ func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chain
 		ConsumerRedistributionFraction:    "0.75",
 		HistoricalEntries:                 10000,
 		UnbondingPeriod:                   1728000000000000,
-		Deposit:                           GOV_DEPOSIT_AMOUNT,
+		Deposit:                           strconv.Itoa(GOV_MIN_DEPOSIT_AMOUNT/2) + DENOM,
 	}
 	if config.TopN >= 0 {
 		prop.TopN = uint32(config.TopN)
 	}
-	propTx, err := p.ConsumerAdditionProposal(ctx, VALIDATOR_MONIKER, prop)
+	propTx, err := p.ConsumerAdditionProposal(ctx, interchaintest.FaucetAccountKeyName, prop)
 	require.NoError(t, err)
-	require.NoError(t, p.WaitForProposalStatus(ctx, propTx.ProposalID, govv1beta1.StatusDepositPeriod))
-	if config.DuringDepositPeriod != nil {
-		config.DuringDepositPeriod()
-	}
-	require.NoError(t, p.WaitForProposalStatus(ctx, propTx.ProposalID, govv1beta1.StatusVotingPeriod))
-	if config.DuringVotingPeriod != nil {
-		config.DuringVotingPeriod()
-	}
-	require.NoError(t, p.PassProposal(ctx, propTx.ProposalID))
-	return spawnTime
+	go func() {
+		require.NoError(t, p.WaitForProposalStatus(ctx, propTx.ProposalID, govv1beta1.StatusDepositPeriod))
+		propWaiter.waitForDepositAllowed()
+
+		_, err = p.GetNode().ExecTx(ctx, VALIDATOR_MONIKER, "gov", "deposit", propTx.ProposalID, prop.Deposit)
+		require.NoError(t, err)
+
+		require.NoError(t, p.WaitForProposalStatus(ctx, propTx.ProposalID, govv1beta1.StatusVotingPeriod))
+		propWaiter.startVotingPeriod()
+		propWaiter.waitForVoteAllowed()
+
+		require.NoError(t, p.PassProposal(ctx, propTx.ProposalID))
+		propWaiter.pass()
+	}()
+	return propWaiter
 }
 
 func isValoperJailed(ctx context.Context, t *testing.T, provider Chain, valoper string) bool {
@@ -298,25 +365,35 @@ func isValoperJailed(ctx context.Context, t *testing.T, provider Chain, valoper 
 	return gjson.GetBytes(out, "jailed").Bool()
 }
 
-func ValidatorJailedTest(ctx context.Context, t *testing.T, provider Chain, consumer Chain, relayer ibc.Relayer) {
-	require.NoError(t, consumer.Validators[1].StopContainer(ctx))
-	require.NoError(t, consumer.Validators[2].StopContainer(ctx))
-
+func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consumer Chain, validatorIdx int, shouldJail bool) {
+	require.NoError(t, consumer.Validators[validatorIdx].StopContainer(ctx))
 	wallets, err := GetValidatorWallets(ctx, provider)
 	require.NoError(t, err)
-	valoper2 := wallets[1].ValoperAddress
-	valoper3 := wallets[2].ValoperAddress
+	valoper := wallets[validatorIdx].ValoperAddress
+	if shouldJail {
+		require.Eventually(t, func() bool {
+			return isValoperJailed(ctx, t, provider, valoper)
+		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 
-	require.Eventually(t, func() bool {
-		return isValoperJailed(ctx, t, provider, valoper2)
-	}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
-	require.False(t, isValoperJailed(ctx, t, provider, valoper3))
+		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
+		time.Sleep(10 * COMMIT_TIMEOUT)
+		_, err = provider.Validators[validatorIdx].ExecTx(ctx, wallets[validatorIdx].Moniker, "slashing", "unjail")
+		require.NoError(t, err)
+		require.False(t, isValoperJailed(ctx, t, provider, valoper))
+	} else {
+		require.Never(t, func() bool {
+			return isValoperJailed(ctx, t, provider, valoper)
+		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
+	}
+}
 
-	require.NoError(t, consumer.Validators[1].StartContainer(ctx))
-	time.Sleep(10 * COMMIT_TIMEOUT)
-	_, err = provider.Validators[1].ExecTx(ctx, wallets[1].Moniker, "slashing", "unjail")
-	require.NoError(t, err)
-	require.False(t, isValoperJailed(ctx, t, provider, valoper2))
+func RSValidatorsJailedTest(ctx context.Context, t *testing.T, provider Chain, consumer Chain) {
+	const (
+		lastValidator       = NUM_VALIDATORS - 1
+		secondLastValidator = NUM_VALIDATORS - 2
+	)
+	CheckIfValidatorJailed(ctx, t, provider, consumer, lastValidator, false)
+	CheckIfValidatorJailed(ctx, t, provider, consumer, secondLastValidator, true)
 }
 
 func getPower(ctx context.Context, t *testing.T, chain Chain, hexaddr string) int64 {
