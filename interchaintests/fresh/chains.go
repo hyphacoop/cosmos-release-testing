@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"sync"
 	"testing"
@@ -20,6 +21,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
+	"golang.org/x/mod/semver"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -45,7 +47,7 @@ func createConfigToml() testutil.Toml {
 }
 
 func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *interchaintest.ChainSpec {
-	fullNodes := 1
+	fullNodes := NUM_FULL_NODES
 	validators := NUM_VALIDATORS
 	genesisOverrides := []cosmos.GenesisKV{
 		cosmos.NewGenesisKV("app_state.gov.params.voting_period", GOV_VOTING_PERIOD.String()),
@@ -56,6 +58,9 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 		cosmos.NewGenesisKV("app_state.slashing.params.downtime_jail_duration", DOWNTIME_JAIL_DURATION.String()),
 		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_period", "2s"),
 		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_fraction", "1.00"),
+	}
+	if semver.Compare(gaiaVersion, "v16") >= 0 {
+		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"))
 	}
 	return &interchaintest.ChainSpec{
 		Name:          "gaia",
@@ -201,7 +206,9 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 		setupRelayerKeys(ctx, t, relayer, relayerWallet, provider)
 		require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
 		t.Cleanup(func() {
-			_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
+			if os.Getenv("KEEP_CONTAINERS") == "" {
+				_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
+			}
 		})
 	}
 	return provider
@@ -263,9 +270,10 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, v
 	require.NoError(t, err, "error fetching height after upgrade proposal passed")
 
 	// wait for the chain to halt. We're asking for blocks after the halt height, so we should time out.
-	timeoutCtx, timeoutCtxCancel := context.WithTimeout(ctx, (time.Duration(haltHeight-height)+6)*COMMIT_TIMEOUT)
+	timeoutCtx, timeoutCtxCancel := context.WithTimeout(ctx, (time.Duration(haltHeight-height)+10)*COMMIT_TIMEOUT)
 	defer timeoutCtxCancel()
 	err = testutil.WaitForBlocks(timeoutCtx, int(haltHeight-height)+3, chain)
+	require.Error(t, timeoutCtx.Err(), "chain should not produce blocks after halt height")
 	require.Error(t, err, "chain should not produce blocks after halt height")
 
 	height, err = chain.Height(ctx)
@@ -296,6 +304,10 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, v
 	for _, val := range chain.Validators {
 		_, _, err := val.ExecBin(ctx, "keys", "list", "--keyring-backend", "test")
 		require.NoError(t, err)
+	}
+	if chain.Relayer != nil {
+		require.NoError(t, chain.Relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx)))
+		require.NoError(t, chain.Relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
 	}
 }
 
@@ -392,4 +404,13 @@ func SetEpoch(ctx context.Context, chain Chain, epoch int) error {
 		return err
 	}
 	return chain.PassProposal(ctx, result.ProposalID)
+}
+
+func (c Chain) GetValidatorHex(ctx context.Context, val int) (string, error) {
+	json, err := c.Validators[val].ReadFile(ctx, "config/priv_validator_key.json")
+	if err != nil {
+		return "", err
+	}
+	providerHex := gjson.GetBytes(json, "address").String()
+	return providerHex, nil
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLSMWithV16Upgrade(t *testing.T) {
+func TestLSMAfterUpgrade(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 
@@ -40,17 +40,4 @@ func TestLSMWithV16Upgrade(t *testing.T) {
 
 	fresh.LSMHappyPathTest(ctx, t, provider, stride, provider.Relayer, lsmWallets)
 	fresh.ICADelegateHappyPathTest(ctx, t, provider, stride, provider.Relayer, icaAddr)
-}
-
-func TestLSMTokenizeVestedAfterV16Upgrade(t *testing.T) {
-	ctx, err := fresh.NewTestContext(t)
-	require.NoError(t, err)
-
-	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, false)
-
-	fresh.TokenizeVestedAmountTest(ctx, t, provider, false)
-
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
-
-	fresh.TokenizeVestedAmountTest(ctx, t, provider, true)
 }

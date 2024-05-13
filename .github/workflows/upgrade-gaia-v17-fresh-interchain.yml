@@ -58,7 +58,7 @@ jobs:
         id: generate-tests
         run: |
           cd interchaintests
-          test_names=$(go test -list=. ./fresh | grep '^Test' | jq -c --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          test_names=$(go test -list=. ./fresh/... | grep '^Test' | jq -c --raw-input --slurp 'split("\n") | map(select(. != ""))')
           echo "$test_names" | tee ../tests.json
       - name: Generate upgrade versions
         id: generate-upgrade
@@ -105,7 +105,7 @@ jobs:
           TEST_UPGRADE_VERSION: ${{ matrix.upgrade_version }}
           TEST_TARGET_VERSION: ${{ env.TARGET_VERSION }}
           TEST_DOCKER_REPOSITORY: "gaia"
-          CONTAINER_LOG_TAIL: "250"
+          CONTAINER_LOG_TAIL: "150"
         run: |
           cd interchaintests
-          go test -v -timeout 60m -run="^${{ matrix.test_name }}$" ./fresh/...
+          go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...

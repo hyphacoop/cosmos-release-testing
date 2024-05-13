@@ -175,6 +175,8 @@ func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain,
 			Address: lsmWallets["liquid_3"].FormattedAddress(),
 		}, ibc.TransferOptions{})
 		require.NoError(t, err)
+		// wait for the transfer to be reflected
+		require.NoError(t, testutil.WaitForBlocks(ctx, 5, provider))
 
 		_, err = provider.GetNode().ExecTx(ctx, lsmWallets["liquid_3"].FormattedAddress(),
 			"staking", "redeem-tokens", fmt.Sprintf("%d%s", ibcTransfer, tokenizedDenom),

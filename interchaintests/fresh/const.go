@@ -9,6 +9,7 @@ const (
 	UPGRADE_DELTA        = int64(30)
 	DENOM                = "uatom"
 	NUM_VALIDATORS       = 6
+	NUM_FULL_NODES       = 0
 	VALIDATOR_FUNDS      = 11_000_000_000
 	VALIDATOR_STAKE_STEP = 1_000_000
 	// This moniker is hardcoded into the chain's genesis process.

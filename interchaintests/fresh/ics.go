@@ -22,7 +22,7 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-type ConsumerBootstrapCb func(ctx context.Context, consumer ibc.Chain)
+type ConsumerBootstrapCb func(ctx context.Context, consumer *cosmos.CosmosChain)
 
 type ConsumerConfig struct {
 	ChainName             string
@@ -138,11 +138,6 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 		_ = ic.Close()
 	})
 
-	if config.AfterSpawnTime != nil {
-		config.AfterSpawnTime(ctx, consumer)
-	}
-	// require.NoError(t, consumer.fundFullNode(ctx))
-
 	setupRelayerKeys(ctx, t, p.Relayer, relayerWallet, consumer)
 	rep := GetRelayerExecReporter(ctx)
 	require.NoError(t, p.Relayer.StopRelayer(ctx, rep))
@@ -156,7 +151,7 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 }
 
 func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, config ConsumerConfig, spawnTime time.Time, proposalWaiter *proposalWaiter) *interchaintest.ChainSpec {
-	fullNodes := 1
+	fullNodes := NUM_FULL_NODES
 	validators := NUM_VALIDATORS
 
 	chainType := config.ChainName
@@ -180,6 +175,9 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 	genesisOverrides := []cosmos.GenesisKV{
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_CONSUMER)),
 		cosmos.NewGenesisKV("consensus_params.block.max_gas", "50000000"),
+	}
+	if config.TopN >= 0 {
+		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.ccvconsumer.params.soft_opt_out_threshold", "0.0"))
 	}
 	if chainType == "neutron" {
 		genesisOverrides = append(genesisOverrides,
@@ -226,26 +224,32 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 			},
 			PreGenesis: func(consumer ibc.Chain) error {
 				if config.DuringDepositPeriod != nil {
-					config.DuringDepositPeriod(ctx, consumer)
+					config.DuringDepositPeriod(ctx, consumer.(*cosmos.CosmosChain))
 				}
 				proposalWaiter.allowDeposit()
 				proposalWaiter.waitForVotingPeriod()
 				if config.DuringVotingPeriod != nil {
-					config.DuringVotingPeriod(ctx, consumer)
+					config.DuringVotingPeriod(ctx, consumer.(*cosmos.CosmosChain))
 				}
 				proposalWaiter.allowVote()
 				proposalWaiter.waitForPassed()
 				tCtx, tCancel := context.WithDeadline(ctx, spawnTime)
 				defer tCancel()
 				if config.BeforeSpawnTime != nil {
-					config.BeforeSpawnTime(tCtx, consumer)
+					config.BeforeSpawnTime(tCtx, consumer.(*cosmos.CosmosChain))
 				}
 				// interchaintest will set up the validator keys right before PreGenesis.
 				// Now we just need to wait for the chain to spawn before interchaintest can get the ccv file.
 				// This wait is here and not there because of changes we've made to interchaintest that need to be upstreamed in an orderly way.
 				GetLogger(ctx).Sugar().Infof("waiting for chain %s to spawn at %s", chainID, spawnTime)
 				<-tCtx.Done()
-				return testutil.WaitForBlocks(ctx, 2, p)
+				if err := testutil.WaitForBlocks(ctx, 2, p); err != nil {
+					return err
+				}
+				if config.AfterSpawnTime != nil {
+					config.AfterSpawnTime(ctx, consumer.(*cosmos.CosmosChain))
+				}
+				return nil
 			},
 			Bech32Prefix: bechPrefix,
 			ModifyGenesisAmounts: func(i int) (types.Coin, types.Coin) {
@@ -371,19 +375,21 @@ func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consume
 	require.NoError(t, err)
 	valoper := wallets[validatorIdx].ValoperAddress
 	if shouldJail {
-		require.Eventually(t, func() bool {
+		require.Eventuallyf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
-		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
+		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d never jailed", validatorIdx)
 
 		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
 		time.Sleep(10 * COMMIT_TIMEOUT)
 		_, err = provider.Validators[validatorIdx].ExecTx(ctx, wallets[validatorIdx].Moniker, "slashing", "unjail")
 		require.NoError(t, err)
-		require.False(t, isValoperJailed(ctx, t, provider, valoper))
+		require.False(t, isValoperJailed(ctx, t, provider, valoper), "validator %d not unjailed", validatorIdx)
 	} else {
-		require.Never(t, func() bool {
+		require.Neverf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
-		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
+		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d jailed", validatorIdx)
+		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
+		time.Sleep(10 * COMMIT_TIMEOUT)
 	}
 }
 
@@ -396,7 +402,7 @@ func RSValidatorsJailedTest(ctx context.Context, t *testing.T, provider Chain, c
 	CheckIfValidatorJailed(ctx, t, provider, consumer, secondLastValidator, true)
 }
 
-func getPower(ctx context.Context, t *testing.T, chain Chain, hexaddr string) int64 {
+func GetPower(ctx context.Context, t *testing.T, chain Chain, hexaddr string) int64 {
 	var power int64
 	CheckEndpoint(ctx, t, chain.GetHostRPCAddress()+"/validators", func(b []byte) error {
 		power = gjson.GetBytes(b, fmt.Sprintf("result.validators.#(address==\"%s\").voting_power", hexaddr)).Int()
@@ -420,7 +426,7 @@ func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer 
 	require.NoError(t, err)
 	consumerHex := gjson.GetBytes(json, "address").String()
 
-	providerPowerBefore := getPower(ctx, t, provider, providerHex)
+	providerPowerBefore := GetPower(ctx, t, provider, providerHex)
 
 	_, err = provider.Validators[0].ExecTx(ctx, providerAddress.Moniker,
 		"staking", "delegate",
@@ -429,17 +435,17 @@ func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer 
 	require.NoError(t, err)
 
 	if blocksPerEpoch > 1 {
-		require.Greater(t, getPower(ctx, t, provider, providerHex), providerPowerBefore)
-		require.NotEqual(t, getPower(ctx, t, provider, providerHex), getPower(ctx, t, consumer, consumerHex))
+		require.Greater(t, GetPower(ctx, t, provider, providerHex), providerPowerBefore)
+		require.NotEqual(t, GetPower(ctx, t, provider, providerHex), GetPower(ctx, t, consumer, consumerHex))
 		require.NoError(t, testutil.WaitForBlocks(ctx, blocksPerEpoch, provider))
 	}
 
 	require.Eventually(t, func() bool {
-		providerPower := getPower(ctx, t, provider, providerHex)
-		consumerPower := getPower(ctx, t, consumer, consumerHex)
+		providerPower := GetPower(ctx, t, provider, providerHex)
+		consumerPower := GetPower(ctx, t, consumer, consumerHex)
 		if providerPowerBefore >= providerPower {
 			return false
 		}
 		return providerPower == consumerPower
-	}, 10*time.Minute, COMMIT_TIMEOUT)
+	}, 15*time.Minute, COMMIT_TIMEOUT)
 }

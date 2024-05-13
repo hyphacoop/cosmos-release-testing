@@ -1,4 +1,4 @@
-package fresh_test
+package v16_test
 
 import (
 	"testing"
@@ -10,6 +10,9 @@ import (
 func TestV16UpgradeIBCRateLimiting(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
+	if fresh.GetConfig(ctx).TargetVersion != "v16" {
+		t.Skip("Test is only for v16.0.0")
+	}
 
 	chainA, chainB, relayer := fresh.CreateLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion, fresh.DEFAULT_CHANNEL_VERSION)
 	channel, err := fresh.GetTransferChannel(ctx, relayer, chainA, chainB)

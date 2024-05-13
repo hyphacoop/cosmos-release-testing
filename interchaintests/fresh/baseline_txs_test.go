@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBaselineTXsAfterV16Upgrade(t *testing.T) {
+func TestBaselineTXsAfterUpgrade(t *testing.T) {
 	t.Parallel()
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
