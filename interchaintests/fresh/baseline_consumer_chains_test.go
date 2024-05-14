@@ -5,90 +5,94 @@ import (
 
 	"github.com/hyphacoop/cosmos-release-testing/interchaintests/fresh"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/mod/semver"
 )
 
-func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, shouldCopyProviderKey []bool) {
+func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, shouldCopyProviderKey [fresh.NUM_VALIDATORS]bool) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 
-	provider, relayer := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	consumer := fresh.AddConsumerChain(ctx, t, provider, relayer, otherChain, otherChainVersion, fresh.CONSUMER_DENOM, shouldCopyProviderKey)
+	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
+	consumerConfig := fresh.ConsumerConfig{
+		ChainName:             otherChain,
+		Version:               otherChainVersion,
+		ShouldCopyProviderKey: shouldCopyProviderKey,
+		Denom:                 fresh.CONSUMER_DENOM,
+		TopN:                  fresh.PSS_DISABLED,
+	}
+	consumer := provider.AddConsumerChain(ctx, t, consumerConfig)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, consumer, provider.Relayer)
 
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, consumer, relayer)
+	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
-	fresh.UpgradeChain(ctx, t, provider, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
-
-	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
-	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	require.NoError(t, provider.Relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	require.NoError(t, provider.Relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, fresh.SetEpoch(ctx, provider, 1))
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, consumer, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, consumer, provider.Relayer)
 
-	consumer2 := fresh.AddConsumerChain(ctx, t, provider, relayer, otherChain, otherChainVersion, fresh.CONSUMER_DENOM, shouldCopyProviderKey)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer2, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, consumer2, relayer)
-	fresh.ValidatorJailedTest(ctx, t, provider, consumer2, relayer)
+	if semver.Compare(fresh.GetConfig(ctx).TargetVersion, "v17") >= 0 {
+		consumerConfig.TopN = 95
+	}
+
+	consumer2 := provider.AddConsumerChain(ctx, t, consumerConfig)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer2, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, consumer2, provider.Relayer)
+	fresh.RSValidatorsJailedTest(ctx, t, provider, consumer2)
 }
 
-func TestConsumerChainLaunchesAfterV16UpgradeICS40(t *testing.T) {
-	runConsumerChainTest(t, "ics-consumer", "v4.0.0", []bool{true, true, true})
+func TestConsumerChainLaunchesAfterUpgradeICS40(t *testing.T) {
+	runConsumerChainTest(t, "ics-consumer", "v4.0.0", fresh.NoProviderKeysCopied())
 }
 
-func TestConsumerChainLaunchesAfterV16UpgradeICS33AllKeysCopied(t *testing.T) {
-	runConsumerChainTest(t, "ics-consumer", "v3.3.0", []bool{true, true, true})
+func TestConsumerChainLaunchesAfterUpgradeICS33AllKeysCopied(t *testing.T) {
+	runConsumerChainTest(t, "ics-consumer", "v3.3.0", fresh.AllProviderKeysCopied())
 }
 
-func TestConsumerChainLaunchesAfterV16UpgradeICS33SomeKeysCopied(t *testing.T) {
-	runConsumerChainTest(t, "ics-consumer", "v3.3.0", []bool{false, true, true})
+func TestConsumerChainLaunchesAfterUpgradeICS33SomeKeysCopied(t *testing.T) {
+	runConsumerChainTest(t, "ics-consumer", "v3.3.0", fresh.SomeProviderKeysCopied())
 }
 
-func TestConsumerChainLaunchesAfterV16UpgradeICS33NoKeysCopied(t *testing.T) {
-	runConsumerChainTest(t, "ics-consumer", "v3.3.0", []bool{false, false, false})
+func TestConsumerChainLaunchesAfterUpgradeICS33NoKeysCopied(t *testing.T) {
+	runConsumerChainTest(t, "ics-consumer", "v3.3.0", fresh.NoProviderKeysCopied())
 }
 
-func TestMainnetConsumerChainsWithV16Upgrade(t *testing.T) {
+func TestMainnetConsumerChainsAfterUpgrade(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 	const neutronVersion = "v3.0.1"
 	const strideVersion = "v20.0.0"
 
-	provider, relayer := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	neutron := fresh.AddConsumerChain(ctx, t, provider, relayer, "neutron", neutronVersion, fresh.NEUTRON_DENOM, []bool{true, true, true})
-	stride := fresh.AddConsumerChain(ctx, t, provider, relayer, "stride", strideVersion, fresh.STRIDE_DENOM, []bool{true, true, true})
+	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
+	neutron := provider.AddConsumerChain(ctx, t, fresh.ConsumerConfig{
+		ChainName:             "neutron",
+		Version:               neutronVersion,
+		ShouldCopyProviderKey: fresh.AllProviderKeysCopied(),
+		Denom:                 fresh.NEUTRON_DENOM,
+		TopN:                  fresh.PSS_DISABLED,
+	})
+	stride := provider.AddConsumerChain(ctx, t, fresh.ConsumerConfig{
+		ChainName:             "stride",
+		Version:               strideVersion,
+		ShouldCopyProviderKey: fresh.AllProviderKeysCopied(),
+		Denom:                 fresh.STRIDE_DENOM,
+		TopN:                  fresh.PSS_DISABLED,
+	})
 
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, neutron, relayer)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, stride, relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, neutron, provider.Relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, stride, provider.Relayer)
 
-	fresh.UpgradeChain(ctx, t, provider, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
-	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
-	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	require.NoError(t, provider.Relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
+	require.NoError(t, provider.Relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, fresh.SetEpoch(ctx, provider, 1))
 
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, neutron, relayer)
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, relayer, 1)
-	fresh.IBCTest(ctx, t, provider, stride, relayer)
-}
-
-func TestEpochsAfterV16(t *testing.T) {
-	ctx, err := fresh.NewTestContext(t)
-	require.NoError(t, err)
-
-	provider, relayer := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	consumer := fresh.AddConsumerChain(ctx, t, provider, relayer, "ics-consumer", "v4.0.0", fresh.CONSUMER_DENOM, []bool{true, true, true})
-
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 1)
-
-	fresh.UpgradeChain(ctx, t, provider, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
-	require.NoError(t, relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
-	require.NoError(t, relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
-
-	require.NoError(t, fresh.SetEpoch(ctx, provider, 20))
-	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, relayer, 20)
-
-	require.Error(t, fresh.SetEpoch(ctx, provider, 0))
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, neutron, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, neutron, provider.Relayer)
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, provider.Relayer, 1)
+	fresh.IBCTest(ctx, t, provider, stride, provider.Relayer)
 }

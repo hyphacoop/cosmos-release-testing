@@ -24,7 +24,7 @@ func AddLinkedChain(ctx context.Context, t *testing.T, chainA Chain, relayer ibc
 
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	chainB := Chain{chains[0].(*cosmos.CosmosChain)}
+	chainB := Chain{chains[0].(*cosmos.CosmosChain), relayer}
 	relayerWallet, err := chainB.BuildRelayerWallet(ctx, "relayer-"+chainB.Config().ChainID)
 	require.NoError(t, err)
 
@@ -83,7 +83,6 @@ func setupRelayerKeys(ctx context.Context, t *testing.T, relayer ibc.Relayer, wa
 }
 
 func IBCTxWithFeeTest(ctx context.Context, t *testing.T, chainA, chainB Chain, relayer ibc.Relayer, hasFeeModule bool) {
-
 	const (
 		recvFee    = 1_000
 		ackFee     = 2_000

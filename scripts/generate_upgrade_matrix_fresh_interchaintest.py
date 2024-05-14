@@ -49,7 +49,7 @@ for name in release_names:
 for rc in rc_releases:
     components = rc.split('.')
     # We only want the next major version.
-    if version_major - int(components[0][1:]) == 1:
+    if (int(components[0][1:]) - version_major) == 1:
         releases.append(rc)
 
 # Set upgrade versions to target for each release
