@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hyphacoop/cosmos-release-testing/interchaintests/fresh"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
@@ -219,4 +221,78 @@ func TestPSSChainLaunchAfterUpgradeOptIn(t *testing.T) {
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, 4, false)
 		})
 	}
+}
+
+func TestPSSChainLaunchWithSetCap(t *testing.T) {
+	optIns := []int{0, 3, 4, 5}
+	ctx, err := fresh.NewTestContext(t)
+	require.NoError(t, err)
+
+	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
+	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+
+	consumerConfig := getConsumerConfig(fresh.PSS_OPT_IN, nil, nil)
+	consumerConfig.ValidatorSetCap = 4
+	optInDuringVoting.Set(&consumerConfig, optInFunction(t, provider, optIns...))
+
+	consumer := provider.AddConsumerChain(ctx, t, consumerConfig)
+
+	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
+
+	pubKey, _, err := consumer.Validators[1].ExecBin(ctx, "tendermint", "show-validator")
+	require.NoError(t, err)
+	_, err = provider.Validators[1].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
+		"provider", "opt-in", consumer.Config().ChainID, string(pubKey))
+	require.NoError(t, err)
+
+	hex, err := consumer.GetValidatorHex(ctx, 1)
+	require.NoError(t, err)
+	require.Never(t, func() bool {
+		power, err := fresh.GetPower(ctx, consumer, hex)
+		return err != nil && power > 0
+	}, 100*fresh.COMMIT_TIMEOUT, fresh.COMMIT_TIMEOUT)
+}
+
+func TestPSSChainLaunchWithPowerCap(t *testing.T) {
+	optIns := []int{1, 2, 3, 4, 5}
+	ctx, err := fresh.NewTestContext(t)
+	require.NoError(t, err)
+
+	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
+	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+
+	consumerConfig := getConsumerConfig(fresh.PSS_OPT_IN, nil, nil)
+	cap := 50
+	// This power cap is based on stake in the consumer, not the provider
+	consumerConfig.ValidatorPowerCap = cap
+	optInDuringVoting.Set(&consumerConfig, optInFunction(t, provider, optIns...))
+
+	consumer := provider.AddConsumerChain(ctx, t, consumerConfig)
+
+	// check that a small delegation works
+	fresh.DelegateToValidator(ctx, t, provider, consumer, fresh.VALIDATOR_STAKE_STEP, 5, 1)
+
+	// push validator 1 over the power cap, ensure it doesn't get reflected
+	providerHex, err := provider.GetValidatorHex(ctx, 1)
+	require.NoError(t, err)
+	consumerHex, err := consumer.GetValidatorHex(ctx, 1)
+	require.NoError(t, err)
+	powerBefore, err := fresh.GetPower(ctx, consumer, consumerHex)
+	require.NoError(t, err)
+	wallets, err := fresh.GetValidatorWallets(ctx, provider)
+	require.NoError(t, err)
+	_, err = provider.Validators[1].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
+		"staking", "delegate", wallets[1].ValoperAddress, fmt.Sprintf("%d%s", 30*fresh.VALIDATOR_STAKE_STEP, fresh.DENOM))
+	require.NoError(t, err)
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		power, err := fresh.GetPower(ctx, consumer, consumerHex)
+		assert.NoError(c, err)
+		assert.Greater(c, power, powerBefore)
+	}, 15*time.Minute, fresh.COMMIT_TIMEOUT)
+	providerPower, err := fresh.GetPower(ctx, provider, providerHex)
+	require.NoError(t, err)
+	consumerPower, err := fresh.GetPower(ctx, consumer, consumerHex)
+	require.NoError(t, err)
+	require.NotEqual(t, providerPower, consumerPower)
+	require.Equal(t, int64(cap), consumerPower)
 }

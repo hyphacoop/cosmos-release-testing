@@ -30,6 +30,8 @@ type ConsumerConfig struct {
 	Denom                 string
 	ShouldCopyProviderKey [NUM_VALIDATORS]bool
 	TopN                  int
+	ValidatorSetCap       int
+	ValidatorPowerCap     int
 
 	DuringDepositPeriod ConsumerBootstrapCb
 	DuringVotingPeriod  ConsumerBootstrapCb
@@ -344,6 +346,12 @@ func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chain
 	if config.TopN >= 0 {
 		prop.TopN = uint32(config.TopN)
 	}
+	if config.ValidatorSetCap > 0 {
+		prop.ValidatorSetCap = uint32(config.ValidatorSetCap)
+	}
+	if config.ValidatorPowerCap > 0 {
+		prop.ValidatorsPowerCap = uint32(config.ValidatorPowerCap)
+	}
 	propTx, err := p.ConsumerAdditionProposal(ctx, interchaintest.FaucetAccountKeyName, prop)
 	require.NoError(t, err)
 	go func() {
@@ -402,50 +410,61 @@ func RSValidatorsJailedTest(ctx context.Context, t *testing.T, provider Chain, c
 	CheckIfValidatorJailed(ctx, t, provider, consumer, secondLastValidator, true)
 }
 
-func GetPower(ctx context.Context, t *testing.T, chain Chain, hexaddr string) int64 {
+func GetPower(ctx context.Context, chain Chain, hexaddr string) (int64, error) {
 	var power int64
-	CheckEndpoint(ctx, t, chain.GetHostRPCAddress()+"/validators", func(b []byte) error {
+	err := CheckEndpoint(ctx, chain.GetHostRPCAddress()+"/validators", func(b []byte) error {
 		power = gjson.GetBytes(b, fmt.Sprintf("result.validators.#(address==\"%s\").voting_power", hexaddr)).Int()
 		if power == 0 {
 			return fmt.Errorf("validator %s power not found; validators are: %s", hexaddr, string(b))
 		}
 		return nil
 	})
-	return power
+	if err != nil {
+		return 0, err
+	}
+	return power, nil
 }
 
-func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer Chain, relayer ibc.Relayer, blocksPerEpoch int) {
+func DelegateToValidator(ctx context.Context, t *testing.T, provider, consumer Chain, amount, valIdx, blocksPerEpoch int) {
 	wallets, err := GetValidatorWallets(ctx, provider)
 	require.NoError(t, err)
-	providerAddress := wallets[0]
+	providerAddress := wallets[valIdx]
 
-	json, err := provider.Validators[0].ReadFile(ctx, "config/priv_validator_key.json")
+	json, err := provider.Validators[valIdx].ReadFile(ctx, "config/priv_validator_key.json")
 	require.NoError(t, err)
 	providerHex := gjson.GetBytes(json, "address").String()
-	json, err = consumer.Validators[0].ReadFile(ctx, "config/priv_validator_key.json")
+	json, err = consumer.Validators[valIdx].ReadFile(ctx, "config/priv_validator_key.json")
 	require.NoError(t, err)
 	consumerHex := gjson.GetBytes(json, "address").String()
 
-	providerPowerBefore := GetPower(ctx, t, provider, providerHex)
+	providerPowerBefore, err := GetPower(ctx, provider, providerHex)
+	require.NoError(t, err)
 
-	_, err = provider.Validators[0].ExecTx(ctx, providerAddress.Moniker,
+	_, err = provider.Validators[valIdx].ExecTx(ctx, providerAddress.Moniker,
 		"staking", "delegate",
-		providerAddress.ValoperAddress, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
+		providerAddress.ValoperAddress, fmt.Sprintf("%d%s", amount, DENOM),
 	)
 	require.NoError(t, err)
 
 	if blocksPerEpoch > 1 {
-		require.Greater(t, GetPower(ctx, t, provider, providerHex), providerPowerBefore)
-		require.NotEqual(t, GetPower(ctx, t, provider, providerHex), GetPower(ctx, t, consumer, consumerHex))
+		providerPower, err := GetPower(ctx, provider, providerHex)
+		require.NoError(t, err)
+		require.Greater(t, providerPower, providerPowerBefore)
+		consumerPower, err := GetPower(ctx, consumer, consumerHex)
+		require.NotEqual(t, providerPower, consumerPower)
 		require.NoError(t, testutil.WaitForBlocks(ctx, blocksPerEpoch, provider))
 	}
 
-	require.Eventually(t, func() bool {
-		providerPower := GetPower(ctx, t, provider, providerHex)
-		consumerPower := GetPower(ctx, t, consumer, consumerHex)
-		if providerPowerBefore >= providerPower {
-			return false
-		}
-		return providerPower == consumerPower
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		providerPower, err := GetPower(ctx, provider, providerHex)
+		assert.NoError(c, err)
+		consumerPower, err := GetPower(ctx, consumer, consumerHex)
+		assert.NoError(c, err)
+		assert.Greater(c, providerPower, providerPowerBefore)
+		assert.Equal(c, providerPower, consumerPower)
 	}, 15*time.Minute, COMMIT_TIMEOUT)
+}
+
+func CCVKeyAssignmentTest(ctx context.Context, t *testing.T, provider, consumer Chain, relayer ibc.Relayer, blocksPerEpoch int) {
+	DelegateToValidator(ctx, t, provider, consumer, VALIDATOR_STAKE_STEP, 0, blocksPerEpoch)
 }
