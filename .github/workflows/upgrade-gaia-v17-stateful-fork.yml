@@ -48,7 +48,7 @@ jobs:
       - name: Generate upgrade versions
         id: generate-upgrade
         run: |
-          upgrade=$(scripts/stateful/generate_upgrade_matrix_v16.py $GAIA_LATEST)
+          upgrade=$(scripts/stateful/generate_upgrade_matrix_v17.py $GAIA_LATEST)
           echo $upgrade
           echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:

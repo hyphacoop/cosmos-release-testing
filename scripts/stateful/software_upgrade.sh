@@ -1,12 +1,17 @@
 #!/bin/bash 
 # Test a gaia software upgrade via governance proposal.
 # It assumes gaia is running on the local host.
+#
+set -eux
 
 gaia_host=$1
 gaia_port=$2
 upgrade_name=$3
 
 echo "Attempting upgrade to $upgrade_name."
+
+# Delegate some more stake. Voting fails otherwise, even though we have stake.
+$CHAIN_BINARY tx staking delegate $VALOPER_1 2000000uatom --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json
 
 # Set time to wait for proposal to pass
 voting_period_seconds=20 # This is hardcoded by the test validator
@@ -27,12 +32,13 @@ jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/pro
 jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
 jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
 jq '.' upgrade-3.json
-proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-3.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
+proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-3.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
 
 # Submit the proposal
 echo "Submitting the upgrade proposal."
 echo $proposal
-txhash=$($proposal | jq -r .txhash)
+txout=$($proposal)
+txhash=$(echo $txout | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 
 # Get proposal ID from txhash
@@ -42,9 +48,10 @@ echo "Proposal ID: $proposal_id"
 
 # Vote yes on the proposal
 echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
+vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
 echo $vote
-txhash=$($vote | jq -r .txhash)
+txout=$($vote)
+txhash=$(echo $txout | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $HOME_1
 
@@ -74,6 +81,7 @@ chmod +x ./upgraded
 mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
 
 echo "Starting $CHAIN_BINARY"
+echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home '$HOME_1'; sleep 1; done" > $HOME/$PROVIDER_SERVICE_1.sh
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m bash $HOME/$PROVIDER_SERVICE_1.sh
 # set screen to flush log to 0
 screen -r $PROVIDER_SERVICE_1 -p0 -X logfile flush 0

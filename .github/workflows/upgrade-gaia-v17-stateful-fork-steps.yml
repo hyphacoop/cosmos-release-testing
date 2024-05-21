@@ -26,7 +26,7 @@ jobs:
       CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
       CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
       HOME_1: ${{ vars.HOME_1 }}
-      CHAIN_ID: ${{ vars.CHAIN_ID }}
+      CHAIN_ID: cosmoshub-4
       MONIKER_1: ${{ vars.MONIKER_1 }}
       MONIKER_2: ${{ vars.MONIKER_2 }}
       MONIKER_4: ${{ vars.MONIKER_4 }}
@@ -90,6 +90,7 @@ jobs:
       COMMIT_TIMEOUT: 5
       CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
       VESTING_TARGET: "1772414007"
+      TARGET_VERSION: v17
     steps:
       # Get system info
       - run: ifconfig
@@ -142,7 +143,7 @@ jobs:
       - name: Install required packages
         run: |
           sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc lz4
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Init Python venv
@@ -171,10 +172,13 @@ jobs:
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
       - name: Set up memory monitor for provider
         run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
+      - name: Get archive url
+        run: |
+          SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+          echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Fork chain
         env:
           START_VERSION: ${{inputs.gaia_version}}
-          ARCHIVE_URL: ${{ vars.ARCHIVE_URL }}
         run: scripts/stateful/fork_chain.sh
       - name: Blocks produced before upgrade to v17
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
