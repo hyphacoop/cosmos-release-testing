@@ -61,8 +61,8 @@ func TestConsumerChainLaunchesAfterUpgradeICS33NoKeysCopied(t *testing.T) {
 func TestMainnetConsumerChainsAfterUpgrade(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
-	const neutronVersion = "v3.0.1"
-	const strideVersion = "v20.0.0"
+	const neutronVersion = "v3.0.2"
+	const strideVersion = "v22.0.0"
 
 	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
 	neutron := provider.AddConsumerChain(ctx, t, fresh.ConsumerConfig{

@@ -96,11 +96,15 @@ func RPCEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 	}
 }
 
-func CheckEndpoint(ctx context.Context, t *testing.T, url string, f func([]byte) error) {
+func CheckEndpoint(ctx context.Context, url string, f func([]byte) error) error {
 	resp, err := http.Get(url)
-	require.NoError(t, err)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 	bts, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
-	require.NoError(t, f(bts))
+	if err != nil {
+		return err
+	}
+	return f(bts)
 }
