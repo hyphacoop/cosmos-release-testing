@@ -392,7 +392,7 @@ jobs:
           cd gaia
           git checkout ${{ env.RUNNING_VERSION }}
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
-          cp build/$CHAIN_BINARY /home/runner/go/bin/gaiad-fork
+          cp build/gaiad /home/runner/go/bin/gaiad-fork
       - name: Fork the chain
         run: |
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
