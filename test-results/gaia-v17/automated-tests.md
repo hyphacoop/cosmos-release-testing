@@ -8,7 +8,7 @@
 Upgrade workflows use two starting points: fresh and stateful genesis.
 
 * Fresh genesis: A genesis file is initialized with three validators and the chain starts at height 1.
-  * [GitHub Actions workflow](https://github.com/hyphacoop/cosmos-release-testing/actions/runs/9172804242)
+  * [GitHub Actions workflow](https://github.com/hyphacoop/cosmos-release-testing/actions/runs/9194038265)
   * [Log archive](./v17-logs-fresh-state.zip)
 * Stafeul genesis: A genesis file is periodically exported from the Interchain Security testnet to provide a single validator with a majority voting power so it can start producing blocks on its own.
   * [GitHub Actions workflow](https://github.com/hyphacoop/cosmos-release-testing/actions/runs/9067810923)
