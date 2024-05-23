@@ -70,6 +70,8 @@ Upgrade workflows use two starting points: fresh and stateful genesis.
   * Top N consumer chain launches
   * Opt-in consumer chain launches
   * Opt-in and opt-out operations
+  * Power cap
+  * Validator set cap
   * Downtime infractions
   * Consumer commission rate
 
