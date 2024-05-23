@@ -35,7 +35,7 @@ jobs:
   #     - name: Install required packages
   #       run: |
   #         sudo apt update
-  #         sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip
+  #         sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential
   #     - name: Install openssh-server
   #       run: |
   #         sudo apt install -y openssh-server
@@ -252,7 +252,7 @@ jobs:
       - name: Install required packages
         run: |
           sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server
@@ -381,14 +381,24 @@ jobs:
       #   env:
       #     NODE_HOME: /home/runner/.gaia
       #   run: mkdir -p /home/runner/artifact/config/tinkered && cp -rvp $NODE_HOME/config /home/runner/artifact/config/tinkered/
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
+      - name: Build fork tool
+        run: |
+          cd /home/runner
+          git clone https://github.com/cosmos/gaia.git
+          cd gaia
+          git checkout ${{ env.RUNNING_VERSION }}
+          make build BUILD_TAGS="-tag unsafe_start_local_validator"
+          cp build/$CHAIN_BINARY /home/runner/go/bin/gaiad-fork
       - name: Fork the chain
         run: |
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
           pubkey=$(jq -r .pub_key.value /home/runner/.gaia/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value /home/runner/.gaia/config/priv_validator_key.json)
-          wget ${{ vars.FORK_BIN_URL }} -O /home/runner/gaiad-fork
-          chmod +x /home/runner/gaiad-fork
-          screen -L -Logfile /home/runner/artifact/gaiad_fork.log -S gaiad -d -m gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --validator-pubkey '$pubkey' --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl --validator-privkey '$privkey' --home /home/runner/.gaia
+          screen -L -Logfile /home/runner/artifact/gaiad_fork.log -S gaiad -d -m /home/runner/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --validator-pubkey '$pubkey' --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl --validator-privkey '$privkey' --home /home/runner/.gaia
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
@@ -423,16 +433,11 @@ jobs:
           tail -30 /home/runner/artifact/gaiad_upgrade.log
       - name: Compress and upload files
         run: |
-          cp cosmos-genesis-tinkerer/tinkered_genesis.json /home/runner/rs-genesis-export/rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
           cd /home/runner/rs-genesis-export/
           echo "Compressing rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
           gzip rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
-          echo "Compressing rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
-          gzip rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
           echo "Uploading exported genesis to files.polypore.xyz"
           scp rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-export/
-          echo "Uploading Tinkered genesis to files.polypore.xyz"
-          scp rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-tinkered/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
@@ -440,7 +445,6 @@ jobs:
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-tinkered/rs-provider-tinkered-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
