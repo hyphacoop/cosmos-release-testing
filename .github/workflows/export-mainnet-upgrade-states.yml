@@ -122,17 +122,17 @@ jobs:
         run: |
           # Node Stake
           # SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
-          # echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
+          echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
           # Polkachu
-          SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
+          # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
           echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
           rm -rf /home/runner/.gaia/data
           # Node Stake addrbook
-          # curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
+          curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
           # Polkachu addr book
-          curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
+          # curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
       - name: Install Go
         uses: actions/setup-go@v5
