@@ -180,24 +180,12 @@ jobs:
           tail -30 /home/runner/artifact/gaiad_upgrade.log
       - name: Compress and upload files
         run: |
-          cp cosmos-genesis-tinkerer/tinkered_genesis.json /home/runner/mainnet-genesis-export/mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
-          cd /home/runner/mainnet-genesis-export/
-          echo "Compressing mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
-          gzip mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
-          echo "Compressing mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
-          gzip mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
-          echo "Uploading exported genesis to files.polypore.xyz"
-          scp mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/mainnet-genesis-export/
-          echo "Uploading Tinkered genesis to files.polypore.xyz"
-          scp mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/mainnet-genesis-tinkered/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           tar cf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/
           # Update latest file symlinks
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/mainnet-genesis-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/mainnet-genesis-tinkered/mainnet-tinkered-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/mainnet-genesis-tinkered/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
       - name: Upload artifacts
         if: always()
