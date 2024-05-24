@@ -130,9 +130,9 @@ jobs:
         run: |
           rm -rf /home/runner/.gaia/data
           # Node Stake addrbook
-          # curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
+          # curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
           # Polkachu addr book
-          curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/genesis.json
+          curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
       - name: Install Go
         uses: actions/setup-go@v5
