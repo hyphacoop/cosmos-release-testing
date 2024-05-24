@@ -35,7 +35,7 @@ jobs:
       - name: Install required packages
         run: |
           sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip lz4
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server
@@ -124,8 +124,9 @@ jobs:
           echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
+          rm -rf /home/runner/.gaia/data
           curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
-          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -x -C /home/runner/.gaia/
+          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
