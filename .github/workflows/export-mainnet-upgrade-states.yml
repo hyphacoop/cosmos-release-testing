@@ -127,15 +127,6 @@ jobs:
           rm -rf /home/runner/.gaia/data
           curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
-      # - name: Start Chain
-      #   env:
-      #     NODE_HOME: /home/runner/.gaia
-      #     CHAIN_BINARY: 'gaiad'
-      #   run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
-      # - name: Export Genesis
-      #   run: |
-      #     mkdir /home/runner/mainnet-genesis-export
-      #     gaiad export --height ${{ env.HALT_HEIGHT }} --output-document /home/runner/mainnet-genesis-export/mainnet-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -149,6 +140,11 @@ jobs:
           git checkout release/v16.x
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: /home/runner/go/bin/gaiad-fork start --x-crisis-skip-assert-invariants --home $NODE_HOME
       - name: Fork the chain
         run: |
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
