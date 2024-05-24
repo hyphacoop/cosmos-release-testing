@@ -118,6 +118,14 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/cosmoshub-4 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/cosmoshub-4/
+      - name: Get archive url
+        run: |
+          SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+          echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
+      - name: Download snapshot
+        run: |
+          curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
+          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -x -C /home/runner/.gaia/
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
