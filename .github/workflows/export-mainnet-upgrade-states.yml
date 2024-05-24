@@ -127,11 +127,11 @@ jobs:
           rm -rf /home/runner/.gaia/data
           curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
-      - name: Start Chain
-        env:
-          NODE_HOME: /home/runner/.gaia
-          CHAIN_BINARY: 'gaiad'
-        run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      # - name: Start Chain
+      #   env:
+      #     NODE_HOME: /home/runner/.gaia
+      #     CHAIN_BINARY: 'gaiad'
+      #   run: $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
       # - name: Export Genesis
       #   run: |
       #     mkdir /home/runner/mainnet-genesis-export
