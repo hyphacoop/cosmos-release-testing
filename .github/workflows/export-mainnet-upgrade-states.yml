@@ -120,12 +120,18 @@ jobs:
         run: mkdir -p /home/runner/artifact/config/cosmoshub-4 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/cosmoshub-4/
       - name: Get archive url
         run: |
-          SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+          # Node Stake
+          # SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+          # Polkachu
+          SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
           echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
           rm -rf /home/runner/.gaia/data
-          curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
+          # Node Stake addrbook
+          # curl -Ls https://ss.cosmos.nodestake.org/genesis.json > /home/runner/.gaia/config/genesis.json
+          # Polkachu addr book
+          curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/genesis.json
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
       - name: Install Go
         uses: actions/setup-go@v5
