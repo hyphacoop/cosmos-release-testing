@@ -121,11 +121,11 @@ jobs:
       - name: Get archive url
         run: |
           # Node Stake
-          # SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+          SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
           echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
           # Polkachu
           # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
-          echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
+          # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
           rm -rf /home/runner/.gaia/data
