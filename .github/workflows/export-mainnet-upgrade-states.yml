@@ -150,7 +150,7 @@ jobs:
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
-        run: /home/runner/go/bin/gaiad-fork start --x-crisis-skip-assert-invariants --home $NODE_HOME
+        run: /usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
