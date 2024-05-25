@@ -156,6 +156,7 @@ jobs:
           NODE_HOME: /home/runner/.gaia
         run: |
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
+          curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/node_key.json > /home/runner/.gaia/config/node_key.json
           pubkey=$(jq -r .pub_key.value /home/runner/.gaia/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value /home/runner/.gaia/config/priv_validator_key.json)
           # sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
