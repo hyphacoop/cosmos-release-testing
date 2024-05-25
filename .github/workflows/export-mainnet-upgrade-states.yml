@@ -169,6 +169,15 @@ jobs:
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Stop fork tool
+        run: |
+          echo "exiting gaia and screen"
+          killall gaiad-fork screen
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Submit and vote on the upgrade proposal
         run: |
           echo "Restoring validator key"
@@ -209,7 +218,7 @@ jobs:
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: export-cosmos-hub-mainnet
           path: ~/artifact/
