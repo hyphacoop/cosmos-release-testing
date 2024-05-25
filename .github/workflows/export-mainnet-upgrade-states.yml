@@ -147,10 +147,10 @@ jobs:
           git checkout release/v16.x
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
-      - name: Start Chain
-        env:
-          NODE_HOME: /home/runner/.gaia
-        run: /usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      # - name: Start Chain
+      #   env:
+      #     NODE_HOME: /home/runner/.gaia
+      #   run: /usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
