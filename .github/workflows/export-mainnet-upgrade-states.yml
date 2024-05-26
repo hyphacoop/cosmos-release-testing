@@ -84,7 +84,8 @@ jobs:
           SERVICE_NAME: mainnet-export
           CHAIN_ID: cosmoshub-4
           CHAIN_BINARY: 'gaiad'
-          GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
+          # GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
+          GENESIS_URL: https://ss.cosmos.nodestake.org/genesis.json
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
