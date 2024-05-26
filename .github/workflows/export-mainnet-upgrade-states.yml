@@ -110,7 +110,7 @@ jobs:
           echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           echo "Replaceing genesis..."
-          wget -nv $GENESIS_URL -O genesis.json.gz
+          wget -nv $GENESIS_URL -O genesis.json
           # gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
           echo "halt-height set to: $HALT_HEIGHT"
