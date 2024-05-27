@@ -1,7 +1,7 @@
 {
     "title": "set the blocks per epoch to 1",
     "description": "This will set blocks_per_epoch to 1",
-    "deposit": "1000000uatom",
+    "deposit": "25000000uatom",
     "changes": [
         {
             "subspace": "provider",
