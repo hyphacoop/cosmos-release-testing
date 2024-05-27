@@ -12,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params/client/utils"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,6 +69,10 @@ func TransactionsTest(ctx context.Context, t *testing.T, chain Chain) {
 
 		t.Run("authz", func(t *testing.T) {
 			authzTest(ctx, t, chain)
+		})
+
+		t.Run("feegrant", func(t *testing.T) {
+			feegrantTest(ctx, t, chain)
 		})
 	})
 }
@@ -267,6 +272,49 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 		require.NoError(t, err)
 		require.NoError(t, authzGenExec(ctx, t, chain, wallets[1], "tx", "gov", "vote", prop.ProposalID, "yes", "--from", wallets[0].Address))
 	})
+}
+
+func feegrantTest(ctx context.Context, t *testing.T, chain Chain) {
+	wallets, err := GetValidatorWallets(ctx, chain)
+	require.NoError(t, err)
+
+	expire := time.Now().Add(15 * COMMIT_TIMEOUT)
+	_, err = chain.Validators[0].ExecTx(
+		ctx,
+		wallets[0].Moniker,
+		"feegrant", "grant", wallets[0].Address, wallets[1].Address,
+		"--expiration", expire.Format(time.RFC3339),
+	)
+	require.NoError(t, err)
+
+	balance0Before, err := chain.GetBalance(ctx, wallets[0].Address, DENOM)
+	require.NoError(t, err)
+	balance1Before, err := chain.GetBalance(ctx, wallets[1].Address, DENOM)
+	require.NoError(t, err)
+
+	_, err = chain.Validators[1].ExecTx(ctx, wallets[1].Moniker,
+		"bank", "send", wallets[1].Address, wallets[2].Address, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
+		"--fee-granter", wallets[0].Address,
+	)
+	require.NoError(t, err)
+
+	balance0After, err := chain.GetBalance(ctx, wallets[0].Address, DENOM)
+	require.NoError(t, err)
+	balance1After, err := chain.GetBalance(ctx, wallets[1].Address, DENOM)
+	require.NoError(t, err)
+
+	require.True(t, balance0After.LT(balance0Before), "balance0After: %s, balance0Before: %s", balance0After, balance0Before)
+	require.True(t, balance1After.Equal(balance1Before.Sub(math.NewInt(VALIDATOR_STAKE_STEP))))
+
+	<-time.After(time.Until(expire))
+	err = testutil.WaitForBlocks(ctx, 1, chain)
+	require.NoError(t, err)
+
+	_, err = chain.Validators[1].ExecTx(ctx, wallets[1].Moniker,
+		"bank", "send", wallets[1].Address, wallets[2].Address, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
+		"--fee-granter", wallets[0].Address,
+	)
+	require.Error(t, err)
 }
 
 func IBCTest(ctx context.Context, t *testing.T, chainA Chain, chainB Chain, relayer ibc.Relayer) {
