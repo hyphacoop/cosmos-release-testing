@@ -127,14 +127,14 @@ jobs:
           # Polkachu
           # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
-      - name: Download snapshot
-        run: |
-          rm -rf /home/runner/.gaia/data
-          # Node Stake addrbook
-          curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
-          # Polkachu addr book
-          # curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
-          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
+      # - name: Download snapshot
+      #   run: |
+      #     rm -rf /home/runner/.gaia/data
+      #     # Node Stake addrbook
+      #     curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
+      #     # Polkachu addr book
+      #     # curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
+      #     curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -148,10 +148,12 @@ jobs:
           git checkout release/v16.x
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
-      # - name: Start Chain
-      #   env:
-      #     NODE_HOME: /home/runner/.gaia
-      #   run: /usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+        run: |
+          curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
+          /usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
