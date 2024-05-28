@@ -1,6 +1,6 @@
 {
     "title": "Set the voting period to 1 minute",
-    "description": "If successful, the voting period will be changed to 1 minutes",
+    "description": "If successful, the voting period will be changed to 1 minute",
     "summary": "This proposal will set the voting period to 1 minute",
     "changes": [
         {
@@ -9,5 +9,6 @@
         "value": {"voting_period":"60000000000"}
         }
     ],
-    "deposit": "25000000uatom"
+    "deposit": "25000000uatom",
+    "metadata": "ipfs://CID"
 }
