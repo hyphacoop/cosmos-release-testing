@@ -45,7 +45,7 @@ check_code $TXHASH
 
 # Wait for rewards to accumulate
 echo "Waiting for rewards to accumulate"
-sleep 20
+sleep 60
 echo "Withdrawing rewards for test account..."
 starting_balance=$($CHAIN_BINARY q bank balances $WALLET_2 --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
 echo "Starting balance: $starting_balance"
