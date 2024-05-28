@@ -14,7 +14,7 @@
 * **Upgrade time:** `2024-05-08T13:23:44Z`
 * **Node upgrade duration:** 1m
 * **Chain upgrade duration:** 9m
-* [Proposal 246](https://explorer.polypore.xyz/theta-testnet-001/gov/249)
+* [Proposal 249](https://explorer.polypore.xyz/theta-testnet-001/gov/249)
 
 ## Replicated Security testnet (`provider`)
 
@@ -23,7 +23,7 @@
 * **Node upgrade duration:** 1m
 * **Chain upgrade duration:** 12m
 * **Validators present:** 42/52
-* [Proposal 118](https://explorer.polypore.xyz/provider/gov/122)
+* [Proposal 122](https://explorer.polypore.xyz/provider/gov/122)
 
 ## Interchain Security Lightning Experiment (ISLE)
 
