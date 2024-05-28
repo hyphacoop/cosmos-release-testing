@@ -152,7 +152,8 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 	t.Run("unbond", func(t *testing.T) {
 		valHex, err := chain.GetValidatorHex(ctx, 2)
 		require.NoError(t, err)
-		powerBefore := GetPower(ctx, t, chain, valHex)
+		powerBefore, err := GetPower(ctx, chain, valHex)
+		require.NoError(t, err)
 		_, err = chain.Validators[0].ExecTx(
 			ctx,
 			wallets[0].Moniker,
@@ -160,7 +161,8 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 		)
 		require.NoError(t, err)
 		require.EventuallyWithT(t, func(c *assert.CollectT) {
-			powerAfter := GetPower(ctx, t, chain, valHex)
+			powerAfter, err := GetPower(ctx, chain, valHex)
+			require.NoError(t, err)
 			assert.NoError(c, err)
 			assert.Greater(c, powerAfter, powerBefore)
 		}, 15*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
@@ -177,7 +179,8 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 		require.Error(t, authzGenExec(ctx, t, chain, wallets[1], "tx", "staking", "unbond", wallets[0].ValoperAddress, fmt.Sprintf("%d%s", amount, DENOM), "--from", wallets[0].Address))
 
 		require.EventuallyWithT(t, func(c *assert.CollectT) {
-			powerAfter := GetPower(ctx, t, chain, valHex)
+			powerAfter, err := GetPower(ctx, chain, valHex)
+			require.NoError(t, err)
 			assert.NoError(c, err)
 			assert.Equal(c, powerAfter, powerBefore)
 		}, 15*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
@@ -196,7 +199,8 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 		require.NoError(t, err)
 		val2Hex, err := chain.GetValidatorHex(ctx, 2)
 		require.NoError(t, err)
-		val0PowerBefore := GetPower(ctx, t, chain, val0Hex)
+		val0PowerBefore, err := GetPower(ctx, chain, val0Hex)
+		require.NoError(t, err)
 		_, err = chain.Validators[0].ExecTx(
 			ctx,
 			wallets[0].Moniker,
@@ -204,7 +208,8 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 		)
 		require.NoError(t, err)
 		require.EventuallyWithT(t, func(c *assert.CollectT) {
-			val0PowerAfter := GetPower(ctx, t, chain, val0Hex)
+			val0PowerAfter, err := GetPower(ctx, chain, val0Hex)
+			require.NoError(t, err)
 			assert.NoError(c, err)
 			assert.Greater(c, val0PowerAfter, val0PowerBefore)
 		}, 15*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
@@ -219,10 +224,11 @@ func authzTest(ctx context.Context, t *testing.T, chain Chain) {
 
 		require.Error(t, authzGenExec(ctx, t, chain, wallets[1], "tx", "staking", "redelegate", wallets[0].ValoperAddress, wallets[1].ValoperAddress, fmt.Sprintf("%d%s", amount, DENOM), "--from", wallets[0].Address))
 
-		val2PowerBefore := GetPower(ctx, t, chain, val2Hex)
+		val2PowerBefore, err := GetPower(ctx, chain, val2Hex)
+		require.NoError(t, err)
 		require.NoError(t, authzGenExec(ctx, t, chain, wallets[1], "tx", "staking", "redelegate", wallets[0].ValoperAddress, wallets[2].ValoperAddress, fmt.Sprintf("%d%s", amount, DENOM), "--from", wallets[0].Address))
 		require.EventuallyWithT(t, func(c *assert.CollectT) {
-			val2PowerAfter := GetPower(ctx, t, chain, val2Hex)
+			val2PowerAfter, err := GetPower(ctx, chain, val2Hex)
 			assert.NoError(c, err)
 			assert.Greater(c, val2PowerAfter, val2PowerBefore)
 		}, 15*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
