@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # usage:
-# ./set_epoch.sh path/to/prop.json
+# ./set_voting_period.sh path/to/prop.json
 
 # get prop file from arg
 prop_file=$1
 
-# Change Blocks per Epoch
-echo "Setting Blocks per Epoch"
+# Change Voting Period
+echo "Setting Voting Period"
 proposal="$CHAIN_BINARY tx gov submit-proposal $prop_file --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
 echo $proposal
 gaiadout=$($proposal)
@@ -33,5 +33,5 @@ sleep $VOTING_PERIOD
 sleep 12
 
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
-echo "$CHAIN_BINARY q params subspace provider BlocksPerEpoch --home $HOME_1"
-$CHAIN_BINARY q params subspace provider BlocksPerEpoch --home $HOME_1
+echo "$CHAIN_BINARY q gov params --home $HOME_1"
+$CHAIN_BINARY q gov params --home $HOME_1

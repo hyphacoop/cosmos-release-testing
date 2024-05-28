@@ -9,6 +9,6 @@
         "value": {"voting_period":"60000000000"}
         }
     ],
-    "deposit": "25000000uatom",
+    "deposit": "250000000uatom",
     "metadata": "ipfs://CID"
 }
