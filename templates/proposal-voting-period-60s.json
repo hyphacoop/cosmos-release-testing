@@ -1,0 +1,12 @@
+{
+    "title": "Set the voting period to 1 minute",
+    "description": "If successful, the voting period will be changed to 1 minutes",
+    "changes": [
+          {
+              "subspace": "gov",
+              "key": "votingparams",
+          "value": {"voting_period":"60000000000"}
+          }
+    ],
+    "deposit": "10000000uatom"
+  }

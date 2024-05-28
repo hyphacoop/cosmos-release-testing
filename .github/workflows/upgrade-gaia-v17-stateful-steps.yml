@@ -179,6 +179,9 @@ jobs:
           $CHAIN_BINARY keys list --home $HOME_1
       - name: Query unbonding time
         run: $CHAIN_BINARY --home $HOME_1 q staking params
+      - name: Set voting period to 60s
+        env: VOTING_PERIOD: "20s"
+        run: scripts/stateful/set_voting_period.sh templates/proposal-voting-period-60s.json
       - name: Query gov params time
         run: $CHAIN_BINARY --home $HOME_1 q gov params
       - name: Query BlocksPerEpoch
