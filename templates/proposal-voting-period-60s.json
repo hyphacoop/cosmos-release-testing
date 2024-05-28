@@ -1,12 +1,13 @@
 {
     "title": "Set the voting period to 1 minute",
     "description": "If successful, the voting period will be changed to 1 minutes",
+    "summary": "This proposal will set the voting period to 1 minute",
     "changes": [
-          {
-              "subspace": "gov",
-              "key": "votingparams",
-          "value": {"voting_period":"60000000000"}
-          }
+        {
+        "subspace": "gov",
+        "key": "votingparams",
+        "value": {"voting_period":"60000000000"}
+        }
     ],
     "deposit": "25000000uatom"
-  }
+}
