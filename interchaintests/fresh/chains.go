@@ -249,6 +249,17 @@ func (c Chain) WaitForProposalStatus(ctx context.Context, proposalID string, sta
 	return err
 }
 
+func (c Chain) GenerateTx(ctx context.Context, valIdx int, command ...string) (string, error) {
+	command = append([]string{"tx"}, command...)
+	command = append(command, "--generate-only", "--keyring-backend", "test", "--chain-id", c.Config().ChainID)
+	command = c.Validators[valIdx].NodeCommand(command...)
+	stdout, _, err := c.Validators[valIdx].Exec(ctx, command, nil)
+	if err != nil {
+		return "", err
+	}
+	return string(stdout), nil
+}
+
 func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, version string) {
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
