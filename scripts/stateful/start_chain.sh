@@ -8,7 +8,7 @@ echo "Initializing node homes..."
 echo "Downloading and extracting archived state"
 mkdir -p $HOME_1 
 # wget -qO- $HOME/archived-state.gz $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
-curl -4 -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
+curl -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
 
 # echo "Patching genesis file for fast governance..."
 # jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
