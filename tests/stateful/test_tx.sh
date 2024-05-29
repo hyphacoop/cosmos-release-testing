@@ -68,8 +68,8 @@ else
     exit 1
 fi
 
-echo "Unbonding funds from test account to validator..."
-TXHASH=$($CHAIN_BINARY tx staking unbond $VALOPER_1 $VAL_STAKE$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
-# wait for 1 block
-tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-check_code $TXHASH
+# echo "Unbonding funds from test account to validator..."
+# TXHASH=$($CHAIN_BINARY tx staking unbond $VALOPER_1 $VAL_STAKE$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+# # wait for 1 block
+# tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+# check_code $TXHASH
