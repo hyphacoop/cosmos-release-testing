@@ -278,43 +278,71 @@ func feegrantTest(ctx context.Context, t *testing.T, chain Chain) {
 	wallets, err := GetValidatorWallets(ctx, chain)
 	require.NoError(t, err)
 
-	expire := time.Now().Add(15 * COMMIT_TIMEOUT)
-	_, err = chain.Validators[0].ExecTx(
-		ctx,
-		wallets[0].Moniker,
-		"feegrant", "grant", wallets[0].Address, wallets[1].Address,
-		"--expiration", expire.Format(time.RFC3339),
-	)
-	require.NoError(t, err)
+	tests := []struct {
+		name   string
+		revoke func(expireTime time.Time)
+	}{
+		{
+			name: "revoke",
+			revoke: func(_ time.Time) {
+				_, err := chain.Validators[0].ExecTx(
+					ctx,
+					wallets[0].Moniker,
+					"feegrant", "revoke", wallets[0].Address, wallets[1].Address,
+				)
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "expire",
+			revoke: func(expire time.Time) {
+				<-time.After(time.Until(expire))
+				err = testutil.WaitForBlocks(ctx, 1, chain)
+				require.NoError(t, err)
+			},
+		},
+	}
 
-	balance0Before, err := chain.GetBalance(ctx, wallets[0].Address, DENOM)
-	require.NoError(t, err)
-	balance1Before, err := chain.GetBalance(ctx, wallets[1].Address, DENOM)
-	require.NoError(t, err)
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			expire := time.Now().Add(20 * COMMIT_TIMEOUT)
+			_, err = chain.Validators[0].ExecTx(
+				ctx,
+				wallets[0].Moniker,
+				"feegrant", "grant", wallets[0].Address, wallets[1].Address,
+				"--expiration", expire.Format(time.RFC3339),
+			)
+			require.NoError(t, err)
 
-	_, err = chain.Validators[1].ExecTx(ctx, wallets[1].Moniker,
-		"bank", "send", wallets[1].Address, wallets[2].Address, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
-		"--fee-granter", wallets[0].Address,
-	)
-	require.NoError(t, err)
+			balance0Before, err := chain.GetBalance(ctx, wallets[0].Address, DENOM)
+			require.NoError(t, err)
+			balance1Before, err := chain.GetBalance(ctx, wallets[1].Address, DENOM)
+			require.NoError(t, err)
 
-	balance0After, err := chain.GetBalance(ctx, wallets[0].Address, DENOM)
-	require.NoError(t, err)
-	balance1After, err := chain.GetBalance(ctx, wallets[1].Address, DENOM)
-	require.NoError(t, err)
+			_, err = chain.Validators[1].ExecTx(ctx, wallets[1].Moniker,
+				"bank", "send", wallets[1].Address, wallets[2].Address, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
+				"--fee-granter", wallets[0].Address,
+			)
+			require.NoError(t, err)
 
-	require.True(t, balance0After.LT(balance0Before), "balance0After: %s, balance0Before: %s", balance0After, balance0Before)
-	require.True(t, balance1After.Equal(balance1Before.Sub(math.NewInt(VALIDATOR_STAKE_STEP))))
+			balance0After, err := chain.GetBalance(ctx, wallets[0].Address, DENOM)
+			require.NoError(t, err)
+			balance1After, err := chain.GetBalance(ctx, wallets[1].Address, DENOM)
+			require.NoError(t, err)
 
-	<-time.After(time.Until(expire))
-	err = testutil.WaitForBlocks(ctx, 1, chain)
-	require.NoError(t, err)
+			require.True(t, balance0After.LT(balance0Before), "balance0After: %s, balance0Before: %s", balance0After, balance0Before)
+			require.True(t, balance1After.Equal(balance1Before.Sub(math.NewInt(VALIDATOR_STAKE_STEP))))
 
-	_, err = chain.Validators[1].ExecTx(ctx, wallets[1].Moniker,
-		"bank", "send", wallets[1].Address, wallets[2].Address, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
-		"--fee-granter", wallets[0].Address,
-	)
-	require.Error(t, err)
+			tt.revoke(expire)
+
+			_, err = chain.Validators[1].ExecTx(ctx, wallets[1].Moniker,
+				"bank", "send", wallets[1].Address, wallets[2].Address, fmt.Sprintf("%d%s", VALIDATOR_STAKE_STEP, DENOM),
+				"--fee-granter", wallets[0].Address,
+			)
+			require.Error(t, err)
+		})
+	}
 }
 
 func IBCTest(ctx context.Context, t *testing.T, chainA Chain, chainB Chain, relayer ibc.Relayer) {
