@@ -516,6 +516,7 @@
         - name: Add consumer chain with ICS v4.0.0
           env:
             CONSUMER_CHAIN_ID: v400-one
+            PSS_ENABLED: true
           run: |
             scripts/add_consumer.sh
         - name: Initialize consumer chain with ICS v4.0.0
@@ -555,7 +556,7 @@
             CONSUMER_HOME_3: /home/runner/.v400-1-3
             ICS_400: true
             CONSUMER_ICS: v4.1.1
-            PROVIDER_ICS: v3.3.0
+            PROVIDER_ICS: v4.2.0
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/prepare_consumer.sh
