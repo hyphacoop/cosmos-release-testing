@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 on Saturdays.
     - cron: '30 5 * * 6'
-  # push:
+  push:
 # concurrency:
 #   group: self-hosted-runners
 
@@ -397,10 +397,27 @@ jobs:
       - name: Fork the chain
         run: |
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
+          curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/node_key.json > /home/runner/.gaia/config/node_key.json
           pubkey=$(jq -r .pub_key.value /home/runner/.gaia/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value /home/runner/.gaia/config/priv_validator_key.json)
+          sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+          sed -i -e '/enable =/ s/= .*/= false/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/halt-height =/ s^= .*^= \"0\"^" $NODE_HOME/config/app.toml
           screen -L -Logfile /home/runner/artifact/gaiad_fork.log -S gaiad -d -m /home/runner/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --validator-pubkey "$pubkey" --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl --validator-privkey "$privkey" --home /home/runner/.gaia
           screen -r gaiad -p0 -X logfile flush 0
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Stop fork tool
+        run: |
+          echo "exiting gaia and screen"
+          killall gaiad-fork screen
+          sleep 10s
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Submit and vote on the upgrade proposal
