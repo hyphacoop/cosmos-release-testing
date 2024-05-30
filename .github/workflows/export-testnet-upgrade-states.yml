@@ -426,6 +426,10 @@ jobs:
         run: |
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
