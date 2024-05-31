@@ -436,7 +436,7 @@ jobs:
           echo "Submitting the upgrade proposal..."
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
-          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\" | . .deposit=\"250000000uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\" | . .deposit=\"1000000000uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
           proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000uatom --from val --yes"
           $proposal
           txhash=$($proposal | jq -r .txhash)
