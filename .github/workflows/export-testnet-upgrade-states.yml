@@ -441,7 +441,7 @@ jobs:
           $proposal
           txhash=$($proposal | jq -r .txhash)
           echo "Wait for the proposal to go on chain..."
-          tests/test_block_production.sh 127.0.0.1 26657 1 10
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
           echo "Get proposal ID from txhash..."
           proposal_id=$(gaiad --output json q tx $txhash | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
