@@ -1081,6 +1081,7 @@
         - name: Add Stride consumer chain
           env:
             CONSUMER_CHAIN_ID: stride-test
+            PSS_ENABLED: true
           run: |
             scripts/add_consumer.sh
         - name: Initialize Stride consumer chain
@@ -1120,7 +1121,7 @@
             CONSUMER_HOME_2: /home/runner/.stride-2
             CONSUMER_HOME_3: /home/runner/.stride-3
             CONSUMER_ICS: v4.0.0
-            PROVIDER_ICS: v3.3.0
+            PROVIDER_ICS: v4.2.0
           run: |
             export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
             scripts/prepare_consumer.sh
