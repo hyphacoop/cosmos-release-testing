@@ -245,11 +245,19 @@ func TestPSSChainLaunchWithSetCap(t *testing.T) {
 		"provider", "opt-in", consumer.Config().ChainID, string(pubKey))
 	require.NoError(t, err)
 
-	hex, err := consumer.GetValidatorHex(ctx, 1)
+	hex1, err := consumer.GetValidatorHex(ctx, 1)
 	require.NoError(t, err)
-	require.Never(t, func() bool {
-		power, err := fresh.GetPower(ctx, consumer, hex)
-		return err != nil && power > 0
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		power, err := fresh.GetPower(ctx, consumer, hex1)
+		assert.NoError(c, err)
+		assert.Greater(c, power, int64(0))
+	}, 100*fresh.COMMIT_TIMEOUT, fresh.COMMIT_TIMEOUT)
+
+	hex5, err := consumer.GetValidatorHex(ctx, 5)
+	require.NoError(t, err)
+	require.EventuallyWithT(t, func(c *assert.CollectT) {
+		_, err := fresh.GetPower(ctx, consumer, hex5)
+		assert.Error(c, err)
 	}, 100*fresh.COMMIT_TIMEOUT, fresh.COMMIT_TIMEOUT)
 }
 
