@@ -92,7 +92,7 @@ func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID s
 	require.NoError(t, err)
 	propID, err := getProposalID(ctx, chain, txhash)
 	require.NoError(t, err)
-	require.NoError(t, PassProposal(ctx, chain, propID))
+	require.NoError(t, chain.PassProposal(ctx, propID))
 }
 
 func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID string, pctOfSupply int64) {
@@ -120,7 +120,7 @@ func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID stri
 	require.NoError(t, err)
 	propID, err := getProposalID(ctx, chain, txhash)
 	require.NoError(t, err)
-	require.NoError(t, PassProposal(ctx, chain, propID))
+	require.NoError(t, chain.PassProposal(ctx, propID))
 }
 
 func getProposalID(ctx context.Context, chain Chain, txhash string) (string, error) {

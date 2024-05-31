@@ -1,7 +1,8 @@
 {
     "title": "set the blocks per epoch to 100",
     "description": "This will set blocks_per_epoch to 100",
-    "deposit": "10000000uatom",
+    "deposit": "250000000uatom",
+    "metadata": "ipfs://CID",
     "changes": [
         {
             "subspace": "provider",
