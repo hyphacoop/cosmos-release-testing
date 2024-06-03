@@ -167,9 +167,6 @@ jobs:
           git checkout ${{ env.FORK_TOOL_TAG }}
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
-      - name: Start Chain
-        env:
-          NODE_HOME: /home/runner/.gaia
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
