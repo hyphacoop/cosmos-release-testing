@@ -7,16 +7,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBaselineTXsAfterV16Upgrade(t *testing.T) {
+func TestBaselineTXsAfterUpgrade(t *testing.T) {
 	t.Parallel()
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
 
-	chain, _ := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, false)
+	chain := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, false)
 
 	fresh.TransactionsTest(ctx, t, chain)
 
-	fresh.UpgradeChain(ctx, t, chain, fresh.VALIDATOR_MONIKER, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChain(ctx, t, chain, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 
 	fresh.TransactionsTest(ctx, t, chain)
 

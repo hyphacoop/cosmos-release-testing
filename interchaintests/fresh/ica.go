@@ -69,7 +69,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
 	require.NoError(t, err)
 
-	_, err = controller.SendIBCTransfer(ctx, srcChannel.ChannelID, VALIDATOR_MONIKER, ibc.WalletAmount{
+	_, err = controller.SendIBCTransfer(ctx, srcChannel.ChannelID, interchaintest.FaucetAccountKeyName, ibc.WalletAmount{
 		Address: icaAddress,
 		Amount:  sdkmath.NewInt(amountToSend),
 		Denom:   DENOM,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"sync"
 	"testing"
@@ -20,6 +21,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
+	"golang.org/x/mod/semver"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -31,15 +33,7 @@ type ValidatorWallet struct {
 
 type Chain struct {
 	*cosmos.CosmosChain
-}
-
-func (c Chain) QueryJSON(ctx context.Context, t *testing.T, path string, query ...string) gjson.Result {
-	t.Helper()
-	stdout, _, err := c.GetNode().ExecQuery(ctx, query...)
-	require.NoError(t, err)
-	retval := gjson.GetBytes(stdout, path)
-	require.True(t, retval.Exists(), "path %s does not exist in %s", path, stdout)
-	return retval
+	Relayer ibc.Relayer
 }
 
 func createConfigToml() testutil.Toml {
@@ -53,15 +47,20 @@ func createConfigToml() testutil.Toml {
 }
 
 func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *interchaintest.ChainSpec {
-	fullNodes := 0
-	validators := 3
+	fullNodes := NUM_FULL_NODES
+	validators := NUM_VALIDATORS
 	genesisOverrides := []cosmos.GenesisKV{
-		cosmos.NewGenesisKV("app_state.gov.params.voting_period", "40s"),
-		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "10s"),
+		cosmos.NewGenesisKV("app_state.gov.params.voting_period", GOV_VOTING_PERIOD.String()),
+		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", GOV_DEPOSIT_PERIOD.String()),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", DENOM),
-		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", "1"),
+		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.amount", strconv.Itoa(GOV_MIN_DEPOSIT_AMOUNT)),
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_PROVIDER)),
 		cosmos.NewGenesisKV("app_state.slashing.params.downtime_jail_duration", DOWNTIME_JAIL_DURATION.String()),
+		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_period", "2s"),
+		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_fraction", "1.00"),
+	}
+	if semver.Compare(gaiaVersion, "v16") >= 0 {
+		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"))
 	}
 	return &interchaintest.ChainSpec{
 		Name:          "gaia",
@@ -122,7 +121,7 @@ func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion, channel
 	relayer := createRelayer(ctx, t)
 	retval := make([]Chain, n)
 	for i := 0; i < n; i++ {
-		retval[i] = Chain{chains[i].(*cosmos.CosmosChain)}
+		retval[i] = Chain{chains[i].(*cosmos.CosmosChain), relayer}
 	}
 
 	ic := interchaintest.NewInterchain()
@@ -164,7 +163,7 @@ func CreateNLinkedChains(ctx context.Context, t *testing.T, gaiaVersion, channel
 }
 
 // CreateChain creates a single new chain with the given version and returns the chain object.
-func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) (Chain, ibc.Relayer) {
+func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRelayer bool) Chain {
 	dockerClient, dockerNetwork := GetDockerContext(ctx)
 
 	cf := interchaintest.NewBuiltinChainFactory(
@@ -174,7 +173,7 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 
 	chains, err := cf.Chains(t.Name())
 	require.NoError(t, err)
-	provider := Chain{chains[0].(*cosmos.CosmosChain)}
+	provider := Chain{chains[0].(*cosmos.CosmosChain), nil}
 	var relayer ibc.Relayer
 	var relayerWallet ibc.Wallet
 
@@ -182,6 +181,7 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 
 	if withRelayer {
 		relayer = createRelayer(ctx, t)
+		provider.Relayer = relayer
 		ic.AddRelayer(relayer, "relayer")
 		relayerWallet, err = provider.BuildRelayerWallet(ctx, "relayer-"+provider.Config().ChainID)
 		require.NoError(t, err)
@@ -206,31 +206,61 @@ func CreateChain(ctx context.Context, t *testing.T, gaiaVersion string, withRela
 		setupRelayerKeys(ctx, t, relayer, relayerWallet, provider)
 		require.NoError(t, relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
 		t.Cleanup(func() {
-			_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
+			if os.Getenv("KEEP_CONTAINERS") == "" {
+				_ = relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx))
+			}
 		})
 	}
-	return provider, relayer
+	return provider
 }
 
-func PassProposal(ctx context.Context, chain Chain, proposalID string) error {
+func (c Chain) QueryJSON(ctx context.Context, t *testing.T, path string, query ...string) gjson.Result {
+	t.Helper()
+	stdout, _, err := c.GetNode().ExecQuery(ctx, query...)
+	require.NoError(t, err)
+	retval := gjson.GetBytes(stdout, path)
+	require.True(t, retval.Exists(), "path %s does not exist in %s", path, stdout)
+	return retval
+}
+
+func (c Chain) PassProposal(ctx context.Context, proposalID string) error {
 	propID, err := strconv.ParseInt(proposalID, 10, 64)
 	if err != nil {
 		return err
 	}
-	err = chain.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
+	err = c.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
 	if err != nil {
 		return err
 	}
-	chainHeight, err := chain.Height(ctx)
+	return c.WaitForProposalStatus(ctx, proposalID, govv1beta1.StatusPassed)
+}
+
+func (c Chain) WaitForProposalStatus(ctx context.Context, proposalID string, status govv1beta1.ProposalStatus) error {
+	propID, err := strconv.ParseInt(proposalID, 10, 64)
+	if err != nil {
+		return err
+	}
+	chainHeight, err := c.Height(ctx)
 	if err != nil {
 		return err
 	}
 	maxHeight := chainHeight + UPGRADE_DELTA
-	_, err = cosmos.PollForProposalStatus(ctx, chain.CosmosChain, chainHeight, maxHeight, propID, govv1beta1.StatusPassed)
+	_, err = cosmos.PollForProposalStatus(ctx, c.CosmosChain, chainHeight, maxHeight, propID, status)
 	return err
 }
 
-func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, upgradeName, version string) {
+func (c Chain) GenerateTx(ctx context.Context, valIdx int, command ...string) (string, error) {
+	command = append([]string{"tx"}, command...)
+	command = append(command, "--generate-only", "--keyring-backend", "test", "--chain-id", c.Config().ChainID)
+	command = c.Validators[valIdx].NodeCommand(command...)
+	stdout, _, err := c.Validators[valIdx].Exec(ctx, command, nil)
+	if err != nil {
+		return "", err
+	}
+	return string(stdout), nil
+}
+
+func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, version string) {
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
 
@@ -243,24 +273,25 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, u
 		Description: "Upgrade to " + upgradeName,
 		Height:      haltHeight,
 	}
-	upgradeTx, err := chain.UpgradeProposal(ctx, proposalKey, proposal)
+	upgradeTx, err := chain.UpgradeProposal(ctx, interchaintest.FaucetAccountKeyName, proposal)
 	require.NoError(t, err, "error submitting upgrade proposal")
-	require.NoError(t, PassProposal(ctx, chain, upgradeTx.ProposalID))
+	require.NoError(t, chain.PassProposal(ctx, upgradeTx.ProposalID))
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after upgrade proposal passed")
 
-	// wait for the chain to halt. We're asking for one more block than the halt height, so we should time out.
-	timeoutCtx, timeoutCtxCancel := context.WithTimeout(ctx, time.Second*60)
+	// wait for the chain to halt. We're asking for blocks after the halt height, so we should time out.
+	timeoutCtx, timeoutCtxCancel := context.WithTimeout(ctx, (time.Duration(haltHeight-height)+10)*COMMIT_TIMEOUT)
 	defer timeoutCtxCancel()
-	err = testutil.WaitForBlocks(timeoutCtx, int(haltHeight-height)+1, chain)
+	err = testutil.WaitForBlocks(timeoutCtx, int(haltHeight-height)+3, chain)
+	require.Error(t, timeoutCtx.Err(), "chain should not produce blocks after halt height")
 	require.Error(t, err, "chain should not produce blocks after halt height")
 
 	height, err = chain.Height(ctx)
 	require.NoError(t, err, "error fetching height after chain should have halted")
 
-	// make sure that chain is halted
-	require.Equal(t, haltHeight, height, "height is not equal to halt height")
+	// make sure that chain is halted; some chains may produce one more block after halt height
+	require.LessOrEqual(t, height-haltHeight, int64(1), "height %d is not within one block of halt height %d; chain isn't halted", height, haltHeight)
 
 	// bring down nodes to prepare for upgrade
 	err = chain.StopAllNodes(ctx)
@@ -284,6 +315,10 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, proposalKey, u
 	for _, val := range chain.Validators {
 		_, _, err := val.ExecBin(ctx, "keys", "list", "--keyring-backend", "test")
 		require.NoError(t, err)
+	}
+	if chain.Relayer != nil {
+		require.NoError(t, chain.Relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx)))
+		require.NoError(t, chain.Relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
 	}
 }
 
@@ -366,7 +401,7 @@ func GetValidatorWallets(ctx context.Context, chain Chain) ([]ValidatorWallet, e
 }
 
 func SetEpoch(ctx context.Context, chain Chain, epoch int) error {
-	result, err := chain.ParamChangeProposal(ctx, VALIDATOR_MONIKER, &utils.ParamChangeProposalJSON{
+	result, err := chain.ParamChangeProposal(ctx, interchaintest.FaucetAccountKeyName, &utils.ParamChangeProposalJSON{
 		Changes: []utils.ParamChangeJSON{{
 			Subspace: "provider",
 			Key:      "BlocksPerEpoch",
@@ -379,5 +414,14 @@ func SetEpoch(ctx context.Context, chain Chain, epoch int) error {
 	if err != nil {
 		return err
 	}
-	return PassProposal(ctx, chain, result.ProposalID)
+	return chain.PassProposal(ctx, result.ProposalID)
+}
+
+func (c Chain) GetValidatorHex(ctx context.Context, val int) (string, error) {
+	json, err := c.Validators[val].ReadFile(ctx, "config/priv_validator_key.json")
+	if err != nil {
+		return "", err
+	}
+	providerHex := gjson.GetBytes(json, "address").String()
+	return providerHex, nil
 }
