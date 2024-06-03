@@ -250,21 +250,15 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
-      # - name: Compress and upload files
-      #   run: |
-      #     cd /home/runner/genesis-export/
-      #     echo "Compressing theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json ..."
-      #     gzip theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json
-      #     echo "Uploading exported genesis to files.polypore.xyz"
-      #     scp theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-export/
-      #     echo "Compressing ~/.gaia ..."
-      #     cd /home/runner/
-      #     tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
-      #     echo "Uploading archived state to files.polypore.xyz"
-      #     scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
-      #     # Update latest file symlinks
-      #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz /var/www/html/genesis/theta-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
-      #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
+      - name: Compress and upload files
+        run: |
+          echo "Compressing ~/.gaia ..."
+          cd /home/runner/
+          tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
+          echo "Uploading archived state to files.polypore.xyz"
+          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet/
+          # Update latest file symlinks
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/theta-testnet/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/theta-testnet/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -513,11 +507,6 @@ jobs:
           tail -30 /home/runner/artifact/gaiad_upgrade.log
       - name: Compress and upload files
         run: |
-          cd /home/runner/genesis-export/
-          echo "Compressing rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json ..."
-          gzip rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json
-          echo "Uploading exported genesis to files.polypore.xyz"
-          scp rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-export/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
