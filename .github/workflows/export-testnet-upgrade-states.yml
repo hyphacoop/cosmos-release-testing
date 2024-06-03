@@ -101,20 +101,16 @@ jobs:
           TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
           TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
           TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
-          HALT_HEIGHT=$[$CURRENT_BLOCK+50]
           sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
           sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
-          sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "Replaceing genesis..."
           wget -nv $GENESIS_URL -O genesis.json.gz
           gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
-          echo "halt-height set to: $HALT_HEIGHT"
-          echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
       - name: Archive config files
         env:
           NODE_HOME: /home/runner/.gaia
@@ -124,6 +120,8 @@ jobs:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
         run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Syncing Chain
         run: |
           catching_up="true"
@@ -134,6 +132,10 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
+      - name: Stop gaiad
+        run: |
+          killall gaiad screen
+          sleep 10s
       # - name: Tinker Genesis
       #   run: |
       #     source /home/runner/env/bin/activate
@@ -251,17 +253,17 @@ jobs:
       # - name: Compress and upload files
       #   run: |
       #     cd /home/runner/genesis-export/
-      #     echo "Compressing theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
-      #     gzip theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+      #     echo "Compressing theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json ..."
+      #     gzip theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json
       #     echo "Uploading exported genesis to files.polypore.xyz"
-      #     scp theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-export/
+      #     scp theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/theta-testnet-export/
       #     echo "Compressing ~/.gaia ..."
       #     cd /home/runner/
       #     tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
       #     echo "Uploading archived state to files.polypore.xyz"
       #     scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
       #     # Update latest file symlinks
-      #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/theta-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+      #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/theta-testnet-export/theta-genesis-export_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz /var/www/html/genesis/theta-testnet-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
       #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
@@ -361,19 +363,15 @@ jobs:
           TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
           TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
           TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
-          HALT_HEIGHT=$[$CURRENT_BLOCK+50]
           sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
           sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
-          sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "Replaceing genesis..."
           wget -nv $GENESIS_URL -O genesis.json
           mv genesis.json $NODE_HOME/config/genesis.json
-          echo "halt-height set to: $HALT_HEIGHT"
-          echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
       - name: Archive config files
         env:
           NODE_HOME: /home/runner/.gaia
@@ -383,6 +381,8 @@ jobs:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
         run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Syncing Chain
         run: |
           catching_up="true"
@@ -393,6 +393,10 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
+      - name: Stop gaiad
+        run: |
+          killall gaiad screen
+          sleep 10s
       # - name: Tinker Genesis
       #   run: |
       #     source /home/runner/env/bin/activate
@@ -510,17 +514,17 @@ jobs:
       - name: Compress and upload files
         run: |
           cd /home/runner/genesis-export/
-          echo "Compressing rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json ..."
-          gzip rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json
+          echo "Compressing rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json ..."
+          gzip rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json
           echo "Uploading exported genesis to files.polypore.xyz"
-          scp rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-export/
+          scp rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz gh-actions@files.polypore.xyz:/var/www/html/genesis/rs-testnet-provider-export/
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           tar czf ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz .gaia
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/rs-testnet-provider/
           # Update latest file symlinks
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.HALT_HEIGHT }}.json.gz /var/www/html/genesis/rs-testnet-provider-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz /var/www/html/genesis/rs-testnet-provider-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
