@@ -8,7 +8,7 @@ gaia:
   gas-adjustment: 2.0
   trusting-period: 504h
   images:
-    - repository: ghcr.io/strangelove-ventures/heighliner/gaia
+    - repository: ghcr.io/hyphacoop/gaia
       uid-gid: 1025:1025
   no-host-mount: false
 
@@ -50,6 +50,6 @@ ics-consumer:
   gas-adjustment: 2.0
   trusting-period: 96h
   images:
-    - repository: ghcr.io/strangelove-ventures/heighliner/ics
+    - repository: ghcr.io/hyphacoop/ics
       uid-gid: 1025:1025
   no-host-mount: false

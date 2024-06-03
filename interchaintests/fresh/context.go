@@ -31,7 +31,7 @@ type Config struct {
 	StartVersion     string `envconfig:"START_VERSION" default:"v15.1.0"`
 	UpgradeVersion   string `envconfig:"UPGRADE_VERSION" default:"main"`
 	TargetVersion    string `envconfig:"TARGET_VERSION" default:"v16"`
-	DockerRepository string `envconfig:"DOCKER_REPOSITORY" default:"gaia"`
+	DockerRepository string `envconfig:"DOCKER_REPOSITORY" default:"ghcr.io/hyphacoop/gaia"`
 }
 
 type dockerContext struct {
