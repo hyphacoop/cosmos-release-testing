@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 on Monday.
     - cron: '30 5 * * 1'
-  # push:
+  push:
 # concurrency:
 #   group: self-hosted-runners
 
@@ -99,13 +99,11 @@ jobs:
           TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
           TRUST_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block\?height\=$TRUST_HEIGHT)
           TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
-          HALT_HEIGHT=$[$CURRENT_BLOCK+50]
           sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
           sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"${{ vars.SYNC_RPC_1 }},${{ vars.SYNC_RPC_2 }}\"^" $NODE_HOME/config/config.toml
-          sed -i -e "/halt-height =/ s^= .*^= \"$HALT_HEIGHT\"^" $NODE_HOME/config/app.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
@@ -113,28 +111,50 @@ jobs:
           wget -nv $GENESIS_URL -O genesis.json.gz
           gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
-          echo "halt-height set to: $HALT_HEIGHT"
-          echo "HALT_HEIGHT=$HALT_HEIGHT" >> $GITHUB_ENV
       - name: Archive config files
         env:
           NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/cosmoshub-4 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/cosmoshub-4/
-      - name: Get archive url
-        run: |
-          # Node Stake
-          SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
-          echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
-          # Polkachu
-          # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
-          # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
-      - name: Download snapshot
-        run: |
-          rm -rf /home/runner/.gaia/data
-          # Node Stake addrbook
+      # - name: Get archive url
+      #   run: |
+      #     # Node Stake
+      #     SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+      #     echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
+      #     # Polkachu
+      #     # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
+      #     # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
+      # - name: Download snapshot
+      #   run: |
+      #     rm -rf /home/runner/.gaia/data
+      #     # Node Stake addrbook
+      #     curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
+      #     # Polkachu addr book
+      #     # curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
+      #     curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
+      - name: Get addrbook
+        run:
           curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
-          # Polkachu addr book
-          # curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
-          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -c -d - | tar -xv -C /home/runner/.gaia/
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Syncing Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:26657/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
+      - name: Stop gaiad
+        run: |
+          killall gaiad screen
+          sleep 10s
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -148,12 +168,9 @@ jobs:
           git checkout ${{ env.FORK_TOOL_TAG }}
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
-      # - name: Start Chain
-      #   env:
-      #     NODE_HOME: /home/runner/.gaia
-      #   run: |
-      #     curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
-      #     /usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
@@ -167,7 +184,6 @@ jobs:
           sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
-          sed -i -e "/halt-height =/ s^= .*^= \"0\"^" $NODE_HOME/config/app.toml
           screen -L -Logfile /home/runner/artifact/gaiad_fork.log -S gaiad -d -m /home/runner/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --validator-pubkey "$pubkey" --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl --validator-privkey "$privkey" --home /home/runner/.gaia
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
