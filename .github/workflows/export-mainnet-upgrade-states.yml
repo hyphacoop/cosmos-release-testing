@@ -134,7 +134,7 @@ jobs:
       - name: gaiad tendermint unsafe-reset-all
         run: gaiad tendermint unsafe-reset-all
       - name: Get addrbook
-        run: curl -Ls https://ss.cosmos.nodestake.org/addrbook.json > /home/runner/.gaia/config/addrbook.json
+        run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
