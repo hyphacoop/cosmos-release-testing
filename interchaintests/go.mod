@@ -9,7 +9,7 @@ replace (
 	github.com/cosmos/interchain-security/v4 => github.com/cosmos/interchain-security/v4 v4.2.0-lsm-rc0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/misko9/go-substrate-rpc-client/v4 => github.com/faddat/go-substrate-rpc-client/v4 v4.0.1-0.20240402155230-48db8c110afe
-	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240605143657-0c54e5d3709c
+	github.com/strangelove-ventures/interchaintest/v7 => github.com/hyphacoop/interchaintest/v7 v7.0.1-0.20240610153824-9ccc5551034a
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
 )
 
