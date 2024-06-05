@@ -80,7 +80,7 @@ jobs:
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-theta-stateful-workflow
-      archive_url: https://files.polypore.xyz/archived-state/ics-testnet-provider/latest_v17.tar.gz
+      archive_url: https://files.polypore.xyz/archived-state/theta-testnet/latest_v17.tar.gz
     uses: ./.github/workflows/upgrade-gaia-v18-stateful-steps.yml
   test-upgrade-ics-testnet:
     needs: set-version-matrix
