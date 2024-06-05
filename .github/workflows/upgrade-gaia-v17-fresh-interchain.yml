@@ -89,23 +89,14 @@ jobs:
         with:
           cache-dependency-path: |
             interchaintests/go.sum
-      - name: Build docker images
-        run: |
-          curl -L https://github.com/strangelove-ventures/heighliner/releases/download/v${{env.HEIGHLINER_VERSION}}/heighliner_${{env.HEIGHLINER_VERSION}}_linux_amd64.tar.gz | tar -xz -C /usr/local/bin heighliner
-          heighliner build --git-ref ${{ matrix.gaia_version }} --chain gaia
-          heighliner build --git-ref ${{ matrix.upgrade_version }} --chain gaia
-          # Build ics images that are not available upstream
-          heighliner build --chain ics --git-ref v4.1.1
-          docker tag ics:v4.1.1 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
-          heighliner build --chain ics --git-ref v4.2.0-lsm-rc0
-          docker tag ics:v4.2.0-lsm-rc0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0
       - name: Test ${{ matrix.test_name }}
         env:
           TEST_START_VERSION: ${{ matrix.gaia_version }}
           TEST_UPGRADE_VERSION: ${{ matrix.upgrade_version }}
           TEST_TARGET_VERSION: ${{ env.TARGET_VERSION }}
-          TEST_DOCKER_REPOSITORY: "gaia"
           CONTAINER_LOG_TAIL: "150"
         run: |
+          # Horrid hack. It's not in the strangelove repo, and I haven't implemented making it configurable for genesis-transform.
+          docker pull ghcr.io/hyphacoop/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
           cd interchaintests
           go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
