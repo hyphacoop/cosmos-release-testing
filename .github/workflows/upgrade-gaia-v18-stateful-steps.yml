@@ -182,7 +182,15 @@ jobs:
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
       - name: Query unbonding time
-        run: $CHAIN_BINARY --home $HOME_1 q staking params
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q staking params
+          unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.unbonding_time' | sed 's/.$//')
+          echo "UNBONDING_TIME=$unbonding" >> $GITHUB_ENV
+      - name: Update templates/proposal-add-template.json unbonding time
+        run: |
+          unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000*1000*1000" | bc)
+          jq ". .unbonding_period=$unbonding_period" templates/proposal-add-template.json > proposal-add-template.json
+          mv proposal-add-template.json templates/proposal-add-template.json
       - name: Set voting period to 60s
         env:
           VOTING_PERIOD: "20s"
