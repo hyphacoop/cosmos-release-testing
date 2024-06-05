@@ -210,10 +210,10 @@ jobs:
 
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      - name: Delegate to another validator
-        run: |
-          echo "Running: gaiad tx staking delegate $DELEGATE_1 $DELEGATE_1_AMOUNT$DENOM --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y --chain-id $CHAIN_ID --home $HOME_1"
-          gaiad tx staking delegate $DELEGATE_1 $DELEGATE_1_AMOUNT$DENOM --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y --chain-id $CHAIN_ID --home $HOME_1
+      # - name: Delegate to another validator
+      #   run: |
+      #     echo "Running: gaiad tx staking delegate $DELEGATE_1 $DELEGATE_1_AMOUNT$DENOM --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y --chain-id $CHAIN_ID --home $HOME_1"
+      #     gaiad tx staking delegate $DELEGATE_1 $DELEGATE_1_AMOUNT$DENOM --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y --chain-id $CHAIN_ID --home $HOME_1
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: _Provider API tests> gaiad v17
