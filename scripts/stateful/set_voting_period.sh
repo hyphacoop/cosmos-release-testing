@@ -8,7 +8,7 @@ prop_file=$1
 
 # Change Voting Period
 echo "Setting Voting Period"
-proposal="$CHAIN_BINARY tx gov submit-proposal $prop_file --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
+proposal="$CHAIN_BINARY tx gov submit-proposal param-change $prop_file --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
 echo $proposal
 gaiadout=$($proposal)
 echo "gaiad output:"
