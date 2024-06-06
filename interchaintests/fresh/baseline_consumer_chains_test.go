@@ -5,7 +5,6 @@ import (
 
 	"github.com/hyphacoop/cosmos-release-testing/interchaintests/fresh"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/mod/semver"
 )
 
 func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, shouldCopyProviderKey [fresh.NUM_VALIDATORS]bool) {
@@ -31,10 +30,6 @@ func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, sh
 	require.NoError(t, fresh.SetEpoch(ctx, provider, 1))
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
 	fresh.IBCTest(ctx, t, provider, consumer, provider.Relayer)
-
-	if semver.Compare(fresh.GetConfig(ctx).TargetVersion, "v17") >= 0 {
-		consumerConfig.TopN = 95
-	}
 
 	consumer2 := provider.AddConsumerChain(ctx, t, consumerConfig)
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer2, provider.Relayer, 1)
