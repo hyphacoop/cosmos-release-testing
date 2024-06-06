@@ -1,14 +1,30 @@
 {
-    "title": "Set the voting period to 1 minute",
-    "description": "If successful, the voting period will be changed to 1 minute",
-    "summary": "This proposal will set the voting period to 1 minute",
-    "changes": [
-        {
-        "subspace": "gov",
-        "key": "votingparams",
-        "value": {"voting_period":"60000000000"}
-        }
+    "messages": [
+     {
+      "@type": "/cosmos.gov.v1.MsgUpdateParams",
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "params": {
+       "min_deposit": [
+           {
+               "denom": "uatom",
+               "amount": "100000000"
+           }
+       ],
+       "max_deposit_period": "3600s",
+       "voting_period": "60s",
+       "quorum": "0.334000000000000000",
+       "threshold": "0.500000000000000000",
+       "veto_threshold": "0.334000000000000000",
+       "min_initial_deposit_ratio": "0.100000000000000000",
+       "burn_vote_quorum": false,
+       "burn_proposal_deposit_prevote": false,
+       "burn_vote_veto": true,
+       "min_deposit_ratio": "0.010000000000000000"
+      }
+     }
     ],
+    "metadata": "ipfs://CID",
     "deposit": "1000000000uatom",
-    "metadata": "ipfs://CID"
-}
+    "title": "Set a 60s voting period",
+    "summary": "Change the following gov module parameters:\r\n* Minimum deposit: 100 ATOM\r\n* Voting period: 60s minutes"
+   }

@@ -6,6 +6,8 @@
 # get prop file from arg
 prop_file=$1
 
+timeout=$(echo "$COMMIT_TIMEOUT * 2" | bc)
+
 # Change Blocks per Epoch
 echo "Setting Blocks per Epoch"
 proposal="$CHAIN_BINARY tx gov submit-legacy-proposal param-change $prop_file --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
@@ -16,7 +18,7 @@ echo "$gaiadout"
 
 txhash=$(echo "$gaiadout" | jq -r .txhash)
 # Wait for the proposal to go on chain
-sleep 12
+sleep $timeout
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
@@ -28,7 +30,7 @@ $CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJU
 $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
 echo "Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
-sleep 12
+timeout=$(echo "$COMMIT_TIMEOUT * 2" | bc)
 
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
 echo "$CHAIN_BINARY q params subspace provider BlocksPerEpoch --home $HOME_1"
