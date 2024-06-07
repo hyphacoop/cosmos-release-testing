@@ -181,6 +181,12 @@ jobs:
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Query unbonding time
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
