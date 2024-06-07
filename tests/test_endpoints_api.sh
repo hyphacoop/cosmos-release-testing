@@ -99,6 +99,9 @@ if [ "$RESPONSE" != "info" ]; then
 fi
 
 echo "> $STAKING_DELEGATIONS"
+echo "DEBUG:"
+curl $STAKING_DELEGATIONS
+echo "END DEBUG"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $STAKING_DELEGATIONS | jq -r '. | keys[0]')
 if [ "$RESPONSE" != "delegation_responses" ]; then
     response_failed $RESPONSE
