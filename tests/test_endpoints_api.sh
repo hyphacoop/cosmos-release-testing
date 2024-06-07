@@ -4,9 +4,9 @@ host=$1
 port=$2
 NODE_ADDRESS=http://$host:$port
 
-TEST_ACCOUNT="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl"
-VAL_ACCOUNT="cosmosvaloper1arjwkww79m65csulawqngr7ngs4uqu5hr3frxw"
-DEL_ACCOUNT="cosmos1arjwkww79m65csulawqngr7ngs4uqu5hx9ak2a"
+TEST_ACCOUNT="cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq"
+VAL_ACCOUNT="cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv"
+# DEL_ACCOUNT="cosmos1arjwkww79m65csulawqngr7ngs4uqu5hx9ak2a"
 DENOM="uatom"
 PROPOSAL_ID="1"
 AUTH_ACCOUNTS="$NODE_ADDRESS/cosmos/auth/v1beta1/accounts"

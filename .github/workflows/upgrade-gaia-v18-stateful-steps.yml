@@ -181,12 +181,16 @@ jobs:
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
-      - name: DEBUG
+      - name: Get starting balances
         run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+          wallets=$(gaiad keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: Query unbonding time
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
