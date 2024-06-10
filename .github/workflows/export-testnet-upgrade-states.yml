@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 on Saturdays.
     - cron: '30 5 * * 6'
-  push:
+  # push:
 # concurrency:
 #   group: self-hosted-runners
 
