@@ -124,7 +124,6 @@ jobs:
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
-          rm -rf /home/runner/.gaia/data
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C /home/runner/.gaia/ --strip-components=1
       - name: Get addrbook
         run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
