@@ -19,8 +19,16 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/mod/semver"
 )
+
+func hasOrderingFlag(ctx context.Context, controller Chain) (bool, error) {
+	cmd := controller.GetNode().BinCommand("tx", "interchain-accounts", "controller", "register", "--help")
+	stdout, _, err := controller.GetNode().Exec(ctx, cmd, nil)
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(stdout), "ordering"), nil
+}
 
 func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer ibc.Relayer, srcAddress string, valIdx int, initialFunds int64) (string, error) {
 	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
@@ -29,10 +37,12 @@ func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer 
 	}
 	srcConnection := srcChannel.ConnectionHops[0]
 
-	GetLogger(ctx).Sugar().Infof("VERSION IS: %s", controller.GetNode().GetBuildInformation(ctx).Version)
-	if semver.Compare(semver.Major(controller.GetNode().GetBuildInformation(ctx).Version), "v17") > 0 ||
-		// if we can't parse it (maybe this is a branch build), just assume it's a new version
-		!semver.IsValid(controller.GetNode().GetBuildInformation(ctx).Version) {
+	hasOrdering, err := hasOrderingFlag(ctx, controller)
+	if err != nil {
+		return "", err
+	}
+
+	if hasOrdering {
 		_, err = controller.Validators[valIdx].ExecTx(ctx, srcAddress,
 			"interchain-accounts", "controller", "register",
 			"--ordering", "ORDER_ORDERED",
