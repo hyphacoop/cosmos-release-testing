@@ -75,10 +75,10 @@ func TestWasm(t *testing.T) {
 	_, err = chain.GetNode().ExecTx(ctx, interchaintest.FaucetAccountKeyName,
 		"wasm", "execute", contractAddr, increment,
 	)
-	require.Error(t, err)
+	require.NoError(t, err)
 
 	countAfter := chain.QueryJSON(ctx, t, "data.count", "wasm", "contract-state", "smart", contractAddr, query).Int()
-	require.Equal(t, count, countAfter)
+	require.Equal(t, int64(101), countAfter)
 
 	txhash, err = chain.GetNode().ExecTx(ctx, interchaintest.FaucetAccountKeyName,
 		"wasm", "submit-proposal", "execute-contract",
@@ -96,5 +96,5 @@ func TestWasm(t *testing.T) {
 	require.NoError(t, err)
 
 	count = chain.QueryJSON(ctx, t, "data.count", "wasm", "contract-state", "smart", contractAddr, query).Int()
-	require.Equal(t, int64(101), count)
+	require.Equal(t, int64(102), count)
 }
