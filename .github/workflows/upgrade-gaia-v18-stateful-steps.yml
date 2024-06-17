@@ -448,7 +448,7 @@ jobs:
           echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
           max_bytes=$(curl -s 127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
           echo "Current max_bytes value is: $max_bytes"
-          export BLOCK_SIZE=$("$max_bytes * 0.6" | bc)
+          export BLOCK_SIZE=$(echo "$max_bytes * 0.6 / 1" | bc)
           echo "Setting tx block size to: $BLOCK_SIZE"
           echo "while true; do scripts/stateful/ibc_transfer_block_size.sh $BLOCK_SIZE; sleep 1; done" > $HOME/ibc_transfer_block_size_service.sh
           chmod +x $HOME/ibc_transfer_block_size_service.sh
@@ -458,7 +458,7 @@ jobs:
           screen -r ibc_transfer_block_size -p0 -X logfile flush 0
       - name: Get output of IBC transfer block size script
         run: |
-          sleep 30
+          sleep 60
           cat $HOME/artifact/ibc_transfer_block_size.log
       - name: DEBUG
         run: |
