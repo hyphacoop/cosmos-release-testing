@@ -386,7 +386,21 @@ jobs:
             echo "BlocksPerEpoch is not 100"
             exit 1
           fi
-
+      - name: Start IBC transfer
+        run: |
+          echo "Set up screen service"
+          echo "while true; do scripts/stateful/ibc_transfer_block_size.sh 1000; sleep 1; done" > $HOME/ibc_transfer_block_size_service.sh
+          chmod +x $HOME/ibc_transfer_block_size_service.sh
+          echo "Starting $HOME/ibc_transfer_block_size_service.sh"
+          screen -L -Logfile $HOME/artifact/ibc_transfer_block_size.log -S ibc_transfer_block_size -d -m bash $HOME/ibc_transfer_block_size_service.sh
+          # set screen to flush log to 0
+          screen -r ibc_transfer_block_size -p0 -X logfile flush 0
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       # - name: Initialize consumer chain b with ICS v4.0.0
       #   env:
       #     CONSUMER_CHAIN_ID: consumerb

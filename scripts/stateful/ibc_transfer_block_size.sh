@@ -9,16 +9,16 @@ BATCH_SIZE=10
 echo "Memo size: $MEMO_SIZE"
 echo "Recv size: $RECIPIENT_SIZE"
 
-CHAIN_BINARY=gaiad-test
-ADDRESS=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-CHANNEL=channel-0
-DENOM=uatom
+CHAIN_BINARY=$CHAIN_BINARY
+ADDRESS=$WALLET_2
+CHANNEL=$CONSUMERA_CHAN_ID
+DENOM=$DENOM
 ACCOUNT=0
 GAS=2500000
 GAS_PRICE=0.005$DENOM
-CHAIN_ID=testnet
-NODE_URL=http://localhost:27001
-NODE_HOME=/root/.val1
+# CHAIN_ID=testnet
+NODE_URL=http://localhost:$VAL1_RPC_PORT
+NODE_HOME=$CHAIN_ID
 
 # Get the current block number
 current_block() {
