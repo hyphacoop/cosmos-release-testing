@@ -445,8 +445,8 @@ jobs:
             mkdir temp
           fi
           export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
-          max_bytes=$(curl -s 127.0.0.1:VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
           echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
+          max_bytes=$(curl -s 127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
           echo "Current max_bytes value is: $max_bytes"
           export BLOCK_SIZE=$("$max_bytes * 0.6" | bc)
           echo "Setting tx block size to: $BLOCK_SIZE"
@@ -456,6 +456,10 @@ jobs:
           screen -L -Logfile $HOME/artifact/ibc_transfer_block_size.log -S ibc_transfer_block_size -d -m bash $HOME/ibc_transfer_block_size_service.sh
           # set screen to flush log to 0
           screen -r ibc_transfer_block_size -p0 -X logfile flush 0
+      - name: Get output of IBC transfer block size script
+        run: |
+          sleep 30
+          cat $HOME/artifact/ibc_transfer_block_size.log
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
