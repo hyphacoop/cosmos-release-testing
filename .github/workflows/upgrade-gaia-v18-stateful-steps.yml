@@ -440,12 +440,17 @@ jobs:
       - name: Start IBC transfer
         run: |
           echo "Set up screen service"
-          if [ -d temp ]
+          if [ ! -d temp ]
           then
             mkdir temp
           fi
-          ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq -o json | jq -r '.account_number')
-          echo "while true; do scripts/stateful/ibc_transfer_block_size.sh 1000; sleep 1; done" > $HOME/ibc_transfer_block_size_service.sh
+          export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
+          max_bytes=$(curl -s 127.0.0.1:VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
+          echo "Current max_bytes value is: $max_bytes"
+          export BLOCK_SIZE=$("$max_bytes * 0.6" | bc)
+          echo "Setting tx block size to: $BLOCK_SIZE"
+          echo "while true; do scripts/stateful/ibc_transfer_block_size.sh $BLOCK_SIZE; sleep 1; done" > $HOME/ibc_transfer_block_size_service.sh
           chmod +x $HOME/ibc_transfer_block_size_service.sh
           echo "Starting $HOME/ibc_transfer_block_size_service.sh"
           screen -L -Logfile $HOME/artifact/ibc_transfer_block_size.log -S ibc_transfer_block_size -d -m bash $HOME/ibc_transfer_block_size_service.sh
