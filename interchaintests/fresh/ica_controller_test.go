@@ -1,4 +1,4 @@
-package v16_test
+package fresh_test
 
 import (
 	"testing"
@@ -7,16 +7,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestV16UpgradeICAController(t *testing.T) {
+func TestICAController(t *testing.T) {
 	ctx, err := fresh.NewTestContext(t)
 	require.NoError(t, err)
+	alreadyUpgraded := false
 	if fresh.GetConfig(ctx).TargetVersion != "v16" {
-		t.Skip("Test is only for v16.0.0")
+		alreadyUpgraded = true
 	}
 
 	controller, host, relayer := fresh.CreateLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion, fresh.DEFAULT_CHANNEL_VERSION)
 
-	fresh.ICAControllerTest(ctx, t, controller, host, relayer, false)
+	fresh.ICAControllerTest(ctx, t, controller, host, relayer, alreadyUpgraded)
 
 	fresh.UpgradeChain(ctx, t, controller, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
 

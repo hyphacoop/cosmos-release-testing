@@ -24,7 +24,7 @@ func TestLSMAfterUpgrade(t *testing.T) {
 	strideVals, err := fresh.GetValidatorWallets(ctx, stride)
 	require.NoError(t, err)
 
-	icaAddr, err := fresh.SetupICAAccount(ctx, stride, provider, provider.Relayer, strideVals[0].Address, 1_000_000_000)
+	icaAddr, err := fresh.SetupICAAccount(ctx, stride, provider, provider.Relayer, strideVals[0].Address, 0, 1_000_000_000)
 	require.NoError(t, err)
 
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, provider.Relayer, 1)

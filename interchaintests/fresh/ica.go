@@ -21,17 +21,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer ibc.Relayer, srcAddress string, initialFunds int64) (string, error) {
+func hasOrderingFlag(ctx context.Context, controller Chain) (bool, error) {
+	cmd := controller.GetNode().BinCommand("tx", "interchain-accounts", "controller", "register", "--help")
+	stdout, _, err := controller.GetNode().Exec(ctx, cmd, nil)
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(stdout), "ordering"), nil
+}
+
+func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer ibc.Relayer, srcAddress string, valIdx int, initialFunds int64) (string, error) {
 	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
 	if err != nil {
 		return "", err
 	}
 	srcConnection := srcChannel.ConnectionHops[0]
 
-	_, err = controller.Validators[0].ExecTx(ctx, srcAddress,
-		"interchain-accounts", "controller", "register",
-		srcConnection,
-	)
+	hasOrdering, err := hasOrderingFlag(ctx, controller)
+	if err != nil {
+		return "", err
+	}
+
+	if hasOrdering {
+		_, err = controller.Validators[valIdx].ExecTx(ctx, srcAddress,
+			"interchain-accounts", "controller", "register",
+			"--ordering", "ORDER_ORDERED",
+			srcConnection,
+		)
+	} else {
+		_, err = controller.Validators[valIdx].ExecTx(ctx, srcAddress,
+			"interchain-accounts", "controller", "register",
+			srcConnection,
+		)
+	}
 	if err != nil {
 		return "", err
 	}
@@ -57,14 +79,29 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 	const amountToSend = int64(3_300_000_000)
 	wallets, err := GetValidatorWallets(ctx, controller)
 	require.NoError(t, err)
-	srcAddress := wallets[0].Address
+	valIdx := 0
 
-	icaAddress, err := SetupICAAccount(ctx, controller, host, relayer, srcAddress, amountToSend)
-	if !isUpgraded {
-		require.Error(t, err)
-		return
+	var icaAddress, srcAddress string
+	for ; valIdx < len(wallets); valIdx++ {
+		srcAddress = wallets[valIdx].Address
+		icaAddress, err = SetupICAAccount(ctx, controller, host, relayer, srcAddress, valIdx, amountToSend)
+		if !isUpgraded {
+			require.Error(t, err)
+			return
+		} else if err == nil {
+			break
+		} else if strings.Contains(err.Error(), "active channel already set for this owner") {
+			GetLogger(ctx).Sugar().Warnf("error setting up ICA account: %s", err)
+			valIdx++
+			continue
+		}
+		// if we get here, fail the test. Unexpected error.
+		require.NoError(t, err)
 	}
-	require.NoError(t, err)
+	if icaAddress == "" {
+		// this'll happen if every validator has an ICA account already
+		require.Fail(t, "unable to create ICA account")
+	}
 
 	srcChannel, err := GetTransferChannel(ctx, relayer, controller, host)
 	require.NoError(t, err)
@@ -101,7 +138,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 
 	srcConnection := srcChannel.ConnectionHops[0]
 
-	sendICATx(ctx, t, controller, srcAddress, dstAddress, icaAddress, srcConnection, icaAmount, ibcStakeDenom)
+	sendICATx(ctx, t, controller, valIdx, srcAddress, dstAddress, icaAddress, srcConnection, icaAmount, ibcStakeDenom)
 
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		recipientBalanceAfter, err := host.GetBalance(ctx, dstAddress, ibcStakeDenom)
@@ -111,7 +148,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 	}, 10*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 }
 
-func sendICATx(ctx context.Context, t *testing.T, controller Chain, srcAddress string, dstAddress string, icaAddress string, srcConnection string, amount int64, denom string) {
+func sendICATx(ctx context.Context, t *testing.T, controller Chain, valIdx int, srcAddress string, dstAddress string, icaAddress string, srcConnection string, amount int64, denom string) {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
@@ -129,9 +166,9 @@ func sendICATx(ctx context.Context, t *testing.T, controller Chain, srcAddress s
 	})
 	require.NoError(t, err)
 	msgPath := "msg.json"
-	require.NoError(t, controller.Validators[0].WriteFile(ctx, msg, msgPath))
-	msgPath = controller.Validators[0].HomeDir() + "/" + msgPath
-	_, err = controller.Validators[0].ExecTx(ctx, srcAddress,
+	require.NoError(t, controller.Validators[valIdx].WriteFile(ctx, msg, msgPath))
+	msgPath = controller.Validators[valIdx].HomeDir() + "/" + msgPath
+	_, err = controller.Validators[valIdx].ExecTx(ctx, srcAddress,
 		"interchain-accounts", "controller", "send-tx",
 		srcConnection, msgPath,
 	)
@@ -146,7 +183,7 @@ func GetICAAddress(ctx context.Context, controller Chain, srcAddress string, src
 	defer timeoutCancel()
 	for timeoutCtx.Err() == nil {
 		time.Sleep(5 * time.Second)
-		stdout, _, err := controller.Validators[0].ExecQuery(timeoutCtx,
+		stdout, _, err := controller.GetNode().ExecQuery(timeoutCtx,
 			"interchain-accounts", "controller", "interchain-account",
 			srcAddress, srcConnection,
 		)
