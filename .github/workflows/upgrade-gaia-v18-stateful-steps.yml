@@ -463,7 +463,6 @@ jobs:
       - name: Get output of IBC transfer block size script
         run: |
           cat $HOME/artifact/ibc_transfer_block_size.log
-      - name: 
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
