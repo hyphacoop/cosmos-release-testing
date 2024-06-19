@@ -49,6 +49,7 @@ jobs:
       VAL1_GRPC_PORT: 26001
       VAL1_P2P_PORT: 28001
       VAL1_PPROF_PORT: 6061
+      VAL1_PROM_PORT: 26660
       WALLET_1: ${{ vars.WALLET_1 }}
       WALLET_2: ${{ vars.WALLET_2 }}
       WALLET_4: ${{ vars.WALLET_4 }}
@@ -170,8 +171,7 @@ jobs:
       - name: Test software upgrade for main branch
         if: ${{ inputs.upgrade_version == 'main' }}
         env:
-          # DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          DOWNLOAD_URL: https://files.polypore.xyz/builds/non-static/gaiad/gaiad-main-3def471d8a8373a92ce512a2275a4946333898db
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
