@@ -15,12 +15,21 @@ curl -6 -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
 # jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
 # mv ./gov.json $HOME_1/config/genesis.json
 
-# Install Gaia binary
-CHAIN_BINARY_URL=$DOWNLOAD_URL
-echo "Installing Gaia..."
-mkdir -p $HOME/go/bin
-wget -nv $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY
-chmod +x $HOME/go/bin/$CHAIN_BINARY
+# # Install Gaia binary
+# CHAIN_BINARY_URL=$DOWNLOAD_URL
+# echo "Installing Gaia..."
+# mkdir -p $HOME/go/bin
+# wget -nv $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY
+# chmod +x $HOME/go/bin/$CHAIN_BINARY
+
+# Build Gaia binary
+echo "Building gaiad branch: $UPGRADE_VERSION"
+git clone https://github.com/cosmos/gaia.git
+cd gaia
+git checkout $UPGRADE_VERSION
+make build
+cp build/gaiad $HOME/go/bin/$CHAIN_BINARY
+cd ..
 
 # Printing Gaia binary checksum
 echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)

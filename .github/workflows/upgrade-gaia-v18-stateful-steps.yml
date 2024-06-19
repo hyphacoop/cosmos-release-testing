@@ -94,6 +94,7 @@ jobs:
       COMMIT_TIMEOUT: 5
       CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
       VESTING_TARGET: "1772414007"
+      UPGRADE_VERSION: ${{ inputs.upgrade_version }}
     steps:
       # Get system info
       - run: ifconfig
@@ -130,6 +131,10 @@ jobs:
           BUILD_TAG=gaiad-linux-${{inputs.upgrade_version}}
           TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
           echo TARGET_COMMIT: $TARGET_COMMIT
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
       - name: Consumer chain binary URLs
         run: |
           echo "$CONSUMER_CHAIN_BINARY runs off $CONSUMER_CHAIN_BINARY_URL"
