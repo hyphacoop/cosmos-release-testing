@@ -102,7 +102,7 @@ else
     sudo systemctl stop $PROVIDER_SERVICE_3
 
     sudo apt install build-essential -y
-    wget https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
+    wget -q https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
     sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
     cd ~
     git clone https://github.com/cosmos/gaia.git
