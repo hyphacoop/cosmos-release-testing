@@ -106,6 +106,7 @@ else
     sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
     git clone https://github.com/cosmos/gaia.git
     cd gaia
+    git checkout v18.0.0-rc0
     make install
     cd ..
     # wget $DOWNLOAD_URL -O ./upgraded -q

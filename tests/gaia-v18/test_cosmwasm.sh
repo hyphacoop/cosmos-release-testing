@@ -44,7 +44,9 @@ echo "Contract address: $contract_address"
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
 echo "Count: $count"
 
-$CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1
+txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
+echo "Execute tx hash: $txhash"
+$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 sleep $((TIMEOUT_COMMIT*3))
 
 # Query
