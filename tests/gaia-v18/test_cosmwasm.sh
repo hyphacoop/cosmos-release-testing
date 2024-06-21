@@ -8,8 +8,8 @@ proposal="$CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     --label \"my first contract\" \
     --no-admin \
     --instantiate-nobody true \
-    --title "Store and instantiate CW template" \
-    --summary "This proposal will store and instantiate the cw template contract" \
+    --title \"Store and instantiate CW template\" \
+    --summary \"This proposal will store and instantiate the cw template contract\" \
     --from $WALLET_1 \
     --chain-id $CHAIN_ID \
     --gas 20000000 --gas-prices 0.005$DENOM \
