@@ -45,7 +45,7 @@ count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --hom
 echo "Count: $count"
 
 $CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1
-sleep $((TIMEOUT_COMMIT*2))
+sleep $((TIMEOUT_COMMIT*3))
 
 # Query
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
