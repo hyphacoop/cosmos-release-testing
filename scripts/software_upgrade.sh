@@ -100,9 +100,17 @@ else
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
     sudo systemctl stop $PROVIDER_SERVICE_3
-    wget $DOWNLOAD_URL -O ./upgraded -q
-    chmod +x ./upgraded
-    mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
+
+    sudo apt install build-essential -y
+    wget https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
+    cd ~
+    git clone https://github.com/cosmos/gaia.git
+    cd gaia
+    make install
+    # wget $DOWNLOAD_URL -O ./upgraded -q
+    # chmod +x ./upgraded
+    # mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
     sudo systemctl start $PROVIDER_SERVICE_1
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
