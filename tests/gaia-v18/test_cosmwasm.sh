@@ -3,21 +3,21 @@
 INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
-proposal="$CHAIN_BINARY tx wasm submit-proposal store-instantiate \
+txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     tests/gaia-v18/contract.wasm $INIT \
-    --label \"my first contract\" \
+    --label "my first contract" \
     --no-admin \
     --instantiate-nobody true \
-    --title \"Store and instantiate CW template\" \
-    --summary \"This proposal will store and instantiate the cw template contract\" \
+    --title "Store and instantiate CW template" \
+    --summary "This proposal will store and instantiate the cw template contract" \
     --from $WALLET_1 \
     --chain-id $CHAIN_ID \
     --gas 20000000 --gas-prices 0.005$DENOM \
     --deposit 10000000$DENOM -y \
-    --home $HOME_1"
+    --home $HOME_1 -o json | jq -r '.txhash')
 echo "Submitting the store-instantiate proposal..."
-echo $proposal
-txhash=$($proposal | jq -r .txhash)
+# echo $proposal
+# txhash=$($proposal | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "Getting proposal ID from txhash..."
