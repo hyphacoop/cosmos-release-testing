@@ -5,7 +5,7 @@ QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
 response=$($CHAIN_BINARY tx wasm store tests/gaia-v18/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1 | grep "cancelled transaction")
-echo $response
+echo "response: *$response*"
 
 txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     tests/gaia-v18/contract.wasm $INIT \
