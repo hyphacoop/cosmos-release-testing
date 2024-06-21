@@ -3306,4 +3306,9 @@
         - name: _Blocks produced after upgrade
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+
+        - name: _Test permissioned cosmwasm
+          run: |
+            tests/test_cosmwasm.sh
+
   
