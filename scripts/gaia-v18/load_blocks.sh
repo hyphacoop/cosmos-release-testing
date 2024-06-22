@@ -28,7 +28,7 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   echo "Num unconfirmed txs: $current_mempool_size"
 
   # SIGN TX
-  $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET_1 --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $NODE_HOME &>  signed.json
+  $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET_1 --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 &>  signed.json
 
   # BROADCAST TX
   $CHAIN_BINARY tx broadcast signed.json --node $NODE_URL &> broadcast.log
