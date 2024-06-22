@@ -68,12 +68,12 @@ jq -r ".app_state.gov.params.min_deposit[0].amount = \"1\"" ./voting.json > ./go
 fi
 
 echo "Patching genesis for 2m bytes block size..."
-jq -r '.consensus_params.block.max_bytes = "2000000"' $HOME_1/config/genesis.json  > ./blocksize.json
-cp ./blocksize.json $HOME_1/config/genesis.json
+jq -r '.consensus_params.block.max_bytes = "2000000"' $HOME_1/config/genesis.json  > blocksize.json
+cp blocksize.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for 100_000_000 gas..."
-jq -r '.consensus_params.block.max_gas = "100000000"' $HOME_1/config/genesis.json  > ./maxgas.json
-cp ./maxgas.json $HOME_1/config/genesis.json
+jq -r '.consensus_params.block.max_gas = "100000000"' $HOME_1/config/genesis.json  > maxgas.json
+cp maxgas.json $HOME_1/config/genesis.json
 
 echo "Setting slashing window to 10..."
 jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' ./gov.json > ./slashing.json
@@ -89,9 +89,10 @@ echo "Patching genesis for ICA messages..."
 # Gaia
 jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' slashing-2.json > ./ica_host.json
 mv ica_host.json $HOME_1/config/genesis.json
-# pd
+# jq '.app_state.interchainaccounts' $HOME_1/config/genesis.json
 
-jq '.app_state.interchainaccounts' $HOME_1/config/genesis.json
+echo "Consensus params:"
+jq 'consensus_params' $HOME_1/config/genesis.json
 
 echo "Patching config files..."
 # app.toml
