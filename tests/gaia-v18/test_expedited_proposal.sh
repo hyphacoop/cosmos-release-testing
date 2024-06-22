@@ -2,7 +2,7 @@
 
 # Calculate upgrade height
 echo "Calculate height for mock v19 upgrade expedited proposal"
-let voting_blocks_delta=15/$TIMEOUT_COMMIT+5
+let voting_blocks_delta=15/$COMMIT_TIMEOUT+5
 height=$(curl -s http://localhost:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
 echo "Current height: $height"
 upgrade_height=$(($height+$voting_blocks_delta))
