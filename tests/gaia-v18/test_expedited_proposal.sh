@@ -24,7 +24,20 @@ $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-pri
 echo "Sleeping for $EXPEDITED_PERIOD..."
 sleep $EXPEDITED_PERIOD
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq '.'
-echo "Status:"
-$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq -r '.status'
-echo "Upgrade plan:"
-$CHAIN_BINARY q upgrade plan --home $HOME_1 -o json | jq -r '.'
+status=$($CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq -r '.status')
+echo "Status: $status"
+if [[ "$status" == "PROPOSAL_STATUS_PASSED" ]]; then
+    echo "PASS: Expedited proposal passed."
+else
+    echo "FAIL: Expedited proposal did not pass."
+    exit 1
+fi
+
+upgrade_name=$($CHAIN_BINARY q upgrade plan --home $HOME_1 -o json | jq -r '.name')
+echo "Upgrade plan name: $upgrade_name"
+if [[ "$upgrade_name" == "v19" ]]; then
+    echo "PASS: Upgrade plan is set."
+else
+    echo "FAIL: Upgrade plan is not set."
+    exit 1
+fi
