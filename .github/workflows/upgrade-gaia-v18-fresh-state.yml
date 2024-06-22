@@ -3414,8 +3414,8 @@
             toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
             sudo systemctl restart $PROVIDER_SERVICE_1 --now
             sleep 15s
-            curl -s http://localhost:$VAL1_RPC_PORT/cosmos/consensus/v1/params
-            curl -s http://localhost:$VAL1_RPC_PORT/cosmos/consensus/v1/params | jq '.'
+            curl -s http://localhost:$VAL1_API_PORT/cosmos/consensus/v1/params
+            curl -s http://localhost:$VAL1_API_PORT/cosmos/consensus/v1/params | jq '.'
             echo "Loading mempool with large gas txs..."
             scripts/gaia-v18/load_blocks.sh 20000000 100
             echo "Loading mempool with txs..."
