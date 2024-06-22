@@ -3319,7 +3319,7 @@
           ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
         fail-fast: false
       env:
-        COMMIT_TIMEOUT: 60s
+        # COMMIT_TIMEOUT: 60s
         COSMOVISOR_VERSION: ${{ matrix.cv_version }}
         UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
         # Consumer chain variables
@@ -3381,7 +3381,7 @@
             START_VERSION: ${{matrix.gaia_version}}
           run: |
             export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-            scripts/start_chain.sh
+            scripts/start_chain_single_val.sh
         - name: Check Gaia log
           run: sudo journalctl -u $PROVIDER_SERVICE_1
         - name: Print Gaia version

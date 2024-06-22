@@ -6,19 +6,9 @@ ACCOUNT=0
 GAS_PRICE=0.01$DENOM
 NODE_URL=http://localhost:$VAL1_RPC_PORT
 
-# Get the current block number
-current_block() {
-  curl -s $NODE_URL/block | jq -r .result.block.header.height
-}
-
 # Get the size of the mempool
 mempool_size() {
   curl -s $NODE_URL/num_unconfirmed_txs?limit=1 | jq -r .result.n_txs
-}
-
-# Get the size of the latest block
-block_size() {
-  curl -s $NODE_URL/block?height=$1 | jq -r .result.block.data.txs | jq length
 }
 
 SEQUENCE=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/auth/v1beta1/accounts/$WALLET_1 | jq --raw-output ' .account.sequence')
