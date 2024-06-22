@@ -42,3 +42,7 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   fi
 
 done
+
+jq '.' unsigned.json
+jq '.' signed.json
+cat broadcast.log
