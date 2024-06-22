@@ -3417,7 +3417,7 @@
             echo "Loading mempool with large gas txs..."
             scripts/gaia-v18/load_blocks.sh 20000000 100
             echo "Loading mempool with txs..."
-            scripts/gaia-v18/load_blocks.sh 100000 4000
+            scripts/gaia-v18/load_blocks.sh 100000 5000
             curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
             echo "Clearing backlog of large gas txs..."
             sleep 5m

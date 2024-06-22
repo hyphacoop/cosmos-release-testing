@@ -1,5 +1,5 @@
 #!/bin/bash
-GAS=$1
+TX_GAS=$1
 TARGET_TXS=$2
 
 ACCOUNT=0
@@ -18,7 +18,7 @@ echo "Sequence: $SEQUENCE"
 $CHAIN_BINARY tx bank send \
 $WALLET_1 $WALLET_1 1$DENOM --from $WALLET_1 \
 --account-number $ACCOUNT \
---gas $GAS --gas-prices $GAS_PRICE \
+--gas $TX_GAS --gas-prices $GAS_PRICE \
 --generate-only  \
 --chain-id $CHAIN_ID \
 --node $NODE_URL &> unsigned.json
