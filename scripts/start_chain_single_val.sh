@@ -92,7 +92,7 @@ mv ica_host.json $HOME_1/config/genesis.json
 # jq '.app_state.interchainaccounts' $HOME_1/config/genesis.json
 
 echo "Consensus params:"
-jq 'consensus_params' $HOME_1/config/genesis.json
+jq '.consensus_params' $HOME_1/config/genesis.json
 
 echo "Patching config files..."
 # app.toml
