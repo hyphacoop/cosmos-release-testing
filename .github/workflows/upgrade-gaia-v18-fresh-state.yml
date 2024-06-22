@@ -3413,16 +3413,16 @@
           run: |
             echo "Loading mempool with large gas txs..."
             scripts/gaia-v18/load_blocks.sh 20000000 1
-            # scripts/gaia-v18/load_blocks.sh 20000000 50
-            # echo "Loading mempool with txs..."
-            # scripts/gaia-v18/load_blocks.sh 120000 4000
-            # curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
-            # echo "Clearing backlog of large gas txs..."
-            # sleep 5m
-            # curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
-            # echo "Clearing backlog of large gas txs..."
-            # sleep 5m
-            # curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
+            scripts/gaia-v18/load_blocks.sh 20000000 50
+            echo "Loading mempool with txs..."
+            scripts/gaia-v18/load_blocks.sh 120000 4000
+            curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
+            echo "Clearing backlog of large gas txs..."
+            sleep 5m
+            curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
+            echo "Clearing backlog of large gas txs..."
+            sleep 5m
+            curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
         
     v18-3-expedited:
       runs-on: ubuntu-22.04

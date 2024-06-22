@@ -43,6 +43,6 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
 
 done
 
-jq '.' unsigned.json
-jq '.' signed.json
-cat broadcast.log
+# jq '.' unsigned.json
+# jq '.' signed.json
+# cat broadcast.log
