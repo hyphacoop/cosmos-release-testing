@@ -67,6 +67,14 @@ jq -r ".app_state.gov.params.min_deposit[0].amount = \"1\"" ./voting.json > ./go
 
 fi
 
+echo "Patching genesis for 2m bytes block size..."
+jq -r '.consensus_params.block.max_bytes = "2000000"' $HOME_1/config/genesis.json  > ./blocksize.json
+cp ./blocksize.json $HOME_1/config/genesis.json
+
+echo "Patching genesis for 100_000_000 gas..."
+jq -r '.consensus_params.block.max_gas = "100000000"' $HOME_1/config/genesis.json  > ./maxgas.json
+cp ./maxgas.json $HOME_1/config/genesis.json
+
 echo "Setting slashing window to 10..."
 jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' ./gov.json > ./slashing.json
 jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json > slashing-2.json
