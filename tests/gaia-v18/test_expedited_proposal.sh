@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Calculate upgrade height
+echo "Calculate height for mock v19 upgrade expedited proposal"
+let voting_blocks_delta=15/$TIMEOUT_COMMIT+5
+height=$(curl -s http://localhost:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+echo "Current height: $height"
+upgrade_height=$(($height+$voting_blocks_delta))
+echo "Upgrade block height set to $upgrade_height."
+
+jq --arg HEIGHT "$upgrade_height" '.messages[0].plan.height = $HEIGHT' templates/gaia-v18/proposal-upgrade-v19.json > temp/proposal.json
+proposal="$CHAIN_BINARY tx gov submit-proposal temp/proposal.json --from $MONIKER_1 --gas auto --gas-adjustment 2 --gas-prices 0.005$DENOM --home $HOME_1 -o json -y"
+txhash=$($proposal | jq -r .txhash)
+echo "tx hash: $txhash" 
+
+sleep $COMMIT_TIMEOUT
+sleep $COMMIT_TIMEOUT
+echo "Getting proposal ID from txhash..."
+proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+echo "Proposal ID: $proposal_id"
+
+printf "\nVOTING\n"
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment 3 --yes --home $HOME_1
+echo "Sleeping for $EXPEDITED_PERIOD..."
+sleep $EXPEDITED_PERIOD
+$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq '.'
+echo "Status:"
+$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq -r '.status'
+echo "Upgrade plan:"
+$CHAIN_BINARY q upgrade plan --home $HOME_1 -o json | jq -r '.'

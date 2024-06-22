@@ -3432,6 +3432,7 @@
         CONSUMER_FEES: 500
         ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
         ICS_TRANSFORM_BINARY: cd-transform
+        VOTING_PERIOD: 30s
       steps:
         - name: start-version
           run: echo ${{matrix.gaia_version}}
@@ -3504,5 +3505,8 @@
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
 
         - name: _Test expedited proposals
+          env:
+            EXPEDITED_PERIOD: 15s
           run: |
             scripts/gaia-v18/set_expedited_period.sh
+            tests/gaia-v18/test_expedited_proposal.sh
