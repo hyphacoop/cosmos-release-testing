@@ -19,6 +19,9 @@ mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-par
 sed "s/_EVIDENCE_MAX_BYTES_/$EVIDENCE_MAX_BYTES/g" templates/proposal-block-params.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
 
+echo "Proposal file:"
+cat templates/proposal-block-params-patched.json
+
 # Change Rate Limit
 echo "Set Rate Limit for $channel_id..."
 proposal="$CHAIN_BINARY tx gov submit-proposal templates/proposal-block-params-patched.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
