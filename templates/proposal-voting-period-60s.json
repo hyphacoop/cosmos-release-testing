@@ -25,7 +25,7 @@
        "expedited_min_deposit": [
          {
            "denom": "uatom",
-           "amount": "20000000"
+           "amount": "150000000"
          }
        ]
       }
