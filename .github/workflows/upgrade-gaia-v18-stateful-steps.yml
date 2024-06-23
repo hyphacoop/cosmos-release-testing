@@ -469,6 +469,23 @@ jobs:
       - name: Get output of IBC transfer block size script
         run: |
           cat $HOME/artifact/ibc_transfer_block_size.log
+      - name: Print block params
+        run: |
+          params=$(http://127.0.0.1:VAL1_RPC_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          echo "$params"
+      - name: Set max block size
+        env:
+          MAX_BYTES: "500000"
+          MAX_GAS: "-1"
+          EVIDENCE_MAX_AGE_NUM_BLOCKS: "100000"
+          EVIDENCE_MAX_AGE_DURATION: "172800s"
+          EVIDENCE_MAX_BYTES: "1048576"
+        run: |
+          /home/sysadmin/projects/hyphacoop/cosmos-release-testing/scripts/stateful/set_block_size.sh
+      - name: Verify block params updated
+        run: |
+          max_bytes=$(http://127.0.0.1:VAL1_RPC_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          echo "$max_bytes"
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
