@@ -11,7 +11,7 @@ scripts/gaia-v18/load_blocks.sh 100000 5000 0.01
 echo "Waiting for blocks to get loaded..."
 num_unconfirmed_txs=$(curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs | jq -r '.result.n_txs')
 echo "Unconfirmed txs: $num_unconfirmed_txs"
-while [ $num_unconfirmed_txs > 1000 ] ; do
+while [ $num_unconfirmed_txs -gt "1000" ] ; do
     echo "Sleeping for a minute..."
     sleep 1m
     num_unconfirmed_txs=$(curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs | jq -r '.result.n_txs')
