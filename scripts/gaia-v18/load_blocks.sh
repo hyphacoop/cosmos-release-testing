@@ -40,9 +40,9 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
     ((SEQUENCE++))
   fi
   echo "Unsigned JSON:"
-  jq '.' unsigned.json
+  cat unsigned.json
   echo "Signed JSON:"
-  jq '.' signed.json
+  cat signed.json
   echo "Broadcast tx log:"
   cat broadcast.log
 done
