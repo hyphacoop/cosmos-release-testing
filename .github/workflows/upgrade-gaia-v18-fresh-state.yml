@@ -3419,7 +3419,7 @@
             curl -s http://localhost:$VAL1_API_PORT/cosmos/consensus/v1/params
             curl -s http://localhost:$VAL1_API_PORT/cosmos/consensus/v1/params | jq '.'
             echo "Loading mempool with large gas txs..."
-            scripts/gaia-v18/load_blocks.sh 20000000 100
+            scripts/gaia-v18/load_blocks.sh 50000000 20
             echo "Loading mempool with txs..."
             scripts/gaia-v18/load_blocks.sh 100000 5000
             curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
@@ -3429,7 +3429,9 @@
             echo "Clearing backlog of large gas txs..."
             sleep 5m
             curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
-        
+        - name: _Test feemarket gas prices post-load
+          run: |
+            $CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq '.'
     # v18-3-expedited:
     #   runs-on: ubuntu-22.04
     #   needs: set-version-matrix
