@@ -85,7 +85,6 @@ mv ica_host.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for 2m bytes block size..."
 jq -r '.consensus_params.block.max_bytes = "2000000"' $HOME_1/config/genesis.json > blocksize.json
-jq '.' blocksize.json
 cp blocksize.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for 100_000_000 gas..."
