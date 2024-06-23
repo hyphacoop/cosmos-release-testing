@@ -30,8 +30,8 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET_1 --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 &>  signed.json
 
   # BROADCAST TX
-  $CHAIN_BINARY tx broadcast signed.json --node $NODE_URL &> broadcast.log
-
+  # $CHAIN_BINARY tx broadcast signed.json --node $NODE_URL &> broadcast.log
+  $CHAIN_BINARY tx broadcast signed.json --node $NODE_URL --output-document broadcast.log
   # If there's an account sequence mismatch, parse the expected value and use it
   if cat broadcast.log | grep -q "account sequence mismatch"; then
     SEQUENCE=$(cat broadcast.log | grep -oP 'expected \K\d+')
