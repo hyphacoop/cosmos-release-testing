@@ -19,7 +19,15 @@
        "burn_vote_quorum": false,
        "burn_proposal_deposit_prevote": false,
        "burn_vote_veto": true,
-       "min_deposit_ratio": "0.010000000000000000"
+       "min_deposit_ratio": "0.010000000000000000",
+       "expedited_voting_period": "15s",
+       "expedited_threshold": "0.667000000000000000",
+       "expedited_min_deposit": [
+         {
+           "denom": "uatom",
+           "amount": "20000000"
+         }
+       ]
       }
      }
     ],
