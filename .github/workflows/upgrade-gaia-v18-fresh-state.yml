@@ -3415,7 +3415,7 @@
           run: |
             toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
             sudo systemctl restart $PROVIDER_SERVICE_1 --now
-            sleep 15s
+            sleep 70s
             echo "Loading mempool with large gas txs..."
             scripts/gaia-v18/load_blocks.sh 50000000 40 0.005
             curl -s http://localhost:$VAL1_RPC_PORT/num_unconfirmed_txs
