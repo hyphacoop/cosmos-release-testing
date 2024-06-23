@@ -1,9 +1,8 @@
 #!/bin/bash
 TX_GAS=$1
 TARGET_TXS=$2
-
+PRICE=$3$DENOM
 ACCOUNT=0
-GAS_PRICE=0.01$DENOM
 NODE_URL=http://localhost:$VAL1_RPC_PORT
 
 # Get the size of the mempool
@@ -40,7 +39,8 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   else
     ((SEQUENCE++))
   fi
-
+  jq '.' signed.json
+  cat broadcast.log
 done
 
 # jq '.' unsigned.json
