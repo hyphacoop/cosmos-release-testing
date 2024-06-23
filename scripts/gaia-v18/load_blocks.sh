@@ -1,10 +1,11 @@
 #!/bin/bash
 TX_GAS=$1
 TARGET_TXS=$2
-PRICE=$3$DENOM
+PRICE="$3$DENOM"
 ACCOUNT=0
 NODE_URL=http://localhost:$VAL1_RPC_PORT
 
+echo "Price: $PRICE"
 # Get the size of the mempool
 mempool_size() {
   curl -s $NODE_URL/num_unconfirmed_txs?limit=1 | jq -r .result.n_txs
@@ -17,7 +18,7 @@ echo "Sequence: $SEQUENCE"
 $CHAIN_BINARY tx bank send \
 $WALLET_1 $WALLET_1 1$DENOM --from $WALLET_1 \
 --account-number $ACCOUNT \
---gas $TX_GAS --gas-prices $GAS_PRICE \
+--gas $TX_GAS --gas-prices $PRICE \
 --generate-only  \
 --chain-id $CHAIN_ID \
 --node $NODE_URL &> unsigned.json
