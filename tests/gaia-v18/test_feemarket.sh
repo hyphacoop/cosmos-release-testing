@@ -24,7 +24,7 @@ echo "Less than 1000 txs remain in the mempool"
 
 current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq '.prices[0].amount')
 echo "Current gas price: $current_price$DENOM"
-if [ $current_price -gt $preload_price ] ; then
+if (( $(echo "$current_price > $preload_price" | bc -l) )); then
     echo "PASS: Current price is greater than pre-load price."
 else
     echo "FAIL: Current price is not greater than pre-load price."
