@@ -48,4 +48,4 @@ sleep $VOTING_PERIOD
 
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
 echo "Get params:"
-curl http://127.0.0.1:VAL1_RPC_PORT/cosmos/consensus/v1/params
+curl http://127.0.0.1:$VAL1_RPC_PORT/cosmos/consensus/v1/params
