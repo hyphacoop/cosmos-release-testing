@@ -322,110 +322,7 @@
     #     - name: _RPC endpoints check
     #       run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
 
-    Baseline-2-globalfee:
-      runs-on: ubuntu-22.04
-      needs: set-version-matrix
-      strategy:
-        matrix:
-          ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-        fail-fast: false
-      env:
-        COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-        UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-      steps:
-        - name: start-version
-          run: echo ${{matrix.gaia_version}}
-        - name: target-version
-          run: echo ${{matrix.upgrade_version}}
-        - name: target-commit
-          if: ${{ matrix.upgrade_version == 'main' }}
-          run: |
-            BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-            TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-            echo TARGET_COMMIT: $TARGET_COMMIT
-        - name: Update PATH
-          run: |
-            mkdir -p $HOME/go/bin
-            echo "$HOME/go/bin" >> $GITHUB_PATH
-            echo "$HOME/.hermes" >> $GITHUB_PATH
-            echo "$HOME/.relayer" >> $GITHUB_PATH
-        - name: Bypass the grub-efi-amd64-signed package
-          run: sudo apt-mark hold grub-efi-amd64-signed
-        - name: Check out repository code
-          uses: actions/checkout@v3
-        - name: Set up Python
-          uses: actions/setup-python@v3
-          with:
-            python-version: '3.10'
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            python -m pip install toml-cli
-        - name: Install Cosmovisor > v1.3.0
-          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-          run: |
-            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-            echo "COSMOVISOR=true" >> $GITHUB_ENV
-            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Install Cosmovisor v1.3.0
-          if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-          run: |
-            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-            echo "COSMOVISOR=true" >> $GITHUB_ENV
-            echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-        - name: Start chain
-          env:
-            START_VERSION: ${{matrix.gaia_version}}
-          run: |
-            export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-            scripts/start_chain.sh
-        - name: Check Gaia log
-          run: sudo journalctl -u $PROVIDER_SERVICE_1
-        - name: Print Gaia version
-          run: $CHAIN_BINARY version --long
-        - name: Block production check
-          run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-  
-        - name: Test globalfee module
-          run: |
-            tests/test_globalfee.sh
-  
-        - name: Test software upgrade for published releases
-          if: ${{ matrix.upgrade_version != 'main' }}
-          env:
-            DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          run: |
-            echo $DOWNLOAD_URL
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-        - name: Test software upgrade for main branch
-          if: ${{ matrix.upgrade_version == 'main' }}
-          env:
-            DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          run: |
-            scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-  
-        - name: _Blocks produced after upgrade
-          run: |
-            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-  
-        - name: Flush "migration successful" lines
-          run: |
-            $CHAIN_BINARY keys list --home $HOME_1
-  
-        - name: _Transactions verified> bank send, delegate, and withdraw rewards
-          run: tests/test_tx_fresh.sh
-        - name: _API endpoints check
-          run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-        - name: _RPC endpoints check
-          run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
-  
-        - name: Test globalfee module
-          env:
-            COSMOS_SDK: v47
-          run: |
-            tests/test_globalfee.sh
-  
-    Baseline-3-icsv400:
+    Baseline-2-icsv400:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
@@ -779,7 +676,7 @@
         - name: _Soft opt-out test> Validator must be unjailed
           run: tests/test_validator_jailed.sh $VALOPER_2 false
   
-    Baseline-4-pfm:
+    Baseline-3-pfm:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
@@ -986,7 +883,7 @@
           run: |
             tests/test_pfm_transfers.sh
   
-    Baseline-5-lsm:
+    Baseline-4-lsm:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
@@ -1280,7 +1177,7 @@
             COSMOS_SDK: v47
           run: tests/test_ica_delegate_happy.sh
   
-    Baseline-6-mainnet-consumer-chains:
+    Baseline-5-mainnet-consumer-chains:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
@@ -1649,7 +1546,7 @@
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
   
-    Baseline-7-vesting-liquid-staking:
+    Baseline-6-vesting-liquid-staking:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
       strategy:
@@ -1806,7 +1703,7 @@
               exit 0
             fi
 
-    Baseline-8-ICA-controller:
+    Baseline-7-ICA-controller:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
       strategy:
@@ -1935,7 +1832,7 @@
           run: |
             tests/gaia-v16/test_ica_controller.sh
 
-    Baseline-9-IBC-fee-middleware:
+    Baseline-8-IBC-fee-middleware:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
       strategy:
@@ -2055,8 +1952,9 @@
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
         
-        - name: Restart relayer
+        - name: Restart Hermes with dynamic gas prices
           run: |
+            cp templates/gaia-v18/hermes-config-ibc-fee.toml ~/.hermes/config.toml
             sudo systemctl restart $RELAYER
             sleep 1m
 
@@ -2066,7 +1964,7 @@
           run: |
             tests/gaia-v16/test_ibc_fee.sh
 
-    Baseline-10-PSS-topn:
+    Baseline-9-PSS-topn:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
@@ -2413,7 +2311,7 @@
             $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
             $CHAIN_BINARY q tendermint-validator-set --home $CONSUMER_HOME_1
 
-    Baseline-11-PSS-optin:
+    Baseline-10-PSS-optin:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
@@ -2717,7 +2615,7 @@
             tests/test_validator_jailed.sh $VALOPER_1 false
             $CHAIN_BINARY q provider throttle-state --home $HOME_1
 
-    Baseline-12-PSS-commission-rate:
+    Baseline-11-PSS-commission-rate:
       runs-on: ubuntu-22.04
       needs: set-version-matrix-relayer
       strategy:
