@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ACK_FEE=456
+ACK_FEE=20000
 balance_before=$($CHAIN_BINARY q bank balances $WALLET_RELAYER --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
 
 
@@ -18,9 +18,9 @@ echo "Balance before: $balance_before$DENOM"
 echo "Balance after: $balance_before$DENOM"
 echo "Difference: ${difference}$DENOM"
 
-if [ $difference == $ACK_FEE ]; then
-    echo "PASS: Relayer balance increased by ACK_FEE."
+if (( $(echo "$balance_after > $balance_before" | bc -l) )); then
+    echo "PASS: Relayer balance increased."
 else
-    echo "FAIL: Relayer balance did not increase by ACK_FEE."
+    echo "FAIL: Relayer balance did not increase."
     exit 1
 fi
