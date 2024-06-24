@@ -1,6 +1,6 @@
 #!/bin/bash
 
-preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq '.prices[0].amount')
+preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
 echo "Pre-load price: $preload_price$DENOM"
 
 toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
@@ -22,7 +22,7 @@ while [ $num_unconfirmed_txs -gt "1000" ] ; do
 done
 echo "Less than 1000 txs remain in the mempool"
 
-current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq '.prices[0].amount')
+current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
 echo "Current gas price: $current_price$DENOM"
 if (( $(echo "$current_price > $preload_price" | bc -l) )); then
     echo "PASS: Current price is greater than pre-load price."
