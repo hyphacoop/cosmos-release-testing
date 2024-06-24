@@ -471,7 +471,7 @@ jobs:
           cat $HOME/artifact/ibc_transfer_block_size.log
       - name: Print block params
         run: |
-          params=$(http://127.0.0.1:VAL1_RPC_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
           echo "$params"
       - name: Set max block size
         env:
@@ -484,7 +484,7 @@ jobs:
           scripts/stateful/set_block_size.sh
       - name: Verify block params updated
         run: |
-          max_bytes=$(http://127.0.0.1:VAL1_RPC_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          max_bytes=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
           echo "$max_bytes"
       - name: DEBUG
         run: |
