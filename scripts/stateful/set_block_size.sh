@@ -22,8 +22,8 @@ mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-par
 echo "Proposal file:"
 cat templates/proposal-block-params-patched.json
 
-# Change Rate Limit
-echo "Set Rate Limit for $channel_id..."
+# Submit Proposal
+echo "Submitting proposal..."
 proposal="$CHAIN_BINARY tx gov submit-proposal templates/proposal-block-params-patched.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
 echo $proposal
 gaiadout=$($proposal)

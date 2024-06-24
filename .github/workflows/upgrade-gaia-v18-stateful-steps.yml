@@ -479,7 +479,7 @@ jobs:
           MAX_GAS: "-1"
           EVIDENCE_MAX_AGE_NUM_BLOCKS: "100000"
           EVIDENCE_MAX_AGE_DURATION: "172800s"
-          EVIDENCE_MAX_BYTES: "1048576"
+          EVIDENCE_MAX_BYTES: "490000"
         run: |
           scripts/stateful/set_block_size.sh
       - name: Verify block params updated
