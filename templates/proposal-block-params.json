@@ -10,7 +10,7 @@
       "evidence": {
        "max_age_num_blocks": "_EVIDENCE_MAX_AGE_NUM_BLOCKS_",
        "max_age_duration": "_EVIDENCE_MAX_AGE_DURATION_",
-       "max_bytes": "_EVIDENCE_MAX_BYTES_"
+       "max_bytes": "_EVIDENCE_MAX-BYTES_"
        },
       "validator": {
        "pub_key_types": [

@@ -16,7 +16,7 @@ sed "s/_EVIDENCE_MAX_AGE_NUM_BLOCKS_/$EVIDENCE_MAX_AGE_NUM_BLOCKS/g" templates/p
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
 sed "s/_EVIDENCE_MAX_AGE_DURATION_/$EVIDENCE_MAX_AGE_DURATION/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
-sed "s/_EVIDENCE_MAX_BYTES_/$EVIDENCE_MAX_BYTES/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
+sed "s/_EVIDENCE_MAX-BYTES_/$EVIDENCE_MAX_BYTES/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
 
 echo "Proposal file:"
