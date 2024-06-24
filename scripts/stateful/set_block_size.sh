@@ -10,13 +10,13 @@
 # Patch prop template
 sed "s/_MAX_BYTES_/$MAX_BYTES/g" templates/proposal-block-params.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
-sed "s/_MAX_GAS_/$MAX_GAS/g" templates/proposal-block-params.json > templates/proposal-block-params-patched.json.tmp
+sed "s/_MAX_GAS_/$MAX_GAS/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
-sed "s/_EVIDENCE_MAX_AGE_NUM_BLOCKS_/$EVIDENCE_MAX_AGE_NUM_BLOCKS/g" templates/proposal-block-params.json > templates/proposal-block-params-patched.json.tmp
+sed "s/_EVIDENCE_MAX_AGE_NUM_BLOCKS_/$EVIDENCE_MAX_AGE_NUM_BLOCKS/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
-sed "s/_EVIDENCE_MAX_AGE_DURATION_/$EVIDENCE_MAX_AGE_DURATION/g" templates/proposal-block-params.json > templates/proposal-block-params-patched.json.tmp
+sed "s/_EVIDENCE_MAX_AGE_DURATION_/$EVIDENCE_MAX_AGE_DURATION/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
-sed "s/_EVIDENCE_MAX_BYTES_/$EVIDENCE_MAX_BYTES/g" templates/proposal-block-params.json > templates/proposal-block-params-patched.json.tmp
+sed "s/_EVIDENCE_MAX_BYTES_/$EVIDENCE_MAX_BYTES/g" templates/proposal-block-params-patched.json > templates/proposal-block-params-patched.json.tmp
 mv templates/proposal-block-params-patched.json.tmp templates/proposal-block-params-patched.json
 
 echo "Proposal file:"
