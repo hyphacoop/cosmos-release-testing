@@ -15,7 +15,7 @@ sleep 30
 balance_after=$($CHAIN_BINARY q bank balances $WALLET_RELAYER --home $HOME_1 -o json | jq -r --arg DENOM "$DENOM" '.balances[] | select(.denom == $DENOM).amount')
 difference=$(echo "$balance_after - $balance_before" | bc)
 echo "Balance before: $balance_before$DENOM"
-echo "Balance after: $balance_before$DENOM"
+echo "Balance after: $balance_after$DENOM"
 echo "Difference: ${difference}$DENOM"
 
 if (( $(echo "$balance_after > $balance_before" | bc -l) )); then
