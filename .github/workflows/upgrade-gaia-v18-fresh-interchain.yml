@@ -8,7 +8,7 @@ on:
     schedule:
       - cron: '0 10 * * 1-6'
     workflow_dispatch:
-    push:
+    # push:
     
 
 concurrency:

@@ -35,6 +35,7 @@ upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
 
 upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
+# upgrade_info="{\"binaries\":{\"linux/amd64\":\"https://github.com/hyphacoop/cosmos-builds/releases/download/v18-preview/gaiad\"}}"
 # Auto download: Set the binary paths need for the proposal message
 if [ $COSMOS_SDK == "v45" ]; then
     proposal="$CHAIN_BINARY --output json tx gov submit-proposal software-upgrade $upgrade_name --from $WALLET_1 --keyring-backend test --upgrade-height $upgrade_height --upgrade-info $upgrade_info --title gaia-upgrade --description 'test' --chain-id $CHAIN_ID --deposit $VAL3_STAKE$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
@@ -100,6 +101,15 @@ else
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
     sudo systemctl stop $PROVIDER_SERVICE_3
+
+    # sudo apt install build-essential -y
+    # wget -q https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
+    # sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
+    # git clone https://github.com/cosmos/gaia.git
+    # cd gaia
+    # git checkout v18.0.0-rc0
+    # make install
+    # cd ..
     wget $DOWNLOAD_URL -O ./upgraded -q
     chmod +x ./upgraded
     mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
