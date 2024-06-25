@@ -8,9 +8,15 @@ on:
   schedule:
     # Once a day at 13:15
     - cron: '15 13 * * 1'
+<<<<<<< HEAD
   push:
 # concurrency:
 #   group: self-hosted-runners
+=======
+  # push:
+concurrency:
+  group: self-hosted-runners
+>>>>>>> origin/v18-features-fresh-state
 jobs:
   set-version-matrix:
     runs-on: ubuntu-22.04

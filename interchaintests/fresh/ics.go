@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"golang.org/x/mod/semver"
 )
 
 type ConsumerBootstrapCb func(ctx context.Context, consumer *cosmos.CosmosChain)
@@ -92,6 +93,11 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 
 	if len(config.ShouldCopyProviderKey) != NUM_VALIDATORS {
 		panic(fmt.Sprintf("shouldCopyProviderKey must be the same length as the number of validators (%d)", NUM_VALIDATORS))
+	}
+
+	version := p.GetNode().GetBuildInformation(ctx).Version
+	if (semver.Compare(version, "v17") >= 0 || !semver.IsValid(version)) && config.TopN < 0 {
+		config.TopN = 95
 	}
 
 	spawnTime := time.Now().Add(CHAIN_SPAWN_WAIT)

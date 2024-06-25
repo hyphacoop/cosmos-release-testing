@@ -90,7 +90,7 @@ func updateRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID s
 			Metadata: "ipfs://CID",
 		})
 	require.NoError(t, err)
-	propID, err := getProposalID(ctx, chain, txhash)
+	propID, err := GetProposalID(ctx, chain, txhash)
 	require.NoError(t, err)
 	require.NoError(t, chain.PassProposal(ctx, propID))
 }
@@ -118,12 +118,13 @@ func addRateLimit(ctx context.Context, t *testing.T, chain Chain, channelID stri
 			Metadata: "ipfs://CID",
 		})
 	require.NoError(t, err)
-	propID, err := getProposalID(ctx, chain, txhash)
+	propID, err := GetProposalID(ctx, chain, txhash)
 	require.NoError(t, err)
 	require.NoError(t, chain.PassProposal(ctx, propID))
 }
 
-func getProposalID(ctx context.Context, chain Chain, txhash string) (string, error) {
+// GetProposalID parses the proposal ID from the tx; this is necessary when the proposal type isn't in the SDK yet
+func GetProposalID(ctx context.Context, chain Chain, txhash string) (string, error) {
 	// we need to do this because the rate limit proposals aren't in the sdk yet,
 	// so there'll be an error if we go through chain.SubmitProposal and expect it to parse the proposal ID
 	stdout, _, err := chain.GetNode().ExecQuery(ctx, "tx", txhash)
