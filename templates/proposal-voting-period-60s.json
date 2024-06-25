@@ -33,6 +33,6 @@
     ],
     "metadata": "ipfs://CID",
     "deposit": "1000000000uatom",
-    "title": "Set a 60s voting period",
-    "summary": "Change the following gov module parameters:\r\n* Minimum deposit: 100 ATOM\r\n* Voting period: 60s minutes"
+    "title": "Set a 60s voting period and 15s expedited voting period",
+    "summary": "Change the following gov module parameters:\r\n* Minimum deposit: 100 ATOM\r\n* Voting period: 60s and 15s expedited voting period"
    }

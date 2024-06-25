@@ -209,7 +209,7 @@ jobs:
           mv proposal-add-template.json templates/proposal-add-template.json
           echo "Contents of templates/proposal-add-template.json:"
           cat templates/proposal-add-template.json
-      - name: Set voting period to 60s
+      - name: Set voting period to 60s and 15s expedited voting period"
         env:
           VOTING_PERIOD: "20s"
         run: scripts/stateful/set_voting_period.sh templates/proposal-voting-period-60s.json
@@ -444,7 +444,10 @@ jobs:
         #   CON1_RPC_PORT: 27201
         run: tests/stateful/test_ccv_epoch.sh 100
       - name: Test expedited proposal
-        run: tests/stateful/gaia-v18/test_expedited_proposal.sh
+        run: |
+          export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
+          echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
+          tests/stateful/gaia-v18/test_expedited_proposal.sh
       - name: Current block size before IBC flood
         run: scripts/get_block_size.sh 10 5
       - name: Start IBC transfer
