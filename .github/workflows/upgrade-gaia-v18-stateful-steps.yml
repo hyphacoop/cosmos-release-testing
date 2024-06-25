@@ -443,6 +443,8 @@ jobs:
         # env:
         #   CON1_RPC_PORT: 27201
         run: tests/stateful/test_ccv_epoch.sh 100
+      - name: Test expedited proposal
+        run: tests/stateful/gaia-v18/test_expedited_proposal.sh
       - name: Current block size before IBC flood
         run: scripts/get_block_size.sh 10 5
       - name: Start IBC transfer
