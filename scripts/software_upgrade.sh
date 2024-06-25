@@ -34,8 +34,8 @@ height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
 
-# upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
-upgrade_info="{\"binaries\":{\"linux/amd64\":\"https://github.com/hyphacoop/cosmos-builds/releases/download/v18-preview/gaiad\"}}"
+upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
+# upgrade_info="{\"binaries\":{\"linux/amd64\":\"https://github.com/hyphacoop/cosmos-builds/releases/download/v18-preview/gaiad\"}}"
 # Auto download: Set the binary paths need for the proposal message
 if [ $COSMOS_SDK == "v45" ]; then
     proposal="$CHAIN_BINARY --output json tx gov submit-proposal software-upgrade $upgrade_name --from $WALLET_1 --keyring-backend test --upgrade-height $upgrade_height --upgrade-info $upgrade_info --title gaia-upgrade --description 'test' --chain-id $CHAIN_ID --deposit $VAL3_STAKE$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
