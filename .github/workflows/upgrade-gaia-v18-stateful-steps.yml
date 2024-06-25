@@ -448,29 +448,29 @@ jobs:
           export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
           echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
           tests/stateful/gaia-v18/test_expedited_proposal.sh
-      - name: Current block size before IBC flood
-        run: scripts/get_block_size.sh 10 5
-      - name: Start IBC transfer
-        run: |
-          echo "Set up screen service"
-          if [ ! -d temp ]
-          then
-            mkdir temp
-          fi
-          export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
-          echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
-          max_bytes=$(curl -s 127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
-          echo "Current max_bytes value is: $max_bytes"
-          export BLOCK_SIZE=$(echo "$max_bytes * 0.6 / 1" | bc)
-          echo "Setting tx block size to: $BLOCK_SIZE"
-          echo "while true; do scripts/stateful/ibc_transfer_block_size.sh $BLOCK_SIZE; sleep 1; done" > $HOME/ibc_transfer_block_size_service.sh
-          chmod +x $HOME/ibc_transfer_block_size_service.sh
-          echo "Starting $HOME/ibc_transfer_block_size_service.sh"
-          screen -L -Logfile $HOME/artifact/ibc_transfer_block_size.log -S ibc_transfer_block_size -d -m bash $HOME/ibc_transfer_block_size_service.sh
-          # set screen to flush log to 0
-          screen -r ibc_transfer_block_size -p0 -X logfile flush 0
-      - name: Current block size when IBC flood is ongoing
-        run: scripts/get_block_size.sh 10 5
+      # - name: Current block size before IBC flood
+      #   run: scripts/get_block_size.sh 10 5
+      # - name: Start IBC transfer
+      #   run: |
+      #     echo "Set up screen service"
+      #     if [ ! -d temp ]
+      #     then
+      #       mkdir temp
+      #     fi
+      #     export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
+      #     echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
+      #     max_bytes=$(curl -s 127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+      #     echo "Current max_bytes value is: $max_bytes"
+      #     export BLOCK_SIZE=$(echo "$max_bytes * 0.6 / 1" | bc)
+      #     echo "Setting tx block size to: $BLOCK_SIZE"
+      #     echo "while true; do scripts/stateful/ibc_transfer_block_size.sh $BLOCK_SIZE; sleep 1; done" > $HOME/ibc_transfer_block_size_service.sh
+      #     chmod +x $HOME/ibc_transfer_block_size_service.sh
+      #     echo "Starting $HOME/ibc_transfer_block_size_service.sh"
+      #     screen -L -Logfile $HOME/artifact/ibc_transfer_block_size.log -S ibc_transfer_block_size -d -m bash $HOME/ibc_transfer_block_size_service.sh
+      #     # set screen to flush log to 0
+      #     screen -r ibc_transfer_block_size -p0 -X logfile flush 0
+      # - name: Current block size when IBC flood is ongoing
+      #   run: scripts/get_block_size.sh 10 5
       - name: Get output of IBC transfer block size script
         run: |
           cat $HOME/artifact/ibc_transfer_block_size.log
@@ -478,7 +478,7 @@ jobs:
         run: |
           params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
           echo "$params"
-      - name: Set max block size
+      - name: Set max block size and verify block params
         env:
           MAX_BYTES: "500000"
           MAX_GAS: "-1"
@@ -487,10 +487,22 @@ jobs:
           EVIDENCE_MAX_BYTES: "490000"
         run: |
           scripts/stateful/set_block_size.sh
-      - name: Verify block params updated
-        run: |
           max_bytes=$(curl http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
-          echo "$max_bytes"
+          echo ""
+          echo "Max bytes from query: $max_bytes"
+          if [ $max_bytes -ne $MAX_BYTES ]
+          then
+            echo "Block size did not set"
+            exit 1
+          fi
+      - name: Set consensus timeout to 1 minute
+        run: |
+          toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
+          screen -S {{ env.PROVIDER_SERVICE_1 }} -p 0 -X stuff "^C"
+      - name: Wait for 2 blocks
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
+      - name: _Test Feemarket
+        run: tests/gaia-v18/test_feemarket.sh
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
