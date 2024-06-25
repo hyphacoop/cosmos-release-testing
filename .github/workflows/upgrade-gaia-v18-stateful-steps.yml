@@ -497,6 +497,7 @@ jobs:
           fi
       - name: Set consensus timeout to 1 minute
         run: |
+          source ~/env/bin/activate
           toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
           screen -S {{ env.PROVIDER_SERVICE_1 }} -p 0 -X stuff "^C"
       - name: Wait for 2 blocks
