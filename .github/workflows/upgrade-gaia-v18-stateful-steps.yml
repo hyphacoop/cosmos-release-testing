@@ -471,9 +471,9 @@ jobs:
       #     screen -r ibc_transfer_block_size -p0 -X logfile flush 0
       # - name: Current block size when IBC flood is ongoing
       #   run: scripts/get_block_size.sh 10 5
-      - name: Get output of IBC transfer block size script
-        run: |
-          cat $HOME/artifact/ibc_transfer_block_size.log
+      # - name: Get output of IBC transfer block size script
+      #   run: |
+      #     cat $HOME/artifact/ibc_transfer_block_size.log
       - name: Print block params
         run: |
           params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
