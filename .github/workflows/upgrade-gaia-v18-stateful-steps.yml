@@ -448,6 +448,27 @@ jobs:
           export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
           echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
           tests/stateful/gaia-v18/test_expedited_proposal.sh
+      - name: Print block params
+        run: |
+          params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          echo "$params"
+      - name: _Set max block size and verify block params
+        env:
+          MAX_BYTES: "500000"
+          MAX_GAS: "-1"
+          EVIDENCE_MAX_AGE_NUM_BLOCKS: "100000"
+          EVIDENCE_MAX_AGE_DURATION: "172800s"
+          EVIDENCE_MAX_BYTES: "490000"
+        run: |
+          scripts/stateful/set_block_size.sh
+          max_bytes=$(curl http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
+          echo ""
+          echo "Max bytes from query: $max_bytes"
+          if [ $max_bytes -ne $MAX_BYTES ]
+          then
+            echo "Block size did not set"
+            exit 1
+          fi
       # - name: Current block size before IBC flood
       #   run: scripts/get_block_size.sh 10 5
       # - name: Start IBC transfer
@@ -486,27 +507,6 @@ jobs:
           export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
           echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
           tests/stateful/gaia-v18/test_feemarket.sh
-      - name: Print block params
-        run: |
-          params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
-          echo "$params"
-      - name: Set max block size and verify block params
-        env:
-          MAX_BYTES: "500000"
-          MAX_GAS: "-1"
-          EVIDENCE_MAX_AGE_NUM_BLOCKS: "100000"
-          EVIDENCE_MAX_AGE_DURATION: "172800s"
-          EVIDENCE_MAX_BYTES: "490000"
-        run: |
-          scripts/stateful/set_block_size.sh
-          max_bytes=$(curl http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
-          echo ""
-          echo "Max bytes from query: $max_bytes"
-          if [ $max_bytes -ne $MAX_BYTES ]
-          then
-            echo "Block size did not set"
-            exit 1
-          fi
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
