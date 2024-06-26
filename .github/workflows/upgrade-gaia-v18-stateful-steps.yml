@@ -398,7 +398,6 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
       - name: _Test Feemarket
         run: |
-<<<<<<< HEAD
           export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
           echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
           tests/stateful/gaia-v18/test_feemarket.sh
@@ -408,16 +407,6 @@ jobs:
       #     do
       #       sleep 1
       #     done
-=======
-          max_bytes=$(curl http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
-          echo "$max_bytes"
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
->>>>>>> 16ef54f (merge)
       - name: Stop services
         if: always()
         run: |
