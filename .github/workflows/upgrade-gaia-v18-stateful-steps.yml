@@ -474,6 +474,15 @@ jobs:
       # - name: Get output of IBC transfer block size script
       #   run: |
       #     cat $HOME/artifact/ibc_transfer_block_size.log
+      - name: Set consensus timeout to 1 minute
+        run: |
+          source ~/env/bin/activate
+          toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
+          screen -S $PROVIDER_SERVICE_1 -p 0 -X stuff "^C"
+      - name: Wait for 2 blocks
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
+      - name: _Test Feemarket
+        run: tests/stateful/gaia-v18/test_feemarket.sh
       - name: Print block params
         run: |
           params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
@@ -495,15 +504,6 @@ jobs:
             echo "Block size did not set"
             exit 1
           fi
-      - name: Set consensus timeout to 1 minute
-        run: |
-          source ~/env/bin/activate
-          toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
-          screen -S $PROVIDER_SERVICE_1 -p 0 -X stuff "^C"
-      - name: Wait for 2 blocks
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
-      - name: _Test Feemarket
-        run: tests/stateful/gaia-v18/test_feemarket.sh
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
