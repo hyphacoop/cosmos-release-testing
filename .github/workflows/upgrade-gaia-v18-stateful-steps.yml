@@ -503,7 +503,7 @@ jobs:
       - name: Wait for 2 blocks
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
       - name: _Test Feemarket
-        run: tests/gaia-v18/test_feemarket.sh
+        run: tests/stateful/gaia-v18/test_feemarket.sh
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
