@@ -482,7 +482,10 @@ jobs:
       - name: Wait for 2 blocks
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
       - name: _Test Feemarket
-        run: tests/stateful/gaia-v18/test_feemarket.sh
+        run: |
+          export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
+          echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
+          tests/stateful/gaia-v18/test_feemarket.sh
       - name: Print block params
         run: |
           params=$(http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params.block.max_bytes')
