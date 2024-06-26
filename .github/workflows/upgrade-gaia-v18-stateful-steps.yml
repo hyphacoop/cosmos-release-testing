@@ -499,6 +499,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
+          script /dev/null
           screen -S {{ env.PROVIDER_SERVICE_1 }} -p 0 -X stuff "^C"
       - name: Wait for 2 blocks
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
