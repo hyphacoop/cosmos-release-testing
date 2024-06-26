@@ -8,19 +8,28 @@ echo "Initializing node homes..."
 echo "Downloading and extracting archived state"
 mkdir -p $HOME_1 
 # wget -qO- $HOME/archived-state.gz $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
-curl -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
+curl -6 -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
 
 # echo "Patching genesis file for fast governance..."
 # jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
 # jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
 # mv ./gov.json $HOME_1/config/genesis.json
 
-# Install Gaia binary
-CHAIN_BINARY_URL=$DOWNLOAD_URL
-echo "Installing Gaia..."
-mkdir -p $HOME/go/bin
-wget -nv $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY
-chmod +x $HOME/go/bin/$CHAIN_BINARY
+# # Install Gaia binary
+# CHAIN_BINARY_URL=$DOWNLOAD_URL
+# echo "Installing Gaia..."
+# mkdir -p $HOME/go/bin
+# wget -nv $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY
+# chmod +x $HOME/go/bin/$CHAIN_BINARY
+
+# Build Gaia binary
+echo "Building gaiad branch: $UPGRADE_VERSION"
+git clone https://github.com/cosmos/gaia.git
+cd gaia
+git checkout $UPGRADE_VERSION
+make build
+cp build/gaiad $HOME/go/bin/$CHAIN_BINARY
+cd ..
 
 # Printing Gaia binary checksum
 echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
@@ -63,6 +72,9 @@ toml set --toml-path $HOME_1/config/client.toml node "tcp://localhost:$VAL1_RPC_
 
 # Set client chain-id
 toml set --toml-path $HOME_1/config/client.toml chain-id "$CHAIN_ID"
+
+# Turn on Instrumentation
+toml set --toml-path $HOME_1/config/config.toml instrumentation.prometheus true
 
 # Create self-delegation accounts
 echo $MNEMONIC_2 | $CHAIN_BINARY keys add $MONIKER_2 --keyring-backend test --home $HOME_1 --recover

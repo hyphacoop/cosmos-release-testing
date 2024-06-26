@@ -19,12 +19,20 @@
        "burn_vote_quorum": false,
        "burn_proposal_deposit_prevote": false,
        "burn_vote_veto": true,
-       "min_deposit_ratio": "0.010000000000000000"
+       "min_deposit_ratio": "0.010000000000000000",
+       "expedited_voting_period": "15s",
+       "expedited_threshold": "0.667000000000000000",
+       "expedited_min_deposit": [
+         {
+           "denom": "uatom",
+           "amount": "150000000"
+         }
+       ]
       }
      }
     ],
     "metadata": "ipfs://CID",
     "deposit": "1000000000uatom",
-    "title": "Set a 60s voting period",
-    "summary": "Change the following gov module parameters:\r\n* Minimum deposit: 100 ATOM\r\n* Voting period: 60s minutes"
+    "title": "Set a 60s voting period and 15s expedited voting period",
+    "summary": "Change the following gov module parameters:\r\n* Minimum deposit: 100 ATOM\r\n* Voting period: 60s and 15s expedited voting period"
    }

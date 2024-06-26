@@ -1,0 +1,26 @@
+{
+    "messages": [
+     {
+      "@type": "/cosmos.consensus.v1.MsgUpdateParams",
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "block": {
+       "max_bytes": "_MAX_BYTES_",
+       "max_gas": "_MAX_GAS_"
+      },
+      "evidence": {
+       "max_age_num_blocks": "_EVIDENCE_MAX_AGE_NUM_BLOCKS_",
+       "max_age_duration": "_EVIDENCE_MAX_AGE_DURATION_",
+       "max_bytes": "_EVIDENCE_MAX-BYTES_"
+       },
+      "validator": {
+       "pub_key_types": [
+         "ed25519"
+       ]
+       }
+     }
+    ],
+    "metadata": "ipfs://CID",
+    "deposit": "100000000uatom",
+    "title": "Update Block Params",
+    "summary": "Update Block Params."
+   }
