@@ -437,8 +437,7 @@ jobs:
           cd /home/runner
           git clone https://github.com/cosmos/gaia.git
           cd gaia
-          # git checkout ${{ env.RUNNING_VERSION }}
-          git checkout release/v17.x
+          git checkout ${{ vars.FORK_TOOL_TAG }}
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
       - name: Fork the chain
