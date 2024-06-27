@@ -62,6 +62,14 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 	if semver.Compare(gaiaVersion, "v16") >= 0 {
 		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"))
 	}
+	// TODO: Actual version number
+	if gaiaVersion == "blocksdk-fee-market" {
+		genesisOverrides = append(genesisOverrides,
+			cosmos.NewGenesisKV("app_state.feemarket.state.base_fee", "0.005"),
+			cosmos.NewGenesisKV("app_state.feemarket.params.max_block_utilization", "100000000"),
+			cosmos.NewGenesisKV("app_state.feemarket.params.target_block_utilization", "50000000"),
+		)
+	}
 	return &interchaintest.ChainSpec{
 		Name:          "gaia",
 		Version:       gaiaVersion,
