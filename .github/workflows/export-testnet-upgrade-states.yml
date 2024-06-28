@@ -139,6 +139,8 @@ jobs:
           killall gaiad screen
           sleep 10s
       - name: Create snapshot
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
@@ -406,6 +408,8 @@ jobs:
           killall gaiad screen
           sleep 10s
       - name: Create snapshot
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
