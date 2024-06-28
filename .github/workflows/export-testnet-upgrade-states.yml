@@ -134,8 +134,15 @@ jobs:
           echo "Done Syncing"
       - name: Stop gaiad
         run: |
+          synced_block=$(gaiad q block | jq -r '.block.header.height')
+          echo "synced_block=$synced_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
+      - name: Create snapshot
+        run: |
+          cd $NODE_HOME
+          mkdir ~/snapshot
+          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data
       # - name: Tinker Genesis
       #   run: |
       #     source /home/runner/env/bin/activate
@@ -259,6 +266,11 @@ jobs:
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/theta-testnet/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/theta-testnet/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/theta-testnet/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
+      - name: Upload Snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: $CHAIN_ID-snapshot-${{ env.synced_block }}
+          path: ~/snapshot/
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -389,8 +401,16 @@ jobs:
           echo "Done Syncing"
       - name: Stop gaiad
         run: |
+          synced_block=$(gaiad q block | jq -r '.block.header.height')
+          echo "synced_block=$synced_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
+      - name: Create snapshot
+        run: |
+          cd $NODE_HOME
+          mkdir ~/snapshot
+          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data
+
       # - name: Tinker Genesis
       #   run: |
       #     source /home/runner/env/bin/activate
@@ -514,6 +534,11 @@ jobs:
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/genesis/rs-testnet-provider-export/rs-provider-genesis_${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}.json.gz /var/www/html/genesis/rs-testnet-provider-export/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').json.gz
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/rs-testnet-provider/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-provider-stateful-upgrade.tar.gz /var/www/html/archived-state/rs-testnet-provider/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
+      - name: Upload Snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: $CHAIN_ID-snapshot-${{ env.synced_block }}
+          path: ~/snapshot/
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
