@@ -450,7 +450,7 @@ jobs:
       - name: Upload Snapshot
         uses: actions/upload-artifact@v4
         with:
-          name: $CHAIN_ID-snapshot-${{ env.synced_block }}
+          name: ${{ env.CHAIN_ID }}-snapshot-${{ env.synced_block }}
           path: ~/snapshot/
       - name: Upload artifacts
         if: always()
