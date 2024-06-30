@@ -98,7 +98,7 @@ jobs:
       UPGRADE_VERSION: ${{ inputs.upgrade_version }}
     steps:
       # Get system info
-      - run: ifconfig
+      - run: ip addr show
       - run: lscpu
       - run: df -h
       - run: free -m
