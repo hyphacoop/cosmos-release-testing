@@ -8,9 +8,9 @@ on:
   schedule:
     # Once a day at 13:15
     - cron: '15 13 * * 1'
-  # push:
+  push:
 concurrency:
-  group: self-hosted-runners
+  group: cosmos-runner-set
 jobs:
   set-version-matrix:
     runs-on: ubuntu-22.04
