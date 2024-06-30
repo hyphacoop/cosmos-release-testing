@@ -10,7 +10,7 @@ on:
     - cron: '15 13 * * 1'
   push:
 concurrency:
-  group: cosmos-runner-set
+  group: self-hosted-runners
 jobs:
   set-version-matrix:
     runs-on: ubuntu-22.04
@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
       #max-parallel: 3
     with:
-      runs-on-os: self-hosted-ubuntu-22.04
+      runs-on-os: cosmos-runner-set
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
@@ -76,7 +76,7 @@ jobs:
       fail-fast: false
       #max-parallel: 3
     with:
-      runs-on-os: self-hosted-ubuntu-22.04
+      runs-on-os: cosmos-runner-set
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-theta-stateful-workflow
@@ -90,7 +90,7 @@ jobs:
       fail-fast: false
       #max-parallel: 3
     with:
-      runs-on-os: self-hosted-ubuntu-22.04
+      runs-on-os: cosmos-runner-set
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-ics-stateful-workflow
