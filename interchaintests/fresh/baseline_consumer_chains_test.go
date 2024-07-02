@@ -23,7 +23,7 @@ func runConsumerChainTest(t *testing.T, otherChain, otherChainVersion string, sh
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
 	fresh.IBCTest(ctx, t, provider, consumer, provider.Relayer)
 
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, provider, fresh.GetConfig(ctx).UpgradeVersion)
 
 	require.NoError(t, provider.Relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, provider.Relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
@@ -80,7 +80,7 @@ func TestMainnetConsumerChainsAfterUpgrade(t *testing.T) {
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, provider.Relayer, 1)
 	fresh.IBCTest(ctx, t, provider, stride, provider.Relayer)
 
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, provider, fresh.GetConfig(ctx).UpgradeVersion)
 
 	require.NoError(t, provider.Relayer.StopRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))
 	require.NoError(t, provider.Relayer.StartRelayer(ctx, fresh.GetRelayerExecReporter(ctx)))

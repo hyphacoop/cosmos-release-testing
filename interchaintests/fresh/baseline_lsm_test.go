@@ -33,7 +33,7 @@ func TestLSMAfterUpgrade(t *testing.T) {
 	fresh.LSMHappyPathTest(ctx, t, provider, stride, provider.Relayer, lsmWallets)
 	fresh.ICADelegateHappyPathTest(ctx, t, provider, stride, provider.Relayer, icaAddr)
 
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, provider, fresh.GetConfig(ctx).UpgradeVersion)
 	require.NoError(t, fresh.SetEpoch(ctx, provider, 1))
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, stride, provider.Relayer, 1)
 	fresh.IBCTest(ctx, t, provider, stride, provider.Relayer)

@@ -174,7 +174,7 @@ func TestPSSChainLaunchAfterUpgradeTop100(t *testing.T) {
 	require.NoError(t, err)
 
 	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, provider, fresh.GetConfig(ctx).UpgradeVersion)
 
 	consumerConfig := getConsumerConfig(100, nil, nil)
 
@@ -229,7 +229,7 @@ func TestPSSChainLaunchWithSetCap(t *testing.T) {
 	require.NoError(t, err)
 
 	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, provider, fresh.GetConfig(ctx).UpgradeVersion)
 
 	consumerConfig := getConsumerConfig(fresh.PSS_OPT_IN, nil, nil)
 	consumerConfig.ValidatorSetCap = 4
@@ -267,7 +267,7 @@ func TestPSSChainLaunchWithPowerCap(t *testing.T) {
 	require.NoError(t, err)
 
 	provider := fresh.CreateChain(ctx, t, fresh.GetConfig(ctx).StartVersion, true)
-	fresh.UpgradeChain(ctx, t, provider, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, provider, fresh.GetConfig(ctx).UpgradeVersion)
 
 	consumerConfig := getConsumerConfig(fresh.PSS_OPT_IN, nil, nil)
 	cap := 50

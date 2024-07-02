@@ -268,6 +268,37 @@ func (c Chain) GenerateTx(ctx context.Context, valIdx int, command ...string) (s
 	return string(stdout), nil
 }
 
+func UpgradeChainViaRestart(ctx context.Context, t *testing.T, chain Chain, version string) {
+	// bring down nodes to prepare for upgrade
+	err := chain.StopAllNodes(ctx)
+	require.NoError(t, err, "error stopping node(s)")
+
+	// upgrade version on all nodes
+	chain.UpgradeVersion(ctx, chain.GetNode().DockerClient, chain.GetNode().Image.Repository, version)
+
+	// start all nodes back up.
+	// validators reach consensus on first block after upgrade height
+	// and chain block production resumes.
+	err = chain.StartAllNodes(ctx)
+	require.NoError(t, err, "error starting upgraded node(s)")
+
+	timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 60*time.Second)
+	defer timeoutCancel()
+	err = testutil.WaitForBlocks(timeoutCtx, 5, chain)
+	require.NoError(t, err)
+
+	// Flush "successfully migrated key info" messages
+	for _, val := range chain.Validators {
+		_, _, err := val.ExecBin(ctx, "keys", "list", "--keyring-backend", "test")
+		require.NoError(t, err)
+	}
+	if chain.Relayer != nil {
+		require.NoError(t, chain.Relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx)))
+		require.NoError(t, chain.Relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
+	}
+
+}
+
 func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, version string) {
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
@@ -301,33 +332,7 @@ func UpgradeChain(ctx context.Context, t *testing.T, chain Chain, upgradeName, v
 	// make sure that chain is halted; some chains may produce one more block after halt height
 	require.LessOrEqual(t, height-haltHeight, int64(1), "height %d is not within one block of halt height %d; chain isn't halted", height, haltHeight)
 
-	// bring down nodes to prepare for upgrade
-	err = chain.StopAllNodes(ctx)
-	require.NoError(t, err, "error stopping node(s)")
-
-	// upgrade version on all nodes
-	chain.UpgradeVersion(ctx, chain.GetNode().DockerClient, chain.GetNode().Image.Repository, version)
-
-	// start all nodes back up.
-	// validators reach consensus on first block after upgrade height
-	// and chain block production resumes.
-	err = chain.StartAllNodes(ctx)
-	require.NoError(t, err, "error starting upgraded node(s)")
-
-	timeoutCtx, timeoutCancel := context.WithTimeout(ctx, 60*time.Second)
-	defer timeoutCancel()
-	err = testutil.WaitForBlocks(timeoutCtx, 5, chain)
-	require.NoError(t, err)
-
-	// Flush "successfully migrated key info" messages
-	for _, val := range chain.Validators {
-		_, _, err := val.ExecBin(ctx, "keys", "list", "--keyring-backend", "test")
-		require.NoError(t, err)
-	}
-	if chain.Relayer != nil {
-		require.NoError(t, chain.Relayer.StopRelayer(ctx, GetRelayerExecReporter(ctx)))
-		require.NoError(t, chain.Relayer.StartRelayer(ctx, GetRelayerExecReporter(ctx)))
-	}
+	UpgradeChainViaRestart(ctx, t, chain, version)
 }
 
 func GetChannelWithPort(ctx context.Context, relayer ibc.Relayer, chain, counterparty Chain, portID string) (*ibc.ChannelOutput, error) {

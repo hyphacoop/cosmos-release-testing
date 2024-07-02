@@ -16,7 +16,7 @@ func TestBaselineTXsAfterUpgrade(t *testing.T) {
 
 	fresh.TransactionsTest(ctx, t, chain)
 
-	fresh.UpgradeChain(ctx, t, chain, fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, chain, fresh.GetConfig(ctx).UpgradeVersion)
 
 	fresh.TransactionsTest(ctx, t, chain)
 

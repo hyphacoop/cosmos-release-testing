@@ -13,6 +13,6 @@ func TestPFMAfterUpgrade(t *testing.T) {
 	chains, relayer := fresh.CreateNLinkedChains(ctx, t, fresh.GetConfig(ctx).StartVersion, fresh.DEFAULT_CHANNEL_VERSION, 4)
 	fresh.PFMTransfersTest(ctx, t, chains, relayer)
 
-	fresh.UpgradeChain(ctx, t, chains[0], fresh.GetConfig(ctx).TargetVersion, fresh.GetConfig(ctx).UpgradeVersion)
+	fresh.UpgradeChainViaRestart(ctx, t, chains[0], fresh.GetConfig(ctx).UpgradeVersion)
 	fresh.PFMTransfersTest(ctx, t, chains, relayer)
 }
