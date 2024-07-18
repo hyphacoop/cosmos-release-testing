@@ -215,6 +215,11 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 			return sjson.SetBytes(b, "app_state.epochs.epochs.#(identifier==\"stride_epoch\").duration", "30s")
 		}
 	}
+	var providerVerOverride string
+
+	if semver.Compare(p.GetNode().ICSVersion(ctx), "v4.1.0") > 0 {
+		providerVerOverride = "v4.1.0"
+	}
 
 	return &interchaintest.ChainSpec{
 		Name:          chainType,
@@ -268,6 +273,9 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 						Amount: sdkmath.NewInt(getValidatorStake()[i]),
 						Denom:  denom,
 					}
+			},
+			InterchainSecurityConfig: ibc.ICSConfig{
+				ProviderVerOverride: providerVerOverride,
 			},
 			ModifyGenesis: modifyGenesis,
 			ConsumerCopyProviderKey: func(i int) bool {
@@ -380,7 +388,10 @@ func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chain
 func isValoperJailed(ctx context.Context, t *testing.T, provider Chain, valoper string) bool {
 	out, _, err := provider.Validators[0].ExecQuery(ctx, "staking", "validator", valoper)
 	require.NoError(t, err)
-	return gjson.GetBytes(out, "jailed").Bool()
+	if gjson.GetBytes(out, "jailed").Exists() {
+		return gjson.GetBytes(out, "jailed").Bool()
+	}
+	return gjson.GetBytes(out, "validator.jailed").Bool()
 }
 
 func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consumer Chain, validatorIdx int, shouldJail bool) {

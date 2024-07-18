@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/mod/semver"
 )
 
 func APIEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
@@ -58,6 +59,11 @@ func APIEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 }
 
 func RPCEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
+	blockEventsKey := "begin_block_events"
+	if semver.Compare(chain.GetNode().GetBuildInformation(ctx).CosmosSdkVersion, "v0.50.0") >= 0 {
+		blockEventsKey = "finalize_block_events"
+	}
+
 	tests := []struct {
 		name string
 		path string
@@ -65,7 +71,7 @@ func RPCEndpointsTest(ctx context.Context, t *testing.T, chain Chain) {
 	}{
 		{name: "abci_info", path: "/abci_info", key: "response"},
 		{name: "block", path: "/block", key: "block"},
-		{name: "block_results", path: "/block_results", key: "begin_block_events"},
+		{name: "block_results", path: "/block_results", key: blockEventsKey},
 		{name: "blockchain", path: "/blockchain", key: "block_metas"},
 		{name: "commit", path: "/commit", key: "signed_header"},
 		{name: "consensus_params", path: "/consensus_params", key: "consensus_params"},

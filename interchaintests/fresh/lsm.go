@@ -50,6 +50,8 @@ func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain,
 		ibcTransfer   = 10000000
 		liquid1Redeem = 20000000
 	)
+	shareFactor, ok := sdkmath.NewIntFromString("1000000000000000000")
+	require.True(t, ok)
 	providerWallets, err := GetValidatorWallets(ctx, provider)
 	require.NoError(t, err)
 	providerWallet := providerWallets[0]
@@ -59,39 +61,39 @@ func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain,
 	strideWallet := strideWallets[0]
 
 	t.Run("Validator Bond", func(t *testing.T) {
-		delegatorShares1 := provider.QueryJSON(ctx, t, "delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		validatorBondShares1 := provider.QueryJSON(ctx, t, "validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		delegatorShares1 := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		validatorBondShares1 := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 
 		_, err = provider.GetNode().ExecTx(ctx, lsmWallets["bonding"].FormattedAddress(),
 			"staking", "delegate", providerWallet.ValoperAddress, fmt.Sprintf("%d%s", delegation, DENOM))
 		require.NoError(t, err)
-		delegatorShares2 := provider.QueryJSON(ctx, t, "delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		checkAMinusBEqualsX(t, delegatorShares2, delegatorShares1, delegation)
+		delegatorShares2 := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		checkAMinusBEqualsX(t, delegatorShares2, delegatorShares1, sdkmath.NewInt(delegation).Mul(shareFactor))
 
 		_, err = provider.GetNode().ExecTx(ctx, lsmWallets["bonding"].FormattedAddress(),
 			"staking", "validator-bond", providerWallet.ValoperAddress)
 		require.NoError(t, err)
-		validatorBondShares2 := provider.QueryJSON(ctx, t, "validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		checkAMinusBEqualsX(t, validatorBondShares2, validatorBondShares1, delegation)
+		validatorBondShares2 := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		checkAMinusBEqualsX(t, validatorBondShares2, validatorBondShares1, sdkmath.NewInt(delegation).Mul(shareFactor))
 	})
 
 	var tokenizedDenom string
 	t.Run("Tokenize", func(t *testing.T) {
-		delegatorShares1 := provider.QueryJSON(ctx, t, "delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		delegatorShares1 := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		_, err := provider.GetNode().ExecTx(ctx, lsmWallets["liquid_1"].FormattedAddress(),
 			"staking", "delegate", providerWallet.ValoperAddress, fmt.Sprintf("%d%s", delegation, DENOM))
 		require.NoError(t, err)
-		delegatorShares2 := provider.QueryJSON(ctx, t, "delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		checkAMinusBEqualsX(t, delegatorShares2, delegatorShares1, delegation)
+		delegatorShares2 := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		checkAMinusBEqualsX(t, delegatorShares2, delegatorShares1, sdkmath.NewInt(delegation).Mul(shareFactor))
 
-		sharesPreTokenize := provider.QueryJSON(ctx, t, "liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		sharesPreTokenize := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		_, err = provider.GetNode().ExecTx(ctx, lsmWallets["liquid_1"].FormattedAddress(),
 			"staking", "tokenize-share",
 			providerWallet.ValoperAddress, fmt.Sprintf("%d%s", tokenize, DENOM), lsmWallets["liquid_1"].FormattedAddress(),
 			"--gas", "auto")
 		require.NoError(t, err)
-		sharesPostTokenize := provider.QueryJSON(ctx, t, "liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		checkAMinusBEqualsX(t, sharesPostTokenize, sharesPreTokenize, tokenize)
+		sharesPostTokenize := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		checkAMinusBEqualsX(t, sharesPostTokenize, sharesPreTokenize, sdkmath.NewInt(tokenize).Mul(shareFactor))
 
 		balances, err := provider.AllBalances(ctx, lsmWallets["liquid_1"].FormattedAddress())
 		require.NoError(t, err)
@@ -184,28 +186,28 @@ func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain,
 		require.NoError(t, err)
 
 		happyLiquid1Delegations2 := provider.QueryJSON(ctx, t, fmt.Sprintf("delegation_responses.#(delegation.validator_address==\"%s\").delegation.shares", providerWallet.ValoperAddress), "staking", "delegations", lsmWallets["liquid_1"].FormattedAddress()).String()
-		checkAMinusBEqualsX(t, happyLiquid1Delegations2, happyLiquid1Delegations1, liquid1Redeem)
+		checkAMinusBEqualsX(t, happyLiquid1Delegations2, happyLiquid1Delegations1, sdkmath.NewInt(liquid1Redeem).Mul(shareFactor))
 
 		happyLiquid2Delegations := provider.QueryJSON(ctx, t, fmt.Sprintf("delegation_responses.#(delegation.validator_address==\"%s\").delegation.shares", providerWallet.ValoperAddress), "staking", "delegations", lsmWallets["liquid_2"].FormattedAddress()).String()
 		// LOL there are better ways of doing this
-		checkAMinusBEqualsX(t, happyLiquid2Delegations, "0", bankSend)
+		checkAMinusBEqualsX(t, happyLiquid2Delegations, "0", sdkmath.NewInt(bankSend).Mul(shareFactor))
 		happyLiquid3Delegations := provider.QueryJSON(ctx, t, fmt.Sprintf("delegation_responses.#(delegation.validator_address==\"%s\").delegation.shares", providerWallet.ValoperAddress), "staking", "delegations", lsmWallets["liquid_3"].FormattedAddress()).String()
-		checkAMinusBEqualsX(t, happyLiquid3Delegations, "0", ibcTransfer)
+		checkAMinusBEqualsX(t, happyLiquid3Delegations, "0", sdkmath.NewInt(ibcTransfer).Mul(shareFactor))
 
 		happyLiquid1DelegationBalance = provider.QueryJSON(ctx, t, fmt.Sprintf("delegation_responses.#(delegation.validator_address==\"%s\").balance.amount", providerWallet.ValoperAddress), "staking", "delegations", lsmWallets["liquid_1"].FormattedAddress()).String()
 		happyLiquid2DelegationBalance := provider.QueryJSON(ctx, t, fmt.Sprintf("delegation_responses.#(delegation.validator_address==\"%s\").balance.amount", providerWallet.ValoperAddress), "staking", "delegations", lsmWallets["liquid_2"].FormattedAddress()).String()
 		happyLiquid3DelegationBalance := provider.QueryJSON(ctx, t, fmt.Sprintf("delegation_responses.#(delegation.validator_address==\"%s\").balance.amount", providerWallet.ValoperAddress), "staking", "delegations", lsmWallets["liquid_3"].FormattedAddress()).String()
-		checkAMinusBEqualsX(t, happyLiquid1DelegationBalance, "0", 70000000)
-		checkAMinusBEqualsX(t, happyLiquid2DelegationBalance, "0", bankSend)
-		checkAMinusBEqualsX(t, happyLiquid3DelegationBalance, "0", ibcTransfer)
+		checkAMinusBEqualsX(t, happyLiquid1DelegationBalance, "0", sdkmath.NewInt(70000000))
+		checkAMinusBEqualsX(t, happyLiquid2DelegationBalance, "0", sdkmath.NewInt(bankSend))
+		checkAMinusBEqualsX(t, happyLiquid3DelegationBalance, "0", sdkmath.NewInt(ibcTransfer))
 	})
 	t.Run("Cleanup", func(t *testing.T) {
 		_, err := provider.GetNode().ExecTx(ctx, lsmWallets["bonding"].FormattedAddress(),
 			"staking", "unbond", providerWallet.ValoperAddress, fmt.Sprintf("%d%s", delegation, DENOM))
 		require.NoError(t, err)
 
-		validatorBondShares := provider.QueryJSON(ctx, t, "validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		checkAMinusBEqualsX(t, validatorBondShares, "0", 0)
+		validatorBondShares := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		checkAMinusBEqualsX(t, validatorBondShares, "0", sdkmath.NewInt(0).Mul(shareFactor))
 
 		_, err = provider.GetNode().ExecTx(ctx, lsmWallets["liquid_1"].FormattedAddress(),
 			"staking", "unbond", providerWallet.ValoperAddress, fmt.Sprintf("%s%s", happyLiquid1DelegationBalance, DENOM))
@@ -243,9 +245,9 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 	strideWallet := strideWallets[0]
 
 	t.Run("Delegate and Bond", func(t *testing.T) {
-		shares1 := provider.QueryJSON(ctx, t, "delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		tokens1 := provider.QueryJSON(ctx, t, "tokens", "staking", "validator", providerWallet.ValoperAddress).String()
-		bondShares1 := provider.QueryJSON(ctx, t, "validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		shares1 := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		tokens1 := provider.QueryJSON(ctx, t, "validator.tokens", "staking", "validator", providerWallet.ValoperAddress).String()
+		bondShares1 := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		shares1Int := strToSDKInt(t, shares1)
 		tokens1Int := strToSDKInt(t, tokens1)
 		bondShares1Int := strToSDKInt(t, bondShares1)
@@ -262,15 +264,15 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 			"staking", "validator-bond", providerWallet.ValoperAddress)
 		require.NoError(t, err)
 
-		bondShares2 := provider.QueryJSON(ctx, t, "validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		bondShares2 := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		bondShares2Int := strToSDKInt(t, bondShares2)
 		require.Truef(t, bondShares2Int.Sub(expectedShares).Abs().LTE(sdkmath.NewInt(1)), "bondShares2: %s, expectedShares: %s", bondShares2, expectedShares)
 	})
 
 	t.Run("Delegate via ICA", func(t *testing.T) {
-		preDelegationTokens := provider.QueryJSON(ctx, t, "tokens", "staking", "validator", providerWallet.ValoperAddress).String()
-		preDelegationShares := provider.QueryJSON(ctx, t, "delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		preDelegationLiquidShares := provider.QueryJSON(ctx, t, "liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		preDelegationTokens := provider.QueryJSON(ctx, t, "validator.tokens", "staking", "validator", providerWallet.ValoperAddress).String()
+		preDelegationShares := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		preDelegationLiquidShares := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 
 		preDelegationTokensInt := strToSDKInt(t, preDelegationTokens)
 		preDelegationSharesInt := strToSDKInt(t, preDelegationShares)
@@ -302,12 +304,12 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 
 		var tokensDelta sdkmath.Int
 		require.EventuallyWithT(t, func(c *assert.CollectT) {
-			postDelegationTokens := provider.QueryJSON(ctx, t, "tokens", "staking", "validator", providerWallet.ValoperAddress).String()
+			postDelegationTokens := provider.QueryJSON(ctx, t, "validator.tokens", "staking", "validator", providerWallet.ValoperAddress).String()
 			tokensDelta = strToSDKInt(t, postDelegationTokens).Sub(strToSDKInt(t, preDelegationTokens))
 			assert.Truef(c, tokensDelta.Sub(sdkmath.NewInt(delegate)).Abs().LTE(sdkmath.NewInt(1)), "tokensDelta: %s, delegate: %d", tokensDelta, delegate)
 		}, 20*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 
-		postDelegationLiquidShares := provider.QueryJSON(ctx, t, "liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
+		postDelegationLiquidShares := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		liquidSharesDelta := strToSDKInt(t, postDelegationLiquidShares).Sub(strToSDKInt(t, preDelegationLiquidShares))
 		require.Truef(t, liquidSharesDelta.Sub(expectedLiquidIncrease).Abs().LTE(sdkmath.NewInt(1)), "liquidSharesDelta: %s, expectedLiquidIncrease: %d", liquidSharesDelta, expectedLiquidIncrease)
 	})
@@ -352,7 +354,7 @@ func TokenizeVestedAmountTest(ctx context.Context, t *testing.T, provider Chain,
 		"--gas", "auto")
 	require.Error(t, err)
 
-	sharesPreTokenize := provider.QueryJSON(ctx, t, "liquid_shares", "staking", "validator", validatorWallet.ValoperAddress).String()
+	sharesPreTokenize := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", validatorWallet.ValoperAddress).String()
 
 	// try to tokenize vested amount (i.e. half) should succeed if upgraded
 	_, err = provider.GetNode().ExecTx(ctx, vestingAccount.FormattedAddress(),
@@ -360,8 +362,8 @@ func TokenizeVestedAmountTest(ctx context.Context, t *testing.T, provider Chain,
 		"--gas", "auto")
 	if isUpgraded {
 		require.NoError(t, err)
-		sharesPostTokenize := provider.QueryJSON(ctx, t, "liquid_shares", "staking", "validator", validatorWallet.ValoperAddress).String()
-		checkAMinusBEqualsX(t, sharesPostTokenize, sharesPreTokenize, vestingAmount/2)
+		sharesPostTokenize := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", validatorWallet.ValoperAddress).String()
+		checkAMinusBEqualsX(t, sharesPostTokenize, sharesPreTokenize, sdkmath.NewInt(vestingAmount/2))
 
 	} else {
 		require.Error(t, err)
