@@ -67,6 +67,8 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 			cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.005"),
 			cosmos.NewGenesisKV("app_state.feemarket.state.base_gas_price", "0.005"),
 			cosmos.NewGenesisKV("app_state.feemarket.params.fee_denom", DENOM),
+			cosmos.NewGenesisKV("app_state.wasm.params.code_upload_access.permission", "Nobody"),
+			cosmos.NewGenesisKV("app_state.wasm.params.instantiate_default_permission", "AnyOfAddresses"),
 		)
 	}
 	return &interchaintest.ChainSpec{
