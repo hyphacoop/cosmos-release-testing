@@ -119,9 +119,13 @@ echo "Patching genesis for ICA messages..."
 # Gaia
 jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' $HOME_1/config/genesis.json > ./ica_host.json
 mv ica_host.json $HOME_1/config/genesis.json
-# pd
 
-jq '.app_state.interchainaccounts' $HOME_1/config/genesis.json
+# Introduced in Gaia v19 upgrade workflow
+echo "Patching genesis for feemarket params..."
+jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $HOME_1/config/genesis.json > ./feemarket-denom.json
+mv feemarket-denom.json $HOME_1/config/genesis.json
+jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $HOME_1/config/genesis.json > ./feemarket-min-base.json
+mv feemarket-min-base.json $HOME_1/config/genesis.json
 
 echo "Copying genesis file to other nodes..."
 cp $HOME_1/config/genesis.json $HOME_2/config/genesis.json 
