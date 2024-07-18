@@ -293,7 +293,10 @@
         - name: Block production check
           run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
         - name: Print feemarket params
-          run: $CHAIN_BINARY q feemarket params --home $HOME_1
+          run: |
+            sleep 10
+            $CHAIN_BINARY q feemarket params --home $HOME_1
+            $CHAIN_BINARY q feemarket gas-prices --home $HOME_1
 
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
