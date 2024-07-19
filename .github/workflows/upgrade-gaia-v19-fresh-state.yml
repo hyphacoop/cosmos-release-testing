@@ -22,6 +22,7 @@
     DOWNTIME_BLOCKS: 10000
     # Provider chain variables
     CHAIN_BINARY: gaiad
+    BINARY_SOURCE: BUILD
     CHAIN_ID: testnet
     DENOM: uatom
     BASE_FEES: 2000
