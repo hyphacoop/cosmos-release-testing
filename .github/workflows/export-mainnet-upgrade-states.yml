@@ -36,7 +36,7 @@ jobs:
       - name: Install required packages
         run: |
           sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip lz4
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip lz4 psmisc 
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server

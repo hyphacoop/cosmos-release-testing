@@ -54,20 +54,20 @@ jobs:
     outputs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
 
-  # test-upgrade-mainnet:
-  #   needs: set-version-matrix
-  #   strategy:
-  #     matrix:
-  #       ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-  #     fail-fast: false
-  #     #max-parallel: 3
-  #   with:
-  #     runs-on-os: cosmos-runner-set
-  #     gaia_version: ${{ matrix.gaia_version }}
-  #     upgrade_version: ${{ matrix.upgrade_version }}
-  #     env_name: major-upgrade-stateful-workflow
-  #     archive_url: https://files.polypore.xyz/archived-state/latest_v18.tar.gz
-  #   uses: ./.github/workflows/upgrade-gaia-v19-stateful-steps.yml
+  test-upgrade-mainnet:
+    needs: set-version-matrix
+    strategy:
+      matrix:
+        ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+      fail-fast: false
+      #max-parallel: 3
+    with:
+      runs-on-os: cosmos-runner-set
+      gaia_version: ${{ matrix.gaia_version }}
+      upgrade_version: ${{ matrix.upgrade_version }}
+      env_name: major-upgrade-stateful-workflow
+      archive_url: https://files.polypore.xyz/archived-state/latest_v18.tar.gz
+    uses: ./.github/workflows/upgrade-gaia-v19-stateful-steps.yml
   test-upgrade-release-testnet:
     needs: set-version-matrix
     strategy:
