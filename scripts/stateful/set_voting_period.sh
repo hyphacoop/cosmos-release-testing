@@ -20,7 +20,7 @@ sleep 6
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
-$CHAIN_BINARY q tx $txhash --home $HOME_1
+$CHAIN_BINARY q tx $txhash --home $HOME_1 --output json
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "Voting on proposal $proposal_id..."
