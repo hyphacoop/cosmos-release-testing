@@ -55,12 +55,8 @@ func optInFunction(t *testing.T, producer fresh.Chain, validators ...int) func(c
 		for _, i := range validators {
 			i := i
 			eg.Go(func() error {
-				pubKey, _, err := consumer.Validators[i].ExecBin(ctx, "tendermint", "show-validator")
-				if err != nil {
-					return err
-				}
-				_, err = producer.Validators[i].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-					"provider", "opt-in", consumer.Config().ChainID, string(pubKey))
+				_, err := producer.Validators[i].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
+					"provider", "opt-in", consumer.Config().ChainID)
 				return err
 			})
 		}
