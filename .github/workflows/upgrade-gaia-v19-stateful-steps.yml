@@ -231,6 +231,12 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: _Provider API tests> gaiad v17
         run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: _Provider RPC tests> gaiad v17
         run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
       - name: Set up relayer
