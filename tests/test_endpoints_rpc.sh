@@ -51,7 +51,7 @@ echo "curl output:"
 curl $BLOCK_RESULTS -s -N -H "Accept: application/json"
 echo "jq output:"
 RESPONSE=$(curl $BLOCK_RESULTS -s -N -H "Accept: application/json" | jq '.')
-print $RESPONSE
+echo $RESPONSE
 # if [ "$RESPONSE" != "begin_block_events" ]; then # deprecated with v19
 # if [ "$RESPONSE" != "height" ]; then
     # response_failed $RESPONSE
