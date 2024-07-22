@@ -16,10 +16,9 @@ func strToSDKInt(t *testing.T, s string) sdkmath.Int {
 	return i
 }
 
-func checkAMinusBEqualsX(t *testing.T, a, b string, x int64) {
+func checkAMinusBEqualsX(t *testing.T, a, b string, x sdkmath.Int) {
 	t.Helper()
-	// trim the .00s from the string
 	intA := strToSDKInt(t, a)
 	intB := strToSDKInt(t, b)
-	require.Equal(t, x, intA.Sub(intB).Int64())
+	require.True(t, intA.Sub(intB).Equal(x), "a - b = %s, expected %s", intA.Sub(intB).String(), x.String())
 }

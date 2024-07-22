@@ -434,3 +434,18 @@ func (c Chain) GetValidatorHex(ctx context.Context, val int) (string, error) {
 	providerHex := gjson.GetBytes(json, "address").String()
 	return providerHex, nil
 }
+
+func (c Chain) GetGovernanceAddress(ctx context.Context) (string, error) {
+	addr, err := c.CosmosChain.GetGovernanceAddress(ctx)
+	if err != nil {
+		return "", err
+	}
+	if addr != "" {
+		return addr, nil
+	}
+	out, _, err := c.GetNode().ExecQuery(ctx, "auth", "module-account", "gov")
+	if err != nil {
+		return "", err
+	}
+	return gjson.GetBytes(out, "account.value.address").String(), nil
+}
