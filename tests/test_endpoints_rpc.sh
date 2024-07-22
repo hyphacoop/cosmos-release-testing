@@ -47,7 +47,7 @@ if [ "$RESPONSE" != "block" ]; then
 fi
 
 echo "> $BLOCK_RESULTS"
-curl $BLOCK_RESULTS
+curl $BLOCK_RESULTS -i -H "Accept: application/json"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $BLOCK_RESULTS | jq -r '.result')
 print $RESPONSE
 # if [ "$RESPONSE" != "begin_block_events" ]; then # deprecated with v19
