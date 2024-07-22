@@ -96,6 +96,7 @@ jobs:
       CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
       VESTING_TARGET: "1772414007"
       UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+      HERMES_VERSION: ${{ vars.HERMES_VERSION }}
     steps:
       # Get system info
       - run: sudo apt install -y net-tools
