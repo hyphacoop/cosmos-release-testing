@@ -235,10 +235,8 @@ func TestPSSChainLaunchWithSetCap(t *testing.T) {
 
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
 
-	pubKey, _, err := consumer.Validators[1].ExecBin(ctx, "tendermint", "show-validator")
-	require.NoError(t, err)
 	_, err = provider.Validators[1].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-		"provider", "opt-in", consumer.Config().ChainID, string(pubKey))
+		"provider", "opt-in", consumer.Config().ChainID)
 	require.NoError(t, err)
 
 	hex1, err := consumer.GetValidatorHex(ctx, 1)
