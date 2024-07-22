@@ -50,7 +50,7 @@ echo "> $BLOCK_RESULTS"
 echo "curl output:"
 curl $BLOCK_RESULTS -s -N -H "Accept: application/json"
 echo "jq output:"
-RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s -N -H "Accept: application/json" $BLOCK_RESULTS | jq -r '.result')
+RESPONSE=$(curl $BLOCK_RESULTS -s -N -H "Accept: application/json" | jq '.')
 print $RESPONSE
 # if [ "$RESPONSE" != "begin_block_events" ]; then # deprecated with v19
 # if [ "$RESPONSE" != "height" ]; then
