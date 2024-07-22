@@ -99,6 +99,11 @@ jobs:
     steps:
       # Get system info
       - run: sudo apt install -y net-tools
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -144,12 +149,6 @@ jobs:
         run: |
           echo "$HOME/go/bin" >> $GITHUB_PATH
           echo "$HOME/.hermes" >> $GITHUB_PATH
-      - name: Bypass the grub-efi-amd64-signed package
-        run: sudo apt-mark hold grub-efi-amd64-signed
-      - name: Install required packages
-        run: |
-          sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Init Python venv
