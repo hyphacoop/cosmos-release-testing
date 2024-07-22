@@ -211,8 +211,20 @@ jobs:
         run: $CHAIN_BINARY --home $HOME_1 q gov params
       - name: Query BlocksPerEpoch
         run: $CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Set BlocksPerEpoch to 1
         run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-1.json
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue2 ]
+          do
+            sleep 1
+          done
       - name: Check BlocksPerEpoch is 1
         run: |
           BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.value')
