@@ -47,8 +47,8 @@ if [ "$RESPONSE" != "block" ]; then
 fi
 
 echo "> $BLOCK_RESULTS"
-RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $BLOCK_RESULTS | jq -r '.result | keys[0]')
-if [ "$RESPONSE" != "begin_block_events" ]; then
+RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $BLOCK_RESULTS | jq -r '.result | keys[2]')
+if [ "$RESPONSE" != "finalize_block_events" ]; then
     response_failed $RESPONSE
 fi
 
