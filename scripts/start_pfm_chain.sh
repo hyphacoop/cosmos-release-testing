@@ -48,6 +48,15 @@ jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json 
 # jq -r '.app_state.staking.params.global_liquid_staking_cap = "0.100000000000000000"' lsm-1.json > lsm-2.json
 # jq -r '.app_state.staking.params.validator_liquid_staking_cap = "0.200000000000000000"' lsm-2.json > lsm-3.json
 
+# Introduced in Gaia v19 upgrade workflow
+echo "Patching genesis for feemarket params..."
+jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $PFM_HOME/config/genesis.json > ./feemarket-denom.json
+mv feemarket-denom.json $PFM_HOME/config/genesis.json
+jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $PFM_HOME/config/genesis.json > ./feemarket-min-base.json
+mv feemarket-min-base.json $PFM_HOME/config/genesis.json
+jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $PFM_HOME/config/genesis.json > ./feemarket-base.json
+mv feemarket-base.json $PFM_HOME/config/genesis.json
+
 echo "Patching genesis for ICA messages..."
 # Gaia
 jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' slashing-2.json > ./ica_host.json
