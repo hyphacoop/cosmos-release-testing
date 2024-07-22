@@ -11,12 +11,17 @@ on:
 
 jobs:
   export-cosmoshub-mainnet:
-    runs-on: self-hosted-ubuntu-22.04
+    runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
       # Get system info
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - run: sudo apt -y install net-tools
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -28,10 +33,6 @@ jobs:
       - run: pwd
       - name: mkdir ~/artifact
         run: mkdir ~/artifact
-      - name: Update Apt
-        run: |
-          sudo apt update
-          sudo apt dist-upgrade -y
       - name: Install required packages
         run: |
           sudo apt update
