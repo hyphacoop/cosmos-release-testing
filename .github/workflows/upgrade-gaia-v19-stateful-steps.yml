@@ -202,9 +202,10 @@ jobs:
         run: |
           # unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000000000" | bc)
           # jq ". .unbonding_period=$unbonding_period" templates/proposal-add-template.json > proposal-add-template.json
-          jq ". .unbonding_period=${{ env.UNBONDING_TIME }}" templates/proposal-add-template.json > proposal-add-template.json
+          echo "${{ env.UNBONDING_TIME }}"
+          jq ". .unbonding_period=\"${{ env.UNBONDING_TIME }}\"" templates/proposal-add-template.json > proposal-add-template.json
           mv proposal-add-template.json templates/proposal-add-template.json
-          echo "Contents of templates/proposal-add-template.json:"
+          echo "[INFO] Contents of templates/proposal-add-template.json:"
           cat templates/proposal-add-template.json
       - name: Set voting period to 60s and 15s expedited voting period"
         env:
