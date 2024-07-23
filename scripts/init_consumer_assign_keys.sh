@@ -7,18 +7,18 @@ echo "Running with $CONSUMER_CHAIN_BINARY."
 echo "Initializing consumer homes..."
 $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_1
-$CHAIN_BINARY config node tcp://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config node tcp://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY init $MONIKER_1 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
 cat $CONSUMER_HOME_1/config/client.toml
 
 $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_2
 $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_2
-$CHAIN_BINARY config node tcp://localhost:$CON2_RPC_PORT --home $CONSUMER_HOME_2
+$CONSUMER_CHAIN_BINARY config node tcp://localhost:$CON2_RPC_PORT --home $CONSUMER_HOME_2
 $CONSUMER_CHAIN_BINARY init $MONIKER_2 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_2
 
 $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_3
 $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_3
-$CHAIN_BINARY config node tcp://localhost:$CON3_RPC_PORT --home $CONSUMER_HOME_3
+$CONSUMER_CHAIN_BINARY config node tcp://localhost:$CON3_RPC_PORT --home $CONSUMER_HOME_3
 $CONSUMER_CHAIN_BINARY init $MONIKER_3 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_3
 
 echo "Submit key assignment tx..."
