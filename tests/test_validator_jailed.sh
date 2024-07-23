@@ -6,7 +6,7 @@ jailed_expected=$2
 echo "Verifying jailed status for validator $valoper..."
 $CHAIN_BINARY q staking validator $valoper --home $HOME_1 -o json | jq -r '.'
 
-jailed_actual=$($CHAIN_BINARY q staking validator $valoper --home $HOME_1 -o json | jq -r '.jailed')
+jailed_actual=$($CHAIN_BINARY q staking validator $valoper --home $HOME_1 -o json | jq -r '.validator.jailed')
 
 echo "Expected jailed status: $jailed_expected, actual status: $jailed_actual"
 if [ $jailed_expected != $jailed_actual ]; then
