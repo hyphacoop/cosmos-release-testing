@@ -45,6 +45,15 @@ jq -r ".app_state.gov.params.min_deposit[0].amount = \"1\"" ./voting.json > ./go
 # jq -r '.app_state.staking.params.global_liquid_staking_cap = "0.100000000000000000"' lsm-1.json > lsm-2.json
 # jq -r '.app_state.staking.params.validator_liquid_staking_cap = "0.200000000000000000"' lsm-2.json > lsm-3.json
 
+# Introduced in Gaia v19 upgrade workflow
+echo "Patching genesis for feemarket params..."
+jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $CHAIN_HOME/config/genesis.json > ./feemarket-denom.json
+mv feemarket-denom.json $CHAIN_HOME/config/genesis.json
+jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $CHAIN_HOME/config/genesis.json > ./feemarket-min-base.json
+mv feemarket-min-base.json $CHAIN_HOME/config/genesis.json
+jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $CHAIN_HOME/config/genesis.json > ./feemarket-base.json
+mv feemarket-base.json $CHAIN_HOME/config/genesis.json
+
 cat $CHAIN_HOME/config/genesis.json
 
 echo "Patching config files..."
