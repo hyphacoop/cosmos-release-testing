@@ -47,11 +47,7 @@ if [ "$RESPONSE" != "block" ]; then
 fi
 
 echo "> $BLOCK_RESULTS"
-echo "curl output:"
-curl $BLOCK_RESULTS -s -N -H "Accept: application/json"
-echo "jq output:"
 RESPONSE=$(curl $BLOCK_RESULTS -s -N -H "Accept: application/json" | jq -r '.result | keys[0]')
-echo $RESPONSE
 # if [ "$RESPONSE" != "begin_block_events" ]; then # deprecated with v19
 if [ "$RESPONSE" != "app_hash" ]; then
     response_failed $RESPONSE

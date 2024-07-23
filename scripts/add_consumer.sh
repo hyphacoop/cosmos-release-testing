@@ -26,8 +26,8 @@ echo "Submitting proposal..."
 if [ $COSMOS_SDK == "v45" ]; then
     echo "Preparing proposal with v45 command..."
     proposal="$CHAIN_BINARY tx gov submit-proposal consumer-addition proposal-add-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_2 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y -o json"
-elif [ $COSMOS_SDK == "v47" ]; then
-echo "Preparing proposal with v47 command..."
+else [ $COSMOS_SDK == "v47" ]; then
+echo "Preparing proposal with v47+ command..."
     proposal="$CHAIN_BINARY tx gov submit-legacy-proposal consumer-addition proposal-add-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_2 --keyring-backend test --home $HOME_1  --chain-id $CHAIN_ID -y -o json"
 fi
 txhash=$($proposal | jq -r .txhash)
