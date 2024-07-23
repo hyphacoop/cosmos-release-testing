@@ -59,7 +59,7 @@ mv feemarket-base.json $PFM_HOME/config/genesis.json
 
 echo "Patching genesis for ICA messages..."
 # Gaia
-jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' slashing-2.json > ./ica_host.json
+jq -r '.app_state.interchainaccounts.host_genesis_state.params.allow_messages[0] = "*"' $PFM_HOME/config/genesis.json > ./ica_host.json
 mv ica_host.json $PFM_HOME/config/genesis.json
 # pd
 
