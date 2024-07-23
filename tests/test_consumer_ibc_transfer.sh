@@ -11,6 +11,10 @@ echo "expected denom in consumer: $consumer_expected_denom"
 
 $CHAIN_BINARY q ibc channel channels --home $HOME_1 -o json | jq '.'
 
+echo "Consumer home: $CONSUMER_HOME_1"
+echo "Consumer config:"
+cat $CONSUMER_HOME_1/config/client.toml
+
 $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $RECIPIENT
 consumer_start_balance=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $RECIPIENT -o json | jq -r --arg DENOM "$consumer_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
 if [ -z "$consumer_start_balance" ]; then
