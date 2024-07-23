@@ -5,16 +5,40 @@
 
 transform=$1
 
+debug=1
+
+if [ $debug -eq 1 ]
+then
+    echo "[DEBUG] PROPOSAL TEMPLATE templates/proposal-add-template.json:"
+    cat templates/proposal-add-template.json
+fi
+
 echo "Patching add template with spawn time..."
 spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
 jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/proposal-add-template.json > proposal-add-spawn.json
+if [ $debug -eq 1 ]
+then
+    echo "[DEBUG] PROPOSAL file AFTER ADD SPAWN proposal-add-spawn.json:"
+    cat proposal-add-spawn.json
+fi
 sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" proposal-add-spawn.json > proposal-add-$CONSUMER_CHAIN_ID.json
 rm proposal-add-spawn.json
+if [ $debug -eq 1 ]
+then
+    echo "[DEBUG] PROPOSAL AFTER SET chain_id proposal-add-$CONSUMER_CHAIN_ID.json:"
+    cat proposal-add-$CONSUMER_CHAIN_ID.json
+fi
 
 if [ $PSS_ENABLED == true ]; then
     echo "Patching for PSS..."
     jq -r --argjson TOPN $TOPN '.top_N |= $TOPN' proposal-add-$CONSUMER_CHAIN_ID.json > proposal-add-topn.json
     mv proposal-add-topn.json proposal-add-$CONSUMER_CHAIN_ID.json
+fi
+
+if [ $debug -eq 1 ]
+then
+    echo "[DEBUG] PROPOSAL AFTER SET PSS proposal-add-$CONSUMER_CHAIN_ID.json:"
+    cat proposal-add-$CONSUMER_CHAIN_ID.json
 fi
 
 echo "Proposal file proposal-add-$CONSUMER_CHAIN_ID.json"
