@@ -39,7 +39,7 @@ jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $PFM_HOM
 jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
 
 echo "Setting slashing window to 10..."
-jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' ./gov.json > ./slashing.json
+jq -r --arg SLASH "1000" '.app_state.slashing.params.signed_blocks_window |= $SLASH' ./gov.json > ./slashing.json
 jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json > slashing-2.json
 mv slashing-2.json $PFM_HOME/config/genesis.json
 
