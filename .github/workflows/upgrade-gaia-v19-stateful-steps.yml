@@ -195,12 +195,14 @@ jobs:
       - name: Query unbonding time
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
-          unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.unbonding_time' | sed 's/.$//')
+          # unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.unbonding_time' | sed 's/.$//')
+          unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
           echo "UNBONDING_TIME=$unbonding" >> $GITHUB_ENV
       - name: Update templates/proposal-add-template.json unbonding time
         run: |
-          unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000000000" | bc)
-          jq ". .unbonding_period=$unbonding_period" templates/proposal-add-template.json > proposal-add-template.json
+          # unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000000000" | bc)
+          # jq ". .unbonding_period=$unbonding_period" templates/proposal-add-template.json > proposal-add-template.json
+          jq ". .unbonding_period=${{ env.UNBONDING_TIME }}" templates/proposal-add-template.json > proposal-add-template.json
           mv proposal-add-template.json templates/proposal-add-template.json
           echo "Contents of templates/proposal-add-template.json:"
           cat templates/proposal-add-template.json
