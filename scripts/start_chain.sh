@@ -138,6 +138,9 @@ mv denom.json $HOME_1/config/genesis.json
 jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $HOME_1/config/genesis.json > ./amount.json
 mv amount.json $HOME_1/config/genesis.json
 
+echo "GENESIS FILE:"
+jq '.' $HOME_1/config/genesis.json
+
 echo "Copying genesis file to other nodes..."
 cp $HOME_1/config/genesis.json $HOME_2/config/genesis.json 
 cp $HOME_1/config/genesis.json $HOME_3/config/genesis.json 
