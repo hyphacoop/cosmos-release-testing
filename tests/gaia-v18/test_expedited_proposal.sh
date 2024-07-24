@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Calculate upgrade height
-echo "Calculate height for mock v100 upgrade expedited proposal"
+echo "Calculate height for mock v19 upgrade expedited proposal"
 let voting_blocks_delta=15/$COMMIT_TIMEOUT+5
 height=$(curl -s http://localhost:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
 echo "Current height: $height"
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
 
-jq --arg HEIGHT "$upgrade_height" '.messages[0].plan.height = $HEIGHT' templates/gaia-v18/proposal-upgrade-v100.json > proposal.json
+jq --arg HEIGHT "$upgrade_height" '.messages[0].plan.height = $HEIGHT' templates/gaia-v18/proposal-upgrade-v19.json > proposal.json
 proposal="$CHAIN_BINARY tx gov submit-proposal proposal.json --from $MONIKER_1 --gas auto --gas-adjustment 2 --gas-prices 0.005$DENOM --home $HOME_1 -o json -y"
 txhash=$($proposal | jq -r .txhash)
 echo "tx hash: $txhash" 
@@ -35,7 +35,7 @@ fi
 
 upgrade_name=$($CHAIN_BINARY q upgrade plan --home $HOME_1 -o json | jq -r '.name')
 echo "Upgrade plan name: $upgrade_name"
-if [[ "$upgrade_name" == "v100" ]]; then
+if [[ "$upgrade_name" == "v19" ]]; then
     echo "PASS: Upgrade plan is set."
 else
     echo "FAIL: Upgrade plan is not set."
