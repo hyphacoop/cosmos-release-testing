@@ -289,8 +289,9 @@ jobs:
         env:
           CHAIN_HOME: /home/runner/.val1
         run: |
-          killall hermes || true
           screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
           echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
           hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
           echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
@@ -334,8 +335,9 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
       - name: Establish CCV channel for consumer a
         run: |
-          killall hermes || true
           screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
           client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
           hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
           hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
@@ -422,8 +424,9 @@ jobs:
         if: always()
         run: |
           # hermes
-          killall hermes || true
           screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
           # provider
           killall ${{ env.CHAIN_BINARY }}  || true
           screen -XS {{ env.PROVIDER_SERVICE_1 }} quit || true
@@ -435,6 +438,7 @@ jobs:
           # stride
           killall ${{ env.STRIDE_CHAIN_BINARY }}  || true
           screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
+          killall screen || true
           sleep 20
       - name: Generate info graphs
         if: always()

@@ -130,3 +130,4 @@ clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
 type = "CosmosSdk"
+dynamic_gas_price = { enabled=true, multiplier = 1.5, max = 0.2 } 

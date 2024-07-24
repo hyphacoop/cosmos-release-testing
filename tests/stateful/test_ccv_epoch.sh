@@ -32,6 +32,7 @@ CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.re
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
     echo "[WARNING] VP is the same as starting value, we will wait 60 seconds more"
     sleep 60
+    PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 fi
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
     echo "[ERROR] VP is still the same as starting value!"

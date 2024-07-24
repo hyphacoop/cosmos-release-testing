@@ -27,7 +27,7 @@ CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.re
 
 echo "Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
 if [ $PROVIDER_POWER != $CONSUMER_POWER ]; then
-    echo "[INFO] Consumer chain validator set does not match the provider's."
+    echo "[ERROR] Consumer chain validator set does not match the provider's."
     exit 1
 fi
 echo "[INFO] Consumer chain validator set matches the provider's."
