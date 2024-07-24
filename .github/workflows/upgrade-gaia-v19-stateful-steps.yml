@@ -382,7 +382,8 @@ jobs:
       - name: Waiting for 100th block
         run: |
           cur_height=0
-          to_height=$(curl 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height' | sed 's|.*|(&+50)/100*100|' | bc)
+          height=$(curl 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
+          to_height=$(scripts/stateful/roundup-100.py $height)
           echo "[INFO] waiting to reach height $to_height"
           until [[ "${cur_height}" -gt "${to_height}" ]]
           do
