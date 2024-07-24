@@ -44,8 +44,9 @@ elif [ $COSMOS_SDK == "v47" ]; then
     jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-software-upgrade.json > upgrade-1.json
     jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
     jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
-    jq '.' upgrade-3.json
-    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-3.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
+    jq -r 'messages[0].plan.expedited |= true' upgrade-3.json > upgrade-4.json
+    jq '.' upgrade-4.json
+    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
 fi
 # Submit the proposal
 echo "Submitting the upgrade proposal."
