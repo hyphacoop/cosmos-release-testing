@@ -1935,13 +1935,14 @@
             GAS_PRICE: 0
           run: |
             scripts/start_chain_secondary.sh
+            $CHAIN_BINARTY_SECONDARY version
         - name: Generate IBC connection
           env:
             TARGET_CHAIN_ID: two
             CLIENT_COUNT: 0
             RPC_PORT: 27011
           run: |
-            scripts/gaia-v16/setup_connection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
+            scripts/gaia-v19/setup_connection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
 
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
@@ -2102,6 +2103,7 @@
             CONSUMER_CHAIN_ID: v400-two
             PSS_ENABLED: true
             TOPN: 70
+            COSMOS_SDK: v50
           run: |
             scripts/add_consumer.sh
         - name: Initialize consumer chain with ICS v4.0.0

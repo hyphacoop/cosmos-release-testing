@@ -10,7 +10,7 @@ if [ $RELAYER == "hermes" ]; then
     export PATH="$PATH:~/.hermes"
 
     echo "Setting up Hermes config..."
-    cp templates/gaia-v19/hermes-config-ibc-fee.toml ~/.hermes/config.toml
+    cp templates/gaia-v16/hermes-config-ibc-fee.toml ~/.hermes/config.toml
 
     echo "Adding relayer keys..."
     echo $MNEMONIC_RELAYER > mnemonic.txt
