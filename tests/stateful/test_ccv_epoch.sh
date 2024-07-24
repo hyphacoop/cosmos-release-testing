@@ -14,7 +14,7 @@ echo "[INFO] Delegating additional stake to $MONIKER_1..."
 $CHAIN_BINARY --home $HOME_1 tx staking delegate $VALOPER_1 $DELEGATE_2_AMOUNT$DENOM --from $MONIKER_2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -b sync -y --chain-id $CHAIN_ID
 # Wait for consumer chain to get validator set update
 echo "Waiting for the validator set update to reach the consumer chain..."
-sleep 180
+sleep 60
 PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 
 echo "[INFO] Starting provider voting power: $PROVIDER_POWER_START"
@@ -31,7 +31,7 @@ CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.re
 # Wait 60 more seconds if VP stll the same
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
     echo "[WARNING] VP is the same as starting value, we will wait 60 seconds more"
-    sleep 180
+    sleep 60
     PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 fi
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
