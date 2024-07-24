@@ -4,7 +4,7 @@ valoper=$1
 jailed_expected=$2
 # Check if validator is jailed or not
 echo "Verifying jailed status for validator $valoper..."
-$CHAIN_BINARY q staking validator $valoper --home $HOME_1 -o json | jq -r '.'
+$CHAIN_BINARY q staking validator $valoper --home $HOME_1 -o json | jq -r '.validator.jailed'
 
 jailed_actual=$($CHAIN_BINARY q staking validator $valoper --home $HOME_1 -o json | jq -r '.validator.jailed')
 
