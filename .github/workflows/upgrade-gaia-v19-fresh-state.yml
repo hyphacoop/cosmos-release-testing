@@ -2451,6 +2451,7 @@
             CONSUMER_CHAIN_ID: v400-two
             PSS_ENABLED: true
             TOPN: 0
+            COSMOS_SDK: v50
           run: |
             scripts/add_consumer.sh
         - name: Initialize consumer chain with ICS v4.0.0
@@ -2876,6 +2877,7 @@
             CONSUMER_CHAIN_ID: v400-two
             PSS_ENABLED: true
             TOPN: 0
+            COSMOS_SDK: v50
           run: |
             scripts/add_consumer.sh
         - name: Initialize consumer chain with ICS v4.0.0
