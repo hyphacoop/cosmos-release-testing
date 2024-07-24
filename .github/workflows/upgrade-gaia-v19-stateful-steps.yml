@@ -382,13 +382,18 @@ jobs:
       - name: Waiting for 100th block
         run: |
           cur_height=0
-          height=$(curl 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
+          echo_height=1
+          height=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
           to_height=$(scripts/stateful/roundup-100.py $height)
           echo "[INFO] waiting to reach height $to_height"
           until [[ "${cur_height}" -gt "${to_height}" ]]
           do
               cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
-              echo "[INFO] Current height: $cur_height"
+              if [ $echo_height -ne $cur_height ]
+              then
+                echo "[INFO] Current height: $cur_height"
+                echo_height=$cur_height
+              fi
               sleep 1
           done
       - name: _VSC successful epoch> ICS cona1
