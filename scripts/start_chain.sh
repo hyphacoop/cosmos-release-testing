@@ -133,9 +133,9 @@ mv feemarket-base.json $HOME_1/config/genesis.json
 echo "Patching genesis for expedited proposals..."
 jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
 mv voting.json $HOME_1/config/genesis.json
-jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis > ./denom.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis.json > ./denom.json
 mv denom.json $HOME_1/config/genesis.json
-jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $HOME_1/config/genesis > ./amount.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $HOME_1/config/genesis.json > ./amount.json
 mv amount.json $HOME_1/config/genesis.json
 
 echo "Copying genesis file to other nodes..."
