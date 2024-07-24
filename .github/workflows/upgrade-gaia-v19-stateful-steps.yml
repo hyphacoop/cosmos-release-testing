@@ -100,12 +100,11 @@ jobs:
       CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
       # Get system info
-      - run: sudo apt install -y net-tools
       - name: Install required packages
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -348,12 +347,12 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _VSC successful> Interchain Security (Consumer) PSS
         run: tests/stateful/test_ccv.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
