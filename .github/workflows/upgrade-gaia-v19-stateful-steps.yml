@@ -422,12 +422,6 @@ jobs:
         run: |
           params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
           echo "$params"
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
       - name: Set consensus timeout to 1 minute
         run: |
           source ~/env/bin/activate
