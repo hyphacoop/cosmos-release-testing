@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -29,6 +30,7 @@ type ValidatorWallet struct {
 	Moniker        string
 	Address        string
 	ValoperAddress string
+	ValConsAddress string
 }
 
 type Chain struct {
@@ -393,12 +395,17 @@ func GetValidatorWallets(ctx context.Context, chain Chain) ([]ValidatorWallet, e
 			if err != nil {
 				return err
 			}
+			valconsAddress, _, err := chain.Validators[i].ExecBin(ctx, "tendermint", "show-address")
+			if err != nil {
+				return err
+			}
 			lock.Lock()
 			defer lock.Unlock()
 			wallets[i] = ValidatorWallet{
 				Moniker:        moniker,
 				Address:        address,
 				ValoperAddress: valoperAddress,
+				ValConsAddress: strings.TrimSpace(string(valconsAddress)),
 			}
 			return nil
 		})

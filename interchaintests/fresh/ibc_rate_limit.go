@@ -30,7 +30,7 @@ func IBCTransferRateLimitedTest(
 
 	outflow := chainA.QueryJSON(ctx, t, "flow.outflow", "ratelimit", "rate-limit", channel.ChannelID, "--denom", DENOM).String()
 	channelValue := chainA.QueryJSON(ctx, t, "flow.channel_value", "ratelimit", "rate-limit", channel.ChannelID, "--denom", DENOM).String()
-	ratio := strToSDKInt(t, outflow).Mul(sdkmath.NewInt(100)).Quo(strToSDKInt(t, channelValue)).Int64()
+	ratio := StrToSDKInt(t, outflow).Mul(sdkmath.NewInt(100)).Quo(StrToSDKInt(t, channelValue)).Int64()
 	require.Equal(t, int64(1), ratio)
 
 	sendRateLimitedTx(ctx, t, chainA, chainB, channel, 1, false)

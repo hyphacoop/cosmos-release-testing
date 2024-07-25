@@ -33,6 +33,8 @@ type ConsumerConfig struct {
 	TopN                  int
 	ValidatorSetCap       int
 	ValidatorPowerCap     int
+	Allowlist             []string
+	Denylist              []string
 
 	DuringDepositPeriod ConsumerBootstrapCb
 	DuringVotingPeriod  ConsumerBootstrapCb
@@ -183,6 +185,9 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 	genesisOverrides := []cosmos.GenesisKV{
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_CONSUMER)),
 		cosmos.NewGenesisKV("consensus_params.block.max_gas", "50000000"),
+		cosmos.NewGenesisKV("app_state.ccvconsumer.params.reward_denoms", []string{denom}),
+		cosmos.NewGenesisKV("app_state.ccvconsumer.params.provider_reward_denoms", []string{p.Config().Denom}),
+		cosmos.NewGenesisKV("app_state.ccvconsumer.params.blocks_per_distribution_transmission", BLOCKS_PER_DISTRIBUTION),
 	}
 	if config.TopN >= 0 {
 		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.ccvconsumer.params.soft_opt_out_threshold", "0.0"))
@@ -365,6 +370,12 @@ func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chain
 	}
 	if config.ValidatorPowerCap > 0 {
 		prop.ValidatorsPowerCap = uint32(config.ValidatorPowerCap)
+	}
+	if len(config.Allowlist) > 0 {
+		prop.Allowlist = config.Allowlist
+	}
+	if len(config.Denylist) > 0 {
+		prop.Denylist = config.Denylist
 	}
 	propTx, err := p.ConsumerAdditionProposal(ctx, interchaintest.FaucetAccountKeyName, prop)
 	require.NoError(t, err)
