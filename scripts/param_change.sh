@@ -7,7 +7,10 @@ elif [ $COSMOS_SDK == "v47" ]; then
 proposal="$CHAIN_BINARY tx gov submit-legacy-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
 fi
 echo $proposal
-txhash=$($proposal | jq -r .txhash)
+response=$($proposal)
+echo $response
+
+txhash=$($response | jq -r .txhash)
 sleep $(( $COMMIT_TIMEOUT*2 ))
 echo "Proposal hash: $txhash"
 if [ $COSMOS_SDK != "v50" ]; then
