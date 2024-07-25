@@ -8,7 +8,7 @@ echo "Current height: $height"
 upgrade_height=$(($height+1000))
 echo "Upgrade block height set to $upgrade_height."
 
-jq --arg HEIGHT "$upgrade_height" '.messages[0].plan.height = $HEIGHT' templates/gaia-v18/proposal-upgrade-v00.json > proposal.json
+jq --arg HEIGHT "$upgrade_height" '.messages[0].plan.height = $HEIGHT' templates/gaia-v18/proposal-upgrade-v100.json > proposal.json
 proposal="$CHAIN_BINARY tx gov submit-proposal proposal.json --from $MONIKER_1 --gas auto --gas-adjustment 2 --gas-prices 0.005$DENOM --home $HOME_1 -o json -y"
 txhash=$($proposal | jq -r .txhash)
 echo "tx hash: $txhash" 
