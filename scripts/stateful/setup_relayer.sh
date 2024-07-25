@@ -12,10 +12,10 @@ rm hermes
 rm hermes*gz
 
 echo "Downloading Hermes..."
-wget -nv https://files.polypore.xyz/bins/hermes/hermes-debian-11-v1.5.1 -O ~/hermes-linux
-chmod +x ~/hermes-linux
+wget -O  hermes.tar.gz https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz
+tar xfv hermes.tar.gz
 mkdir -p ~/.hermes
-cp ~/hermes-linux ~/.hermes/hermes
+cp ./hermes ~/.hermes/hermes
 
 # echo "Build Hermes..."
 # working_directory="$(pwd)"

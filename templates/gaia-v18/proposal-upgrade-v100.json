@@ -4,7 +4,7 @@
       "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
       "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
       "plan": {
-       "name": "v19",
+       "name": "v100",
        "time": "0001-01-01T00:00:00Z",
        "height": "20",
        "info": "",
@@ -14,7 +14,7 @@
     ],
     "metadata": "ipfs://",
     "deposit": "500000000uatom",
-    "title": "Upgrade to Gaia v19",
-    "summary": "# Gaia v19 Upgrade",
+    "title": "Upgrade to Gaia v100",
+    "summary": "# Gaia v100 Upgrade",
     "expedited": true
    }

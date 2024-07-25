@@ -29,7 +29,7 @@ port = 3001
 id = 'consumera'
 rpc_addr = 'http://localhost:27101'
 grpc_addr = 'http://localhost:26101'
-websocket_addr = 'ws://localhost:27101/websocket'
+event_source = { mode = 'push', url = 'ws://localhost:27101/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'
@@ -41,12 +41,13 @@ clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
 ccv_consumer_chain = true
+type = "CosmosSdk"
 
 [[chains]]
 id = 'consumerb'
 rpc_addr = 'http://localhost:27201'
 grpc_addr = 'http://localhost:26201'
-websocket_addr = 'ws://localhost:27201/websocket'
+event_source = { mode = 'push', url = 'ws://localhost:27201/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'
@@ -58,12 +59,13 @@ clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
 ccv_consumer_chain = true
+type = "CosmosSdk"
 
 [[chains]]
 id = 'consumerc'
 rpc_addr = 'http://localhost:27301'
 grpc_addr = 'http://localhost:26301'
-websocket_addr = 'ws://localhost:27301/websocket'
+event_source = { mode = 'push', url = 'ws://localhost:27301/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
@@ -75,12 +77,13 @@ clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
 ccv_consumer_chain = true
+type = "CosmosSdk"
 
 [[chains]]
 id = 'consumerf'
 rpc_addr = 'http://localhost:27401'
 grpc_addr = 'http://localhost:26401'
-websocket_addr = 'ws://localhost:27401/websocket'
+event_source = { mode = 'push', url = 'ws://localhost:27401/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
@@ -92,12 +95,13 @@ clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
 ccv_consumer_chain = true
+type = "CosmosSdk"
 
 [[chains]]
 id = 'ica-chain'
 rpc_addr = 'http://localhost:37011'
 grpc_addr = 'http://localhost:36011'
-websocket_addr = 'ws://localhost:37011/websocket'
+event_source = { mode = 'push', url = 'ws://localhost:37011/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
@@ -108,13 +112,13 @@ max_gas = 10000000
 clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
-
+type = "CosmosSdk"
 
 [[chains]]
 id = '_CHAIN_ID_'
 rpc_addr = 'http://localhost:27001'
 grpc_addr = 'http://localhost:26001'
-websocket_addr = 'ws://localhost:27001/websocket'
+event_source = { mode = 'push', url = 'ws://localhost:27001/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
@@ -125,3 +129,5 @@ max_gas = 10000000
 clock_drift = '10s'
 trusting_period = '1days'
 trust_threshold = { numerator = '1', denominator = '3' }
+type = "CosmosSdk"
+dynamic_gas_price = { enabled=true, multiplier = 1.5, max = 0.2 } 
