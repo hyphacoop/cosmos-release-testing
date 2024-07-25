@@ -24,7 +24,7 @@ $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-pri
 echo "Sleeping for $EXPEDITED_PERIOD..."
 sleep $EXPEDITED_PERIOD
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq '.'
-status=$($CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq -r '.status')
+status=$($CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq -r '.proposal.status')
 echo "Status: $status"
 if [[ "$status" == "PROPOSAL_STATUS_PASSED" ]]; then
     echo "PASS: Expedited proposal passed."
