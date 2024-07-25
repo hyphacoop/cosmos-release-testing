@@ -418,7 +418,7 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
       - name: _Test Feemarket
         run: |
-          export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q account $WALLET_2 -o json | jq -r '.account_number')
+          export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account $WALLET_2 -o json | jq -r '.account.value.account_number')
           echo "Account number for $WALLET_2 is: $ACCOUNT_NUMBER"
           tests/stateful/gaia-v18/test_feemarket.sh
       # - name: DEBUG
