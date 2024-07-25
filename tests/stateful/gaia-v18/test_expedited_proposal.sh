@@ -33,9 +33,9 @@ else
     exit 1
 fi
 
-upgrade_name=$($CHAIN_BINARY q upgrade plan --home $HOME_1 -o json | jq -r '.name')
+upgrade_name=$($CHAIN_BINARY q upgrade plan --home $HOME_1 -o json | jq -r '.plan.name')
 echo "Upgrade plan name: $upgrade_name"
-if [[ "$upgrade_name" == "v19" ]]; then
+if [[ "$upgrade_name" == "v100" ]]; then
     echo "PASS: Upgrade plan is set."
 else
     echo "FAIL: Upgrade plan is not set."
