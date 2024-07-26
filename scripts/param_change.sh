@@ -6,7 +6,10 @@ if [ $COSMOS_SDK == "v45" ]; then
 proposal="$CHAIN_BINARY tx gov submit-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
 elif [ $COSMOS_SDK == "v47" ]; then
 proposal="$CHAIN_BINARY tx gov submit-legacy-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
+elif [ $COSMOS_SDK == "v50" ]; then
+proposal="$CHAIN_BINARY tx gov submit-legacy-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
 fi
+
 echo $proposal
 # response=$($proposal)
 # echo $response
