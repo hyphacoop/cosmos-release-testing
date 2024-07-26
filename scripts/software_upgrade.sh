@@ -29,7 +29,7 @@ echo "Using ($voting_period_seconds)s voting period to calculate the upgrade hei
 # Calculate upgrade height
 echo "Calculate upgrade height"
 block_time=1
-let voting_blocks_delta=$voting_period_seconds/$block_time+3
+let voting_blocks_delta=$voting_period_seconds/$block_time+5
 height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
@@ -118,6 +118,7 @@ else
         cd ..
     else
         # Download
+        echo "Downloading new binary..."
         wget $DOWNLOAD_URL -O ./upgraded -q
         chmod +x ./upgraded
         mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
