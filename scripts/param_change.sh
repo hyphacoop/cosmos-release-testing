@@ -11,7 +11,7 @@ proposal_json=$1
 # response=$($proposal)
 # echo $response
 
-proposal="$CHAIN_BINARY tx gov submit-legacy-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
+$CHAIN_BINARY tx gov submit-legacy-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y
 
 txhash=$($response | jq -r .txhash)
 sleep $(( $COMMIT_TIMEOUT*2 ))
