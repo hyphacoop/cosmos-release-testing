@@ -100,6 +100,14 @@ mv feemarket-min-base.json $HOME_1/config/genesis.json
 jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $HOME_1/config/genesis.json > ./feemarket-base.json
 mv feemarket-base.json $HOME_1/config/genesis.json
 
+echo "Patching genesis for expedited proposals..."
+jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+mv voting.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis.json > ./denom.json
+mv denom.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $HOME_1/config/genesis.json > ./amount.json
+mv amount.json $HOME_1/config/genesis.json
+
 echo "Consensus params:"
 jq '.consensus_params' $HOME_1/config/genesis.json
 
