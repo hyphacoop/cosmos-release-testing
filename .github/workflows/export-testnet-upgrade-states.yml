@@ -93,9 +93,9 @@ jobs:
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home 
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
@@ -321,9 +321,9 @@ jobs:
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
