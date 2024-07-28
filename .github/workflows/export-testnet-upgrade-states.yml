@@ -184,7 +184,7 @@ jobs:
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
           echo "[INFO] List Keys:"
-          gaiad keys list
+          gaiad keys list --keyring-backend test 
           echo "Delegate 10ATOM to validator."
           gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
           echo "Wait for the delegation to go on chain..."
