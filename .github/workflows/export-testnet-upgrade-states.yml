@@ -131,7 +131,7 @@ jobs:
           echo "Done Syncing"
       - name: Stop gaiad
         run: |
-          synced_block=$(gaiad q block | jq -r '.block.header.height')
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
           echo "synced_block=$synced_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
@@ -356,7 +356,7 @@ jobs:
           echo "Done Syncing"
       - name: Stop gaiad
         run: |
-          synced_block=$(gaiad q block | jq -r '.block.header.height')
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
           echo "synced_block=$synced_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
