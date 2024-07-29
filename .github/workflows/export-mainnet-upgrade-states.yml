@@ -11,12 +11,17 @@ on:
 
 jobs:
   export-cosmoshub-mainnet:
-    runs-on: self-hosted-ubuntu-22.04
+    runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
       # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -32,10 +37,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-      - name: Install required packages
-        run: |
-          sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip lz4
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server

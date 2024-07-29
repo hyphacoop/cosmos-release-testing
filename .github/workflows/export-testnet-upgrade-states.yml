@@ -11,7 +11,7 @@ on:
 
 jobs:
   export-release-testnet:
-    runs-on: self-hosted-ubuntu-22.04
+    runs-on: cosmos-runner-set
     environment:  export-release-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
@@ -21,6 +21,11 @@ jobs:
 
     steps:
       # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -36,10 +41,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-      - name: Install required packages
-        run: |
-          sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server
@@ -92,9 +93,9 @@ jobs:
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
@@ -130,7 +131,7 @@ jobs:
           echo "Done Syncing"
       - name: Stop gaiad
         run: |
-          synced_block=$(gaiad q block | jq -r '.block.header.height')
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
           echo "synced_block=$synced_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
@@ -182,6 +183,8 @@ jobs:
         run: |
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          echo "[INFO] List Keys:"
+          gaiad keys list --keyring-backend test 
           echo "Delegate 10ATOM to validator."
           gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
           echo "Wait for the delegation to go on chain..."
@@ -199,7 +202,7 @@ jobs:
           echo "Wait for the proposal to go on chain..."
           tests/test_block_production.sh 127.0.0.1 26657 1 1
           echo "Get proposal ID from txhash..."
-          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
           vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
           $vote
@@ -236,7 +239,7 @@ jobs:
           path: ~/artifact/
 
   export-ics-testnet-provider:
-    runs-on: self-hosted-ubuntu-22.04
+    runs-on: cosmos-runner-set
     environment: export-rs-testnet
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
@@ -246,6 +249,11 @@ jobs:
 
     steps:
       # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -261,10 +269,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-      - name: Install required packages
-        run: |
-          sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server
@@ -317,9 +321,9 @@ jobs:
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
@@ -354,7 +358,7 @@ jobs:
           echo "Done Syncing"
       - name: Stop gaiad
         run: |
-          synced_block=$(gaiad q block | jq -r '.block.header.height')
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
           echo "synced_block=$synced_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
@@ -405,6 +409,8 @@ jobs:
         run: |
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          echo "[INFO] List Keys:"
+          gaiad keys list
           echo "Delegate 10ATOM to validator."
           gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
           echo "Wait for the delegation to go on chain..."
@@ -422,7 +428,7 @@ jobs:
           echo "Wait for the proposal to go on chain..."
           tests/test_block_production.sh 127.0.0.1 26657 1 1
           echo "Get proposal ID from txhash..."
-          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
           vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
           $vote
