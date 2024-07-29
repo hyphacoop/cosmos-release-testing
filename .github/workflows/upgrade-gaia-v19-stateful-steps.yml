@@ -411,7 +411,7 @@ jobs:
           echo "$params"
       - name: Set block params
         env:
-          MAX_BYTES: 500000
+          MAX_BYTES: 1000000
           MAX_GAS: 100000000
           EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
           EVIDENCE_MAX_AGE_DURATION: 172800s
@@ -425,10 +425,10 @@ jobs:
       - name: Set consensus timeout to 1 minute
         run: |
           source ~/env/bin/activate
-          toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "60s"
+          toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "140s"
           screen -S $PROVIDER_SERVICE_1 -p 0 -X stuff "^C"
       - name: Wait for 2 blocks
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 300
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 600
       - name: _Test Feemarket
         run: |
           export ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account $WALLET_2 -o json | jq -r '.account.value.account_number')
