@@ -409,19 +409,22 @@ jobs:
         run: |
           params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
           echo "$params"
-      - name: Set block params
-        env:
-          MAX_BYTES: 1000000
-          MAX_GAS: 100000000
-          EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
-          EVIDENCE_MAX_AGE_DURATION: 172800s
-          EVIDENCE_MAX_BYTES: 50000
+      # - name: Set block params
+      #   env:
+      #     MAX_BYTES: 1000000
+      #     MAX_GAS: 100000000
+      #     EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
+      #     EVIDENCE_MAX_AGE_DURATION: 172800s
+      #     EVIDENCE_MAX_BYTES: 50000
+      #   run: |
+      #     scripts/stateful/set_block_size.sh
+      - name: Query feemarket params
+        run: gaiad q feemarket params -o json | jq
+      - name: Set feemarket params
         run: |
-          scripts/stateful/set_block_size.sh
-      - name: Print block params
-        run: |
-          params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
-          echo "$params"
+          scripts/submit_proposal.sh templates/proposal-feemarket.json
+      - name: Query feemarket params
+        run: gaiad q feemarket params -o json | jq
       - name: Set consensus timeout to 1 minute
         run: |
           source ~/env/bin/activate

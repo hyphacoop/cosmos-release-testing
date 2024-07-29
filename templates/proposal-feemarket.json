@@ -1,0 +1,28 @@
+{
+    "messages": [
+     {
+      "@type": "/feemarket.feemarket.v1.MsgParams",
+      "params": {
+       "alpha": "0.000000000000000000",
+       "beta": "1.000000000000000000",
+       "gamma": "0.000000000000000000",
+       "delta": "0.000000000000000000",
+       "min_base_gas_price": "0.005000000000000000",
+       "min_learning_rate": "0.125000000000000000",
+       "max_learning_rate": "0.125000000000000000",
+       "max_block_utilization": "1000000",
+       "window": "1",
+       "fee_denom": "uatom",
+       "enabled": true,
+       "distribute_fees": false
+      },
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn"
+     }
+    ],
+    "metadata": "ipfs://CID",
+    "deposit": "1000000000uatom",
+    "title": "Set feemarket for testing",
+    "summary": "Set feemarket for testing",
+    "expedited": false
+   }
+   
