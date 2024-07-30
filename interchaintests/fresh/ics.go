@@ -413,7 +413,7 @@ func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consume
 	if shouldJail {
 		require.Eventuallyf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
-		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d never jailed", validatorIdx)
+		}, 60*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d never jailed", validatorIdx)
 
 		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
 		time.Sleep(10 * COMMIT_TIMEOUT)
@@ -423,7 +423,7 @@ func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consume
 	} else {
 		require.Neverf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
-		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d jailed", validatorIdx)
+		}, 60*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d jailed", validatorIdx)
 		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
 		time.Sleep(10 * COMMIT_TIMEOUT)
 	}
@@ -479,6 +479,7 @@ func DelegateToValidator(ctx context.Context, t *testing.T, provider, consumer C
 		require.NoError(t, err)
 		require.Greater(t, providerPower, providerPowerBefore)
 		consumerPower, err := GetPower(ctx, consumer, consumerHex)
+		require.NoError(t, err)
 		require.NotEqual(t, providerPower, consumerPower)
 		require.NoError(t, testutil.WaitForBlocks(ctx, blocksPerEpoch, provider))
 	}

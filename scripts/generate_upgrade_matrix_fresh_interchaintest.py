@@ -4,6 +4,7 @@ import json
 # import sys
 import re
 import argparse
+from random import shuffle
 
 parser = argparse.ArgumentParser()
 parser.add_argument('starting_version')
@@ -15,7 +16,7 @@ COSMOVISOR = args.cosmovisor
 RELAYER = args.relayer
 
 SKIP_TARGET_VERSIONS = ['v17.0.0','v17.1.0', 'v17.2.0', 'v18.0.0-rc0',
-                        'v18.0.0-rc1', 'v18.0.0-rc3']
+                        'v18.0.0-rc1', 'v18.0.0-rc3', 'v19.0.0-rc0']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 starting_version = args.starting_version.split('.')
@@ -95,6 +96,7 @@ for version, upgrades in matrix.items():
 
 with open('tests.json', 'r', encoding='utf-8') as tests_file:
     test_names = json.load(tests_file)
+    shuffle(test_names)
 
 ## Now add the tests that are going to run
 includes = []

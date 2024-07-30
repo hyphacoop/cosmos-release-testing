@@ -91,6 +91,9 @@ NODE=$9
 
 i=0
 
+
+cd $HOME
+
 SEQUENCE=$($CHAIN_BINARY query auth account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json | jq -r .account.value.sequence)
 ACCOUNT=$($CHAIN_BINARY query auth account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json | jq -r .account.value.account_number)
 
