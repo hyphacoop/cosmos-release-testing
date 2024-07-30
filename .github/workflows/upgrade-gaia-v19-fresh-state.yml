@@ -3080,7 +3080,7 @@
             denom_2="ibc/$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')"
             echo "denom_2: $denom_2"
             echo "rewards:"
-            $CHAIN_BINARY q distribution rewards rewards-by-validator $WALLET_1 $VALOPER_1 --home $HOME_1 -o json
+            $CHAIN_BINARY q distribution rewards-by-validator $WALLET_1 $VALOPER_1 --home $HOME_1 -o json
             echo "REST rewards"
             curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/delegators/$WALLET_1/rewards/$VALOPER_1 | jq -r '.'
             curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/delegators/$WALLET_1/rewards/$VALOPER_1 | jq -r '.rewards'
