@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func strToSDKInt(t *testing.T, s string) sdkmath.Int {
+func StrToSDKInt(t *testing.T, s string) sdkmath.Int {
 	t.Helper()
 	s, _, _ = strings.Cut(s, ".")
 	i, ok := sdkmath.NewIntFromString(s)
@@ -18,7 +18,7 @@ func strToSDKInt(t *testing.T, s string) sdkmath.Int {
 
 func checkAMinusBEqualsX(t *testing.T, a, b string, x sdkmath.Int) {
 	t.Helper()
-	intA := strToSDKInt(t, a)
-	intB := strToSDKInt(t, b)
+	intA := StrToSDKInt(t, a)
+	intB := StrToSDKInt(t, b)
 	require.True(t, intA.Sub(intB).Equal(x), "a - b = %s, expected %s", intA.Sub(intB).String(), x.String())
 }

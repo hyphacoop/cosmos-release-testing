@@ -28,11 +28,12 @@ const (
 	GOV_MIN_DEPOSIT_AMOUNT   = 1000
 	GOV_DEPOSIT_AMOUNT       = "5000000" + DENOM
 	// These durations are a little finniky, don't toy with them too much.
-	COMMIT_TIMEOUT         = 4 * time.Second
-	GOV_DEPOSIT_PERIOD     = 60 * time.Second
-	GOV_VOTING_PERIOD      = 80 * time.Second
-	CHAIN_SPAWN_WAIT       = 155 * time.Second
-	DOWNTIME_JAIL_DURATION = 10 * time.Second
+	COMMIT_TIMEOUT          = 4 * time.Second
+	GOV_DEPOSIT_PERIOD      = 60 * time.Second
+	GOV_VOTING_PERIOD       = 80 * time.Second
+	CHAIN_SPAWN_WAIT        = 155 * time.Second
+	DOWNTIME_JAIL_DURATION  = 10 * time.Second
+	BLOCKS_PER_DISTRIBUTION = 10
 )
 
 func getValidatorStake() [NUM_VALIDATORS]int64 {

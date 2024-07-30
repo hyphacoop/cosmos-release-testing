@@ -248,9 +248,9 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 		shares1 := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		tokens1 := provider.QueryJSON(ctx, t, "validator.tokens", "staking", "validator", providerWallet.ValoperAddress).String()
 		bondShares1 := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		shares1Int := strToSDKInt(t, shares1)
-		tokens1Int := strToSDKInt(t, tokens1)
-		bondShares1Int := strToSDKInt(t, bondShares1)
+		shares1Int := StrToSDKInt(t, shares1)
+		tokens1Int := StrToSDKInt(t, tokens1)
+		bondShares1Int := StrToSDKInt(t, bondShares1)
 
 		exchangeRate1 := shares1Int.Quo(tokens1Int)
 		expectedSharesIncrease := exchangeRate1.MulRaw(bondDelegation)
@@ -265,7 +265,7 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 		require.NoError(t, err)
 
 		bondShares2 := provider.QueryJSON(ctx, t, "validator.validator_bond_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		bondShares2Int := strToSDKInt(t, bondShares2)
+		bondShares2Int := StrToSDKInt(t, bondShares2)
 		require.Truef(t, bondShares2Int.Sub(expectedShares).Abs().LTE(sdkmath.NewInt(1)), "bondShares2: %s, expectedShares: %s", bondShares2, expectedShares)
 	})
 
@@ -274,8 +274,8 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 		preDelegationShares := provider.QueryJSON(ctx, t, "validator.delegator_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		preDelegationLiquidShares := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 
-		preDelegationTokensInt := strToSDKInt(t, preDelegationTokens)
-		preDelegationSharesInt := strToSDKInt(t, preDelegationShares)
+		preDelegationTokensInt := StrToSDKInt(t, preDelegationTokens)
+		preDelegationSharesInt := StrToSDKInt(t, preDelegationShares)
 		exchangeRate := preDelegationSharesInt.Quo(preDelegationTokensInt)
 		expectedLiquidIncrease := exchangeRate.MulRaw(delegate)
 
@@ -305,12 +305,12 @@ func ICADelegateHappyPathTest(ctx context.Context, t *testing.T, provider, strid
 		var tokensDelta sdkmath.Int
 		require.EventuallyWithT(t, func(c *assert.CollectT) {
 			postDelegationTokens := provider.QueryJSON(ctx, t, "validator.tokens", "staking", "validator", providerWallet.ValoperAddress).String()
-			tokensDelta = strToSDKInt(t, postDelegationTokens).Sub(strToSDKInt(t, preDelegationTokens))
+			tokensDelta = StrToSDKInt(t, postDelegationTokens).Sub(StrToSDKInt(t, preDelegationTokens))
 			assert.Truef(c, tokensDelta.Sub(sdkmath.NewInt(delegate)).Abs().LTE(sdkmath.NewInt(1)), "tokensDelta: %s, delegate: %d", tokensDelta, delegate)
 		}, 20*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
 
 		postDelegationLiquidShares := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
-		liquidSharesDelta := strToSDKInt(t, postDelegationLiquidShares).Sub(strToSDKInt(t, preDelegationLiquidShares))
+		liquidSharesDelta := StrToSDKInt(t, postDelegationLiquidShares).Sub(StrToSDKInt(t, preDelegationLiquidShares))
 		require.Truef(t, liquidSharesDelta.Sub(expectedLiquidIncrease).Abs().LTE(sdkmath.NewInt(1)), "liquidSharesDelta: %s, expectedLiquidIncrease: %d", liquidSharesDelta, expectedLiquidIncrease)
 	})
 }
