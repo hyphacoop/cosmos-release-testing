@@ -3082,8 +3082,8 @@
             $CHAIN_BINARY q distribution rewards rewards-by-validator $WALLET_1 $VALOPER_1 --home $HOME_1 -o json
             echo "REST rewards"
             curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.'
-            rewards_denom_1=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_1" '.rewards[] | select(.denom == $DENOM).amount')
-            rewards_denom_2=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_2" '.rewards[] | select(.denom == $DENOM).amount')
+            rewards_denom_1=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg DENOM "$denom_1" '.rewards.rewards[] | select(.denom == $DENOM).amount')
+            rewards_denom_2=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg DENOM "$denom_2" '.rewards.rewards[] | select(.denom == $DENOM).amount')
             rewards_denom_1=${rewards_denom_1%.*}
             echo "rewards denom 1: $rewards_denom_1"
             rewards_denom_2=${rewards_denom_2%.*}
