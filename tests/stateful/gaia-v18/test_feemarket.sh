@@ -4,7 +4,7 @@ preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq
 echo "Pre-load price: $preload_price$DENOM"
 
 echo "Loading mempool with large gas txs..."
-scripts/stateful/gaia-v18/load_blocks.sh 50000000 30 0.005
+scripts/stateful/gaia-v18/load_blocks.sh 50000000 100 0.005
 echo "Loading mempool with txs..."
 scripts/stateful/gaia-v18/load_blocks.sh 100000 5000 0.01
 echo "Waiting for blocks to get loaded..."
