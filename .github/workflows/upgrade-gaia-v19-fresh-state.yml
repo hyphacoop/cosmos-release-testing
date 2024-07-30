@@ -3029,7 +3029,7 @@
             denom_2="ibc/$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')"
             echo "denom_2: $denom_2"
             echo "rewards:"
-            $CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r '.rewards[]'
+            $CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r '.'
             rewards_denom_1=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_1" '.rewards[] | select(.denom == $DENOM).amount')
             rewards_denom_2=$($CHAIN_BINARY q distribution rewards $WALLET_1 $VALOPER_1 --home $HOME_1 -o json | jq -r --arg DENOM "$denom_2" '.rewards[] | select(.denom == $DENOM).amount')
             rewards_denom_1=${rewards_denom_1%.*}
