@@ -25,7 +25,7 @@ $WALLET_2 $WALLET_2 1$DENOM --from $WALLET_2 \
 
 for (( i=0; i<$TARGET_TXS; i++ )); do
   current_mempool_size=$(mempool_size)
-  # echo "Num unconfirmed txs: $current_mempool_size"
+  echo "Num unconfirmed txs: $current_mempool_size"
 
   # SIGN TX
   # $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET_2 --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 &>  signed.json

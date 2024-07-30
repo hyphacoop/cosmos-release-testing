@@ -419,13 +419,13 @@ jobs:
       #   run: |
       #     scripts/stateful/set_block_size.sh
       - name: Query feemarket params
-        run: gaiad q feemarket params -o json | jq
+        run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
       - name: Set feemarket params
         run: |
           scripts/submit_proposal.sh templates/proposal-feemarket.json
       - name: Query feemarket params
-        run: gaiad q feemarket params -o json | jq
-      - name: Set consensus timeout to 1 minute
+        run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
+      - name: Set consensus timeout to 140s
         run: |
           source ~/env/bin/activate
           toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "140s"
