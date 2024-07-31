@@ -37,12 +37,14 @@ echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
 
     echo "Delegating with happy_bonding..."
     # tests/v12_upgrade/log_lsm_data.sh happy pre-delegate-1 $happy_bonding $delegation
-    $CHAIN_BINARY q staking validator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --home $HOME_1
+    $CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1
+    echo "Delegator shares 1: $delegator_shares_1"
     submit_tx "tx staking delegate $VALOPER_1 $delegation$DENOM --from $happy_bonding -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     # tests/v12_upgrade/log_lsm_data.sh happy post-delegate-1 $happy_bonding $delegation
-    $CHAIN_BINARY q staking validator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --home $HOME_1
+    $CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1
 
     delegator_shares_2=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.delegator_shares')
+    echo "Delegator shares 2: $delegator_shares_2"
     shares_diff=$((${delegator_shares_2%.*}-${delegator_shares_1%.*})) # remove decimal portion
     echo "Delegator shares difference: $shares_diff"
     if [[ $shares_diff -ne $delegation ]]; then
