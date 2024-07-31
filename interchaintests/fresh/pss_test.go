@@ -347,10 +347,10 @@ func TestConsumerCommissionRate(t *testing.T) {
 	})
 	require.NoError(t, eg.Wait())
 
-	require.NoError(t, testutil.WaitForBlocks(ctx, fresh.BLOCKS_PER_DISTRIBUTION, provider, consumer1, consumer2))
+	require.NoError(t, testutil.WaitForBlocks(ctx, fresh.BLOCKS_PER_DISTRIBUTION+3, provider, consumer1, consumer2))
 
-	rewardsDenom1 := fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("rewards.#(denom=%q).amount", denom1), "distribution", "rewards", providerWallet.Address, providerWallet.ValoperAddress).String())
-	rewardsDenom2 := fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("rewards.#(denom=%q).amount", denom2), "distribution", "rewards", providerWallet.Address, providerWallet.ValoperAddress).String())
+	rewardsDenom1 := fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("total.#(%%\"*%s\")", denom1), "distribution", "rewards", providerWallet.Address).String())
+	rewardsDenom2 := fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("total.#(%%\"*%s\")", denom2), "distribution", "rewards", providerWallet.Address).String())
 
 	require.NotEmpty(t, rewardsDenom1)
 	require.NotEmpty(t, rewardsDenom2)
@@ -384,10 +384,10 @@ func TestConsumerCommissionRate(t *testing.T) {
 	})
 	require.NoError(t, eg.Wait())
 
-	require.NoError(t, testutil.WaitForBlocks(ctx, fresh.BLOCKS_PER_DISTRIBUTION, provider, consumer1, consumer2))
+	require.NoError(t, testutil.WaitForBlocks(ctx, fresh.BLOCKS_PER_DISTRIBUTION+3, provider, consumer1, consumer2))
 
-	rewardsDenom1 = fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("rewards.#(denom=%q).amount", denom1), "distribution", "rewards", providerWallet.Address, providerWallet.ValoperAddress).String())
-	rewardsDenom2 = fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("rewards.#(denom=%q).amount", denom2), "distribution", "rewards", providerWallet.Address, providerWallet.ValoperAddress).String())
+	rewardsDenom1 = fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("total.#(%%\"*%s\")", denom1), "distribution", "rewards", providerWallet.Address).String())
+	rewardsDenom2 = fresh.StrToSDKInt(t, provider.QueryJSON(ctx, t, fmt.Sprintf("total.#(%%\"*%s\")", denom2), "distribution", "rewards", providerWallet.Address).String())
 
 	require.True(t, rewardsDenom1.GT(rewardsDenom2), "rewards1Int: %s, rewards2Int: %s", rewardsDenom1.String(), rewardsDenom2.String())
 	require.False(t, rewardsDenom1.Sub(rewardsDenom2).Abs().LT(sdkmath.NewInt(1000)), "rewards1Int: %s, rewards2Int: %s", rewardsDenom1.String(), rewardsDenom2.String())
