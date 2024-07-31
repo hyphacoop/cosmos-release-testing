@@ -37,7 +37,9 @@ echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
 
     echo "Delegating with happy_bonding..."
     # tests/v12_upgrade/log_lsm_data.sh happy pre-delegate-1 $happy_bonding $delegation
-    $CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1
+    echo "jq query->"
+    $CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq '.'
+    echo "<- jq query"
     echo "Delegator shares 1: $delegator_shares_1"
     submit_tx "tx staking delegate $VALOPER_1 $delegation$DENOM --from $happy_bonding -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     # tests/v12_upgrade/log_lsm_data.sh happy post-delegate-1 $happy_bonding $delegation
