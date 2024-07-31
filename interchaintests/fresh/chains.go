@@ -109,7 +109,7 @@ func createRelayer(ctx context.Context, t *testing.T) ibc.Relayer {
 	return interchaintest.NewBuiltinRelayerFactory(
 		ibc.Hermes, // TODO: allow specifying relayer type
 		GetLogger(ctx),
-		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "v1.8.0", "1000:1000"),
+		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "v1.8.3", "2000:2000"),
 	).Build(t, dockerClient, dockerNetwork)
 }
 
