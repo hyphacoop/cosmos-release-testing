@@ -410,10 +410,18 @@ func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consume
 	wallets, err := GetValidatorWallets(ctx, provider)
 	require.NoError(t, err)
 	valoper := wallets[validatorIdx].ValoperAddress
+	channel, err := GetChannelWithPort(ctx, provider.Relayer, consumer, provider, "consumer")
+	require.NoError(t, err)
+	require.NoError(t, testutil.WaitForBlocks(ctx, SLASHING_WINDOW_CONSUMER+1, consumer))
+	rs := provider.Relayer.Exec(ctx, GetRelayerExecReporter(ctx), []string{
+		"hermes", "clear", "packets", "--port", "consumer", "--channel", channel.ChannelID,
+		"--chain", consumer.Config().ChainID,
+	}, nil)
+	require.NoError(t, rs.Err)
 	if shouldJail {
 		require.Eventuallyf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
-		}, 60*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d never jailed", validatorIdx)
+		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d never jailed", validatorIdx)
 
 		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
 		time.Sleep(10 * COMMIT_TIMEOUT)
@@ -423,7 +431,7 @@ func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consume
 	} else {
 		require.Neverf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
-		}, 60*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d jailed", validatorIdx)
+		}, 30*COMMIT_TIMEOUT, COMMIT_TIMEOUT, "validator %d jailed", validatorIdx)
 		require.NoError(t, consumer.Validators[validatorIdx].StartContainer(ctx))
 		time.Sleep(10 * COMMIT_TIMEOUT)
 	}
@@ -483,6 +491,15 @@ func DelegateToValidator(ctx context.Context, t *testing.T, provider, consumer C
 		require.NotEqual(t, providerPower, consumerPower)
 		require.NoError(t, testutil.WaitForBlocks(ctx, blocksPerEpoch, provider))
 	}
+
+	channel, err := GetChannelWithPort(ctx, provider.Relayer, provider, consumer, "provider")
+	require.NoError(t, err)
+	require.NoError(t, testutil.WaitForBlocks(ctx, SLASHING_WINDOW_CONSUMER+1, consumer))
+	rs := provider.Relayer.Exec(ctx, GetRelayerExecReporter(ctx), []string{
+		"hermes", "clear", "packets", "--port", "provider", "--channel", channel.ChannelID,
+		"--chain", provider.Config().ChainID,
+	}, nil)
+	require.NoError(t, rs.Err)
 
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		providerPower, err := GetPower(ctx, provider, providerHex)

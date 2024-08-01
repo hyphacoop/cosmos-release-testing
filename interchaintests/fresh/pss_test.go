@@ -72,7 +72,7 @@ func getConsumerConfig(topN int, whenToOptIn *whenToOptIn, howToOptIn fresh.Cons
 	consumerConfig := fresh.ConsumerConfig{
 		TopN:                  topN,
 		ChainName:             "ics-consumer",
-		Version:               "v4.0.0",
+		Version:               "v4.4.0",
 		Denom:                 fresh.CONSUMER_DENOM,
 		ShouldCopyProviderKey: fresh.NoProviderKeysCopied(),
 	}
@@ -119,12 +119,13 @@ func TestPSSChainLaunchAfterUpgradeTop80(t *testing.T) {
 			require.Error(t, err)
 
 			// kick a validator out of the top 80, and push a different one in
-			wallets, err := fresh.GetValidatorWallets(ctx, provider)
-			require.NoError(t, err)
-			_, err = provider.Validators[5].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-				"staking", "delegate", wallets[5].ValoperAddress, fmt.Sprintf("%d%s", 20*fresh.VALIDATOR_STAKE_STEP, fresh.DENOM))
-			require.NoError(t, err)
-			require.NoError(t, testutil.WaitForBlocks(ctx, 10, consumer))
+			// wallets, err := fresh.GetValidatorWallets(ctx, provider)
+			// require.NoError(t, err)
+			fresh.DelegateToValidator(ctx, t, provider, consumer, 20*fresh.VALIDATOR_STAKE_STEP, 5, 1)
+			// _, err = provider.Validators[5].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
+			// 	"staking", "delegate", wallets[5].ValoperAddress, fmt.Sprintf("%d%s", 20*fresh.VALIDATOR_STAKE_STEP, fresh.DENOM))
+			// require.NoError(t, err)
+			// require.NoError(t, testutil.WaitForBlocks(ctx, 10, consumer))
 
 			_, err = provider.Validators[3].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
 				"provider", "opt-out", consumer.Config().ChainID)
