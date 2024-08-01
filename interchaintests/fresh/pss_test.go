@@ -72,7 +72,7 @@ func getConsumerConfig(topN int, whenToOptIn *whenToOptIn, howToOptIn fresh.Cons
 	consumerConfig := fresh.ConsumerConfig{
 		TopN:                  topN,
 		ChainName:             "ics-consumer",
-		Version:               "v4.0.0",
+		Version:               "v4.4.0",
 		Denom:                 fresh.CONSUMER_DENOM,
 		ShouldCopyProviderKey: fresh.NoProviderKeysCopied(),
 	}
