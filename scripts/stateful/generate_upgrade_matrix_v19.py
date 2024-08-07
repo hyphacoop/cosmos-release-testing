@@ -5,7 +5,7 @@ import sys
 import re
 
 SKIP_STARTING_VERSIONS = ['v17.0.0','v17.1.0','v17.2.0', 'v18.0.0-rc0','v18.0.0-rc1','v18.0.0-rc2','v18.0.0-rc3','v18.0.0-rc4','v18.0.0','v19.0.0-rc0', 'v19.0.0-rc1','v19.0.0-rc2','v19.0.0-rc3','v19.0.0-rc4','v19.0.0']
-SKIP_TARGET_VERSIONS = ['v19.0.0-rc0','v19.0.0-rc2','v19.0.0-rc3']
+SKIP_TARGET_VERSIONS = ['v19.0.0-rc0','v19.0.0-rc2']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 starting_version = sys.argv[1].split('.')
