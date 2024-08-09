@@ -230,17 +230,73 @@ jobs:
         run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 4
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      - name: Wait for 1 block to pass
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Generate wallets for fee market
+        run: |
+          feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          echo "[INFO] feemarket_wallet1: $feemarket_wallet1_json"
+          echo "$feemarket_wallet1_json | jq '.address' 
+          echo "FEE_MARKET_WALLET1=$(echo $feemarket_wallet1_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet2: $feemarket_wallet2_json"
+          echo "$feemarket_wallet2_json | jq '.address' 
+          echo "FEE_MARKET_WALLET2=$(echo $feemarket_wallet2_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet3: $feemarket_wallet3_json"
+          echo "$feemarket_wallet3_json | jq '.address' 
+          echo "FEE_MARKET_WALLET3=$(echo $feemarket_wallet3_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet4: $feemarket_wallet4_json"
+          echo "$feemarket_wallet4_json | jq '.address' 
+          echo "FEE_MARKET_WALLET4=$(echo $feemarket_wallet4_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet5: $feemarket_wallet5_json"
+          echo "$feemarket_wallet5_json | jq '.address' 
+          echo "FEE_MARKET_WALLET5=$(echo $feemarket_wallet5_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet6: $feemarket_wallet6_json"
+          echo "$feemarket_wallet6_json | jq '.address' 
+          echo "FEE_MARKET_WALLET6=$(echo $feemarket_wallet6_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet7: $feemarket_wallet7_json"
+          echo "$feemarket_wallet7_json | jq '.address' 
+          echo "FEE_MARKET_WALLET7=$(echo $feemarket_wallet7_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet8: $feemarket_wallet8_json"
+          echo "$feemarket_wallet8_json | jq '.address' 
+          echo "FEE_MARKET_WALLET8=$(echo $feemarket_wallet8_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet9: $feemarket_wallet9_json"
+          echo "$feemarket_wallet9_json | jq '.address' 
+          echo "FEE_MARKET_WALLET9=$(echo $feemarket_wallet9_json | jq '.address')" >> $GITHUB_ENV
+          echo "[INFO] feemarket_wallet10: $feemarket_wallet10_json"
+          echo "$feemarket_wallet10_json | jq '.address' 
+          echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq '.address')" >> $GITHUB_ENV
+      - name: Send funds to feemarket wallets
+        run: |
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET1 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET2 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET3 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET4 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET5 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET6 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET7 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET8 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET9 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET10 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Get wallet balances
+        run: |
+          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: DEBUG
         run: |
           while [ ! -f /continue ]
           do
             sleep 1
           done
-      - name: generate wallets for fee market
-        run: |
-          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      - name: Wait for 1 block to pass
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: _Provider API tests> gaiad v17
         run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
       - name: _Provider RPC tests> gaiad v17
