@@ -11,8 +11,10 @@ mempool_size() {
   curl -s $NODE_URL/num_unconfirmed_txs?limit=1 | jq -r .result.n_txs
 }
 
+echo "[INFO] Account Number: $ACCOUNT"
+echo "[INFO] Wallet: $WALLET"
 SEQUENCE=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/auth/v1beta1/accounts/$WALLET | jq --raw-output ' .account.sequence')
-echo "Sequence: $SEQUENCE"
+echo "[INFO] Sequence: $SEQUENCE"
 
 # Generate unsigned tx
 $CHAIN_BINARY tx bank send \
@@ -43,7 +45,7 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   # cat unsigned.json
   # echo "Signed JSON:"
   # cat signed.json
-  echo "Broadcast tx log:"
+  echo "[INFO] Broadcast tx log:"
   cat broadcast.log
 done
 
