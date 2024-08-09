@@ -11,12 +11,12 @@ mempool_size() {
   curl -s $NODE_URL/num_unconfirmed_txs?limit=1 | jq -r .result.n_txs
 }
 
-SEQUENCE=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/auth/v1beta1/accounts/$WALLET_2 | jq --raw-output ' .account.sequence')
+SEQUENCE=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/auth/v1beta1/accounts/$WALLET | jq --raw-output ' .account.sequence')
 echo "Sequence: $SEQUENCE"
 
 # Generate unsigned tx
 $CHAIN_BINARY tx bank send \
-$WALLET_2 $WALLET_2 1$DENOM --from $WALLET_2 \
+$WALLET $WALLET 1$DENOM --from $WALLET \
 --account-number $ACCOUNT \
 --gas $TX_GAS --gas-prices $PRICE \
 --generate-only  \
@@ -28,8 +28,8 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   echo "Num unconfirmed txs: $current_mempool_size"
 
   # SIGN TX
-  # $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET_2 --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 &>  signed.json
-  $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET_2 --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 --output-document signed.json
+  # $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 &>  signed.json
+  $CHAIN_BINARY tx sign unsigned.json --account-number $ACCOUNT --from $WALLET --yes --sequence $SEQUENCE --chain-id $CHAIN_ID --offline --home $HOME_1 --output-document signed.json
   # BROADCAST TX
   $CHAIN_BINARY tx broadcast signed.json --node $NODE_URL &> broadcast.log
   # If there's an account sequence mismatch, parse the expected value and use it
