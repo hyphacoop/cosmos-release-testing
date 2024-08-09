@@ -237,31 +237,31 @@ jobs:
           feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
           echo "[INFO] feemarket_wallet1: $feemarket_wallet1_json"
           echo "FEE_MARKET_WALLET1=$(echo $feemarket_wallet1_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-2 --output json)
           echo "[INFO] feemarket_wallet2: $feemarket_wallet2_json"
           echo "FEE_MARKET_WALLET2=$(echo $feemarket_wallet2_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet3_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet3_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-3 --output json)
           echo "[INFO] feemarket_wallet3: $feemarket_wallet3_json"
           echo "FEE_MARKET_WALLET3=$(echo $feemarket_wallet3_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet4_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet4_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-4 --output json)
           echo "[INFO] feemarket_wallet4: $feemarket_wallet4_json"
           echo "FEE_MARKET_WALLET4=$(echo $feemarket_wallet4_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet5_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet5_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-5 --output json)
           echo "[INFO] feemarket_wallet5: $feemarket_wallet5_json"
           echo "FEE_MARKET_WALLET5=$(echo $feemarket_wallet5_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet6_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet6_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-6 --output json)
           echo "[INFO] feemarket_wallet6: $feemarket_wallet6_json"
           echo "FEE_MARKET_WALLET6=$(echo $feemarket_wallet6_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet7_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet7_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-7 --output json)
           echo "[INFO] feemarket_wallet7: $feemarket_wallet7_json"
           echo "FEE_MARKET_WALLET7=$(echo $feemarket_wallet7_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet8_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet8_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-8 --output json)
           echo "[INFO] feemarket_wallet8: $feemarket_wallet8_json"
           echo "FEE_MARKET_WALLET8=$(echo $feemarket_wallet8_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet9_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet9_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-9 --output json)
           echo "[INFO] feemarket_wallet9: $feemarket_wallet9_json"
           echo "FEE_MARKET_WALLET9=$(echo $feemarket_wallet9_json | jq '.address')" >> $GITHUB_ENV
-          feemarket_wallet10_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+          feemarket_wallet10_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-10 --output json)
           echo "[INFO] feemarket_wallet10: $feemarket_wallet10_json"
           echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq '.address')" >> $GITHUB_ENV
       - name: Send funds to feemarket wallets
