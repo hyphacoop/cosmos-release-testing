@@ -265,36 +265,69 @@ jobs:
           echo "[INFO] feemarket_wallet10: $feemarket_wallet10_json"
           echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq '.address')" >> $GITHUB_ENV
       - name: Send funds to feemarket wallets
+        env:
+          SEND_AMOUNT: 10000000
         run: |
           echo "[INFO] sending funds to feemarket-1 ${{ env.FEE_MARKET_WALLET1 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET1 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET1 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-2 ${{ env.FEE_MARKET_WALLET2 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET2 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET2 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-3 ${{ env.FEE_MARKET_WALLET3 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET3 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET3 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-4 ${{ env.FEE_MARKET_WALLET4 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET4 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET4 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-5 ${{ env.FEE_MARKET_WALLET5 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET5 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET5 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-6 ${{ env.FEE_MARKET_WALLET6 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET6 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET6 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-7 ${{ env.FEE_MARKET_WALLET7 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET7 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET7 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-8 ${{ env.FEE_MARKET_WALLET8 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET8 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET8 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-9 ${{ env.FEE_MARKET_WALLET9 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET9 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET9 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO] sending funds to feemarket-10 ${{ env.FEE_MARKET_WALLET10 }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET10 }} 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET10 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] Prime accounts"
+          echo "[INFO] sending funds from feemarket-1 ${{ env.FEE_MARKET_WALLET1 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET1 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-2 ${{ env.FEE_MARKET_WALLET2 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET2 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-3 ${{ env.FEE_MARKET_WALLET3 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET3 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-4 ${{ env.FEE_MARKET_WALLET4 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET4 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-5 ${{ env.FEE_MARKET_WALLET5 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET5 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-6 ${{ env.FEE_MARKET_WALLET6 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET6 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-7 ${{ env.FEE_MARKET_WALLET7 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET7 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-8 ${{ env.FEE_MARKET_WALLET8 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET8 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-9 ${{ env.FEE_MARKET_WALLET9 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET9 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO] sending funds from feemarket-10 ${{ env.FEE_MARKET_WALLET10 }}"
+          $CHAIN_BINARY tx bank send ${{ env.FEE_MARKET_WALLET10 }} $WALLET_1 1$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: Get wallet balances
         run: |
