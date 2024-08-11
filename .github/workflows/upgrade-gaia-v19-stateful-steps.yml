@@ -532,12 +532,12 @@ jobs:
           screen -S $PROVIDER_SERVICE_1 -p 0 -X stuff "^C"
       - name: Wait for 2 blocks
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 600
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Test Feemarket
         run: |
           export FEE_MARKET_1_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET1 }} -o json | jq -r '.account.value.account_number')
