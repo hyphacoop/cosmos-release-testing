@@ -236,34 +236,34 @@ jobs:
         run: |
           feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
           echo "[INFO] feemarket_wallet1: $feemarket_wallet1_json"
-          echo "FEE_MARKET_WALLET1=$(echo $feemarket_wallet1_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET1=$(echo $feemarket_wallet1_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-2 --output json)
           echo "[INFO] feemarket_wallet2: $feemarket_wallet2_json"
-          echo "FEE_MARKET_WALLET2=$(echo $feemarket_wallet2_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET2=$(echo $feemarket_wallet2_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet3_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-3 --output json)
           echo "[INFO] feemarket_wallet3: $feemarket_wallet3_json"
-          echo "FEE_MARKET_WALLET3=$(echo $feemarket_wallet3_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET3=$(echo $feemarket_wallet3_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet4_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-4 --output json)
           echo "[INFO] feemarket_wallet4: $feemarket_wallet4_json"
-          echo "FEE_MARKET_WALLET4=$(echo $feemarket_wallet4_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET4=$(echo $feemarket_wallet4_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet5_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-5 --output json)
           echo "[INFO] feemarket_wallet5: $feemarket_wallet5_json"
-          echo "FEE_MARKET_WALLET5=$(echo $feemarket_wallet5_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET5=$(echo $feemarket_wallet5_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet6_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-6 --output json)
           echo "[INFO] feemarket_wallet6: $feemarket_wallet6_json"
-          echo "FEE_MARKET_WALLET6=$(echo $feemarket_wallet6_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET6=$(echo $feemarket_wallet6_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet7_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-7 --output json)
           echo "[INFO] feemarket_wallet7: $feemarket_wallet7_json"
-          echo "FEE_MARKET_WALLET7=$(echo $feemarket_wallet7_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET7=$(echo $feemarket_wallet7_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet8_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-8 --output json)
           echo "[INFO] feemarket_wallet8: $feemarket_wallet8_json"
-          echo "FEE_MARKET_WALLET8=$(echo $feemarket_wallet8_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET8=$(echo $feemarket_wallet8_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet9_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-9 --output json)
           echo "[INFO] feemarket_wallet9: $feemarket_wallet9_json"
-          echo "FEE_MARKET_WALLET9=$(echo $feemarket_wallet9_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET9=$(echo $feemarket_wallet9_json | jq -r '.address')" >> $GITHUB_ENV
           feemarket_wallet10_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-10 --output json)
           echo "[INFO] feemarket_wallet10: $feemarket_wallet10_json"
-          echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq '.address')" >> $GITHUB_ENV
+          echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq -r '.address')" >> $GITHUB_ENV
       - name: Send funds to feemarket wallets
         env:
           SEND_AMOUNT: 10000000
@@ -539,17 +539,6 @@ jobs:
       #       sleep 1
       #     done
       - name: _Test Feemarket
-        env:
-          FEE_MARKET_WALLET1: ${{ env.FEE_MARKET_WALLET1 }}
-          FEE_MARKET_WALLET2: ${{ env.FEE_MARKET_WALLET2 }}
-          FEE_MARKET_WALLET3: ${{ env.FEE_MARKET_WALLET3 }}
-          FEE_MARKET_WALLET4: ${{ env.FEE_MARKET_WALLET4 }}
-          FEE_MARKET_WALLET5: ${{ env.FEE_MARKET_WALLET5 }}
-          FEE_MARKET_WALLET6: ${{ env.FEE_MARKET_WALLET6 }}
-          FEE_MARKET_WALLET7: ${{ env.FEE_MARKET_WALLET7 }}
-          FEE_MARKET_WALLET8: ${{ env.FEE_MARKET_WALLET8 }}
-          FEE_MARKET_WALLET9: ${{ env.FEE_MARKET_WALLET9 }}
-          FEE_MARKET_WALLET10: ${{ env.FEE_MARKET_WALLET10 }}
         run: |
           export FEE_MARKET_1_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET1 }} -o json | jq -r '.account.value.account_number')
           echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET1 }} is: $FEE_MARKET_1_ACCOUNT_NUMBER"
