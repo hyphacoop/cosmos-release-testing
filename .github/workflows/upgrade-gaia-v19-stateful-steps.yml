@@ -539,6 +539,17 @@ jobs:
       #       sleep 1
       #     done
       - name: _Test Feemarket
+        env:
+          FEE_MARKET_WALLET1: ${{ env.FEE_MARKET_WALLET1 }}
+          FEE_MARKET_WALLET2: ${{ env.FEE_MARKET_WALLET2 }}
+          FEE_MARKET_WALLET3: ${{ env.FEE_MARKET_WALLET3 }}
+          FEE_MARKET_WALLET4: ${{ env.FEE_MARKET_WALLET4 }}
+          FEE_MARKET_WALLET5: ${{ env.FEE_MARKET_WALLET5 }}
+          FEE_MARKET_WALLET6: ${{ env.FEE_MARKET_WALLET6 }}
+          FEE_MARKET_WALLET7: ${{ env.FEE_MARKET_WALLET7 }}
+          FEE_MARKET_WALLET8: ${{ env.FEE_MARKET_WALLET8 }}
+          FEE_MARKET_WALLET9: ${{ env.FEE_MARKET_WALLET9 }}
+          FEE_MARKET_WALLET10: ${{ env.FEE_MARKET_WALLET10 }}
         run: |
           export FEE_MARKET_1_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET1 }} -o json | jq -r '.account.value.account_number')
           echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET1 }} is: $FEE_MARKET_1_ACCOUNT_NUMBER"

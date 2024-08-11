@@ -13,8 +13,9 @@ mempool_size() {
 
 echo "[INFO] Account Number: $ACCOUNT"
 echo "[INFO] Wallet: $WALLET"
-echo "[INFO] Account info:"
+echo "[INFO] RAW JSON account info:"
 curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/auth/v1beta1/accounts/$WALLET
+echo ""
 SEQUENCE=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/auth/v1beta1/accounts/$WALLET | jq --raw-output ' .account.sequence')
 echo "[INFO] Sequence: $SEQUENCE"
 
