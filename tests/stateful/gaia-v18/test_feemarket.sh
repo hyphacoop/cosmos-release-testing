@@ -25,16 +25,16 @@ echo "Loading mempool with txs from fee market wallets..."
 count=0
 while [ $count -lt 500 ]
 do
-    export WALLET=$FEE_MARKET_WALLET1 ACCOUNT_NUMBER=$FEE_MARKET_1_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET2 ACCOUNT_NUMBER=$FEE_MARKET_2_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET3 ACCOUNT_NUMBER=$FEE_MARKET_3_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET4 ACCOUNT_NUMBER=$FEE_MARKET_4_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET5 ACCOUNT_NUMBER=$FEE_MARKET_5_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET6 ACCOUNT_NUMBER=$FEE_MARKET_6_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET7 ACCOUNT_NUMBER=$FEE_MARKET_7_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET8 ACCOUNT_NUMBER=$FEE_MARKET_8_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET9 ACCOUNT_NUMBER=$FEE_MARKET_9_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
-    export WALLET=$FEE_MARKET_WALLET10 ACCOUNT_NUMBER=$FEE_MARKET_10_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 20000000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET1 ACCOUNT_NUMBER=$FEE_MARKET_1_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET2 ACCOUNT_NUMBER=$FEE_MARKET_2_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET3 ACCOUNT_NUMBER=$FEE_MARKET_3_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET4 ACCOUNT_NUMBER=$FEE_MARKET_4_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET5 ACCOUNT_NUMBER=$FEE_MARKET_5_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET6 ACCOUNT_NUMBER=$FEE_MARKET_6_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET7 ACCOUNT_NUMBER=$FEE_MARKET_7_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET8 ACCOUNT_NUMBER=$FEE_MARKET_8_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET9 ACCOUNT_NUMBER=$FEE_MARKET_9_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
+    export WALLET=$FEE_MARKET_WALLET10 ACCOUNT_NUMBER=$FEE_MARKET_10_ACCOUNT_NUMBER; scripts/stateful/gaia-v18/load_blocks.sh 100000 1 0.005
     let count=$count+1
 done
 
