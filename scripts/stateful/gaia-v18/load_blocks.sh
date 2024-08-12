@@ -48,8 +48,8 @@ for (( i=0; i<$TARGET_TXS; i++ )); do
   # cat unsigned.json
   # echo "Signed JSON:"
   # cat signed.json
-  echo "[INFO] Broadcast tx log:"
-  cat broadcast.log
+  echo "[DEBUG] Broadcast tx log:"
+  cat broadcast.log | grep txhash
 done
 
 # jq '.' unsigned.json
