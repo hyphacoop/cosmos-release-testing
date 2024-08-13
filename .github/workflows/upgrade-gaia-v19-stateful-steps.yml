@@ -214,11 +214,11 @@ jobs:
       - name: Query gov params time
         run: $CHAIN_BINARY --home $HOME_1 q gov params
       - name: Query provider params
-        run: $CHAIN_BINARY --home $HOME_1 q provider params
+        run: $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
       - name: Set BlocksPerEpoch to 1
         run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-1.json
       - name: Query provider params
-        run: $CHAIN_BINARY --home $HOME_1 q provider params
+        run: $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
       - name: Check BlocksPerEpoch is 1
         run: |
           BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
