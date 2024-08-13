@@ -1,13 +1,28 @@
 {
-    "title": "set the blocks per epoch to 1",
-    "description": "This will set blocks_per_epoch to 1",
-    "deposit": "1000000000uatom",
+    "messages": [
+     {
+      "@type": "/interchain_security.ccv.provider.v1.MsgUpdateParams",
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "params": {
+       "template_client": null,
+       "trusting_period_fraction": "0.66",
+       "ccv_timeout_period": "2419200s",
+       "init_timeout_period": "604800s",
+       "vsc_timeout_period": "3024000s",
+       "slash_meter_replenish_period": "3600s",
+       "slash_meter_replenish_fraction": "0.05",
+       "consumer_reward_denom_registration_fee": {
+        "denom": "uatom",
+        "amount": "10000000"
+       },
+       "blocks_per_epoch": "1",
+       "number_of_epochs_to_start_receiving_rewards": "24"
+      }
+     }
+    ],
     "metadata": "ipfs://CID",
-    "changes": [
-        {
-            "subspace": "provider",
-            "key": "BlocksPerEpoch",
-            "value": "1"
-        }
-    ]
-}
+    "deposit": "1000000000uatom",
+    "title": "Set epoch to 1",
+    "summary": "This will set epoch to 1 block",
+    "expedited": false
+   }

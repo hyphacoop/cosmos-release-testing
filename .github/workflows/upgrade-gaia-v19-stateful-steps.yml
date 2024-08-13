@@ -213,13 +213,15 @@ jobs:
         run: scripts/stateful/set_voting_period.sh templates/proposal-voting-period-60s.json
       - name: Query gov params time
         run: $CHAIN_BINARY --home $HOME_1 q gov params
-      - name: Query BlocksPerEpoch
-        run: $CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch
+      - name: Query provider params
+        run: $CHAIN_BINARY --home $HOME_1 q provider params
       - name: Set BlocksPerEpoch to 1
-        run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-1.json
+        run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-1.json
+      - name: Query provider params
+        run: $CHAIN_BINARY --home $HOME_1 q provider params
       - name: Check BlocksPerEpoch is 1
         run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.param.value')
+          BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
           echo "BlocksPerEpoch is: $BPE"
           if [ $BPE != "\"1\"" ]
           then
@@ -431,17 +433,17 @@ jobs:
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
           echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: Set BlocksPerEpoch to 100
-        run: scripts/stateful/set_epoch.sh templates/proposal-blocks-per-epoch-100.json
+        run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-100.json
       - name: Check BlocksPerEpoch is 100
         run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q params subspace provider BlocksPerEpoch -o json | jq -r '.param.value')
+          BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
           echo "BlocksPerEpoch is: $BPE"
           if [ $BPE != "\"100\"" ]
           then
