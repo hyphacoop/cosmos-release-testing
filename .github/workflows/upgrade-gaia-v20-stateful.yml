@@ -81,7 +81,7 @@ jobs:
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-theta-stateful-workflow
       archive_url: https://files.polypore.xyz/archived-state/theta-testnet/latest_v19.tar.gz
-    uses: ./.github/workflows/upgrade-gaia-v19-stateful-steps.yml
+    uses: ./.github/workflows/upgrade-gaia-v20-stateful-steps.yml
   test-upgrade-ics-testnet:
     needs: set-version-matrix
     strategy:
@@ -95,4 +95,4 @@ jobs:
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-ics-stateful-workflow
       archive_url: https://files.polypore.xyz/archived-state/ics-testnet-provider/latest_v19.tar.gz
-    uses: ./.github/workflows/upgrade-gaia-v19-stateful-steps.yml
+    uses: ./.github/workflows/upgrade-gaia-v20-stateful-steps.yml
