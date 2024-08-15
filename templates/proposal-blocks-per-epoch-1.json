@@ -85,7 +85,8 @@
         "amount": "10000000"
        },
        "blocks_per_epoch": "1",
-       "number_of_epochs_to_start_receiving_rewards": "24"
+       "number_of_epochs_to_start_receiving_rewards": "24",
+       "max_provider_consensus_validators": "1"
       }
      }
     ],
