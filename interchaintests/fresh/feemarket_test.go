@@ -31,7 +31,7 @@ func TestFeeMarket(t *testing.T) {
 
 	setMaxBlockUtilization(ctx, t, chain, maxBlockUtilization)
 
-	setCommitTimeout(ctx, t, chain, 130*time.Second)
+	setCommitTimeout(ctx, t, chain, 150*time.Second)
 
 	packBlocks(ctx, t, chain, txsPerBlock, blocksToPack)
 }
@@ -91,8 +91,20 @@ NODE=$9
 
 i=0
 
-SEQUENCE=$($CHAIN_BINARY query account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json | jq -r .sequence)
-ACCOUNT=$($CHAIN_BINARY query account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json | jq -r .account_number)
+
+cd $HOME
+
+SEQUENCE=$($CHAIN_BINARY query auth account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json | jq -r .account.value.sequence)
+ACCOUNT=$($CHAIN_BINARY query auth account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json | jq -r .account.value.account_number)
+
+if [ $SEQUENCE == "null" ]; then
+	$CHAIN_BINARY query auth account $FROM --chain-id $CHAIN_ID --node $NODE --home $VAL_HOME -o json >&2
+	exit 1
+fi
+
+if [ $ACCOUNT == "null" ]; then
+	ACCOUNT=0
+fi
 
 $CHAIN_BINARY tx bank send $FROM $TO 1$DENOM --keyring-backend test --generate-only --account-number $ACCOUNT --from $FROM --chain-id $CHAIN_ID --gas 500000 --gas-adjustment 2.0 --gas-prices $GAS_PRICES$DENOM --home $VAL_HOME --node $NODE -o json > tx.json
 
@@ -147,7 +159,7 @@ done
 				}, nil)
 
 				if err != nil {
-					return fmt.Errorf("err %w, stderr: %s", err, stderr)
+					return fmt.Errorf("validator %d, err %w, stderr: %s", v, err, stderr)
 				} else if len(stderr) > 0 {
 					return fmt.Errorf("stderr: %s", stderr)
 				}

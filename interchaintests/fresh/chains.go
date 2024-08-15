@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -29,6 +30,7 @@ type ValidatorWallet struct {
 	Moniker        string
 	Address        string
 	ValoperAddress string
+	ValConsAddress string
 }
 
 type Chain struct {
@@ -107,7 +109,7 @@ func createRelayer(ctx context.Context, t *testing.T) ibc.Relayer {
 	return interchaintest.NewBuiltinRelayerFactory(
 		ibc.Hermes, // TODO: allow specifying relayer type
 		GetLogger(ctx),
-		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "v1.8.0", "1000:1000"),
+		relayer.CustomDockerImage("ghcr.io/informalsystems/hermes", "1.10.1", "2000:2000"),
 	).Build(t, dockerClient, dockerNetwork)
 }
 
@@ -393,12 +395,17 @@ func GetValidatorWallets(ctx context.Context, chain Chain) ([]ValidatorWallet, e
 			if err != nil {
 				return err
 			}
+			valconsAddress, _, err := chain.Validators[i].ExecBin(ctx, "tendermint", "show-address")
+			if err != nil {
+				return err
+			}
 			lock.Lock()
 			defer lock.Unlock()
 			wallets[i] = ValidatorWallet{
 				Moniker:        moniker,
 				Address:        address,
 				ValoperAddress: valoperAddress,
+				ValConsAddress: strings.TrimSpace(string(valconsAddress)),
 			}
 			return nil
 		})
@@ -433,4 +440,19 @@ func (c Chain) GetValidatorHex(ctx context.Context, val int) (string, error) {
 	}
 	providerHex := gjson.GetBytes(json, "address").String()
 	return providerHex, nil
+}
+
+func (c Chain) GetGovernanceAddress(ctx context.Context) (string, error) {
+	addr, err := c.CosmosChain.GetGovernanceAddress(ctx)
+	if err != nil {
+		return "", err
+	}
+	if addr != "" {
+		return addr, nil
+	}
+	out, _, err := c.GetNode().ExecQuery(ctx, "auth", "module-account", "gov")
+	if err != nil {
+		return "", err
+	}
+	return gjson.GetBytes(out, "account.value.address").String(), nil
 }

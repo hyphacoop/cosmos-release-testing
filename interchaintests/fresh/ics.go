@@ -33,6 +33,8 @@ type ConsumerConfig struct {
 	TopN                  int
 	ValidatorSetCap       int
 	ValidatorPowerCap     int
+	Allowlist             []string
+	Denylist              []string
 
 	DuringDepositPeriod ConsumerBootstrapCb
 	DuringVotingPeriod  ConsumerBootstrapCb
@@ -183,6 +185,9 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 	genesisOverrides := []cosmos.GenesisKV{
 		cosmos.NewGenesisKV("app_state.slashing.params.signed_blocks_window", strconv.Itoa(SLASHING_WINDOW_CONSUMER)),
 		cosmos.NewGenesisKV("consensus_params.block.max_gas", "50000000"),
+		cosmos.NewGenesisKV("app_state.ccvconsumer.params.reward_denoms", []string{denom}),
+		cosmos.NewGenesisKV("app_state.ccvconsumer.params.provider_reward_denoms", []string{p.Config().Denom}),
+		cosmos.NewGenesisKV("app_state.ccvconsumer.params.blocks_per_distribution_transmission", BLOCKS_PER_DISTRIBUTION),
 	}
 	if config.TopN >= 0 {
 		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.ccvconsumer.params.soft_opt_out_threshold", "0.0"))
@@ -214,6 +219,11 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 			}
 			return sjson.SetBytes(b, "app_state.epochs.epochs.#(identifier==\"stride_epoch\").duration", "30s")
 		}
+	}
+	var providerVerOverride string
+
+	if semver.Compare(p.GetNode().ICSVersion(ctx), "v4.1.0") > 0 {
+		providerVerOverride = "v4.1.0"
 	}
 
 	return &interchaintest.ChainSpec{
@@ -268,6 +278,9 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 						Amount: sdkmath.NewInt(getValidatorStake()[i]),
 						Denom:  denom,
 					}
+			},
+			InterchainSecurityConfig: ibc.ICSConfig{
+				ProviderVerOverride: providerVerOverride,
 			},
 			ModifyGenesis: modifyGenesis,
 			ConsumerCopyProviderKey: func(i int) bool {
@@ -358,6 +371,12 @@ func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chain
 	if config.ValidatorPowerCap > 0 {
 		prop.ValidatorsPowerCap = uint32(config.ValidatorPowerCap)
 	}
+	if len(config.Allowlist) > 0 {
+		prop.Allowlist = config.Allowlist
+	}
+	if len(config.Denylist) > 0 {
+		prop.Denylist = config.Denylist
+	}
 	propTx, err := p.ConsumerAdditionProposal(ctx, interchaintest.FaucetAccountKeyName, prop)
 	require.NoError(t, err)
 	go func() {
@@ -380,7 +399,10 @@ func (p Chain) consumerAdditionProposal(ctx context.Context, t *testing.T, chain
 func isValoperJailed(ctx context.Context, t *testing.T, provider Chain, valoper string) bool {
 	out, _, err := provider.Validators[0].ExecQuery(ctx, "staking", "validator", valoper)
 	require.NoError(t, err)
-	return gjson.GetBytes(out, "jailed").Bool()
+	if gjson.GetBytes(out, "jailed").Exists() {
+		return gjson.GetBytes(out, "jailed").Bool()
+	}
+	return gjson.GetBytes(out, "validator.jailed").Bool()
 }
 
 func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consumer Chain, validatorIdx int, shouldJail bool) {
@@ -388,6 +410,14 @@ func CheckIfValidatorJailed(ctx context.Context, t *testing.T, provider, consume
 	wallets, err := GetValidatorWallets(ctx, provider)
 	require.NoError(t, err)
 	valoper := wallets[validatorIdx].ValoperAddress
+	channel, err := GetChannelWithPort(ctx, provider.Relayer, consumer, provider, "consumer")
+	require.NoError(t, err)
+	require.NoError(t, testutil.WaitForBlocks(ctx, SLASHING_WINDOW_CONSUMER+1, consumer))
+	rs := provider.Relayer.Exec(ctx, GetRelayerExecReporter(ctx), []string{
+		"hermes", "clear", "packets", "--port", "consumer", "--channel", channel.ChannelID,
+		"--chain", consumer.Config().ChainID,
+	}, nil)
+	require.NoError(t, rs.Err)
 	if shouldJail {
 		require.Eventuallyf(t, func() bool {
 			return isValoperJailed(ctx, t, provider, valoper)
@@ -457,9 +487,19 @@ func DelegateToValidator(ctx context.Context, t *testing.T, provider, consumer C
 		require.NoError(t, err)
 		require.Greater(t, providerPower, providerPowerBefore)
 		consumerPower, err := GetPower(ctx, consumer, consumerHex)
+		require.NoError(t, err)
 		require.NotEqual(t, providerPower, consumerPower)
 		require.NoError(t, testutil.WaitForBlocks(ctx, blocksPerEpoch, provider))
 	}
+
+	channel, err := GetChannelWithPort(ctx, provider.Relayer, provider, consumer, "provider")
+	require.NoError(t, err)
+	require.NoError(t, testutil.WaitForBlocks(ctx, SLASHING_WINDOW_CONSUMER+1, consumer))
+	rs := provider.Relayer.Exec(ctx, GetRelayerExecReporter(ctx), []string{
+		"hermes", "clear", "packets", "--port", "provider", "--channel", channel.ChannelID,
+		"--chain", provider.Config().ChainID,
+	}, nil)
+	require.NoError(t, rs.Err)
 
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		providerPower, err := GetPower(ctx, provider, providerHex)
