@@ -338,7 +338,7 @@ jobs:
           RPC_PORT: 37011
           P2P_PORT: 38011
           PPROF_PORT: 39011
-          GAS_PRICE: 0
+          GAS_PRICE: 0.0025
           MONIKER_RELAYER: ${{ vars.MONIKER_2 }}
           MNEMONIC_RELAYER: ${{ vars.MNEMONIC_2 }}
         run: |
