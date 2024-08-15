@@ -91,6 +91,23 @@ echo "Patching genesis for 100_000_000 gas..."
 jq -r '.consensus_params.block.max_gas = "100000000"' $HOME_1/config/genesis.json > maxgas.json
 cp maxgas.json $HOME_1/config/genesis.json
 
+# Introduced in Gaia v19 upgrade workflow
+echo "Patching genesis for feemarket params..."
+jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $HOME_1/config/genesis.json > ./feemarket-denom.json
+mv feemarket-denom.json $HOME_1/config/genesis.json
+jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $HOME_1/config/genesis.json > ./feemarket-min-base.json
+mv feemarket-min-base.json $HOME_1/config/genesis.json
+jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $HOME_1/config/genesis.json > ./feemarket-base.json
+mv feemarket-base.json $HOME_1/config/genesis.json
+
+echo "Patching genesis for expedited proposals..."
+jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+mv voting.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis.json > ./denom.json
+mv denom.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $HOME_1/config/genesis.json > ./amount.json
+mv amount.json $HOME_1/config/genesis.json
+
 echo "Consensus params:"
 jq '.consensus_params' $HOME_1/config/genesis.json
 

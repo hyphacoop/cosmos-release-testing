@@ -29,7 +29,7 @@ echo "Using ($voting_period_seconds)s voting period to calculate the upgrade hei
 # Calculate upgrade height
 echo "Calculate upgrade height"
 block_time=1
-let voting_blocks_delta=$voting_period_seconds/$block_time+3
+let voting_blocks_delta=$voting_period_seconds/$block_time+5
 height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
@@ -40,12 +40,16 @@ upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
 if [ $COSMOS_SDK == "v45" ]; then
     proposal="$CHAIN_BINARY --output json tx gov submit-proposal software-upgrade $upgrade_name --from $WALLET_1 --keyring-backend test --upgrade-height $upgrade_height --upgrade-info $upgrade_info --title gaia-upgrade --description 'test' --chain-id $CHAIN_ID --deposit $VAL3_STAKE$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
 elif [ $COSMOS_SDK == "v47" ]; then
+    echo "Starting proposal:"
+    jq '.' templates/proposal-software-upgrade.json
     # Set up metadata
     jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-software-upgrade.json > upgrade-1.json
     jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
     jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
-    jq '.' upgrade-3.json
-    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-3.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
+    jq -r '.expedited |= true' upgrade-3.json > upgrade-4.json
+    echo "Modified proposal:"
+    jq '.' upgrade-4.json
+    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
 fi
 # Submit the proposal
 echo "Submitting the upgrade proposal."
@@ -102,17 +106,24 @@ else
     sudo systemctl stop $PROVIDER_SERVICE_2
     sudo systemctl stop $PROVIDER_SERVICE_3
 
-    # sudo apt install build-essential -y
-    # wget -q https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
-    # sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
-    # git clone https://github.com/cosmos/gaia.git
-    # cd gaia
-    # git checkout v18.0.0-rc0
-    # make install
-    # cd ..
-    wget $DOWNLOAD_URL -O ./upgraded -q
-    chmod +x ./upgraded
-    mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
+    if [ "$BINARY_SOURCE" = "BUILD" ]; then
+        # Build
+        sudo apt install build-essential -y
+        wget -q https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
+        sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
+        git clone https://github.com/cosmos/gaia.git
+        cd gaia
+        git checkout v19.0.0-rc0
+        make install
+        cd ..
+    else
+        # Download
+        echo "Downloading new binary..."
+        wget $DOWNLOAD_URL -O ./upgraded -q
+        chmod +x ./upgraded
+        mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
+    fi
+
     sudo systemctl start $PROVIDER_SERVICE_1
     sudo systemctl start $PROVIDER_SERVICE_2
     sudo systemctl start $PROVIDER_SERVICE_3
