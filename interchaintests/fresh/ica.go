@@ -45,7 +45,7 @@ func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer 
 	if hasOrdering {
 		_, err = controller.Validators[valIdx].ExecTx(ctx, srcAddress,
 			"interchain-accounts", "controller", "register",
-			"--ordering", "ORDER_ORDERED",
+			"--ordering", "ORDER_ORDERED", "--version", "",
 			srcConnection,
 		)
 	} else {
