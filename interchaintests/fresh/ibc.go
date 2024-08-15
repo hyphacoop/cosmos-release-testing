@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	sdkmath "cosmossdk.io/math"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -139,7 +139,7 @@ func IBCTxWithFeeTest(ctx context.Context, t *testing.T, chainA, chainB Chain, r
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		balance, err := chainB.GetBalance(ctx, dstWallet.Address, expectedDenom)
 		assert.NoError(c, err)
-		balances, err := chainB.AllBalances(ctx, dstWallet.Address)
+		balances, err := chainB.BankQueryAllBalances(ctx, dstWallet.Address)
 		assert.NoError(c, err)
 		assert.Equalf(c, sendAmount, balance.Int64(), "expected balance %d%s, got %d, all balances: %v", sendAmount, expectedDenom, balance.Int64(), balances)
 	}, 15*COMMIT_TIMEOUT, COMMIT_TIMEOUT)
