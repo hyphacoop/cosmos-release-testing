@@ -21,7 +21,7 @@ jq -r --arg denom "$DENOM" '.app_state.staking.params.bond_denom |= $denom' mint
 jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $denom' bond_denom.json > reward_reg.json
 cp reward_reg.json $CHAIN_HOME/config/genesis.json
 
-Introduced in Gaia v19 upgrade workflow
+# Introduced in Gaia v19 upgrade workflow
 echo "Patching genesis for feemarket params..."
 jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $CHAIN_HOME/config/genesis.json > ./feemarket-denom.json
 mv feemarket-denom.json $CHAIN_HOME/config/genesis.json
