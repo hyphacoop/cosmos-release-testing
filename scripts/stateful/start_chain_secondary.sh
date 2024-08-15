@@ -35,7 +35,7 @@ jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $CHAI
 mv voting.json $CHAIN_HOME/config/genesis.json
 jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $CHAIN_HOME/config/genesis.json > ./denom.json
 mv denom.json $CHAIN_HOME/config/genesis.json
-jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $CHAIN_HOME/config/genesis.json > ./amount.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "15000000"' $CHAIN_HOME/config/genesis.json > ./amount.json
 mv amount.json $CHAIN_HOME/config/genesis.json
 
 # Add funds to accounts
