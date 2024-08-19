@@ -30,6 +30,7 @@ jobs:
       CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
       CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
       HOME_1: ${{ vars.HOME_1 }}
+      HOME_2: ${{ vars.HOME_2 }}
       CHAIN_ID: ${{ vars.CHAIN_ID }}
       MONIKER_1: ${{ vars.MONIKER_1 }}
       MONIKER_2: ${{ vars.MONIKER_2 }}
@@ -50,6 +51,12 @@ jobs:
       VAL1_P2P_PORT: 28001
       VAL1_PPROF_PORT: 6061
       VAL1_PROM_PORT: 26660
+      VAL2_RPC_PORT: 27002
+      VAL2_API_PORT: 25002
+      VAL2_GRPC_PORT: 26002
+      VAL2_P2P_PORT: 28002
+      VAL2_PPROF_PORT: 6062
+      VAL2_PROM_PORT: 26662
       WALLET_1: ${{ vars.WALLET_1 }}
       WALLET_2: ${{ vars.WALLET_2 }}
       WALLET_4: ${{ vars.WALLET_4 }}
@@ -178,11 +185,11 @@ jobs:
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
       - name: Set up memory monitor for provider
         run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
-      - name: Start chain
+      - name: Start chain val1 and link val2 node
         env:
           START_VERSION: ${{inputs.gaia_version}}
           ARCHIVE_URL: ${{ inputs.archive_url }}
-        run: scripts/stateful/start_chain.sh
+        run: scripts/stateful/start_chain_val1.sh
       - name: _Blocks produced after upgrade to v19
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 50 12600
       - name: Flush "migration successful" lines
