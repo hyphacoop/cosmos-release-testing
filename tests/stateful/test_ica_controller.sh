@@ -9,7 +9,7 @@ connection_id=$(hermes --json query connection end --chain ica-chain --connectio
 echo "Connection ID: $connection_id"
 
 echo "Registering ICA..."
-$CHAIN_BINARY tx interchain-accounts controller register $connection_id --from $WALLET_1 --ordering ORDER_ORDERED --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM -y -o json --home $CHAIN_HOME
+$CHAIN_BINARY tx interchain-accounts controller register $connection_id --from $WALLET_1 --ordering ORDER_ORDERED --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM -y -o json --home $CHAIN_HOME --version ""
 sleep 60
 
 ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 $connection_id --home $CHAIN_HOME -o json | jq -r '.address')
