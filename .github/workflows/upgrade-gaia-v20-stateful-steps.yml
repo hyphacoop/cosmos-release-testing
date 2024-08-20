@@ -27,6 +27,7 @@ jobs:
     env:
       SSH_KEYS: ${{ vars.SSH_KEYS }}
       PROVIDER_SERVICE_1: ${{ vars.PROVIDER_SERVICE_1 }}
+      PROVIDER_SERVICE_2: ${{ vars.PROVIDER_SERVICE_2 }}
       CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
       CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
       HOME_1: ${{ vars.HOME_1 }}
