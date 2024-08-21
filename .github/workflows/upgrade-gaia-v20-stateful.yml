@@ -67,7 +67,7 @@ jobs:
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
       archive_url: https://files.polypore.xyz/archived-state/latest_v19.tar.gz
-    uses: ./.github/workflows/upgrade-gaia-v19-stateful-steps.yml
+    uses: ./.github/workflows/upgrade-gaia-v20-stateful-steps.yml
   # test-upgrade-release-testnet:
   #   needs: set-version-matrix
   #   strategy:
