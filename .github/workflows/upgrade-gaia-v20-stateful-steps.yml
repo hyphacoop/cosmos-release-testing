@@ -270,7 +270,7 @@ jobs:
           echo "[INFO]: templates/create-validator.json"
           jq -r '.' templates/create-validator.json
           echo "[INFO]: tx staking create-validator..."
-          gaiad --home $HOME_2 tx staking create-validator validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+          gaiad --home $HOME_2 tx staking create-validator templates/create-validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
 
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
