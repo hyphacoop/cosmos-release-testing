@@ -211,10 +211,15 @@ jobs:
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
+          $CHAIN_BINARY keys list --home $HOME_2
       - name: Get starting balances
         run: |
+          echo "[INFO] val1:"
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+          echo "[INFO] val2:"
+          wallets=$(gaiad --home $HOME_2 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
       - name: Query staking params time
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
@@ -251,6 +256,22 @@ jobs:
             echo "BlocksPerEpoch is not 1"
             exit 1
           fi
+      - name: Create val2 validator
+        run: |
+          echo "[INFO]: Send funds to val2 address: $VAL2_SELF_DELEGATION"
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} $1000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          echo "[INFO]: Store pub key params"
+          pub_key_type=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
+          pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
+          echo "type: $pub_key_type"
+          echo "key: $pub_key"
+          jq -r ".pubkey.\"@type\" = \"$pub_key_type\" | .pubkey.key = \"$pub_key\"" templates/create-validator.json > tmp.json
+          mv tmp.json templates/create-validator.json
+          echo "[INFO]: templates/create-validator.json"
+          jq -r '.' templates/create-validator.json
+          echo "[INFO]: tx staking create-validator..."
+          gaiad --home $HOME_2 tx staking create-validator validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 4
