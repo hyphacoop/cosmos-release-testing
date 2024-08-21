@@ -260,6 +260,10 @@ jobs:
         run: |
           echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
           $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 1000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          echo "[INFO]: Wait for one block to pass"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Check val2 address balances"
+          $CHAIN_BINARY --home $HOME_1 q bank balances ${{ env.VAL2_SELF_DELEGATION }}
           echo "[INFO]: Store pub key params"
           pub_key_type=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
           pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '.key')
