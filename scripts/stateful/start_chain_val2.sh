@@ -57,7 +57,7 @@ val1_node_id=$(gaiad --home $HOME_1 tendermint show-node-id)
 toml set --toml-path $HOME_2/config/config.toml p2p.persistent_peers "$val1_node_id@localhost:$VAL1_P2P_PORT"
 
 # Create self-delegation accounts
-val2_self_delegation=$($CHAIN_BINARY --home $HOME_1 keys add val2 --output json)
+val2_self_delegation=$($CHAIN_BINARY --home $HOME_2 keys add val2 --output json)
 echo "[INFO] val2_self_delegation: $val2_self_delegation"
 echo "VAL2_SELF_DELEGATION=$(echo $val2_self_delegation | jq -r '.address')" >> $GITHUB_ENV
 
