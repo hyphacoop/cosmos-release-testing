@@ -262,7 +262,7 @@ jobs:
           $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 1000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           echo "[INFO]: Store pub key params"
           pub_key_type=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
-          pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
+          pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '.key')
           echo "type: $pub_key_type"
           echo "key: $pub_key"
           jq -r ".pubkey.\"@type\" = \"$pub_key_type\" | .pubkey.key = \"$pub_key\"" templates/create-validator.json > tmp.json
