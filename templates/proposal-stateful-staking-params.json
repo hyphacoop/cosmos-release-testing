@@ -1,0 +1,25 @@
+{
+    "messages": [
+     {
+      "@type": "/cosmos.staking.v1beta1.MsgUpdateParams",
+      "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "params": {
+       "unbonding_time": "504h0m0s",
+       "max_validators": 2,
+       "max_provider_consensus_validators": 1,
+       "max_entries": 7,
+       "historical_entries": 10000,
+       "bond_denom": "uatom",
+       "min_commission_rate": "50000000000000000.000000000000000000",
+       "validator_bond_factor": "250000000000000000000.000000000000000000",
+       "global_liquid_staking_cap": "250000000000000000.000000000000000000",
+       "validator_liquid_staking_cap": "1000000000000000000.000000000000000000"
+      }
+     }
+    ],
+    "metadata": "ipfs://CID",
+    "deposit": "1000000000uatom",
+    "title": "Set staking params for stateful test",
+    "summary": "Setting staking params for stateful tests",
+    "expedited": false
+   }

@@ -220,12 +220,17 @@ jobs:
           echo "[INFO] val2:"
           wallets=$(gaiad --home $HOME_2 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
-      - name: Query staking params time
+      - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
           # unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.unbonding_time' | sed 's/.$//')
           # unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
           # echo "UNBONDING_TIME=$unbonding" >> $GITHUB_ENV
+      - name: Set staking params
+        run: scripts/submit_proposal.sh templates/proposal-stateful-staking-params.json
+      - name: Query staking params after prop passed
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q staking params
       - name: Update templates/proposal-add-template.json unbonding time
         run: |
           # unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000000000" | bc)
