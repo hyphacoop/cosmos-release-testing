@@ -139,7 +139,7 @@ jobs:
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
-          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data
+          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -366,7 +366,7 @@ jobs:
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
-          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data
+          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
       - name: Install Go
         uses: actions/setup-go@v5
         with:
