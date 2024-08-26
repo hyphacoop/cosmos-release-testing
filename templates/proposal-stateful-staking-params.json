@@ -6,7 +6,6 @@
       "params": {
        "unbonding_time": "504h0m0s",
        "max_validators": 2,
-       "max_provider_consensus_validators": 1,
        "max_entries": 7,
        "historical_entries": 10000,
        "bond_denom": "uatom",
