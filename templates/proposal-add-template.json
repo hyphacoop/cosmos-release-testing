@@ -1,19 +1,35 @@
 {
-    "title": "Create a consumer chain",
-    "description": "Create the \"consumer\" consumer chain.",
-    "chain_id": "",
-    "initial_height": {
-        "revision_height": 1
-    },
-    "genesis_hash": "79054737030e8e4f15eeda0fe279427ad8932671377a3fc86e7af2da7ae2763b",
-    "binary_hash": "ec1848bd0018732f1ae771c2b0f857c5def9a5fb7736001d640e1da337b41d9e",
-    "spawn_time": "",
-    "blocks_per_distribution_transmission": 5,
-    "consumer_redistribution_fraction": "0.50",
-    "historical_entries": 10000,
-    "transfer_timeout_period": 1800000000000,
-    "ccv_timeout_period": 2419200000000000,
-    "unbonding_period": 1728000000000000,
-    "deposit": "1000000000uatom",
-    "summary": "test chain"
+ "messages": [
+  {
+   "@type": "/interchain_security.ccv.provider.v1.MsgConsumerAddition",
+   "chain_id": "",
+   "initial_height": {
+    "revision_number": "0",
+    "revision_height": "1"
+   },
+   "genesis_hash": "79054737030e8e4f15eeda0fe279427ad8932671377a3fc86e7af2da7ae2763b",
+   "binary_hash": "ec1848bd0018732f1ae771c2b0f857c5def9a5fb7736001d640e1da337b41d9e",
+   "spawn_time": "0001-01-01T00:00:00Z",
+   "unbonding_period": "1728000s",
+   "ccv_timeout_period": "2419200s",
+   "transfer_timeout_period": "1800s",
+   "consumer_redistribution_fraction": "0.50",
+   "blocks_per_distribution_transmission": "5",
+   "historical_entries": "10000",
+   "distribution_transmission_channel": "",
+   "top_N": 0,
+   "validators_power_cap": 0,
+   "validator_set_cap": 0,
+   "allowlist": [],
+   "denylist": [],
+   "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "min_stake": "0",
+   "allow_inactive_vals": false
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "add chain",
+ "summary": "add consumer chain",
+ "expedited": false
 }

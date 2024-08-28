@@ -15,7 +15,7 @@ fi
 
 echo "[INFO] Patching add template with spawn time..."
 spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
-jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/proposal-add-template.json > proposal-add-spawn.json
+jq -r --arg SPAWNTIME "$spawn_time" '.messages[0].spawn_time |= $SPAWNTIME' templates/proposal-add-template.json > proposal-add-spawn.json
 if [ $debug -eq 1 ]
 then
     echo "[DEBUG] PROPOSAL FILE AFTER ADD SPAWN proposal-add-spawn.json:"
@@ -31,7 +31,7 @@ fi
 
 if [ $PSS_ENABLED == true ]; then
     echo "[INFO] Patching for PSS..."
-    jq -r --argjson TOPN $TOPN '.top_N |= $TOPN' proposal-add-$CONSUMER_CHAIN_ID.json > proposal-add-topn.json
+    jq -r --argjson TOPN $TOPN '.messages[0].top_N |= $TOPN' proposal-add-$CONSUMER_CHAIN_ID.json > proposal-add-topn.json
     mv proposal-add-topn.json proposal-add-$CONSUMER_CHAIN_ID.json
 fi
 
@@ -46,7 +46,7 @@ jq -r '.' proposal-add-$CONSUMER_CHAIN_ID.json
 cp proposal-add-$CONSUMER_CHAIN_ID.json ~/artifact/
 
 echo "[INFO] Submitting proposal..."
-proposal="$CHAIN_BINARY tx gov submit-legacy-proposal consumer-addition proposal-add-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
+proposal="$CHAIN_BINARY tx gov submit-proposal proposal-add-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
 echo $proposal
 gaiadout=$($proposal)
 echo "[INFO] gaiad output:"
