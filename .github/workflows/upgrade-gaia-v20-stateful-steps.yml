@@ -294,7 +294,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_2 query staking validators
       - name: Check tendermint validators
         run: |
-          neutrond q tendermint-validator-set -o json | jq -r '.'
+          $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
       - name: Check validator set is 1
         run: |
           $CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.'
@@ -513,7 +513,7 @@ jobs:
           fi
       - name: Check consumer tendermint validators
         run: |
-          neutrond q tendermint-validator-set -o json | jq -r '.'
+           $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
       - name: Check number of signatures
         run: |
           total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
