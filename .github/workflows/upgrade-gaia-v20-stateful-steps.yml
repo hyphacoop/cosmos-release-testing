@@ -70,6 +70,7 @@ jobs:
       CONSUMER_CHAIN_BINARY_2: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
       CONSUMER_DENOM: ${{ vars.CONSUMER_DENOM }}
       CONSUMER_HOME_1: /home/runner/.cona1
+      CONSUMER_HOME_1: /home/runner/.cona2
       STRIDE_SOV_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v11.0.0/stride-v11.0.0-linux-amd64
       STRIDE_CON_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v12.1.0/stride-v12.1.0-linux-amd64
       STRIDE_CHAIN_BINARY: strided
@@ -90,7 +91,13 @@ jobs:
       CON1_RPC_PORT: 27101
       CON1_P2P_PORT: 28101
       CON1_PPROF_PORT: 6163
+      CON2_API_PORT: 25102
+      CON2_GRPC_PORT: 26102
+      CON2_RPC_PORT: 27102
+      CON2_P2P_PORT: 28102
+      CON2_PPROF_PORT: 6164
       CONSUMER_SERVICE_1: cona1.service
+      CONSUMER_SERVICE_2: cona2.service
       BASE_FEES: 30000
       HIGH_FEES: 25000
       GAS: auto
@@ -473,7 +480,7 @@ jobs:
           DOWNTIME_BLOCKS: 20
           CONSUMER_NEW: true
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-        run: scripts/stateful/init_consumer.sh
+        run: scripts/stateful/init_consumer_2_vals.sh
       - name: Launch consumer chain a
         env:
           CONSUMER_CHAIN_ID: consumera
