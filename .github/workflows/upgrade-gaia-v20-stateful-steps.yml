@@ -492,6 +492,12 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
       - name: _Consumer chain produces blocks val2> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Check block hashes on both consumer nodes
         run: |
           latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.sync_info.latest_block_height')
