@@ -70,7 +70,7 @@ jobs:
       CONSUMER_CHAIN_BINARY_2: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
       CONSUMER_DENOM: ${{ vars.CONSUMER_DENOM }}
       CONSUMER_HOME_1: /home/runner/.cona1
-      CONSUMER_HOME_1: /home/runner/.cona2
+      CONSUMER_HOME_2: /home/runner/.cona2
       STRIDE_SOV_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v11.0.0/stride-v11.0.0-linux-amd64
       STRIDE_CON_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v12.1.0/stride-v12.1.0-linux-amd64
       STRIDE_CHAIN_BINARY: strided
@@ -487,9 +487,25 @@ jobs:
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
           PSS_ENABLED: true
           TOPN: 100
-        run: scripts/stateful/launch_consumer.sh v4.x
-      - name: _Consumer chain produces blocks> ICS v4.0.0
+        run: scripts/stateful/launch_consumer_2_vals.sh v4.x
+      - name: _Consumer chain produces blocks val1> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
+      - name: _Consumer chain produces blocks val2> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
+      - name: Check block hashes on both consumer nodes
+        run: |
+          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.sync_info.latest_block_height')
+          echo "[INFO]: Block height is $latest_block"
+          hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          sleep 6
+          hash_val2=$(curl -s 127.0.0.1:$CON2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          if [ $hash_val1 != $hash_val2 ]
+          then
+            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+            exit 1
+          else
+            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+          fi
       - name: Establish CCV channel for consumer a
         run: |
           screen -XS hermes.service quit || true

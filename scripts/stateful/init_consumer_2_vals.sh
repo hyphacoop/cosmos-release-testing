@@ -84,6 +84,10 @@ toml set --toml-path $CONSUMER_HOME_2/config/config.toml rpc.pprof_laddr "localh
 toml set --toml-path $CONSUMER_HOME_1/config/config.toml p2p.laddr "tcp://0.0.0.0:$CON1_P2P_PORT"
 toml set --toml-path $CONSUMER_HOME_2/config/config.toml p2p.laddr "tcp://0.0.0.0:$CON2_P2P_PORT"
 
+# Set persistent_peer
+val1_node_id=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 tendermint show-node-id)
+toml set --toml-path $CONSUMER_HOME_2/config/config.toml p2p.persistent_peers "$val1_node_id@localhost:$CON1_P2P_PORT"
+
 # Turn off block_sync
 if [ $CONSUMER_NEW ]
 then
