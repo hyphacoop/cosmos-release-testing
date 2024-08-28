@@ -200,6 +200,7 @@ jobs:
           latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          sleep 6
           hash_val2=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           if [ $hash_val1 != $hash_val2 ]
           then
