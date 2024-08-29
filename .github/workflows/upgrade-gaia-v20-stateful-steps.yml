@@ -110,7 +110,8 @@ jobs:
       COMMIT_TIMEOUT: 5
       CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
       VESTING_TARGET: "1772414007"
-      UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+      # UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+      UPGRADE_VERSION: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
       HERMES_VERSION: ${{ vars.HERMES_VERSION }}
       CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
