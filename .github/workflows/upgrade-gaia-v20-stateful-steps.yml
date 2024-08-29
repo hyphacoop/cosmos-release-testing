@@ -513,15 +513,20 @@ jobs:
           fi
       - name: Check consumer tendermint validators
         run: |
-           $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-      # - name: Check number of signatures
-      #   run: |
-      #     total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-      #     if [ $total_signatures != 2 ]
-      #     then
-      #       echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
-      #       exit 1
-      #     fi
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators -o json | jq -r '.'
+      - name: Check number of signatures
+        run: |
+          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 2 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
+            exit 1
+          fi
       - name: Establish CCV channel for consumer a
         run: |
           screen -XS hermes.service quit || true

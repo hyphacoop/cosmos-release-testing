@@ -24,7 +24,7 @@
    "denylist": [],
    "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
    "min_stake": "0",
-   "allow_inactive_vals": false
+   "allow_inactive_vals": true
   }
  ],
  "metadata": "ipfs://CID",
