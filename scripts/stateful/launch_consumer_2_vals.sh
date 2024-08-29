@@ -1,10 +1,9 @@
 #!/bin/bash
+set -e
 # Launch a consumer chain
-
 # $1 sets the backwards compatibility version
 
 transform=$1
-
 debug=1
 
 if [ $debug -eq 1 ]
@@ -62,7 +61,7 @@ echo "[INFO] Getting proposal ID from txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
-echo "[INFO] Optin second validator"
+echo "[INFO] Optin first validator"
 node_key1=$(cat $CONSUMER_HOME_1/config/node_key.json | jq -rc '.priv_key')
 $CHAIN_BINARY --home $HOME_1 tx provider opt-in $CONSUMER_CHAIN_ID "$node_key1" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
 
