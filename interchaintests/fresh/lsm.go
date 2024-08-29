@@ -9,9 +9,9 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
@@ -95,7 +95,7 @@ func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain,
 		sharesPostTokenize := provider.QueryJSON(ctx, t, "validator.liquid_shares", "staking", "validator", providerWallet.ValoperAddress).String()
 		checkAMinusBEqualsX(t, sharesPostTokenize, sharesPreTokenize, sdkmath.NewInt(tokenize).Mul(shareFactor))
 
-		balances, err := provider.AllBalances(ctx, lsmWallets["liquid_1"].FormattedAddress())
+		balances, err := provider.BankQueryAllBalances(ctx, lsmWallets["liquid_1"].FormattedAddress())
 		require.NoError(t, err)
 		for _, balance := range balances {
 			if balance.Amount.Int64() == tokenize {
@@ -149,7 +149,7 @@ func LSMHappyPathTest(ctx context.Context, t *testing.T, provider, stride Chain,
 		}, ibc.TransferOptions{})
 		require.NoError(t, err)
 		require.NoError(t, testutil.WaitForBlocks(ctx, 5, stride))
-		balances, err := stride.AllBalances(ctx, strideWallet.Address)
+		balances, err := stride.BankQueryAllBalances(ctx, strideWallet.Address)
 		require.NoError(t, err)
 		for _, balance := range balances {
 			if balance.Amount.Int64() == ibcTransfer {

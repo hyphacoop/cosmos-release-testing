@@ -3,8 +3,8 @@ package v16_test
 import (
 	"testing"
 
-	ibcfeetypes "github.com/cosmos/ibc-go/v7/modules/apps/29-fee/types"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibcfeetypes "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/types"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	"github.com/hyphacoop/cosmos-release-testing/interchaintests/fresh"
 	"github.com/stretchr/testify/require"
 )

@@ -10,12 +10,12 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-	ccvclient "github.com/cosmos/interchain-security/v4/x/ccv/provider/client"
-	"github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	ccvclient "github.com/cosmos/interchain-security/v5/x/ccv/provider/client"
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
@@ -236,6 +236,7 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 			Denom:         denom,
 			GasPrices:     "0.005" + denom,
 			GasAdjustment: 2.0,
+			Gas:           "auto",
 			ChainID:       chainID,
 			ConfigFileOverrides: map[string]any{
 				"config/config.toml": createConfigToml(),
@@ -281,11 +282,11 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 			},
 			InterchainSecurityConfig: ibc.ICSConfig{
 				ProviderVerOverride: providerVerOverride,
+				ConsumerCopyProviderKey: func(i int) bool {
+					return shouldCopyProviderKey[i]
+				},
 			},
 			ModifyGenesis: modifyGenesis,
-			ConsumerCopyProviderKey: func(i int) bool {
-				return shouldCopyProviderKey[i]
-			},
 		},
 	}
 }

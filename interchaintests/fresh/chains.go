@@ -15,14 +15,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/params/client/utils"
-	"github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	"github.com/strangelove-ventures/interchaintest/v7/relayer"
-	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/relayer"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
-	"golang.org/x/mod/semver"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -60,18 +59,12 @@ func createGaiaChainSpec(ctx context.Context, chainName, gaiaVersion string) *in
 		cosmos.NewGenesisKV("app_state.slashing.params.downtime_jail_duration", DOWNTIME_JAIL_DURATION.String()),
 		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_period", "2s"),
 		cosmos.NewGenesisKV("app_state.provider.params.slash_meter_replenish_fraction", "1.00"),
-	}
-	if semver.Compare(gaiaVersion, "v16") >= 0 {
-		genesisOverrides = append(genesisOverrides, cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"))
-	}
-	if semver.Compare(gaiaVersion, "v18") >= 0 {
-		genesisOverrides = append(genesisOverrides,
-			cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.005"),
-			cosmos.NewGenesisKV("app_state.feemarket.state.base_gas_price", "0.005"),
-			cosmos.NewGenesisKV("app_state.feemarket.params.fee_denom", DENOM),
-			cosmos.NewGenesisKV("app_state.wasm.params.code_upload_access.permission", "Nobody"),
-			cosmos.NewGenesisKV("app_state.wasm.params.instantiate_default_permission", "AnyOfAddresses"),
-		)
+		cosmos.NewGenesisKV("app_state.feemarket.params.min_base_gas_price", "0.005"),
+		cosmos.NewGenesisKV("app_state.feemarket.state.base_gas_price", "0.005"),
+		cosmos.NewGenesisKV("app_state.feemarket.params.fee_denom", DENOM),
+		cosmos.NewGenesisKV("app_state.wasm.params.code_upload_access.permission", "Nobody"),
+		cosmos.NewGenesisKV("app_state.wasm.params.instantiate_default_permission", "AnyOfAddresses"),
+		cosmos.NewGenesisKV("app_state.provider.params.blocks_per_epoch", "1"),
 	}
 	return &interchaintest.ChainSpec{
 		Name:          "gaia",
@@ -239,7 +232,7 @@ func (c Chain) PassProposal(ctx context.Context, proposalID string) error {
 	if err != nil {
 		return err
 	}
-	err = c.VoteOnProposalAllValidators(ctx, propID, cosmos.ProposalVoteYes)
+	err = c.VoteOnProposalAllValidators(ctx, uint64(propID), cosmos.ProposalVoteYes)
 	if err != nil {
 		return err
 	}
@@ -256,7 +249,7 @@ func (c Chain) WaitForProposalStatus(ctx context.Context, proposalID string, sta
 		return err
 	}
 	maxHeight := chainHeight + UPGRADE_DELTA
-	_, err = cosmos.PollForProposalStatus(ctx, c.CosmosChain, chainHeight, maxHeight, propID, status)
+	_, err = cosmos.PollForProposalStatus(ctx, c.CosmosChain, chainHeight, maxHeight, uint64(propID), status)
 	return err
 }
 

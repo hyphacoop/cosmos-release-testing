@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/hyphacoop/cosmos-release-testing/interchaintests/fresh"
-	"github.com/strangelove-ventures/interchaintest/v7"
+	"github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/stretchr/testify/require"
 )
 

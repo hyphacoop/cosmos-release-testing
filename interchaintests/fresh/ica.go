@@ -14,9 +14,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/gogoproto/proto"
-	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
-	"github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	icatypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/types"
+	"github.com/strangelove-ventures/interchaintest/v8"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -45,7 +45,7 @@ func SetupICAAccount(ctx context.Context, controller Chain, host Chain, relayer 
 	if hasOrdering {
 		_, err = controller.Validators[valIdx].ExecTx(ctx, srcAddress,
 			"interchain-accounts", "controller", "register",
-			"--ordering", "ORDER_ORDERED",
+			"--ordering", "ORDER_ORDERED", "--version", "",
 			srcConnection,
 		)
 	} else {
@@ -119,7 +119,7 @@ func ICAControllerTest(ctx context.Context, t *testing.T, controller Chain, host
 
 	var ibcStakeDenom string
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
-		balances, err := host.AllBalances(ctx, icaAddress)
+		balances, err := host.BankQueryAllBalances(ctx, icaAddress)
 		require.NoError(t, err)
 		require.NotEmpty(t, balances)
 		for _, c := range balances {
@@ -157,7 +157,7 @@ func sendICATx(ctx context.Context, t *testing.T, controller Chain, valIdx int, 
 		sdk.MustAccAddressFromBech32(dstAddress),
 		sdk.NewCoins(sdk.NewCoin(denom, sdkmath.NewInt(amount))),
 	)
-	data, err := icatypes.SerializeCosmosTxWithEncoding(cdc, []proto.Message{bankSendMsg}, icatypes.EncodingProtobuf)
+	data, err := icatypes.SerializeCosmosTx(cdc, []proto.Message{bankSendMsg}, icatypes.EncodingProtobuf)
 	require.NoError(t, err)
 
 	msg, err := json.Marshal(icatypes.InterchainAccountPacketData{

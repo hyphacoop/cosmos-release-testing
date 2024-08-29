@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -72,7 +72,7 @@ func PFMTransfersTest(ctx context.Context, t *testing.T, chains []Chain, relayer
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		dEndBalance, err := chains[3].GetBalance(ctx, dWallet1.Address, targetDenomAD)
 		assert.NoError(c, err)
-		balances, err := chains[3].AllBalances(ctx, dWallet1.Address)
+		balances, err := chains[3].BankQueryAllBalances(ctx, dWallet1.Address)
 		assert.NoError(c, err)
 		assert.Truef(c, dEndBalance.GT(dStartBalance), "expected %d > %d in %s; balances are: %+v",
 			dEndBalance, dStartBalance, targetDenomAD, balances)
@@ -107,7 +107,7 @@ func PFMTransfersTest(ctx context.Context, t *testing.T, chains []Chain, relayer
 	require.EventuallyWithT(t, func(c *assert.CollectT) {
 		aEndBalance, err := chains[0].GetBalance(ctx, aWallet1.Address, targetDenomDA)
 		assert.NoError(c, err)
-		balances, err := chains[0].AllBalances(ctx, aWallet1.Address)
+		balances, err := chains[0].BankQueryAllBalances(ctx, aWallet1.Address)
 		assert.NoError(c, err)
 		assert.Truef(c, aEndBalance.GT(aStartBalance), "expected %d > %d in %s; balances are: %+v",
 			aEndBalance, aStartBalance, targetDenomDA, balances)
