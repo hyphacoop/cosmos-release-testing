@@ -65,6 +65,8 @@ echo "[INFO] Optin first validator"
 node_key1=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 tendermint show-validator)
 $CHAIN_BINARY --home $HOME_1 tx provider opt-in $CONSUMER_CHAIN_ID "$node_key1" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
 
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
 echo "[INFO] Optin second validator"
 node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_2 tendermint show-validator)
 $CHAIN_BINARY --home $HOME_1 tx provider opt-in $CONSUMER_CHAIN_ID "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
