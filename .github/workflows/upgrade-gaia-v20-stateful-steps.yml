@@ -305,12 +305,6 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_validator, expected 1"
             exit 1
           fi
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
       - name: Check number of signatures
         run: |
           total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
@@ -528,7 +522,7 @@ jobs:
           # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
           echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
-      - name: Check number of signatures
+      - name: Check number of signatures on consumera
         run: |
           total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 2 ]
