@@ -73,9 +73,9 @@ sleep $(($COMMIT_TIMEOUT+2))
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
 if [ $COSMOS_SDK != "v50" ]; then
-    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.logs[]events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 else
-    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 fi
 
 echo "Proposal ID: $proposal_id"
