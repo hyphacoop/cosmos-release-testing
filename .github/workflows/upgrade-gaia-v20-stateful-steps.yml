@@ -513,6 +513,8 @@ jobs:
             echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
           fi
       - name: Check consumer tendermint validators
+        env:
+          CONSUMER_CHAIN_ID: consumera
         run: |
           echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
           $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
