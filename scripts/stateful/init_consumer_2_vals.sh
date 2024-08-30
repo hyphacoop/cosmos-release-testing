@@ -17,12 +17,12 @@ $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_2
 toml set --toml-path $CONSUMER_HOME_2/config/client.toml node "tcp://localhost:$CON2_RPC_PORT"
 $CONSUMER_CHAIN_BINARY init $MONIKER_2 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_2
 
-echo "Copying keys from provider nodes to consumer ones..."
-cp $HOME_1/config/priv_validator_key.json $CONSUMER_HOME_1/config/priv_validator_key.json
-cp $HOME_1/config/node_key.json $CONSUMER_HOME_1/config/node_key.json
+# echo "Copying keys from provider nodes to consumer ones..."
+# cp $HOME_1/config/priv_validator_key.json $CONSUMER_HOME_1/config/priv_validator_key.json
+# cp $HOME_1/config/node_key.json $CONSUMER_HOME_1/config/node_key.json
 
-cp $HOME_2/config/priv_validator_key.json $CONSUMER_HOME_2/config/priv_validator_key.json
-cp $HOME_2/config/node_key.json $CONSUMER_HOME_2/config/node_key.json
+# cp $HOME_2/config/priv_validator_key.json $CONSUMER_HOME_2/config/priv_validator_key.json
+# cp $HOME_2/config/node_key.json $CONSUMER_HOME_2/config/node_key.json
 
 # Update genesis file with right denom
 sed -i s%stake%$CONSUMER_DENOM%g $CONSUMER_HOME_1/config/genesis.json
