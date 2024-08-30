@@ -50,7 +50,20 @@ elif [ $COSMOS_SDK == "v47" ]; then
     echo "Modified proposal:"
     jq '.' upgrade-4.json
     proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
+elif [ $COSMOS_SDK == "v50" ]; then
+    echo "Starting proposal:"
+    jq '.' templates/proposal-software-upgrade.json
+    # Set up metadata
+    jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-software-upgrade.json > upgrade-1.json
+    jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
+    jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
+    jq -r '.expedited |= true' upgrade-3.json > upgrade-4.json
+    echo "Modified proposal:"
+    jq '.' upgrade-4.json
+    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
 fi
+
+
 # Submit the proposal
 echo "Submitting the upgrade proposal."
 echo $proposal
@@ -59,7 +72,12 @@ sleep $(($COMMIT_TIMEOUT+2))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
-proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+if [ $COSMOS_SDK != "v50" ]; then
+    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+else
+    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.logs[].events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+fi
+
 echo "Proposal ID: $proposal_id"
 
 # Vote yes on the proposal
