@@ -305,6 +305,12 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_validator, expected 1"
             exit 1
           fi
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Check number of signatures
         run: |
           total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
@@ -714,3 +720,9 @@ jobs:
       #   with:
       #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
       #     path: ~/.cona1
+      # - name: Upload cona2 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
+      #     path: ~/.cona2
