@@ -91,7 +91,7 @@
     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
     PSS_ENABLED: true
     PROVIDER_ICS: v4.2.0
-    TOPN: 100
+    TOPN: 0
     # Reference ICS chain variables
     CONSUMER_DENOM: ucon
     CONSUMER_GAS_PRICE: 0.005

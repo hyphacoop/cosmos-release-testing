@@ -31,15 +31,29 @@ if [ $TOPN -eq "0" ]; then
     echo "opt-in tx: $txhash"
     sleep $(($COMMIT_TIMEOUT+2))
     $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+    echo "Opting in with val2..."
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    echo "opt-in tx: $txhash"
+    sleep $(($COMMIT_TIMEOUT+2))
+    $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+    echo "Opting in with val3..."
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    echo "opt-in tx: $txhash"
+    sleep $(($COMMIT_TIMEOUT+2))
+    $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 else
     $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-    sleep $COMMIT_TIMEOUT
+    sleep $(($COMMIT_TIMEOUT+2))
+    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    sleep $(($COMMIT_TIMEOUT+2))
+    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    sleep $(($COMMIT_TIMEOUT+2))
 fi
 
-$CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-sleep $COMMIT_TIMEOUT
-$CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-sleep $COMMIT_TIMEOUT
+# $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+# sleep $COMMIT_TIMEOUT
+# $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+# sleep $COMMIT_TIMEOUT
 
 $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
 echo "val1 key in consumer:"
