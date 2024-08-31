@@ -12,19 +12,19 @@ echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
 
 # Initialize home directories
 echo "Initializing node homes..."
-$CHAIN_BINARY config chain-id $CHAIN_ID --home $HOME_1
-$CHAIN_BINARY config keyring-backend test --home $HOME_1
-$CHAIN_BINARY config node tcp://localhost:$VAL1_RPC_PORT --home $HOME_1
+$CHAIN_BINARY config set client chain-id $CHAIN_ID --home $HOME_1
+$CHAIN_BINARY config set client keyring-backend test --home $HOME_1
+$CHAIN_BINARY config set client node tcp://localhost:$VAL1_RPC_PORT --home $HOME_1
 $CHAIN_BINARY init $MONIKER_1 --chain-id $CHAIN_ID --home $HOME_1
 
-$CHAIN_BINARY config chain-id $CHAIN_ID --home $HOME_2
-$CHAIN_BINARY config keyring-backend test --home $HOME_2
-$CHAIN_BINARY config node tcp://localhost:$VAL2_RPC_PORT --home $HOME_2
+$CHAIN_BINARY config set client chain-id $CHAIN_ID --home $HOME_2
+$CHAIN_BINARY config set client keyring-backend test --home $HOME_2
+$CHAIN_BINARY config set client node tcp://localhost:$VAL2_RPC_PORT --home $HOME_2
 $CHAIN_BINARY init $MONIKER_2 --chain-id $CHAIN_ID --home $HOME_2
 
-$CHAIN_BINARY config chain-id $CHAIN_ID --home $HOME_3
-$CHAIN_BINARY config keyring-backend test --home $HOME_3
-$CHAIN_BINARY config node tcp://localhost:$VAL3_RPC_PORT --home $HOME_3
+$CHAIN_BINARY config set client chain-id $CHAIN_ID --home $HOME_3
+$CHAIN_BINARY config set client keyring-backend test --home $HOME_3
+$CHAIN_BINARY config set client node tcp://localhost:$VAL3_RPC_PORT --home $HOME_3
 $CHAIN_BINARY init $MONIKER_3 --chain-id $CHAIN_ID --home $HOME_3
 
 # Create self-delegation accounts
@@ -64,6 +64,36 @@ jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/
 jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
 
 elif [ $COSMOS_SDK == "v47" ]; then
+
+echo "Setting denom to $DENOM..."
+jq -r --arg denom "$DENOM" '.app_state.crisis.constant_fee.denom |= $denom' $HOME_1/config/genesis.json > crisis.json
+jq -r --arg denom "$DENOM" '.app_state.gov.params.min_deposit[0].denom |= $denom' crisis.json > min_deposit.json
+jq -r --arg denom "$DENOM" '.app_state.mint.params.mint_denom |= $denom' min_deposit.json > mint.json
+jq -r --arg denom "$DENOM" '.app_state.staking.params.bond_denom |= $denom' mint.json > bond_denom.json
+jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $denom' bond_denom.json > reward_reg.json
+cp reward_reg.json $HOME_1/config/genesis.json
+
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_2 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_3 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_4 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_5 $VAL_FUNDS$DENOM --home $HOME_1
+
+echo "Creating and collecting gentxs..."
+mkdir -p $HOME_1/config/gentx
+VAL1_NODE_ID=$($CHAIN_BINARY tendermint show-node-id --home $HOME_1)
+VAL2_NODE_ID=$($CHAIN_BINARY tendermint show-node-id --home $HOME_2)
+VAL3_NODE_ID=$($CHAIN_BINARY tendermint show-node-id --home $HOME_3)
+$CHAIN_BINARY genesis gentx $MONIKER_1 $VAL1_STAKE$DENOM --pubkey "$($CHAIN_BINARY tendermint show-validator --home $HOME_1)" --node-id $VAL1_NODE_ID --moniker $MONIKER_1 --chain-id $CHAIN_ID --home $HOME_1 --output-document $HOME_1/config/gentx/$MONIKER_1-gentx.json
+$CHAIN_BINARY genesis gentx $MONIKER_2 $VAL2_STAKE$DENOM --pubkey "$($CHAIN_BINARY tendermint show-validator --home $HOME_2)" --node-id $VAL2_NODE_ID --moniker $MONIKER_2 --chain-id $CHAIN_ID --home $HOME_1 --output-document $HOME_1/config/gentx/$MONIKER_2-gentx.json
+$CHAIN_BINARY genesis gentx $MONIKER_3 $VAL3_STAKE$DENOM --pubkey "$($CHAIN_BINARY tendermint show-validator --home $HOME_3)" --node-id $VAL3_NODE_ID --moniker $MONIKER_3 --chain-id $CHAIN_ID --home $HOME_1 --output-document $HOME_1/config/gentx/$MONIKER_3-gentx.json
+$CHAIN_BINARY genesis collect-gentxs --home $HOME_1
+
+echo "Patching genesis file for fast governance..."
+jq -r ".app_state.gov.params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+jq -r ".app_state.gov.params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
+
+elif [ $COSMOS_SDK == "v50" ]; then
 
 echo "Setting denom to $DENOM..."
 jq -r --arg denom "$DENOM" '.app_state.crisis.constant_fee.denom |= $denom' $HOME_1/config/genesis.json > crisis.json
