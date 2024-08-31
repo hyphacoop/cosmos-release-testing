@@ -131,7 +131,7 @@ else
         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
         git clone https://github.com/cosmos/gaia.git
         cd gaia
-        git checkout v19.0.0-rc0
+        git checkout main
         make install
         cd ..
     else
