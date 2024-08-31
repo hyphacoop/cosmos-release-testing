@@ -116,7 +116,7 @@
     NEUTRON_DENOM: untrn
     # Relayer variables
     RELAYER: hermes
-    HERMES_VERSION: v1.10.0
+    HERMES_VERSION: v1.10.2
     RLY_VERSION: "2.5.0"
   jobs:
     set-version-matrix:
