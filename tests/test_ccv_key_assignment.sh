@@ -17,6 +17,13 @@ sleep $(($COMMIT_TIMEOUT*8))
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 200
 # journalctl -u $RELAYER | tail -n 200
 
+echo "Querying provider valset:"
+$CHAIN_BINARY q tendermint-validator-set --home $HOME_1
+echo "Querying consumer valset:"
+$CHAIN_BINARY q tendermint-validator-set --home $CONSUMER_HOME_1
+echo "Querying provider params:"
+$CHAIN_BINARY q provider params --home $HOME_1
+
 PROVIDER_ADDRESS=$(jq -r '.address' $HOME_1/config/priv_validator_key.json)
 PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_ADDRESS'") | '.voting_power'')
 
