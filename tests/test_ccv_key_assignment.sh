@@ -15,7 +15,7 @@ echo "Waiting for the validator set update to reach the consumer chain..."
 sleep $(($COMMIT_TIMEOUT*8))
 # journalctl -u $PROVIDER_SERVICE_1 | tail -n 200
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 200
-# journalctl -u $RELAYER | tail -n 200
+journalctl -u $RELAYER | tail -n 200
 
 echo "Querying provider valset:"
 $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
