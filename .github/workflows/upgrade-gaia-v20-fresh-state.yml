@@ -611,7 +611,7 @@
             PROVIDER_ICS: v4.2.0
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-            scripts/prepare_consumer.sh
+            scripts/prepare_consumer_permissionless.sh
         - name: Start consumer chain v400-two
           env:
             CONSUMER_CHAIN_ID: v400-two
