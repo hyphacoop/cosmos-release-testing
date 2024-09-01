@@ -27,7 +27,7 @@
       "validator_set_cap": 0,
       "allowlist": [],
       "denylist": [],
-      "min_stake": "0",
+      "min_stake": 0,
       "allow_inactive_vals": false
     }
   }
