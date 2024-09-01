@@ -14,7 +14,7 @@ $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
 # echo "Client ID: $client_id"
 # $CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
 # consumer_id=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
-# echo "Consumer ID: $consumer_id"
+echo "Consumer ID: $CONSUMER_ID"
 
 echo "Collecting the CCV state..."
 $CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $HOME_1 > ccv.json
@@ -23,7 +23,7 @@ $CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $HOME_1 > 
 jq '.' ccv.json
 
 echo "Patching the CCV state with the provider reward denom"
-jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccvt.json > ccv-reward.json
+jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv.json > ccv-reward.json
 cp ccv-reward.json ccv.json
 
 if [ "$CONSUMER_ICS" == "v3.3.0" ]; then
