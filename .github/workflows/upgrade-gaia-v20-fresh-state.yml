@@ -571,6 +571,8 @@
             COSMOS_SDK: v50
           run: |
             scripts/add_consumer_permissionless.sh
+            echo "Consumer ID: $consumer_id"
+            echo "Consumer ID: $CONSUMER_ID"
         - name: Initialize consumer chain with ICS v4.0.0
           env:
             CONSUMER_CHAIN_ID: v400-two

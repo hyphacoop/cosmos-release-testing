@@ -23,11 +23,11 @@ $CONSUMER_CHAIN_BINARY init $MONIKER_3 --chain-id $CONSUMER_CHAIN_ID --home $CON
 
 echo "chains:"
 $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[]'
-client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
-echo "Client ID: $client_id"
-$CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
-consumer_id=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
-echo "Consumer ID: $consumer_id"
+# client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
+# echo "Client ID: $client_id"
+# $CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
+# CONSUMER_ID=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
+echo "Consumer ID: $CONSUMER_ID"
 
 echo "Submit key assignment tx..."
 CON1_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1)
@@ -35,26 +35,26 @@ CON2_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_2)
 CON3_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_3)
 if [ $TOPN -eq "0" ]; then
     echo "Opting in with val1..."
-    txhash=$($CHAIN_BINARY tx provider opt-in $consumer_id $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
     echo "opt-in tx: $txhash"
     sleep $(($COMMIT_TIMEOUT+2))
     $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
     echo "Opting in with val2..."
-    txhash=$($CHAIN_BINARY tx provider opt-in $consumer_id $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
     echo "opt-in tx: $txhash"
     sleep $(($COMMIT_TIMEOUT+2))
     $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
     echo "Opting in with val3..."
-    txhash=$($CHAIN_BINARY tx provider opt-in $consumer_id $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
     echo "opt-in tx: $txhash"
     sleep $(($COMMIT_TIMEOUT+2))
     $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 else
-    $CHAIN_BINARY tx provider assign-consensus-key $consumer_id $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
     sleep $(($COMMIT_TIMEOUT+2))
-    $CHAIN_BINARY tx provider assign-consensus-key $consumer_id $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
     sleep $(($COMMIT_TIMEOUT+2))
-    $CHAIN_BINARY tx provider assign-consensus-key $consumer_id $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
     sleep $(($COMMIT_TIMEOUT+2))
 fi
 
@@ -65,11 +65,11 @@ fi
 
 $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
 echo "val1 key in consumer:"
-$CHAIN_BINARY q provider validator-consumer-key $consumer_id $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
+$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
 echo "val2 key in consumer:"
-$CHAIN_BINARY q provider validator-consumer-key $consumer_id $($CHAIN_BINARY tendermint show-address --home $HOME_2) --home $HOME_1
+$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $HOME_2) --home $HOME_1
 echo "val3 key in consumer:"
-$CHAIN_BINARY q provider validator-consumer-key $consumer_id $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
+$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $HOME_3) --home $HOME_1
 
 
 # Update genesis file with right denom
