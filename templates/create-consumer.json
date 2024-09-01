@@ -7,8 +7,8 @@
     },
     "initialization_parameters": {
       "initial_height": {
-       "revision_number": "0",
-       "revision_height": "1"
+       "revision_number": 0,
+       "revision_height": 1
       },
       "genesis_hash": "Z2VuX2hhc2g=",
       "binary_hash": "YmluX2hhc2g=",
