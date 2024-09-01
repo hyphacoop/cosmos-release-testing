@@ -21,7 +21,9 @@ $CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_3
 $CONSUMER_CHAIN_BINARY config node tcp://localhost:$CON3_RPC_PORT --home $CONSUMER_HOME_3
 $CONSUMER_CHAIN_BINARY init $MONIKER_3 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_3
 
-client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID"'.chains[] | select(.chain_id == $chain_id).client_id')
+echo "chains:"
+$CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[]'
+client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
 echo "Client ID: $client_id"
 $CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
 consumer_id=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)

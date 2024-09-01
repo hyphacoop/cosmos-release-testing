@@ -598,7 +598,7 @@
             DOWNTIME_BLOCKS: 20
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-            scripts/init_consumer_assign_keys.sh
+            scripts/init_consumer_permissionless.sh
             sleep 20
         - name: Prepare consumer chain v400-two
           env:
