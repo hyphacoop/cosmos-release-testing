@@ -595,7 +595,7 @@
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/init_consumer_permissionless.sh
-            sleep 20
+            sleep 30
         - name: Prepare consumer chain v400-two
           env:
             CONSUMER_CHAIN_ID: v400-two
