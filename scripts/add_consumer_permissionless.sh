@@ -22,4 +22,4 @@ txhash=$($tx | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "Querying txhash..."
-$CHAIN_BINARY q tx $txhash --home $HOME_1
+$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
