@@ -24,6 +24,6 @@ sleep $(($COMMIT_TIMEOUT+2))
 echo "Querying txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
-export consumer_id=$($CHAIN_BINARY --output json q tx $txhash | jq -r '.events[] | select(.type=="consumer_creation") | .attributes[] | select(.key=="consumer_id") | .value'))
+export consumer_id=$($CHAIN_BINARY --output json q tx $txhash | jq -r '.events[] | select(.type=="consumer_creation") | .attributes[] | select(.key=="consumer_id") | .value')
 echo "Consumer ID: $consumer_id"
 echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
