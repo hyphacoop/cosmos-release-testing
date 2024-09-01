@@ -2,11 +2,11 @@
 
 echo "Patching add template with spawn time..."
 spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
-jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/create-consumer.json > create-spawn.json
+jq -r --arg SPAWNTIME "$spawn_time" '.initialization_paarameters.spawn_time |= $SPAWNTIME' templates/create-consumer.json > create-spawn.json
 
 if [ $PSS_ENABLED == true ]; then
     echo "Patching for PSS..."
-    jq -r --argjson TOPN $TOPN '.top_N |= $TOPN' create-spawn.json > create-topn.json
+    jq -r --argjson TOPN $TOPN '.power_shaping_parameters.top_N |= $TOPN' create-spawn.json > create-topn.json
     cp create-topn.json create-spawn.json
     cat create-spawn.json
 fi
