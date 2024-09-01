@@ -10,14 +10,14 @@
 # echo "Submitting proposal..."
 
 $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
-echo "Client ID: $client_id"
-$CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
-consumer_id=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
-echo "Consumer ID: $consumer_id"
+# client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
+# echo "Client ID: $client_id"
+# $CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
+# consumer_id=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
+# echo "Consumer ID: $consumer_id"
 
 echo "Collecting the CCV state..."
-$CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 > ccv.json
+$CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $HOME_1 > ccv.json
 # jq '.params |= . + {"soft_opt_out_threshold": "0.10"}' ccv-pre.json > ccv-optout.json
 
 jq '.' ccv.json
