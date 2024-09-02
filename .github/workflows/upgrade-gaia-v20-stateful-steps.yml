@@ -718,5 +718,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
           path: ~/.cona2
