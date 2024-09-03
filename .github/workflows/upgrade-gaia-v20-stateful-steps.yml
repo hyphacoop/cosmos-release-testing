@@ -702,27 +702,32 @@ jobs:
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
           path: ~/artifact/
+          include-hidden-files: true
       - name: Upload provider chain state val1
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
           path: ~/.val1/
+          include-hidden-files: true
       - name: Upload provider chain state val2
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
           path: ~/.val2/
+          include-hidden-files: true
       - name: Upload cona1 chain state
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
           path: ~/.cona1/
+          include-hidden-files: true
       - name: Upload cona2 chain state
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
           path: ~/.cona2/
+          include-hidden-files: true
