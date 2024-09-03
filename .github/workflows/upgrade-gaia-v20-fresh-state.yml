@@ -564,7 +564,7 @@
             PSS_ENABLED: true
             COSMOS_SDK: v50
           run: |
-            scripts/add_consumer_permissionless.sh
+            scripts/add_consumer_optin.sh
             echo "Consumer ID: $consumer_id"
             echo "Consumer ID: $CONSUMER_ID"
         - name: Initialize consumer chain with ICS v4.0.0
@@ -949,7 +949,7 @@
             DOWNTIME_BLOCKS: 20
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-            scripts/init_consumer_topn.sh
+            scripts/init_consumer_permissionless.sh
             sleep 60
         - name: Prepare consumer chain v400-two
           env:
