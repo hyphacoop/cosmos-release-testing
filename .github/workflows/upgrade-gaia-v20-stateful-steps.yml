@@ -702,21 +702,27 @@ jobs:
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
           path: ~/artifact/
-      - name: Upload provider chain state
+      - name: Upload provider chain state val1
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-state
-          path: ${{ vars.HOME_1 }}
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
+          path: ${{ vars.HOME_1 }}/
+      - name: Upload provider chain state val2
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
+          path: ${{ vars.HOME_2 }}/
       - name: Upload cona1 chain state
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
-          path: ~/.cona1
+          path: ${{ vars.CONSUMER_HOME_1 }}/
       - name: Upload cona2 chain state
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
-          path: ~/.cona2
+          path: ${{ vars.CONSUMER_HOME_2 }}/
