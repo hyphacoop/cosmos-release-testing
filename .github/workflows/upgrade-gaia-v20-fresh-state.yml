@@ -620,8 +620,10 @@
             sudo systemctl enable $CONSUMER_SERVICE_1 --now
             sudo systemctl enable $CONSUMER_SERVICE_2 --now
             sudo systemctl enable $CONSUMER_SERVICE_3 --now
-            sleep 5
+            sleep 10
             journalctl -u $CONSUMER_SERVICE_1
+            echo "Val3:"
+            journalctl -u $CONSUMER_SERVICE_3
         - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
           env:
             CON1_RPC_PORT: 40221
@@ -661,7 +663,9 @@
             connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
-  
+        - name: _Downtime test> val3 must not be jailed 
+          run: |
+            tests/test_validator_jailed.sh $VALOPER_3 null
         - name: Stop validator services
           env:
             CONSUMER_SERVICE_2: v400-2-2.service
