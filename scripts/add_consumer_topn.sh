@@ -25,12 +25,14 @@ echo "Querying txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
 export consumer_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="consumer_creation") | .attributes[] | select(.key=="consumer_id") | .value')
-echo "Consumer ID: $consumer_id"
 echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
+echo "Consumer ID: $consumer_id"
+echo "Consumer ID: $CONSUMER_ID"
 
 echo "Submitting update consumer transaction to change ownership..."
 
 jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id |= $consumer_id' templates/update-consumer.json > update.json
+cat update.json
 tx="$CHAIN_BINARY tx provider update-consumer update.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y -o json"
 txhash=$($tx | jq -r .txhash)
 # Wait for the proposal to go on chain

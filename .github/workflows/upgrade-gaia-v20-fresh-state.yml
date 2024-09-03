@@ -1049,8 +1049,16 @@
             sleep $(($COMMIT_TIMEOUT*10))
             $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
             sleep $(($COMMIT_TIMEOUT*2))
+        - name: _Downtime test> val2 must not be jailed
+          run: tests/test_validator_jailed.sh $VALOPER_2 null
+        - name: Stop validator services
+          env:
+            CONSUMER_SERVICE_2: v400-2-2.service
+          run: |
+            sudo systemctl disable $CONSUMER_SERVICE_2 --now
+            sleep $(($COMMIT_TIMEOUT*30))
         - name: _Downtime test> val3 must be jailed - 2
-          run: tests/test_validator_jailed.sh $VALOPER_2 true
+          run: tests/test_validator_jailed.sh $VALOPER_2 null
 
     # Baseline-3-pfm:
     #   runs-on: ubuntu-22.04
