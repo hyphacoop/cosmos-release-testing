@@ -725,4 +725,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
-          path: ~/.cona2/config/
+          path: ~/.cona2/
