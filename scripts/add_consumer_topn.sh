@@ -31,7 +31,7 @@ echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
 echo "Submitting update consumer transaction to change ownership..."
 
 jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id |= $consumer_id' templates/update-consumer.json > update.json
-tx="$CHAIN_BINARY tx provider update-consimer update.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y -o json"
+tx="$CHAIN_BINARY tx provider update-consumer update.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y -o json"
 txhash=$($tx | jq -r .txhash)
 # Wait for the proposal to go on chain
 sleep $(($COMMIT_TIMEOUT+2))
