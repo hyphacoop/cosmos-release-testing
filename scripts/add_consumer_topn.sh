@@ -41,7 +41,7 @@ sleep $(($COMMIT_TIMEOUT+2))
 echo "Querying txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
-jq -r --arg consumer_id "$CONSUMER_ID" '.messages[0].consumer_id = $consumer_id' templates/proposal-update-consumer.json > proposal-update.json
+jq -r --arg consumer_id "$consumer_id" '.messages[0].consumer_id = $consumer_id' templates/proposal-update-consumer.json > proposal-update.json
 jq -r --arg topn "$TOPN" '.messages[0].power_shaping_parameters.top_N = $topn' proposal-update.json > proposal-topn.json
 
 echo "Submitting proposal to set top N > 0..."
