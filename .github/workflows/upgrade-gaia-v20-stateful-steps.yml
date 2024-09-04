@@ -110,8 +110,8 @@ jobs:
       COMMIT_TIMEOUT: 5
       CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
       VESTING_TARGET: "1772414007"
-      # UPGRADE_VERSION: ${{ inputs.upgrade_version }}
-      UPGRADE_VERSION: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
+      UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+      # UPGRADE_VERSION: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
       HERMES_VERSION: ${{ vars.HERMES_VERSION }}
       CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
@@ -491,7 +491,7 @@ jobs:
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
           PSS_ENABLED: true
           TOPN: 0
-        run: scripts/stateful/launch_consumer_2_vals.sh v4.x
+        run: scripts/stateful/launch_consumer_2_vals_optin.sh v4.x
       - name: _Consumer chain produces blocks val1> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
       - name: _Consumer chain produces blocks val2> ICS v4.0.0
@@ -703,31 +703,32 @@ jobs:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
           path: ~/artifact/
           include-hidden-files: true
-      - name: Upload provider chain state val1
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
-          path: ~/.val1/
-          include-hidden-files: true
-      - name: Upload provider chain state val2
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
-          path: ~/.val2/
-          include-hidden-files: true
-      - name: Upload cona1 chain state
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
-          path: ~/.cona1/
-          include-hidden-files: true
-      - name: Upload cona2 chain state
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
-          path: ~/.cona2/
-          include-hidden-files: true
+      # Upload states to artifats
+      # - name: Upload provider chain state val1
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
+      #     path: ~/.val1/
+      #     include-hidden-files: true
+      # - name: Upload provider chain state val2
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
+      #     path: ~/.val2/
+      #     include-hidden-files: true
+      # - name: Upload cona1 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
+      #     path: ~/.cona1/
+      #     include-hidden-files: true
+      # - name: Upload cona2 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
+      #     path: ~/.cona2/
+      #     include-hidden-files: true
