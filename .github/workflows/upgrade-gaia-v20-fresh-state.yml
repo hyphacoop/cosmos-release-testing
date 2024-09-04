@@ -7,7 +7,7 @@
     # schedule:
       # - cron: '0 6,14 * * 1-6'
     workflow_dispatch:
-    push:
+    # push:
   
   concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,7 +15,7 @@
   
   env:
     # Versions
-    VERSION_CUTOFF: v19.1.0
+    VERSION_CUTOFF: v19.2.0
     TARGET_VERSION: v20
     # All chain variables
     COMMIT_TIMEOUT: 3
@@ -134,9 +134,9 @@
         - run: whoami
         - run: pwd
         - name: Check out repository code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Set up Python
-          uses: actions/setup-python@v3
+          uses: actions/setup-python@v5
         - name: Install dependencies
           run: |
             python -m pip install --upgrade pip
@@ -171,9 +171,9 @@
         - run: whoami
         - run: pwd
         - name: Check out repository code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Set up Python
-          uses: actions/setup-python@v3
+          uses: actions/setup-python@v5
         - name: Install dependencies
           run: |
             python -m pip install --upgrade pip
@@ -208,9 +208,9 @@
         - run: whoami
         - run: pwd
         - name: Check out repository code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Set up Python
-          uses: actions/setup-python@v3
+          uses: actions/setup-python@v5
         - name: Install dependencies
           run: |
             python -m pip install --upgrade pip
@@ -260,9 +260,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -368,9 +368,9 @@
         - name: Bypass the grub-efi-amd64-signed package
           run: sudo apt-mark hold grub-efi-amd64-signed
         - name: Check out repository code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Set up Python
-          uses: actions/setup-python@v3
+          uses: actions/setup-python@v5
           with:
             python-version: '3.10'
         - name: Install dependencies
@@ -744,9 +744,9 @@
         - name: Bypass the grub-efi-amd64-signed package
           run: sudo apt-mark hold grub-efi-amd64-signed
         - name: Check out repository code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Set up Python
-          uses: actions/setup-python@v3
+          uses: actions/setup-python@v5
           with:
             python-version: '3.10'
         - name: Install dependencies
@@ -1069,7 +1069,7 @@
         - name: _Downtime test> val2 must be jailed - 2
           run: tests/test_validator_jailed.sh $VALOPER_2 true
 
-    # Baseline-3-pfm:
+    # Baseline-4-pfm:
     #   runs-on: ubuntu-22.04
     #   needs: set-version-matrix-relayer
     #   strategy:
@@ -1099,9 +1099,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -1315,9 +1315,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -1610,9 +1610,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -1974,9 +1974,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -2130,9 +2130,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -2259,9 +2259,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -2402,9 +2402,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -2750,9 +2750,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -3055,9 +3055,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -3527,9 +3527,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
@@ -3626,9 +3626,9 @@
     #     - name: Bypass the grub-efi-amd64-signed package
     #       run: sudo apt-mark hold grub-efi-amd64-signed
     #     - name: Check out repository code
-    #       uses: actions/checkout@v3
+    #       uses: actions/checkout@v4
     #     - name: Set up Python
-    #       uses: actions/setup-python@v3
+    #       uses: actions/setup-python@v5
     #       with:
     #         python-version: '3.10'
     #     - name: Install dependencies
