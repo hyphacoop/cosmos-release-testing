@@ -1065,8 +1065,8 @@
           run: |
             sudo systemctl disable $CONSUMER_SERVICE_2 --now
             sleep $(($COMMIT_TIMEOUT*30))
-        - name: _Downtime test> val3 must be jailed - 2
-          run: tests/test_validator_jailed.sh $VALOPER_2 null
+        - name: _Downtime test> val2 must be jailed - 2
+          run: tests/test_validator_jailed.sh $VALOPER_2 true
 
     # Baseline-3-pfm:
     #   runs-on: ubuntu-22.04
