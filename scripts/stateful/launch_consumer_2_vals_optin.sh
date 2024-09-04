@@ -6,7 +6,7 @@ set -e
 transform=$1
 debug=1
 # set spawn time 1 minute from now
-spawn="1 minute'
+spawn="1 minute"
 
 if [ $debug -eq 1 ]
 then
