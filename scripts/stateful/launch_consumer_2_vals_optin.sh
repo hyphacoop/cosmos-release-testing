@@ -26,14 +26,14 @@ sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" create-spawn.j
 rm create-spawn.json
 if [ $debug -eq 1 ]
 then
-    echo "[DEBUG] CREATE SPAWN FILE AFTER SET chain_id create-add-$CONSUMER_CHAIN_ID.json:"
+    echo "[DEBUG] CREATE SPAWN FILE AFTER SET chain_id create-$CONSUMER_CHAIN_ID.json:"
     cat create-$CONSUMER_CHAIN_ID.json
 fi
 
 if [ $PSS_ENABLED == true ]; then
     echo "[INFO] Patching for PSS..."
-    jq -r --argjson TOPN $TOPN '.messages[0].top_N |= $TOPN' create-add-$CONSUMER_CHAIN_ID.json > create-add-topn.json
-    mv create-add-topn.json create-$CONSUMER_CHAIN_ID.json
+    jq -r --argjson TOPN $TOPN '.messages[0].top_N |= $TOPN' create-$CONSUMER_CHAIN_ID.json > create-topn.json
+    mv create-topn.json create-$CONSUMER_CHAIN_ID.json
 fi
 
 if [ $debug -eq 1 ]
