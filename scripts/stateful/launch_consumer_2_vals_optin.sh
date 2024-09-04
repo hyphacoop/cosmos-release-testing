@@ -15,7 +15,7 @@ then
 fi
 
 echo "[INFO] Patching add template with spawn time..."
-spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
+spawn_time=$(date --date="$spawn" -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
 jq -r --arg SPAWNTIME "$spawn_time" '.messages[0].spawn_time |= $SPAWNTIME' templates/create-consumer-stateful.json > create-spawn.json
 if [ $debug -eq 1 ]
 then
