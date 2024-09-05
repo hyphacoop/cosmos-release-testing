@@ -56,6 +56,9 @@ echo "$gaiadout" > ~/artifact/$CONSUMER_CHAIN_ID-tx.txt
 
 txhash=$(echo "$gaiadout" | jq -r .txhash)
 
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+
 consumer_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="consumer_creation") | .attributes[] | select(.key=="consumer_id") | .value')
 echo "[INFO]: Consumer ID: $consumer_id"
 echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
