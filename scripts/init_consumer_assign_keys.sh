@@ -85,7 +85,10 @@ echo $MNEMONIC_3 | $CONSUMER_CHAIN_BINARY keys add $MONIKER_3 --keyring-backend 
 echo $MNEMONIC_5 | $CONSUMER_CHAIN_BINARY keys add $MONIKER_5 --keyring-backend test --home $CONSUMER_HOME_1 --recover
 echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add $MONIKER_RELAYER --keyring-backend test --home $CONSUMER_HOME_1 --recover
 
-# Add funds to accounts
+echo "Keys in home $CONSUMER_HOME_1:"
+$CONSUMER_CHAIN_BINARY keys list --home $CONSUMER_HOME_1
+
+echo "Adding funds to accounts..."
 $CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
