@@ -78,7 +78,7 @@ echo "expected spawn time: $spawn_time"
 status=""
 while [ "$status" != "CONSUMER_PHASE_LAUNCHED" ]
 do
-    status=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 3 -o json | jq -r '.phase')
+    status=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain $consumer_id -o json | jq -r '.phase')
     date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./
     echo "Phase: $status"
     sleep 1
