@@ -21,6 +21,23 @@ jq -r --arg denom "$DENOM" '.app_state.staking.params.bond_denom |= $denom' mint
 jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $denom' bond_denom.json > reward_reg.json
 cp reward_reg.json $CHAIN_HOME/config/genesis.json
 
+# Introduced in Gaia v19 upgrade workflow
+echo "Patching genesis for feemarket params..."
+jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $CHAIN_HOME/config/genesis.json > ./feemarket-denom.json
+mv feemarket-denom.json $CHAIN_HOME/config/genesis.json
+jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $CHAIN_HOME/config/genesis.json > ./feemarket-min-base.json
+mv feemarket-min-base.json $CHAIN_HOME/config/genesis.json
+jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $CHAIN_HOME/config/genesis.json > ./feemarket-base.json
+mv feemarket-base.json $CHAIN_HOME/config/genesis.json
+
+echo "Patching genesis for expedited proposals..."
+jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $CHAIN_HOME/config/genesis.json  > ./voting.json
+mv voting.json $CHAIN_HOME/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $CHAIN_HOME/config/genesis.json > ./denom.json
+mv denom.json $CHAIN_HOME/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "15000000"' $CHAIN_HOME/config/genesis.json > ./amount.json
+mv amount.json $CHAIN_HOME/config/genesis.json
+
 # Add funds to accounts
 $CHAIN_BINARY_SECONDARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $CHAIN_HOME
 $CHAIN_BINARY_SECONDARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $CHAIN_HOME

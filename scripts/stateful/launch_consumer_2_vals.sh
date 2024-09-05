@@ -1,10 +1,9 @@
 #!/bin/bash
+set -e
 # Launch a consumer chain
-
 # $1 sets the backwards compatibility version
 
 transform=$1
-
 debug=1
 
 if [ $debug -eq 1 ]
@@ -62,6 +61,18 @@ echo "[INFO] Getting proposal ID from txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
+echo "[INFO] Optin first validator"
+node_key1=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 tendermint show-validator)
+$CHAIN_BINARY --home $HOME_1 tx provider opt-in $CONSUMER_CHAIN_ID "$node_key1" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
+
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+echo "[INFO] Optin second validator"
+node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_2 tendermint show-validator)
+$CHAIN_BINARY --home $HOME_2 tx provider opt-in $CONSUMER_CHAIN_ID "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
+
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
 echo "[INFO] Voting on proposal $proposal_id..."
 $CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y
 $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
@@ -92,13 +103,19 @@ cp ccv.json ~/artifact/$CONSUMER_CHAIN_ID-ccv.json
 echo "[INFO] Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json ccv.json > consumer-genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_1/config/genesis.json
+cp consumer-genesis.json $CONSUMER_HOME_2/config/genesis.json
 
 echo "[INFO] Starting the consumer chain..."
 # Run service in screen session
-echo "[INFO] Starting $CONSUMER_CHAIN_BINARY"
+echo "[INFO] Starting $CONSUMER_CHAIN_BINARY val1"
 screen -L -Logfile $HOME/artifact/$CONSUMER_SERVICE_1.log -S $CONSUMER_SERVICE_1 -d -m bash $HOME/$CONSUMER_SERVICE_1.sh
 # set screen to flush log to 0
 screen -r $CONSUMER_SERVICE_1 -p0 -X logfile flush 0
+
+echo "[INFO] Starting $CONSUMER_CHAIN_BINARY val2"
+screen -L -Logfile $HOME/artifact/$CONSUMER_SERVICE_2.log -S $CONSUMER_SERVICE_2 -d -m bash $HOME/$CONSUMER_SERVICE_2.sh
+# set screen to flush log to 0
+screen -r $CONSUMER_SERVICE_2 -p0 -X logfile flush 0
 
 # sleep 20
 # sudo journalctl -u $CONSUMER_SERVICE_1 | tail -n 200

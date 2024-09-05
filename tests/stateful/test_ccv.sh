@@ -1,8 +1,11 @@
 #!/bin/bash
+set -e
 # Test Validator Set Changes
 
 # Current voting power
 PROVIDER_BADDRESS=$(jq -r '.address' $HOME_1/config/priv_validator_key.json)
+CONSUMER_BADDRESS=$(jq -r '.address' $CONSUMER_HOME_1/config/priv_validator_key.json)
+
 PROVIDER_POWER_START=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 
 echo "[INFO] Starting provider voting power: $PROVIDER_POWER_START"
@@ -23,7 +26,7 @@ then
 fi
 
 # Verify new voting power in consumer chain
-CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
+CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$CONSUMER_BADDRESS'") | '.voting_power'')
 
 echo "Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
 if [ $PROVIDER_POWER != $CONSUMER_POWER ]; then

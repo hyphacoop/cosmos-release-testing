@@ -90,6 +90,10 @@ then
     mkdir $HOME/artifact
 fi
 
+# start node 2
+echo "[INFO]: Configure and start node 2"
+scripts/stateful/start_chain_val2.sh
+
 echo "Starting $CHAIN_BINARY"
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m bash $HOME/$PROVIDER_SERVICE_1.sh
 # set screen to flush log to 0
