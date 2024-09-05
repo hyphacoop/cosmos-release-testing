@@ -5,9 +5,10 @@ echo "Running with $CONSUMER_CHAIN_BINARY."
 
 # Initialize home directories
 echo "Initializing consumer homes..."
-$CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY config node tcp://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config --help
+$CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config set client keyring-backend test --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config set client node tcp://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY init $MONIKER_1 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
 cat $CONSUMER_HOME_1/config/client.toml
 
@@ -86,15 +87,15 @@ echo $MNEMONIC_5 | $CONSUMER_CHAIN_BINARY keys add $MONIKER_5 --keyring-backend 
 echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add $MONIKER_RELAYER --keyring-backend test --home $CONSUMER_HOME_1 --recover
 
 echo "Keys in home $CONSUMER_HOME_1:"
-$CONSUMER_CHAIN_BINARY keys list --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY keys list --home $CONSUMER_HOME_1 --keyring-backend test
 
 echo "Adding funds to accounts..."
-$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
 
 # Update genesis file with right denom
 if [ "$CONSUMER_CHAIN_BINARY" == "strided" ]; then
