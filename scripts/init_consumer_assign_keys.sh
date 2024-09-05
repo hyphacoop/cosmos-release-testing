@@ -5,10 +5,9 @@ echo "Running with $CONSUMER_CHAIN_BINARY."
 
 # Initialize home directories
 echo "Initializing consumer homes..."
-$CONSUMER_CHAIN_BINARY config --help
-$CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY config set client keyring-backend test --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY config set client node tcp://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config node tcp://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY init $MONIKER_1 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
 cat $CONSUMER_HOME_1/config/client.toml
 
