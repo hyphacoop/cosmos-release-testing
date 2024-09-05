@@ -76,7 +76,7 @@ $CHAIN_BINARY --home $HOME_2 tx provider opt-in $consumer_id "$node_key2" --gas 
 echo "[INFO] Waiting for chain to spawn..."
 echo "expected spawn time: $spawn_time"
 status=""
-while [ $status != "CONSUMER_PHASE_LAUNCHED" ]
+while [ "$status" != "CONSUMER_PHASE_LAUNCHED" ]
 do
     status=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 3 -o json | jq -r '.phase')
     date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./
