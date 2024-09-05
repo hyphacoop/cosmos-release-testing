@@ -60,7 +60,7 @@ $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
 $CHAIN_BINARY q tendermint-validator-set --home $CONSUMER_HOME_1
 DENOM_BEFORE=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances | length')
 echo "Sending $CONSUMER_DENOM to $CHAIN_ID..."
-command="$CONSUMER_CHAIN_BINARY --node http://localhost:$CON1_RPC_PORT tx ibc-transfer transfer transfer channel-1 $WALLET_1 1000$CONSUMER_DENOM --from $RECIPIENT --keyring-backend test --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM -y -o json"
+command="$CONSUMER_CHAIN_BINARY --node http://localhost:$CON1_RPC_PORT --home $CONSUMER_HOME_1 tx ibc-transfer transfer transfer channel-1 $WALLET_1 1000$CONSUMER_DENOM --from $RECIPIENT --keyring-backend test --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM -y -o json"
 txhash=$($command | jq -r .txhash)
 echo "Waiting for the transfer to reach the provider chain..."
 sleep $(($COMMIT_TIMEOUT*20))
