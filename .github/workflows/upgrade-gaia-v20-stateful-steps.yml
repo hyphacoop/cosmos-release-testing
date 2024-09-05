@@ -485,16 +485,16 @@ jobs:
           CONSUMER_NEW: true
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
         run: scripts/stateful/init_consumer_2_vals.sh
-      - name: Launch consumer chain a
+      - name: Launch opt-in consumer chain a
         env:
           CONSUMER_CHAIN_ID: consumera
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
           PSS_ENABLED: true
           TOPN: 0
         run: scripts/stateful/launch_consumer_2_vals_optin.sh v4.x
-      - name: _Consumer chain produces blocks val1> ICS v4.0.0
+      - name: _Opt-in consumer chain produces blocks val1> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
-      - name: _Consumer chain produces blocks val2> ICS v4.0.0
+      - name: _Opt-in consumer chain produces blocks val2> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
       - name: Check block hashes on both consumer nodes
         run: |
@@ -512,7 +512,7 @@ jobs:
           else
             echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
           fi
-      - name: Check consumer tendermint validators
+      - name: Check opt-in consumer tendermint validators
         env:
           CONSUMER_CHAIN_ID: consumera
         run: |

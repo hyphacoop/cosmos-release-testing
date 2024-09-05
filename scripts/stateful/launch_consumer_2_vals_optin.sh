@@ -73,8 +73,16 @@ echo "[INFO] Optin second validator"
 node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_2 tendermint show-validator)
 $CHAIN_BINARY --home $HOME_2 tx provider opt-in $consumer_id "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
 
-echo "[INFO] Waiting for proposal to pass..."
-sleep $VOTING_PERIOD
+echo "[INFO] Waiting for chain to spawn..."
+echo "expected spawn time: $spawn_time"
+status=""
+while [ $status != "CONSUMER_PHASE_LAUNCHED" ]
+do
+    status=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 3 -o json | jq -r '.phase')
+    date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./
+    echo "Phase: $status"
+    sleep 1
+done
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 #$CHAIN_BINARY q gov proposals --home $HOME_1
