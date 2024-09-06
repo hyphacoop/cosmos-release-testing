@@ -229,6 +229,42 @@ jobs:
           echo "[INFO] val2:"
           wallets=$(gaiad --home $HOME_2 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
+      - name: Migration query consumer-chain 0 (neutron-1)
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain 0 -o json | jq '.'
+          json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 0 -o json)
+          chain_id=$(echo $json | jq -r '.chain_id')
+          top_n=$(echo $json | jq -r '.power_shaping_params.top_N')
+          echo "Chain ID: $chain_id"
+          echo "Top_N: $top_n"
+          if [ "$chain_id" != "neutron-1" ]
+          then
+            echo "Expected chain ID neutron-1"
+            exit 1
+          fi
+          if [ "$top_n" != "95" ]
+          then
+            echo "Expected Top_N 95"
+            exit 2
+          fi
+      - name: Migration query consumer-chain 1 (stride-1)
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json | jq '.'
+          json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json)
+          chain_id=$(echo $json | jq -r '.chain_id')
+          top_n=$(echo $json | jq -r '.power_shaping_params.top_N')
+          echo "Chain ID: $chain_id"
+          echo "Top_N: $top_n"
+          if [ "$chain_id" != "stride-1" ]
+          then
+            echo "Expected chain ID stride-1"
+            exit 1
+          fi
+          if [ "$top_n" != "95" ]
+          then
+            echo "Expected Top_N 95"
+            exit 2
+          fi
       - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
