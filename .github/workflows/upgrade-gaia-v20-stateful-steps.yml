@@ -249,6 +249,7 @@ jobs:
           fi
       - name: Migration query consumer-chain 1 (stride-1)
         run: |
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json | jq '.'
           json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json)
           chain_id=$(echo $json | jq -r '.chain_id')
           top_n=$(echo $json | jq -r '.power_shaping_params.top_N')
