@@ -738,7 +738,7 @@
             sleep $VOTING_PERIOD
             echo "Consumer chains:"
             $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-            phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r ''.chains[] | select(.chain_id == "v400-one").phase')
+            phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-one").phase')
             if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
               echo "PASS: Consumer chain was stopped."
             else

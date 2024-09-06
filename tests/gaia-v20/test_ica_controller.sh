@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Registering ICA..."
-$CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME --node http://localhost:$VAL1_RPC_PORT
+$CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME --node http://localhost:$VAL1_RPC_PORT
 sleep 60
 
 ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $CONTROLLER_HOME -o json | jq -r '.address')
