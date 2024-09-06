@@ -231,7 +231,7 @@ jobs:
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
       - name: Migration query consumer-chain 0 (neutron-1)
         run: |
-          json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json)
+          json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 0 -o json)
           chain_id=$(echo $json | jq -r '.chain_id')
           top_n=$(echo $json | jq -r '.power_shaping_params.top_N')
           echo "Chain ID: $chain_id"
