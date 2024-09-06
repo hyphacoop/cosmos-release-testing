@@ -703,12 +703,13 @@
             sleep $(($COMMIT_TIMEOUT*30))
         - name: _Downtime test> val2 must be jailed - 2
           run: tests/test_validator_jailed.sh $VALOPER_2 true
-        - name: _Remove consumer chain> ICS v4.0.0 chain 1
+        - name: _Remove consumer chain> ICS v4.0.0 chain 2
           run: |
             echo "Consumer chains:"
             $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-            echo "Removing v400-one:"
-            $CHAIN_BINARY tx provider remove-consumer 0 --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+            consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-two").consumer_id')
+            echo "Removing v400-two (consumer_id = $consumer_id):"
+            $CHAIN_BINARY tx provider remove-consumer $consumer_id --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
             sleep $(($COMMIT_TIMEOUT*2))
             echo "Consumer chains:"
             $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
