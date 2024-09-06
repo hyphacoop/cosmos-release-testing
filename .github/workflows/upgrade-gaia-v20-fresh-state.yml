@@ -729,7 +729,7 @@
 
             jq -r --arg CONSUMER "$consumer_id" '.messages[0].consumer_id |= $CONSUMER' templates/proposal-remove-consumer.json > remove-consumer.json
             jq '.' remove-consumer.json
-            txhash=$($CHAIN_BINARY tx gov submit-proposal remove-consumer.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1 -o json | jq '.txhash')
+            txhash=$($CHAIN_BINARY tx gov submit-proposal remove-consumer.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
             sleep $(($COMMIT_TIMEOUT*2))
             proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
             echo "Voting on consumer removal proposal $proposal_id."
@@ -2263,7 +2263,7 @@
             CONTROLLER_HOME: /home/runner/.val1
             HOST_HOME: /home/runner/.host
           run: |
-            tests/gaia-v16/test_ica_controller.sh
+            tests/gaia-v20/test_ica_controller.sh
 
     # Baseline-9-IBC-fee-middleware:
     #   runs-on: ubuntu-22.04
