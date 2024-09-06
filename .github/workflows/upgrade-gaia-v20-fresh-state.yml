@@ -713,6 +713,13 @@
             sleep $(($COMMIT_TIMEOUT*2))
             echo "Consumer chains:"
             $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
+            phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r chains[] | select(.chain_id == "v400-two").phase')
+            if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
+              echo "PASS: Consumer chain was stopped."
+            else
+              echo "FAIL: Consumer chain was not stopped."
+              exit 1
+            fi
 
     # Baseline-3-ics-topn:
     #   runs-on: ubuntu-22.04

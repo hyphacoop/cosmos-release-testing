@@ -42,7 +42,7 @@ echo "Patching genesis file for fast governance..."
 jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
 jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
 
-elif [ $COSMOS_SDK == "v47" ]; then
+else
 
 echo "Setting denom to $DENOM..."
 jq -r --arg denom "$DENOM" '.app_state.crisis.constant_fee.denom |= $denom' $HOME_1/config/genesis.json > crisis.json
