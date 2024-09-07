@@ -55,7 +55,7 @@ jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_reg
 cp reward_reg.json $HOME_1/config/genesis.json
 
 $CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $HOME_1
-$CHAIN_BINARY add-genesis-account $MONIKER_2 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_2 $VAL_FUNDS$DENOM --home $HOME_1
 $CHAIN_BINARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $HOME_1
 
 echo "Creating and collecting gentxs..."
