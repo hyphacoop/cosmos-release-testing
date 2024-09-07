@@ -13,7 +13,7 @@ echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
 echo "Initializing node homes..."
 $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $HOME_1
 $CHAIN_BINARY config set client keyring-backend test --home $HOME_1
-$CHAIN_BINARY set client config node tcp://localhost:$VAL1_RPC_PORT --home $HOME_1
+$CHAIN_BINARY config set client node tcp://localhost:$VAL1_RPC_PORT --home $HOME_1
 $CHAIN_BINARY init $MONIKER_1 --chain-id $CHAIN_ID --home $HOME_1
 
 # Create self-delegation accounts
