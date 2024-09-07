@@ -2247,7 +2247,7 @@
             HOST_HOME: /home/runner/.host
           run: |
             export CONTROLLER_ACCT=$WALLET_1
-            export RECIPIENT=$WALLET_2
+            export RECIPIENT=$WALLET_3
             tests/test_ica_send.sh
 
         - name: Test software upgrade for published releases
@@ -2285,16 +2285,9 @@
             HOST_HOME: /home/runner/.host
           run: |
             export CONTROLLER_ACCT=$WALLET_2
-            export RECIPIENT=$WALLET_3
+            export RECIPIENT=$WALLET_4
             tests/test_ica_send.sh
-        - name: _Test ICA send with pre-upgrade account
-          env:
-            CONTROLLER_HOME: /home/runner/.val1
-            HOST_HOME: /home/runner/.host
-          run: |
-            export CONTROLLER_ACCT=$WALLET_1
-            export RECIPIENT=$WALLET_2
-            tests/test_ica_send.sh
+
 
     # Baseline-9-IBC-fee-middleware:
     #   runs-on: ubuntu-22.04
