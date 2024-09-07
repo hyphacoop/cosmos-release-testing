@@ -59,6 +59,8 @@
     WALLET_2: cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq
     WALLET_3: cosmos1v8zgdpzqfazvk6fgwhqqhzx0hfannrajezuc6t
     WALLET_4: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
+    WALLET_5: cosmos17n3vkvg6lwf98p3kanlhlyjk6zkrfla9pgh8fk
+    WALLET_6: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
     WALLET_RELAYER: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
     VAL1_STAKE: 800000000
     VAL2_STAKE: 200000000
@@ -2285,9 +2287,16 @@
             HOST_HOME: /home/runner/.host
           run: |
             export CONTROLLER_ACCT=$WALLET_2
-            export RECIPIENT=$WALLET_4
+            export RECIPIENT=$WALLET_5
             tests/test_ica_send.sh
-
+        - name: _Test ICA send with pre-upgrade account
+          env:
+            CONTROLLER_HOME: /home/runner/.val1
+            HOST_HOME: /home/runner/.host
+          run: |
+            export CONTROLLER_ACCT=$WALLET_1
+            export RECIPIENT=$WALLET_6
+            tests/test_ica_send.sh
 
     # Baseline-9-IBC-fee-middleware:
     #   runs-on: ubuntu-22.04
