@@ -2240,7 +2240,7 @@
             HOST_HOME: /home/runner/.host
           run: |
             export CONTROLLER_ACCT=$WALLET_1
-            tests/gaia-v20/register-ica.sh
+            scripts/register-ica.sh
         - name: _Test ICA send
           env:
             CONTROLLER_HOME: /home/runner/.val1
@@ -2278,7 +2278,7 @@
             HOST_HOME: /home/runner/.host
           run: |
             export CONTROLLER_ACCT=$WALLET_2
-            tests/gaia-v20/register-ica.sh
+            scripts/register-ica.sh
         - name: _Test ICA send
           env:
             CONTROLLER_HOME: /home/runner/.val1
