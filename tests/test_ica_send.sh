@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# echo "Registering ICA..."
-# $CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
-# sleep 60
-
-# ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $CONTROLLER_HOME -o json | jq -r '.address')
-# echo "ICA address: $ica_address"
-# echo "Funding ICA..."
-# $CHAIN_BINARY_SECONDARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $HOST_HOME
-# sleep 10
-
 ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $CONTROLLER_ACCT connection-0 --home $CONTROLLER_HOME -o json | jq -r '.address')
 echo "ICA address: $ica_address"
 
@@ -26,7 +16,6 @@ $CHAIN_BINARY tx interchain-accounts host generate-packet-data "$(cat msg.json)"
 echo "Sending ICA tx..."
 $CHAIN_BINARY tx interchain-accounts controller send-tx connection-0 send_packet.json --from $CONTROLLER_ACCT --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json --home $CONTROLLER_HOME
 sleep 60
-
 
 ica_balance=$($CHAIN_BINARY_SECONDARY q bank balances $ica_address --home $HOST_HOME -o json | jq -r '.balances[] | select(.denom == "uatom").amount')
 recipient_balance=$($CHAIN_BINARY_SECONDARY q bank balances $RECIPIENT --home $HOST_HOME -o json | jq -r '.balances[] | select(.denom == "uatom").amount')

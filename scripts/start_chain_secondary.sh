@@ -10,6 +10,7 @@ $CHAIN_BINARY_SECONDARY init $MONIKER_1 --chain-id $CHAIN_ID --home $CHAIN_HOME
 
 # Create self-delegation accounts
 echo $MNEMONIC_1 | $CHAIN_BINARY_SECONDARY keys add $MONIKER_1 --keyring-backend test --home $CHAIN_HOME --recover
+echo $MNEMONIC_2 | $CHAIN_BINARY_SECONDARY keys add $MONIKER_2 --keyring-backend test --home $CHAIN_HOME --recover
 echo $MNEMONIC_RELAYER | $CHAIN_BINARY_SECONDARY keys add $MONIKER_RELAYER --keyring-backend test --home $CHAIN_HOME --recover
 
 # Update genesis file with right denom
@@ -23,6 +24,7 @@ cp reward_reg.json $CHAIN_HOME/config/genesis.json
 
 # Add funds to accounts
 $CHAIN_BINARY_SECONDARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $CHAIN_HOME
+$CHAIN_BINARY_SECONDARY genesis add-genesis-account $MONIKER_2 $VAL_FUNDS$DENOM --home $CHAIN_HOME
 $CHAIN_BINARY_SECONDARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $CHAIN_HOME
 
 echo "Creating and collecting gentxs..."
