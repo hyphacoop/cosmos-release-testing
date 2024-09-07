@@ -2279,13 +2279,21 @@
           run: |
             export CONTROLLER_ACCT=$WALLET_2
             scripts/register_ica.sh
-        - name: _Test ICA send
+        - name: _Test ICA send with post-upgrade account
           env:
             CONTROLLER_HOME: /home/runner/.val1
             HOST_HOME: /home/runner/.host
           run: |
             export CONTROLLER_ACCT=$WALLET_2
             export RECIPIENT=$WALLET_3
+            tests/test_ica_send.sh
+        - name: _Test ICA send with pre-upgrade account
+          env:
+            CONTROLLER_HOME: /home/runner/.val1
+            HOST_HOME: /home/runner/.host
+          run: |
+            export CONTROLLER_ACCT=$WALLET_1
+            export RECIPIENT=$WALLET_2
             tests/test_ica_send.sh
 
     # Baseline-9-IBC-fee-middleware:
