@@ -622,7 +622,6 @@ jobs:
           DOWNTIME_BLOCKS: 20
           CONSUMER_NEW: true
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-          CON1_API_PORT:
           CONSUMER_HOME_1: ${{ vars.CONSUMERB_HOME_1 }}
           CONSUMER_HOME_2: ${{ vars.CONSUMERB_HOME_2 }}
           CON1_API_PORT: ${{ vars.CONB1_API_PORT }}
