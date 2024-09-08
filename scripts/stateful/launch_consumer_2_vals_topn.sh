@@ -61,7 +61,7 @@ echo "CONSUMER_ID_TOPN=$consumer_id" >> $GITHUB_ENV
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Update consumer owner to gov address"
-jq -r ".consumer_id |= $consumer_id" templates/update-consumer.json > update-consumer.json
+jq -r ".consumer_id |= \"$consumer_id\"" templates/update-consumer.json > update-consumer.json
 $CHAIN_BINARY --home $HOME_1 tx provider update-consumer update-consumer.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
