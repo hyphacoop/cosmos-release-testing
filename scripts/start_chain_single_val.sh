@@ -11,13 +11,14 @@ echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
 
 # Initialize home directories
 echo "Initializing node homes..."
-$CHAIN_BINARY config chain-id $CHAIN_ID --home $HOME_1
-$CHAIN_BINARY config keyring-backend test --home $HOME_1
-$CHAIN_BINARY config node tcp://localhost:$VAL1_RPC_PORT --home $HOME_1
+$CHAIN_BINARY config set client chain-id $CHAIN_ID --home $HOME_1
+$CHAIN_BINARY config set client keyring-backend test --home $HOME_1
+$CHAIN_BINARY config set client node tcp://localhost:$VAL1_RPC_PORT --home $HOME_1
 $CHAIN_BINARY init $MONIKER_1 --chain-id $CHAIN_ID --home $HOME_1
 
 # Create self-delegation accounts
 echo $MNEMONIC_1 | $CHAIN_BINARY keys add $MONIKER_1 --keyring-backend test --home $HOME_1 --recover
+echo $MNEMONIC_2 | $CHAIN_BINARY keys add $MONIKER_2 --keyring-backend test --home $HOME_1 --recover
 echo $MNEMONIC_RELAYER | $CHAIN_BINARY keys add $MONIKER_RELAYER --keyring-backend test --home $HOME_1 --recover
 
 if [ $COSMOS_SDK == "v45" ]; then
@@ -30,6 +31,7 @@ jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_reg
 cp reward_reg.json $HOME_1/config/genesis.json
 
 $CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY add-genesis-account $MONIKER_2 $VAL_FUNDS$DENOM --home $HOME_1
 $CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $HOME_1
 
 echo "Creating and collecting gentxs..."
@@ -42,7 +44,7 @@ echo "Patching genesis file for fast governance..."
 jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
 jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
 
-elif [ $COSMOS_SDK == "v47" ]; then
+else
 
 echo "Setting denom to $DENOM..."
 jq -r --arg denom "$DENOM" '.app_state.crisis.constant_fee.denom |= $denom' $HOME_1/config/genesis.json > crisis.json
@@ -53,6 +55,7 @@ jq -r --arg denom "$DENOM" '.app_state.provider.params.consumer_reward_denom_reg
 cp reward_reg.json $HOME_1/config/genesis.json
 
 $CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$DENOM --home $HOME_1
+$CHAIN_BINARY genesis add-genesis-account $MONIKER_2 $VAL_FUNDS$DENOM --home $HOME_1
 $CHAIN_BINARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$DENOM --home $HOME_1
 
 echo "Creating and collecting gentxs..."
