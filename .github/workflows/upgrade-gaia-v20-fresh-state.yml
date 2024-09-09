@@ -282,7 +282,7 @@
         - name: Install Cosmovisor v1.3.0
           if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
           run: |
-            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
             echo "COSMOVISOR=true" >> $GITHUB_ENV
             echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
         - name: Start chain
@@ -390,7 +390,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Select Hermes
@@ -809,7 +809,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Select Hermes
@@ -1164,7 +1164,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Start chain
@@ -1374,7 +1374,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Select Hermes
@@ -1669,7 +1669,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Select Hermes
@@ -2035,7 +2035,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Start chain
@@ -2191,7 +2191,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Set up relayer
@@ -2351,11 +2351,11 @@
         - name: Install Cosmovisor v1.3.0
           if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
           run: |
-            go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+            go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
             echo "COSMOVISOR=true" >> $GITHUB_ENV
             echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
         - name: Set up relayer
-          run: scripts/gaia-v16/setup_relayer_ibc_fee.sh
+          run: scripts/setup_relayer.sh
           
         - name: Start chain
           env:
@@ -2420,11 +2420,11 @@
           run: |
             tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
         
-        - name: Restart Hermes with dynamic gas prices
-          run: |
-            cp templates/gaia-v18/hermes-config-ibc-fee.toml ~/.hermes/config.toml
-            sudo systemctl restart $RELAYER
-            sleep 1m
+        # - name: Restart Hermes with dynamic gas prices
+        #   run: |
+        #     cp templates/gaia-v18/hermes-config-ibc-fee.toml ~/.hermes/config.toml
+        #     sudo systemctl restart $RELAYER
+        #     sleep 1m
 
         - name: _Test IBC fee middleware
           env:
@@ -2493,7 +2493,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Select Hermes
@@ -2965,7 +2965,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Start chain
@@ -3064,7 +3064,7 @@
     #     - name: Install Cosmovisor v1.3.0
     #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
     #       run: |
-    #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+    #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@v1.5.0
     #         echo "COSMOVISOR=true" >> $GITHUB_ENV
     #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
     #     - name: Start chain
