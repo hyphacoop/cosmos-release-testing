@@ -23,14 +23,15 @@ echo "Pre-load price: $preload_price$DENOM"
 # done
 # echo "Less than 2000 txs remain in the mempool"
 
-payload=$(openssl rand -hex $PAYLOAD_SIZE)
-echo "Payload: $payload"
+openssl rand -hex $PAYLOAD_SIZE > payload.txt
+echo "Payload:"
+cat payload.txt
 echo "> Assembling text proposal."
-jq --arg PAYLOAD "$payload" '.summary = $PAYLOAD' templates/proposal-text.json > proposal.json
+jq --slurpfile PAYLOAD payload.txt '.summary = $PAYLOAD' templates/proposal-text.json > proposal.json
 echo "> Proposal JSON:"
 jq '.' proposal.json
 echo "> Submitting proposal."
-$CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $HOME_1 -y
+$CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
 sleep $(($COMMIT_TIMEOUT+1))
 
 current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
