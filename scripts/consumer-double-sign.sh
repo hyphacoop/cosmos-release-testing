@@ -37,6 +37,8 @@ sudo systemctl start $PROVIDER_SERVICE_2
 
 echo "Getting genesis file..."
 cp $HOME_1/config/genesis.json $EQ_PROVIDER_HOME/config/genesis.json
+cp $HOME_1/config/app.toml $EQ_PROVIDER_HOME/config/app.toml
+cp $HOME_1/config/config.toml $EQ_PROVIDER_HOME/config/config.toml
 
 echo "Patching config files..."
 # app.toml
