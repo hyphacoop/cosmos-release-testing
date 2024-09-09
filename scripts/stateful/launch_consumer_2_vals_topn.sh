@@ -66,7 +66,6 @@ $CHAIN_BINARY --home $HOME_1 tx provider update-consumer update-consumer.json --
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Create and submit update-consumer proposal"
-templates/proposal-update-consumer.json
 jq -r --arg consumer_id "$consumer_id" '.messages[0].consumer_id = $consumer_id' templates/proposal-update-consumer.json > proposal-update.json
 jq -r --arg topn "$TOPN" '.messages[0].power_shaping_parameters.top_N = $topn' proposal-update.json > proposal-topn.json
 
