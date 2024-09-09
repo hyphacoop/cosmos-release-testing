@@ -1,5 +1,5 @@
 #!/bin/bash
-PAYLOAD_SIZE=100
+PAYLOAD_SIZE=100000
 
 preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
 echo "Pre-load price: $preload_price$DENOM"
