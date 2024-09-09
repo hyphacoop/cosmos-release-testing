@@ -183,5 +183,22 @@ echo ""                                     | sudo tee /etc/systemd/system/$RELA
 echo "[Install]"                            | sudo tee /etc/systemd/system/$RELAYER.service -a
 echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
+echo "Creating evidence service..."
+sudo touch /etc/systemd/system/hermes-evidence.service
+echo "[Unit]"                               | sudo tee /etc/systemd/system/hermes-evidence.service
+echo "Description=Hermes evidence service"          | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "After=network-online.target"          | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo ""                                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "[Service]"                            | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "User=$USER"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
+
+echo "ExecStart=$HOME/.hermes/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "Restart=no"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo ""                                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "[Install]"                            | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/hermes-evidence.service -a
+
 sudo systemctl daemon-reload
 sudo systemctl enable $RELAYER
+sudo systemctl enable hermes-evidence
