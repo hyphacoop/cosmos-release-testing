@@ -26,9 +26,9 @@ echo "Pre-load price: $preload_price$DENOM"
 openssl rand -hex $PAYLOAD_SIZE > payload.txt
 echo "Payload:"
 cat payload.txt
-jq -Rs --rawfile PAYLOAD payload.txt '$PAYLOAD'
+jq --rawfile PAYLOAD payload.txt '$PAYLOAD'
 echo "> Assembling text proposal."
-jq -Rs --rawfile PAYLOAD payload.txt '.summary = $PAYLOAD' templates/proposal-text.json > proposal.json
+jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.json > proposal.json
 echo "> Proposal JSON:"
 jq '.' proposal.json
 echo "> Submitting proposal."
