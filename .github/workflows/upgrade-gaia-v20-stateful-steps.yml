@@ -627,12 +627,12 @@ jobs:
           CON1_API_PORT: ${{ env.CONB1_API_PORT }}
           CON1_GRPC_PORT: ${{ env.CONB1_GRPC_PORT }}
           CON1_RPC_PORT: ${{ env.CONB1_RPC_PORT }}
-          CON1_P2P_PORT: ${{ env.CONB1_RPC_PORT }}
+          CON1_P2P_PORT: ${{ env.CONB1_P2P_PORT }}
           CON1_PPROF_PORT: ${{ env.CONB1_PPROF_PORT }}
           CON2_API_PORT: ${{ env.CONB2_API_PORT }}
           CON2_GRPC_PORT: ${{ env.CONB2_GRPC_PORT }}
           CON2_RPC_PORT: ${{ env.CONB2_RPC_PORT }}
-          CON2_P2P_PORT: ${{ env.CONB2_RPC_PORT }}
+          CON2_P2P_PORT: ${{ env.CONB2_P2P_PORT }}
           CON2_PPROF_PORT: ${{ env.CONB2_PPROF_PORT }}
           CONSUMER_SERVICE_1: conb1.service
           CONSUMER_SERVICE_2: conb2.service
@@ -646,7 +646,7 @@ jobs:
           CONSUMER_SERVICE_1: conb1.service
           CONSUMER_SERVICE_2: conb2.service
           PSS_ENABLED: true
-          TOPN: 95
+          TOPN: 45
         run: scripts/stateful/launch_consumer_2_vals_topn.sh v4.x
       - name: _TopN consumer chain produces blocks val1> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 10
