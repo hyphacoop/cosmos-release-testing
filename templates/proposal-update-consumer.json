@@ -2,7 +2,7 @@
  "messages": [
   {
    "@type": "/interchain_security.ccv.provider.v1.MsgUpdateConsumer",
-   "owner": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "signer": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
    "consumer_id": "0",
    "new_owner_address": null,
    "metadata": null,
