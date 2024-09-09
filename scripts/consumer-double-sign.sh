@@ -1,6 +1,7 @@
 #!/bin/bash
 # Test equivocation proposal for double-signing
 EQ_PROVIDER_HOME=/home/runner/.eqp
+EQ_PROVIDER_SERVICE=eq_provider.service
 EQ_PROV_API_PORT=50002
 EQ_PROV_GRPC_PORT=50012
 EQ_PROV_RPC_PORT=50022
@@ -76,7 +77,7 @@ $CHAIN_BINARY keys add malval_det --home $EQ_PROVIDER_HOME
 malval_det=$($CHAIN_BINARY keys list --home $EQ_PROVIDER_HOME --output json | jq -r '.[] | select(.name=="malval_det").address')
 
 echo "Fund new validator..."
-$CHAIN_BINARY tx bank send $WALLET_1 $malval_det 100000000uatom --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y | jq '.'
+$CHAIN_BINARY tx bank send $WALLET_1 $malval_det 100000000uatom --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y --home $HOME_1 | jq '.'
 
 echo "Setting up service..."
 
