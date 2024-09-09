@@ -87,11 +87,11 @@ echo "[INFO] Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
-$CHAIN_BINARY q gov proposals --home $HOME_1
+$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
 
 echo "[INFO] Optin second validator"
 node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_2 tendermint show-validator)
-$CHAIN_BINARY --home $HOME_2 tx provider opt-in $CONSUMER_CHAIN_ID "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
+$CHAIN_BINARY --home $HOME_2 tx provider opt-in $consumer_id "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
 
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
