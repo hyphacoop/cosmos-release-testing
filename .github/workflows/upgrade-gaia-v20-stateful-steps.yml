@@ -646,7 +646,7 @@ jobs:
           CONSUMER_SERVICE_1: conb1.service
           CONSUMER_SERVICE_2: conb2.service
           PSS_ENABLED: true
-          TOPN: 45
+          TOPN: 50
         run: scripts/stateful/launch_consumer_2_vals_topn.sh v4.x
       - name: _TopN consumer chain produces blocks val1> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 10
