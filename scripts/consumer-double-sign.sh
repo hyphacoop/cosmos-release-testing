@@ -23,16 +23,19 @@ cp $EQ_PROVIDER_HOME/config/node_key.json ./
 
 echo "Copying snapshot from validator 2..."
 sudo systemctl stop $PROVIDER_SERVICE_2
-cp -R $HOME_2/ $EQ_PROVIDER_HOME/
+cp -R $HOME_2/data/application.db $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/blockstore.db $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/cs.wal $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/evidence.db $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/snapshots $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/state.db $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/tx_index.db $EQ_PROVIDER_HOME/data/
+cp -R $HOME_2/data/upgrade-info.json $EQ_PROVIDER_HOME/data/
 sudo systemctl start $PROVIDER_SERVICE_2
 # sleep 10
 
-$CHAIN_BINARY config set client chain-id $CHAIN_ID --home $EQ_PROVIDER_HOME
-$CHAIN_BINARY config set client keyring-backend test --home $EQ_PROVIDER_HOME
-$CHAIN_BINARY config set client  node tcp://localhost:$EQ_PROV_RPC_PORT --home $EQ_PROVIDER_HOME
-
-# echo "Getting genesis file..."
-# cp $HOME_1/config/genesis.json $EQ_PROVIDER_HOME/config/genesis.json
+echo "Getting genesis file..."
+cp $HOME_1/config/genesis.json $EQ_PROVIDER_HOME/config/genesis.json
 
 echo "Patching config files..."
 # app.toml
@@ -73,7 +76,7 @@ $CHAIN_BINARY keys add malval_det --home $EQ_PROVIDER_HOME
 malval_det=$($CHAIN_BINARY keys list --home $EQ_PROVIDER_HOME --output json | jq -r '.[] | select(.name=="malval_det").address')
 
 echo "Fund new validator..."
-submit_tx "tx bank send $WALLET_1 $malval_det 100000000uatom --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y" $CHAIN_BINARY $HOME_1
+$CHAIN_BINARY tx bank send $WALLET_1 $malval_det 100000000uatom --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y | jq '.'
 
 echo "Setting up service..."
 
@@ -95,6 +98,8 @@ echo "Starting provider service..."
 sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 
 sleep 20
+journalctl -u $EQ_PROVIDER_SERVICE
+
 $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
 curl http://localhost:$EQ_PROV_RPC_PORT/status | jq -r '.result.sync_info'
 
