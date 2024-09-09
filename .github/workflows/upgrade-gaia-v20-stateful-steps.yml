@@ -635,6 +635,7 @@ jobs:
           CON2_P2P_PORT: ${{ env.CONB2_RPC_PORT }}
           CON2_PPROF_PORT: ${{ env.CONB2_PPROF_PORT }}
           CONSUMER_SERVICE_1: conb1.service
+          CONSUMER_SERVICE_2: conb2.service
         run: scripts/stateful/init_consumer_2_vals.sh
       - name: Launch opt-in consumer chain b
         env:
