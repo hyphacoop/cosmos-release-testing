@@ -29,6 +29,7 @@ if [ $RELAYER == "hermes" ]; then
     hermes keys add --chain pfm1 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm2 --mnemonic-file mnemonic.txt
     hermes keys add --chain pfm3 --mnemonic-file mnemonic.txt
+    hermes keys add --chain two --mnemonic-file mnemonic.txt
 
 elif [ $RELAYER == "rly" ]; then
 
