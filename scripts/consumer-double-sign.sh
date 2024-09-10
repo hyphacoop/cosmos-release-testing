@@ -223,7 +223,7 @@ echo $command
 $command
 
 sleep 30
-$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
+$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
 
 echo "Check validator is in the consumer chain..."
 total_after=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
