@@ -103,21 +103,27 @@ sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 sleep 20
 journalctl -u $EQ_PROVIDER_SERVICE
 
-$CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
+# $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
+curl http://localhost:$EQ_PROV_RPC_PORT/status
 curl http://localhost:$EQ_PROV_RPC_PORT/status | jq -r '.result.sync_info'
 
-echo "Create validator..."
 total_before=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
-$CHAIN_BINARY tx staking create-validator --amount 50000000$DENOM \
---pubkey $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) \
---moniker malval_det --chain-id $CHAIN_ID \
---commission-rate 0.10 --commission-max-rate 0.20 --commission-max-change-rate 0.01 \
---gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $malval_det --home $EQ_PROVIDER_HOME -b block -y
+echo "> Creating validator."
+pubkey=$($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME)
+jq --arg PUBKEY "$pubkey" '.pubkey |= $pubkey' templates/create-validator > validator.json
+
+$CHAIN_BINARY tx staking create-validator validator.json \
+--gas auto \
+--gas-adjustment $GAS_ADJUSTMENT \
+--gas-prices $GAS_PRICE$DENOM \
+--from $malval_det \
+--home $EQ_PROVIDER_HOME -y
+
 sleep $(($COMMIT_TIMEOUT*2))
-$CHAIN_BINARY q staking validators --home $HOME_1
+$CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
 
 exit 0
-
+# sleep $(($COMMIT_TIMEOUT*5))
 
 echo "Check validator is in the consumer chain..."
 total_after=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')

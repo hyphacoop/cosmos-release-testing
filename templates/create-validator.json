@@ -1,0 +1,12 @@
+{
+    "pubkey": "",
+    "amount": "1000000uatom",
+    "moniker": "newval",
+    "identity": null,
+    "website": null,
+    "security": null,
+    "details": null,
+    "commission-rate": "0.1",
+    "commission-max-rate": "0.2",
+    "commission-max-change-rate": "0.01"
+}
