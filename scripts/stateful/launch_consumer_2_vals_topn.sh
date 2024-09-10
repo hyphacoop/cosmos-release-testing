@@ -55,7 +55,7 @@ txhash=$(echo "$gaiadout" | jq -r .txhash)
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 
-consumer_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="create_consumer") | .attributes[] | select(.key=="consumer_id") | .value')
+consumer_id=$($CHAIN_BINARY --output json q tx --type=hash $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="create_consumer") | .attributes[] | select(.key=="consumer_id") | .value')
 echo "[INFO]: Consumer ID: $consumer_id"
 echo "CONSUMER_ID_TOPN=$consumer_id" >> $GITHUB_ENV
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
@@ -76,8 +76,8 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 # Get proposal ID from txhash
 echo "[INFO] Getting proposal ID from txhash..."
-$CHAIN_BINARY q tx $txhash --home $HOME_1
-proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+$CHAIN_BINARY q tx --type=hash $txhash --home $HOME_1
+proposal_id=$($CHAIN_BINARY q tx --type=hash $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "[INFO] Voting on proposal $proposal_id..."
 $CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y
@@ -89,11 +89,33 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
 
-echo "[INFO] Optin second validator"
-node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_2 tendermint show-validator)
-$CHAIN_BINARY --home $HOME_2 tx provider opt-in $consumer_id "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
+echo "[INFO] assign-consensus key for first validator"
+node_key1=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 tendermint show-validator)
+assign_json=$($CHAIN_BINARY --home $HOME_2 tx provider assign-consensus-key $consumer_id "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val1 --output json -y)
+
+# get txhash
+assign_txhash=$(echo "$assign_json" | jq -r .txhash)
 
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+# get results
+echo "[INFO]: assign-consensus-key transection output"
+echo "$assign_json"
+echo "[INFO]: Optin transection results"
+$CHAIN_BINARY q tx --type=hash $assign_txhash --home $HOME_1
+
+# echo "[INFO] Optin second validator"
+# node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_2 tendermint show-validator)
+# optin_json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in $consumer_id "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 --output json -y)
+
+# # get txhash
+# optin_txhash=$(echo "$optin_json" | jq -r .txhash)
+
+# tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+# # get results
+# echo "[INFO]: Optin transection output"
+# echo "$optin_json"
+# echo "[INFO]: Optin transection results"
+# $CHAIN_BINARY q tx --type=hash $optin_txhash --home $HOME_1
 
 echo "[INFO] Waiting for chain to spawn..."
 echo "expected spawn time: $spawn_time"
