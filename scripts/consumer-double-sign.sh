@@ -226,7 +226,7 @@ sleep 30
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
 
 echo "Check validator is in the consumer chain..."
-total_after=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
+total_after=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
 total=$(( $total_after - $total_before ))
 
 if [ $total == 1 ]; then
@@ -235,8 +235,6 @@ else
   echo "Validator not created."
   exit 1
 fi
-
-exit 0
 
 
 $CONSUMER_CHAIN_BINARY q block --home $EQ_CONSUMER_HOME_1 | jq '.'
@@ -324,6 +322,8 @@ if [ -z "$validator_check" ]; then
 else
   echo "Equivocation evidence found!"
 fi
+
+sudo systemctl enable hermes-evidence --now
 
 echo "Wait for evidence to reach the provider chain..."
 sleep 60
