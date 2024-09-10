@@ -573,6 +573,8 @@ jobs:
       #     then
       #       echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
       #       exit 1
+      #     else
+      #       echo "Expected correct number of validators: $total_signatures"
       #     fi
       # - name: Establish CCV channel for consumer a
       #   run: |
@@ -679,6 +681,8 @@ jobs:
           then
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
+          else
+            echo "Expected correct number of validators: $total_signatures"
           fi
       - name: Establish CCV channel for consumerb
         run: |
