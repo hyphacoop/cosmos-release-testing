@@ -270,7 +270,6 @@ sudo systemctl stop $EQ_CONSUMER_SERVICE_1
 echo "Duplicating home folder..."
 cp -r $EQ_CONSUMER_HOME_1/ $EQ_CONSUMER_HOME_2/
 
-# Update peer info
 CON2_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_2)
 CON2_PEER="$CON2_NODE_ID@localhost:$CON2_P2P_PORT"
 toml set --toml-path $EQ_CONSUMER_HOME_2/config/config.toml p2p.persistent_peers "$CON2_PEER"
@@ -288,6 +287,7 @@ toml set --toml-path $EQ_CONSUMER_HOME_2/config/config.toml rpc.pprof_laddr "loc
 toml set --toml-path $EQ_CONSUMER_HOME_2/config/config.toml p2p.laddr "tcp://0.0.0.0:$EQ_CON_P2P_PORT_2"
 
 # Wipe the state and address books
+echo '{"height": "0","round": 0,"step": 0,"signature":"","signbytes":""}' > $EQ_CONSUMER_HOME_1/data/priv_validator_state.json
 echo '{"height": "0","round": 0,"step": 0,"signature":"","signbytes":""}' > $EQ_CONSUMER_HOME_2/data/priv_validator_state.json
 echo "{}" > $EQ_CONSUMER_HOME_2/config/addrbook.json
 echo "{}" > $EQ_CONSUMER_HOME_1/config/addrbook.json
@@ -295,7 +295,7 @@ echo "{}" > $EQ_CONSUMER_HOME_1/config/addrbook.json
 # Start duplicate
 echo "Starting second node..."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_2 --now
-sleep 10
+# sleep 10
 
 # Start original
 echo "Starting first node..."

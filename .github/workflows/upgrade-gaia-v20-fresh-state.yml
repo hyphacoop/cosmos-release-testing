@@ -630,8 +630,11 @@
             sudo systemctl enable $CONSUMER_SERVICE_2 --now
             sudo systemctl enable $CONSUMER_SERVICE_3 --now
             sleep 10
+            echo "val1:"
             journalctl -u $CONSUMER_SERVICE_1
-            echo "Val3:"
+            echo "val2:"
+            journalctl -u $CONSUMER_SERVICE_2
+            echo "val3:"
             journalctl -u $CONSUMER_SERVICE_3
         - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
           env:
