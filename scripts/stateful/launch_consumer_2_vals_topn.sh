@@ -107,7 +107,7 @@ do
 done
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
-$CHAIN_BINARY q gov proposals --home $HOME_1 -o json | jq -r '.'
+$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json | jq -r '.'
 
 echo "[INFO] Collecting the CCV state..."
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 > ccv-pre.json
