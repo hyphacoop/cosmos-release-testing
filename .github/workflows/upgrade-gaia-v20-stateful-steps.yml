@@ -556,7 +556,7 @@ jobs:
       #     else
       #       echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
       #     fi
-      # - name: Check opt-in consumer tendermint validators
+      # - name: Print opt-in consumer tendermint validators
       #   env:
       #     CONSUMER_CHAIN_ID: consumera
       #   run: |
@@ -662,32 +662,32 @@ jobs:
           else
             echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
           fi
-      - name: Check opt-in consumer tendermint validators
-        env:
-          CONSUMER_CHAIN_ID: consumerb
+      # - name: Print opt-in consumer tendermint validators
+      #   env:
+      #     CONSUMER_CHAIN_ID: consumerb
+      #   run: |
+      #     echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+      #     $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+      #     # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+      #     # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+      #     echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
+      #     $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
+      - name: Check number of signatures on consumerb
         run: |
-          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
-      - name: Check number of signatures on consumera
-        run: |
-          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 2 ]
+          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 1 ]
           then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
-      - name: Establish CCV channel for consumer a
+      - name: Establish CCV channel for consumerb
         run: |
           screen -XS hermes.service quit || true
           killall hermes || true
           sleep 1
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
-          hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
-          hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
+          hermes create connection --a-chain consumerb --a-client 07-tendermint-0 --b-client $client_id
+          hermes create channel --a-chain consumerb --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           echo "Starting Hermes"
           screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
           # set screen to flush log to 0
@@ -699,10 +699,10 @@ jobs:
         run: tests/stateful/test_ccv.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
         env:
-          CONSUMER_CHAIN_ID: consumera
+          CONSUMER_CHAIN_ID: consumerb
         run: |
           set -x
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
           echo "Client ID: $client_id"
           connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
           echo "Connection ID: $connection_id"
