@@ -7,6 +7,12 @@ EQ_PROV_GRPC_PORT=50012
 EQ_PROV_RPC_PORT=50022
 EQ_PROV_P2P_PORT=50032
 EQ_PROV_PPROF_PORT=50042
+EQ_CONSUMER_HOME_1=/home/runner/.eqc1
+EQ_CON_API_PORT_1=50102
+EQ_CON_GRPC_PORT_1=50112
+EQ_CON_RPC_PORT_1=50122
+EQ_CON_P2P_PORT_1=50132
+EQ_CON_PPROF_PORT_1=50142
 
 UNBOND_AMOUNT=10000000
 REDELEGATE_AMOUNT=5000000
@@ -108,7 +114,7 @@ echo "> New provider node status:"
 curl -s http://localhost:$EQ_PROV_RPC_PORT/status
 curl -s http://localhost:$EQ_PROV_RPC_PORT/status | jq -r '.result.sync_info'
 
-total_before=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
+total_before=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
 echo "> Creating validator."
 pubkey=$($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME)
 jq --argjson PUBKEY "$pubkey" '.pubkey |= $PUBKEY' templates/create-validator.json > validator.json
