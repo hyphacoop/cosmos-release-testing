@@ -91,7 +91,7 @@ $CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1
 
 echo "[INFO] assign-consensus key for first validator"
 node_key1=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 tendermint show-validator)
-assign_json=$($CHAIN_BINARY --home $HOME_2 tx provider assign-consensus-key $consumer_id "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val1 --output json -y)
+assign_json=$($CHAIN_BINARY --home $HOME_1 tx provider assign-consensus-key $consumer_id "$node_key1" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val1 --output json -y)
 
 # get txhash
 assign_txhash=$(echo "$assign_json" | jq -r .txhash)
