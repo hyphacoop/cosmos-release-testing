@@ -733,6 +733,7 @@
             CONSUMER_SERVICE_1: v400-2-1.service
             CON1_RPC_PORT: 40221
             CON1_P2P_PORT: 40231
+            CON2_P2P_PORT: 40232
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/consumer-double-sign-tx.sh
