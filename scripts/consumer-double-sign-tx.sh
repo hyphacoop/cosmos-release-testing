@@ -310,13 +310,13 @@ sleep 90
 # echo "con1 log:"
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
 # echo con2 log:
-# journalctl -u $CONSUMER_SERVICE_2 | tail -n 50
-echo "Original log:"
-journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
-echo "Double log:"
-journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 100
+# # journalctl -u $CONSUMER_SERVICE_2 | tail -n 50
+# echo "Original log:"
+# journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
+# echo "Double log:"
+# journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 100
 
-$CONSUMER_CHAIN_BINARY q evidence --help
+$CHAIN_BINARY q evidence --home $HOME_1 -o json | jq '.'
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1)
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.' | grep $consensus_address)
