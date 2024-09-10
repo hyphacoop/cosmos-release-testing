@@ -95,7 +95,7 @@ $CHAIN_BINARY keys add malval_det --home $EQ_PROVIDER_HOME
 malval_det=$($CHAIN_BINARY keys list --home $EQ_PROVIDER_HOME --output json | jq -r '.[] | select(.name=="malval_det").address')
 
 echo "> Fund new validator."
-$CHAIN_BINARY tx bank send $WALLET_1 $malval_det $FUND_AMOUNT$DENOM --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y --home $HOME_1 | jq '.'
+$CHAIN_BINARY tx bank send $WALLET_1 $malval_det $FUND_AMOUNT$DENOM --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y --home $HOME_1 | jq '.'
 
 echo "> Setting up provider service."
 
@@ -222,7 +222,7 @@ echo "Submit opt-in transaction..."
 key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
 echo "Consumer key: $key"
 echo "Consumer ID: $CONSUMER_ID"
-command="$CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --home $EQ_PROVIDER_HOME -y"
+command="$CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $EQ_PROVIDER_HOME -y"
 echo $command
 $command
 
@@ -247,9 +247,9 @@ val_bytes=$($CHAIN_BINARY keys parse $malval_det --output json | jq -r '.bytes')
 eq_valoper=$($CHAIN_BINARY keys parse $val_bytes --output json | jq -r '.formats[2]')
 echo "Validator address: $eq_valoper"
 
-$CHAIN_BINARY tx staking unbond $eq_valoper $UNBOND_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment 1.2 --fees 1000$DENOM -y
+$CHAIN_BINARY tx staking unbond $eq_valoper $UNBOND_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
 sleep $(($COMMIT_TIMEOUT*2))
-$CHAIN_BINARY tx staking redelegate $eq_valoper $VALOPER_3 $REDELEGATE_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment 1.2 --fees 1000$DENOM -y
+$CHAIN_BINARY tx staking redelegate $eq_valoper $VALOPER_3 $REDELEGATE_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
 sleep $(($COMMIT_TIMEOUT*2))
 
 start_tokens=$($CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq -r --arg oper "$eq_valoper" '.validators[] | select(.operator_address==$oper).tokens')
