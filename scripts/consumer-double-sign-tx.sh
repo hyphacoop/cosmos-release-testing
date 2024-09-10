@@ -316,7 +316,7 @@ sleep 90
 # echo "Double log:"
 # journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 100
 
-$CHAIN_BINARY q evidence --home $HOME_1 -o json | jq '.'
+$CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq '.'
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1)
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.' | grep $consensus_address)
