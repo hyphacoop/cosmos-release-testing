@@ -120,38 +120,14 @@ $CHAIN_BINARY tx staking create-validator validator.json \
 --from $malval_det \
 --home $EQ_PROVIDER_HOME -y
 
-sleep $(($COMMIT_TIMEOUT*2))
+sleep $(($COMMIT_TIMEOUT*5))
 $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
-
-exit 0
-# sleep $(($COMMIT_TIMEOUT*5))
-
-echo "Check validator is in the consumer chain..."
-total_after=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
-total=$(( $total_after - $total_before ))
-
-if [ $total == 1 ]; then
-  echo "Validator created!"
-else
-  echo "Validator not created."
-  exit 1
-fi
 
 echo "Setting up consumer node..."
 $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $EQ_CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY config keyring-backend test --home $EQ_CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY config node tcp://localhost:$EQ_CON_RPC_PORT_1 --home $EQ_CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY init malval_det --chain-id $CONSUMER_CHAIN_ID --home $EQ_CONSUMER_HOME_1
-
-echo "Submit key assignment transaction..."
-key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
-echo "Consumer key: $key"
-command="$CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --home $EQ_PROVIDER_HOME -y"
-echo $command
-$command
-
-sleep 12
-$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
 
 echo "Getting patched genesis file..."
 cp $CONSUMER_HOME_1/config/genesis.json $EQ_CONSUMER_HOME_1/config/genesis.json
@@ -222,7 +198,33 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$EQ_C
 echo "Starting consumer service..."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_1 --now
 
-sleep 20
+sleep 30
+
+echo "Submit opt-in transaction..."
+key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
+echo "Consumer key: $key"
+echo "Consumer ID: $CONSUMER_ID"
+command="$CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --home $EQ_PROVIDER_HOME -y"
+echo $command
+$command
+
+sleep 30
+$CHAIN_BINARY q provider validator-consumer-key $CONSUMER_CHAIN_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
+
+echo "Check validator is in the consumer chain..."
+total_after=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
+total=$(( $total_after - $total_before ))
+
+if [ $total == 1 ]; then
+  echo "Validator created!"
+else
+  echo "Validator not created."
+  exit 1
+fi
+
+exit 0
+
+
 $CONSUMER_CHAIN_BINARY q block --home $EQ_CONSUMER_HOME_1 | jq '.'
 
 val_bytes=$($CHAIN_BINARY keys parse $malval_det --output json | jq -r '.bytes')

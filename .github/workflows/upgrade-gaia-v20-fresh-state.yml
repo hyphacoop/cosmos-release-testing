@@ -656,6 +656,7 @@
           env:
             CONSUMER_HOME_1: /home/runner/.v400-2-1
             CON1_RPC_PORT: 40221
+            CON1_P2P_PORT: 40231
           run: tests/test_ccv_key_assignment.sh
         - name: _IBC transfer successful> ICS v4.0.0 chain 2
           env:
