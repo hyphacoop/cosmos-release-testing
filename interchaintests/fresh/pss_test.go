@@ -2,14 +2,13 @@ package fresh_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"path"
 	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	providertypes "github.com/cosmos/interchain-security/v5/x/ccv/provider/types"
 	"github.com/hyphacoop/cosmos-release-testing/interchaintests/fresh"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
@@ -53,14 +52,15 @@ var optInAfterSpawn = &whenToOptIn{
 
 var optInTimes = []*whenToOptIn{optInDuringDeposit, optInDuringVoting, optInBeforeSpawn, optInAfterSpawn}
 
-func optInFunction(t *testing.T, producer fresh.Chain, validators ...int) func(context.Context, *cosmos.CosmosChain) {
+func optInFunction(t *testing.T, provider fresh.Chain, validators ...int) func(context.Context, *cosmos.CosmosChain) {
 	return func(ctx context.Context, consumer *cosmos.CosmosChain) {
+		consumerID := provider.GetConsumerID(ctx, t, consumer.Config().ChainID)
 		eg := errgroup.Group{}
 		for _, i := range validators {
 			i := i
 			eg.Go(func() error {
-				_, err := producer.Validators[i].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-					"provider", "opt-in", consumer.Config().ChainID)
+				_, err := provider.Validators[i].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
+					"provider", "opt-in", consumerID)
 				return err
 			})
 		}
@@ -107,15 +107,16 @@ func TestPSSChainLaunchAfterUpgradeTop80(t *testing.T) {
 			// // did not opt in
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, 5, false)
 
+			consumerID := provider.GetConsumerID(ctx, t, consumer.Config().ChainID)
 			// opted in manually
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, optInVal, true)
 			_, err = provider.Validators[optInVal].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-				"provider", "opt-out", consumer.Config().ChainID)
+				"provider", "opt-out", consumerID)
 			require.NoError(t, err)
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, optInVal, false)
 
 			_, err = provider.Validators[3].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-				"provider", "opt-out", consumer.Config().ChainID)
+				"provider", "opt-out", consumerID)
 			require.Error(t, err)
 
 			// kick a validator out of the top 80, and push a different one in
@@ -128,7 +129,7 @@ func TestPSSChainLaunchAfterUpgradeTop80(t *testing.T) {
 			// require.NoError(t, testutil.WaitForBlocks(ctx, 10, consumer))
 
 			_, err = provider.Validators[3].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-				"provider", "opt-out", consumer.Config().ChainID)
+				"provider", "opt-out", consumerID)
 			require.NoError(t, err)
 
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, 5, true)
@@ -160,10 +161,11 @@ func TestPSSChainLaunchAfterUpgradeTop67(t *testing.T) {
 			// did not opt in
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, 3, false)
 
+			consumerID := provider.GetConsumerID(ctx, t, consumer.Config().ChainID)
 			// opted in manually
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, optInVal, true)
 			_, err = provider.Validators[optInVal].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-				"provider", "opt-out", consumer.Config().ChainID)
+				"provider", "opt-out", consumerID)
 			require.NoError(t, err)
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, optInVal, false)
 		})
@@ -216,8 +218,9 @@ func TestPSSChainLaunchAfterUpgradeOptIn(t *testing.T) {
 				fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, i, jailed)
 			}
 
+			consumerID := provider.GetConsumerID(ctx, t, consumer.Config().ChainID)
 			_, err = provider.Validators[4].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-				"provider", "opt-out", consumer.Config().ChainID)
+				"provider", "opt-out", consumerID)
 			require.NoError(t, err)
 			fresh.CheckIfValidatorJailed(ctx, t, provider, consumer, 4, false)
 		})
@@ -240,8 +243,9 @@ func TestPSSChainLaunchWithSetCap(t *testing.T) {
 
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
 
+	consumerID := provider.GetConsumerID(ctx, t, consumer.Config().ChainID)
 	_, err = provider.Validators[1].ExecTx(ctx, fresh.VALIDATOR_MONIKER,
-		"provider", "opt-in", consumer.Config().ChainID)
+		"provider", "opt-in", consumerID)
 	require.NoError(t, err)
 
 	hex1, err := consumer.GetValidatorHex(ctx, 1)
@@ -300,19 +304,20 @@ func TestConsumerCommissionRate(t *testing.T) {
 	denom2 := transfertypes.ParseDenomTrace(transfertypes.GetPrefixedDenom("transfer", consumer2Ch.ChannelID, consumer2.Config().Denom)).IBCDenom()
 	require.NotEqual(t, denom1, denom2, "denom1: %s, denom2: %s; channel1: %s, channel2: %s", denom1, denom2, consumer1Ch.Counterparty.ChannelID, consumer2Ch.Counterparty.ChannelID)
 
-	registerDenomJson := fmt.Sprintf(`
-{
-"title": "Add denoms to list of registered reward denoms",
-"summary": "Add denoms to list of registered reward denoms",
-"denoms_to_add": [%q, %q],
-"deposit": %q
-}`, denom1, denom2, fresh.GOV_DEPOSIT_AMOUNT)
-	require.NoError(t, provider.GetNode().WriteFile(ctx, []byte(registerDenomJson), "register_denom.json"))
-	txhash, err := provider.Validators[0].ExecTx(ctx, providerWallet.Moniker, "gov", "submit-legacy-proposal", "change-reward-denoms", path.Join(provider.GetNode().HomeDir(), "register_denom.json"))
+	govAuthority, err := provider.GetGovernanceAddress(ctx)
 	require.NoError(t, err)
-	propID, err := fresh.GetProposalID(ctx, provider, txhash)
+	rewardDenomsProp := providertypes.MsgChangeRewardDenoms{
+		DenomsToAdd: []string{denom1, denom2},
+		Authority:   govAuthority,
+	}
+	prop, err := provider.BuildProposal([]cosmos.ProtoMessage{&rewardDenomsProp},
+		"add denoms to list of registered reward denoms",
+		"add denoms to list of registered reward denoms",
+		"", fresh.GOV_DEPOSIT_AMOUNT, "", false)
 	require.NoError(t, err)
-	require.NoError(t, provider.PassProposal(ctx, propID))
+	txhash, err := provider.SubmitProposal(ctx, providerWallet.Moniker, prop)
+	require.NoError(t, err)
+	require.NoError(t, provider.PassProposal(ctx, txhash.ProposalID))
 
 	eg := errgroup.Group{}
 
@@ -323,12 +328,15 @@ func TestConsumerCommissionRate(t *testing.T) {
 	_, err = provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "distribution", "withdraw-rewards", providerWallet.ValoperAddress, "--commission")
 	require.NoError(t, err)
 
+	consumerID1 := provider.GetConsumerID(ctx, t, consumer1.Config().ChainID)
+	consumerID2 := provider.GetConsumerID(ctx, t, consumer2.Config().ChainID)
+
 	eg.Go(func() error {
-		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumer1.Config().ChainID, "0.5")
+		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumerID1, "0.5")
 		return err
 	})
 	eg.Go(func() error {
-		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumer2.Config().ChainID, "0.5")
+		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumerID2, "0.5")
 		return err
 	})
 	require.NoError(t, eg.Wait())
@@ -361,11 +369,11 @@ func TestConsumerCommissionRate(t *testing.T) {
 	require.NoError(t, err)
 
 	eg.Go(func() error {
-		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumer1.Config().ChainID, "0.25")
+		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumerID1, "0.25")
 		return err
 	})
 	eg.Go(func() error {
-		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumer2.Config().ChainID, "0.5")
+		_, err := provider.GetNode().ExecTx(ctx, providerWallet.Moniker, "provider", "set-consumer-commission-rate", consumerID2, "0.5")
 		return err
 	})
 	require.NoError(t, eg.Wait())
@@ -462,42 +470,35 @@ func TestPSSAllowlistThenModify(t *testing.T) {
 	fresh.CCVKeyAssignmentTest(ctx, t, provider, consumer, provider.Relayer, 1)
 
 	// ensure we can't opt in a non-allowlisted validator
+	consumerID := provider.GetConsumerID(ctx, t, consumer.Config().ChainID)
 	_, err = provider.Validators[3].ExecTx(ctx, wallets[3].Moniker,
-		"provider", "opt-in", consumer.Config().ChainID)
+		"provider", "opt-in", consumerID)
 	require.NoError(t, err)
 
 	validatorCount := len(consumer.QueryJSON(ctx, t, "validators", "tendermint-validator-set").Array())
 	require.Equal(t, 3, validatorCount)
 
-	// modify the allowlist
-	proposal := map[string]interface{}{
-		"title":                "Modify consumer chain",
-		"description":          "Modify the consumer chain",
-		"summary":              "Modify the consumer chain",
-		"chain_id":             consumer.Config().ChainID,
-		"top_N":                0,
-		"validators_power_cap": 0,
-		"validator_set_cap":    0,
-		"allowlist":            []string{},
-		"denylist":             []string{},
-		"deposit":              fresh.GOV_DEPOSIT_AMOUNT,
+	govAddress, err := provider.GetGovernanceAddress(ctx)
+	msg := providertypes.MsgUpdateConsumer{
+		Owner:      govAddress,
+		ConsumerId: consumerID,
+		PowerShapingParameters: &providertypes.PowerShapingParameters{
+			Allowlist: []string{},
+			Denylist:  []string{},
+		},
 	}
-	marshaled, err := json.Marshal(proposal)
+	modify, err := provider.BuildProposal([]cosmos.ProtoMessage{&msg},
+		"modify consumer chain",
+		"modify consumer chain",
+		"", fresh.GOV_DEPOSIT_AMOUNT, "", false)
 	require.NoError(t, err)
-	require.NoError(t, provider.GetNode().WriteFile(ctx, marshaled, "proposal.json"))
-
-	txhash, err := provider.Validators[0].ExecTx(ctx, wallets[0].Moniker,
-		"gov", "submit-legacy-proposal", "consumer-modification",
-		path.Join(provider.GetNode().HomeDir(), "proposal.json"),
-	)
+	txhash, err := provider.SubmitProposal(ctx, wallets[0].Moniker, modify)
 	require.NoError(t, err)
-	propID, err := fresh.GetProposalID(ctx, provider, txhash)
-	require.NoError(t, err)
-	require.NoError(t, provider.PassProposal(ctx, propID))
+	require.NoError(t, provider.PassProposal(ctx, txhash.ProposalID))
 
 	// ensure we can opt in a non-allowlisted validator after the modification
 	_, err = provider.Validators[3].ExecTx(ctx, wallets[3].Moniker,
-		"provider", "opt-in", consumer.Config().ChainID)
+		"provider", "opt-in", consumerID)
 	require.NoError(t, err)
 
 	validatorCount = len(consumer.QueryJSON(ctx, t, "validators", "tendermint-validator-set").Array())

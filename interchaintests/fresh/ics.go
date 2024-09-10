@@ -2,7 +2,9 @@ package fresh
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"path"
 	"strconv"
 	"testing"
 	"time"
@@ -20,6 +22,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+
+	providertypes "github.com/cosmos/interchain-security/v5/x/ccv/provider/types"
 	"golang.org/x/mod/semver"
 )
 
@@ -105,7 +109,13 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 	spawnTime := time.Now().Add(CHAIN_SPAWN_WAIT)
 	chainID := fmt.Sprintf("%s-%d", config.ChainName, len(p.Consumers)+1)
 
-	proposalWaiter := p.consumerAdditionProposal(ctx, t, chainID, config, spawnTime)
+	var proposalWaiter *proposalWaiter
+	if p.GetNode().HasCommand(ctx, "tx", "provider", "create-consumer") {
+		err := p.CreateConsumerPermissionless(ctx, t, chainID, config, spawnTime)
+		require.NoError(t, err)
+	} else {
+		proposalWaiter = p.consumerAdditionProposal(ctx, t, chainID, config, spawnTime)
+	}
 
 	cf := interchaintest.NewBuiltinChainFactory(
 		GetLogger(ctx),
@@ -158,6 +168,93 @@ func (p Chain) AddConsumerChain(ctx context.Context, t *testing.T, config Consum
 		require.NoError(t, val.RecoverKey(ctx, VALIDATOR_MONIKER, wallets[i+1].Mnemonic()))
 	}
 	return consumer
+}
+
+func (p Chain) GetConsumerID(ctx context.Context, t *testing.T, chainID string) string {
+	return p.QueryJSON(ctx, t, fmt.Sprintf("chains.#(chain_id=%q).consumer_id", chainID), "provider", "list-consumer-chains").String()
+}
+
+func (p Chain) CreateConsumerPermissionless(ctx context.Context, t *testing.T, chainID string, config ConsumerConfig, spawnTime time.Time) error {
+	initParams := &providertypes.ConsumerInitializationParameters{
+		InitialHeight:                     clienttypes.Height{RevisionNumber: clienttypes.ParseChainID(chainID), RevisionHeight: 1},
+		SpawnTime:                         spawnTime,
+		BlocksPerDistributionTransmission: 1000,
+		CcvTimeoutPeriod:                  2419200000000000,
+		TransferTimeoutPeriod:             3600000000000,
+		ConsumerRedistributionFraction:    "0.75",
+		HistoricalEntries:                 10000,
+		UnbondingPeriod:                   1728000000000000,
+		GenesisHash:                       []byte("Z2VuX2hhc2g="),
+		BinaryHash:                        []byte("YmluX2hhc2g="),
+	}
+	powerShapingParams := &providertypes.PowerShapingParameters{
+		Top_N:              0,
+		ValidatorSetCap:    uint32(config.ValidatorSetCap),
+		ValidatorsPowerCap: uint32(config.ValidatorPowerCap),
+	}
+	params := providertypes.MsgCreateConsumer{
+		ChainId: chainID,
+		Metadata: providertypes.ConsumerMetadata{
+			Name:        config.ChainName,
+			Description: "Consumer chain",
+			Metadata:    "ipfs://",
+		},
+		InitializationParameters: initParams,
+		PowerShapingParameters:   powerShapingParams,
+	}
+
+	paramsBz, err := json.Marshal(params)
+	require.NoError(t, err)
+	err = p.GetNode().WriteFile(ctx, paramsBz, "consumer-addition.json")
+	require.NoError(t, err)
+	_, err = p.GetNode().ExecTx(ctx, interchaintest.FaucetAccountKeyName, "provider", "create-consumer", path.Join(p.GetNode().HomeDir(), "consumer-addition.json"))
+	require.NoError(t, err)
+	wallets, err := GetValidatorWallets(ctx, p)
+	require.NoError(t, err)
+	if config.TopN >= 0 {
+		govAddress, err := p.GetGovernanceAddress(ctx)
+		require.NoError(t, err)
+		consumerID := p.QueryJSON(ctx, t, fmt.Sprintf("chains.#(chain_id=%q).consumer_id", chainID), "provider", "list-consumer-chains")
+		require.NoError(t, err)
+		update := &providertypes.MsgUpdateConsumer{
+			ConsumerId:      consumerID.String(),
+			NewOwnerAddress: govAddress,
+			Metadata: &providertypes.ConsumerMetadata{
+				Name:        config.ChainName,
+				Description: "Consumer chain",
+				Metadata:    "ipfs://",
+			},
+			InitializationParameters: initParams,
+			PowerShapingParameters:   powerShapingParams,
+		}
+		updateBz, err := json.Marshal(update)
+		require.NoError(t, err)
+		err = p.GetNode().WriteFile(ctx, updateBz, "consumer-update.json")
+		require.NoError(t, err)
+		_, err = p.GetNode().ExecTx(ctx, interchaintest.FaucetAccountKeyName, "provider", "update-consumer", path.Join(p.GetNode().HomeDir(), "consumer-update.json"))
+		require.NoError(t, err)
+		powerShapingParams.Top_N = uint32(config.TopN)
+		update = &providertypes.MsgUpdateConsumer{
+			Owner:      govAddress,
+			ConsumerId: consumerID.String(),
+			Metadata: &providertypes.ConsumerMetadata{
+				Name:        config.ChainName,
+				Description: "Consumer chain",
+				Metadata:    "ipfs://",
+			},
+			InitializationParameters: initParams,
+			PowerShapingParameters:   powerShapingParams,
+		}
+		prop, err := p.BuildProposal([]cosmos.ProtoMessage{update}, "update consumer", "update consumer", "", GOV_DEPOSIT_AMOUNT, "", false)
+		require.NoError(t, err)
+		txhash, err := p.GetNode().SubmitProposal(ctx, wallets[0].Moniker, prop)
+		require.NoError(t, err)
+		propID, err := GetProposalID(ctx, p, txhash)
+		require.NoError(t, err)
+		err = p.PassProposal(ctx, propID)
+		require.NoError(t, err)
+	}
+	return nil
 }
 
 func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, config ConsumerConfig, spawnTime time.Time, proposalWaiter *proposalWaiter) *interchaintest.ChainSpec {
@@ -245,13 +342,17 @@ func (p Chain) createConsumerChainSpec(ctx context.Context, chainID string, conf
 				if config.DuringDepositPeriod != nil {
 					config.DuringDepositPeriod(ctx, consumer.(*cosmos.CosmosChain))
 				}
-				proposalWaiter.allowDeposit()
-				proposalWaiter.waitForVotingPeriod()
+				if proposalWaiter != nil {
+					proposalWaiter.allowDeposit()
+					proposalWaiter.waitForVotingPeriod()
+				}
 				if config.DuringVotingPeriod != nil {
 					config.DuringVotingPeriod(ctx, consumer.(*cosmos.CosmosChain))
 				}
-				proposalWaiter.allowVote()
-				proposalWaiter.waitForPassed()
+				if proposalWaiter != nil {
+					proposalWaiter.allowVote()
+					proposalWaiter.waitForPassed()
+				}
 				tCtx, tCancel := context.WithDeadline(ctx, spawnTime)
 				defer tCancel()
 				if config.BeforeSpawnTime != nil {
