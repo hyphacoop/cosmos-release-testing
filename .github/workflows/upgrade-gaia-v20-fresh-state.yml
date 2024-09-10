@@ -18,7 +18,7 @@
     VERSION_CUTOFF: v19.2.0
     TARGET_VERSION: v20
     # All chain variables
-    COMMIT_TIMEOUT: 2
+    COMMIT_TIMEOUT: 3
     DOWNTIME_BLOCKS: 10000
     # Provider chain variables
     CHAIN_BINARY: gaiad
@@ -733,7 +733,7 @@
             CON1_P2P_PORT: 40231
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-            scripts/consumer-double-sign.sh
+            scripts/consumer-double-sign-tx.sh
 
 
         # - name: _Remove consumer chain> ICS v4.0.0 chain 2

@@ -24,7 +24,7 @@ EQ_CON_PPROF_PORT_2=50242
 
 FUND_AMOUNT=1000000000
 STAKE_AMOUNT=8000000
-UNBOND_AMOUNT=20000000
+UNBOND_AMOUNT=2000000
 REDELEGATE_AMOUNT=1000000
 SLASH_FACTOR=0.05
 
@@ -327,12 +327,15 @@ else
   echo "Equivocation evidence found!"
 fi
 
-sudo systemctl enable hermes-evidence --now
 
-echo "Wait for evidence to reach the provider chain..."
-sleep 60
 
-journalctl -u hermes-evidence
+
+# sudo systemctl enable hermes-evidence --now
+
+# echo "Wait for evidence to reach the provider chain..."
+# sleep 60
+
+# journalctl -u hermes-evidence
 
 status=$($CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) --home $HOME_1 -o json | jq '.tombstoned')
 echo "Status: $status"
