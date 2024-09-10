@@ -110,8 +110,8 @@ curl http://localhost:$EQ_PROV_RPC_PORT/status | jq -r '.result.sync_info'
 total_before=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
 echo "> Creating validator."
 pubkey=$($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME)
-jq --arg PUBKEY "$pubkey" '.pubkey |= $pubkey' templates/create-validator > validator.json
-
+jq --arg PUBKEY "$pubkey" '.pubkey |= $PUBKEY' templates/create-validator > validator.json
+cat validator.json
 $CHAIN_BINARY tx staking create-validator validator.json \
 --gas auto \
 --gas-adjustment $GAS_ADJUSTMENT \
