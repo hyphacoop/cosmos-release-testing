@@ -22,8 +22,10 @@ EQ_CON_P2P_PORT_2=50232
 EQ_CON_PPROF_PORT_1=50142
 EQ_CON_PPROF_PORT_2=50242
 
-UNBOND_AMOUNT=10000000
-REDELEGATE_AMOUNT=5000000
+FUND_AMOUNT=1000000000
+STAKE_AMOUNT=8000000
+UNBOND_AMOUNT=20000000
+REDELEGATE_AMOUNT=1000000
 SLASH_FACTOR=0.05
 
 # source tests/process_tx.sh
@@ -92,10 +94,10 @@ echo "Create new validator key..."
 $CHAIN_BINARY keys add malval_det --home $EQ_PROVIDER_HOME
 malval_det=$($CHAIN_BINARY keys list --home $EQ_PROVIDER_HOME --output json | jq -r '.[] | select(.name=="malval_det").address')
 
-echo "Fund new validator..."
-$CHAIN_BINARY tx bank send $WALLET_1 $malval_det 100000000uatom --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y --home $HOME_1 | jq '.'
+echo "> Fund new validator."
+$CHAIN_BINARY tx bank send $WALLET_1 $malval_det $FUND_AMOUNT$DENOM --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --fees $HIGH_FEES$DENOM -o json -y --home $HOME_1 | jq '.'
 
-echo "Setting up service..."
+echo "> Setting up provider service."
 
 sudo touch /etc/systemd/system/$EQ_PROVIDER_SERVICE
 echo "[Unit]"                               | sudo tee /etc/systemd/system/$EQ_PROVIDER_SERVICE
@@ -126,7 +128,9 @@ total_before=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.resu
 echo "> Creating validator."
 pubkey=$($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME)
 jq --argjson PUBKEY "$pubkey" '.pubkey |= $PUBKEY' templates/create-validator.json > validator.json
-cat validator.json
+jq --arg AMOUNT "$STAKE_AMOUNT$DENOM" '.amount |= $AMOUNT' validator.json > validator-stake.json
+mv validator-stake.json validator.json
+jq '.' validator.json
 $CHAIN_BINARY tx staking create-validator validator.json \
 --gas auto \
 --gas-adjustment $GAS_ADJUSTMENT \
@@ -244,9 +248,9 @@ eq_valoper=$($CHAIN_BINARY keys parse $val_bytes --output json | jq -r '.formats
 echo "Validator address: $eq_valoper"
 
 $CHAIN_BINARY tx staking unbond $eq_valoper $UNBOND_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment 1.2 --fees 1000$DENOM -y
-sleep 10
+sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY tx staking redelegate $eq_valoper $VALOPER_3 $REDELEGATE_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment 1.2 --fees 1000$DENOM -y
-sleep 10
+sleep $(($COMMIT_TIMEOUT*2))
 
 start_tokens=$($CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq -r --arg oper "$eq_valoper" '.validators[] | select(.operator_address==$oper).tokens')
 start_unbonding=$($CHAIN_BINARY q staking unbonding-delegations-from $eq_valoper --home $HOME_1 -o json | jq -r '.unbonding_responses[0].entries[0].balance')
