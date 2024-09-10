@@ -721,6 +721,8 @@
         
 
         - name: _Test double signing detection
+          env:
+            CON1_RPC_PORT: 40221
           run: |
             scripts/consumer-double-sign.sh
 

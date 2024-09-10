@@ -101,16 +101,17 @@ echo "Starting provider service..."
 sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 
 sleep 20
-journalctl -u $EQ_PROVIDER_SERVICE
+# journalctl -u $EQ_PROVIDER_SERVICE
 
 # $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
-curl http://localhost:$EQ_PROV_RPC_PORT/status
-curl http://localhost:$EQ_PROV_RPC_PORT/status | jq -r '.result.sync_info'
+echo "> New provider node status:"
+curl -s http://localhost:$EQ_PROV_RPC_PORT/status
+curl -s http://localhost:$EQ_PROV_RPC_PORT/status | jq -r '.result.sync_info'
 
 total_before=$(curl http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
 echo "> Creating validator."
 pubkey=$($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME)
-jq --arg PUBKEY "$pubkey" '.pubkey |= $PUBKEY' templates/create-validator > validator.json
+jq --arg PUBKEY "$pubkey" '.pubkey |= $PUBKEY' templates/create-validator.json > validator.json
 cat validator.json
 $CHAIN_BINARY tx staking create-validator validator.json \
 --gas auto \
