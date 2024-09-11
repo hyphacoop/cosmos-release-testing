@@ -346,14 +346,14 @@ else
 fi
 
 echo "> Collecting infraction height."
-height=$($CHAIN_BINARY q evidence list --home $CONSUMER_HOME_1 -o json | jq -r '.evidence[0].height')
+height=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq -r '.evidence[0].height')
 echo "> Evidence height: $height"
 
 echo "> Collecting evidence from one block after the infraction height in consumer chain."
 evidence_block=$(($height+1))
-ECHO "> Consumer evidence:"
+echo "> Consumer evidence:"
 $CONSUMER_CHAIN_BINARY q block $evidence_block --home $CONSUMER_HOME_1 -o json | jq '.'
-ECHO "> Provider evidence:"
+echo "> Provider evidence:"
 $CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1 -o json | jq '.'
 echo "> Evidence block: $evidence_block"
 $CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1 -o json | jq '.evidence.evidence[0].duplicate_vote_evidence' > evidence.json
