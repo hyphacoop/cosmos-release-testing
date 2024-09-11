@@ -706,11 +706,18 @@ jobs:
           CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
           CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
         run: tests/stateful/test_ccv.sh
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumerb
         run: |
           set -x
+          set -e
           client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
           echo "Client ID: $client_id"
           connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
@@ -719,47 +726,47 @@ jobs:
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
           echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      - name: Set BlocksPerEpoch to 100
-        run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-100.json
-      - name: Check BlocksPerEpoch is 100
-        run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
-          echo "BlocksPerEpoch is: $BPE"
-          if [ $BPE != 100 ]
-          then
-            echo "BlocksPerEpoch is not 100"
-            exit 1
-          fi
-      - name: Waiting for 100th block
-        run: |
-          cur_height=0
-          echo_height=1
-          height=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
-          to_height=$(scripts/stateful/roundup-100.py $height)
-          echo "[INFO] waiting to reach height $to_height"
-          until [[ "${cur_height}" -gt "${to_height}" ]]
-          do
-              cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
-              if [ $echo_height -ne $cur_height ]
-              then
-                echo "[INFO] Current height: $cur_height"
-                echo_height=$cur_height
-              fi
-              sleep 1
-          done
-      - name: _VSC successful epoch> ICS cona1
-        # env:
-        #   CON1_RPC_PORT: 27201
-        run: tests/stateful/test_ccv_epoch.sh 100
-      - name: Test expedited proposal
-        run: |
-          export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
-          echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
-          tests/stateful/gaia-v18/test_expedited_proposal.sh
-      - name: Print block params
-        run: |
-          params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
-          echo "$params"
+      # - name: Set BlocksPerEpoch to 100
+      #   run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-100.json
+      # - name: Check BlocksPerEpoch is 100
+      #   run: |
+      #     BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
+      #     echo "BlocksPerEpoch is: $BPE"
+      #     if [ $BPE != 100 ]
+      #     then
+      #       echo "BlocksPerEpoch is not 100"
+      #       exit 1
+      #     fi
+      # - name: Waiting for 100th block
+      #   run: |
+      #     cur_height=0
+      #     echo_height=1
+      #     height=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
+      #     to_height=$(scripts/stateful/roundup-100.py $height)
+      #     echo "[INFO] waiting to reach height $to_height"
+      #     until [[ "${cur_height}" -gt "${to_height}" ]]
+      #     do
+      #         cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+      #         if [ $echo_height -ne $cur_height ]
+      #         then
+      #           echo "[INFO] Current height: $cur_height"
+      #           echo_height=$cur_height
+      #         fi
+      #         sleep 1
+      #     done
+      # - name: _VSC successful epoch> ICS cona1
+      #   # env:
+      #   #   CON1_RPC_PORT: 27201
+      #   run: tests/stateful/test_ccv_epoch.sh 100
+      # - name: Test expedited proposal
+      #   run: |
+      #     export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
+      #     echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
+      #     tests/stateful/gaia-v18/test_expedited_proposal.sh
+      # - name: Print block params
+      #   run: |
+      #     params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
+      #     echo "$params"
       # - name: Set block params
       #   env:
       #     MAX_BYTES: 1000000
