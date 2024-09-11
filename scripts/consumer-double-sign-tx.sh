@@ -174,8 +174,8 @@ toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml p2p.addr_book_strict
 # Allow duplicate IPs in p2p
 toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml p2p.allow_duplicate_ip true
 echo "Setting persistent peer..."
-CON1_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_1)
-CON1_PEER="$CON1_NODE_ID@localhost:$CON1_P2P_PORT"
+CON2_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_2)
+CON2_PEER="$CON2_NODE_ID@localhost:$CON2_P2P_PORT"
 toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml p2p.persistent_peers "$CON1_PEER"
 echo "Setting a short commit timeout..."
 toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml consensus.timeout_commit "1s"
@@ -270,8 +270,8 @@ sudo systemctl stop $EQ_CONSUMER_SERVICE_1
 echo "Duplicating home folder..."
 cp -r $EQ_CONSUMER_HOME_1/ $EQ_CONSUMER_HOME_2/
 
-CON2_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_2)
-CON2_PEER="$CON2_NODE_ID@localhost:$CON2_P2P_PORT"
+CON3_NODE_ID=$($CONSUMER_CHAIN_BINARY tedermint show-node-id --home $CONSUMER_HOME_3)
+CON3_PEER="$CON3_NODE_ID@localhost:$CON3_P2P_PORT"
 toml set --toml-path $EQ_CONSUMER_HOME_2/config/config.toml p2p.persistent_peers "$CON2_PEER"
 
 # Update ports
@@ -292,19 +292,21 @@ echo '{"height": "0","round": 0,"step": 0,"signature":"","signbytes":""}' > $EQ_
 echo "{}" > $EQ_CONSUMER_HOME_2/config/addrbook.json
 echo "{}" > $EQ_CONSUMER_HOME_1/config/addrbook.json
 
-# Start duplicate
-echo "Starting second node..."
+# Start duplicate node
+echo "> Starting second node."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_2 --now
 # sleep 10
 
-# Start original
-echo "Starting first node..."
+# Start original node
+echo "> Starting first node."
 sudo systemctl start $EQ_CONSUMER_SERVICE_1
 sleep 60
 
 # Restart whale
-echo "Restarting whale validator..."
+echo "> Restarting whale validator."
 sudo systemctl start $CONSUMER_SERVICE_1
+echo "> Restarting Hermes."
+sudo systemctl restart $RELAYER
 sleep 120
 
 # echo "con1 log:"
@@ -316,8 +318,11 @@ sleep 120
 # echo "Double log:"
 # journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 100
 
-$CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq '.'
+echo "> Consumer chain evidence:"
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'
+echo "> Provider chain evidence:"
+$CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq '.'
+
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1)
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.' | grep $consensus_address)
 echo $validator_check
@@ -328,38 +333,28 @@ else
   echo "Equivocation evidence found!"
 fi
 
-
-
-echo "> Collecting evidence height."
+echo "> Collecting infraction height."
 height=$($CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq -r '.evidence[0].height')
 echo "> Evidence height: $height"
 
-echo "> Collecting evidence from one block after the evidence height."
+echo "> Collecting evidence from one block after the infraction height."
 evidence_block=$(($height+1))
 echo "> Evidence block: $evidence_block"
 $CHAIN_BINARY q block --type=height $evidence_block --home $HOME_1 -o json | jq '.evidence.evidence[0].duplicate_vote_evidence' > evidence.json
 echo "> Evidence JSON:"
 jq '.' evidence.json
 
-# # echo "> COllecting I
-# ## Get IBC header at infraction height
-# interchain-security-pd q ibc client header --height 59 --home /consu/validatoralice --node tcp://7.7.8.252:26658 -o json \
-#     | jq . > header.json
+echo "> Collecting IBC header at infraction height."
+$CHAIN_BINARY q ibc client header --height $height --home $HOME_1 -o json | jq '.' > ibc-header.json
+echo "> IBC header JSON:"
+jq '.' ibc-header.json
 
-
-# ## Query consumer id from client-id (optional)
-# interchain-security-pd q provider consumer-id-from-client-id 07-tendermint-0 --home /provi/validatoralice \
-#     --node tcp://7.7.7.5:26658
-
-# ## submit evidence
-# interchain-security-pd tx provider submit-consumer-double-voting 0 evidence.json header.json \
-#     --from validatoralice \
-#     --chain-id provi \
-#     --home /provi/validatoralice \
-#     --keyring-backend test \
-#     --node tcp://7.7.7.5:26658 -y
-
-
+echo "> Submitting evidence."
+txhash=$($CHAIN_BINARY tx provider submit-consumer-double-voting $CONSUMER_ID evidence.json ibc-header.json \
+    --from $WALLET_1  --home $HOME_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq '.txhash')
+sleep $(($COMMIT_TIMEOUT*2))
+echo "> Evidence submission tx:"
+$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
 
 # sudo systemctl enable hermes-evidence --now

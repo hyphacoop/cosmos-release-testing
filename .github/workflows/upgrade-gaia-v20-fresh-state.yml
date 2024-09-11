@@ -733,10 +733,14 @@
             CONSUMER_CHAIN_ID: v400-two
             CONSUMER_HOME_1: /home/runner/.v400-2-1
             CONSUMER_HOME_2: /home/runner/.v400-2-2
+            CONSUMER_HOME_3: /home/runner/.v400-2-3
             CONSUMER_SERVICE_1: v400-2-1.service
+            CONSUMER_SERVICE_2: v400-2-2.service
+            CONSUMER_SERVICE_3: v400-2-3.service
             CON1_RPC_PORT: 40221
             CON1_P2P_PORT: 40231
             CON2_P2P_PORT: 40232
+            CON3_P2P_PORT: 40233
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/consumer-double-sign-tx.sh
