@@ -240,15 +240,18 @@ else
   exit 1
 fi
 
-
-$CONSUMER_CHAIN_BINARY q block --home $EQ_CONSUMER_HOME_1 | jq '.'
-
 val_bytes=$($CHAIN_BINARY keys parse $malval_det --output json | jq -r '.bytes')
 eq_valoper=$($CHAIN_BINARY keys parse $val_bytes --output json | jq -r '.formats[2]')
 echo "Validator address: $eq_valoper"
 
+echo "> Consumer block from double-signing validator node 1:"
+$CONSUMER_CHAIN_BINARY q block --home $EQ_CONSUMER_HOME_1 | jq '.'
+
+
+echo "> Unbonding from validator."
 $CHAIN_BINARY tx staking unbond $eq_valoper $UNBOND_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
 sleep $(($COMMIT_TIMEOUT*2))
+echo "> Redelegating from validator."
 $CHAIN_BINARY tx staking redelegate $eq_valoper $VALOPER_3 $REDELEGATE_AMOUNT$DENOM --from $malval_det --home $EQ_PROVIDER_HOME --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
 sleep $(($COMMIT_TIMEOUT*2))
 
@@ -261,6 +264,8 @@ echo "Attempting to double sign..."
 # Stop whale
 echo "Stopping whale validator..."
 sudo systemctl stop $CONSUMER_SERVICE_1
+sudo systemctl stop $CONSUMER_SERVICE_2
+sudo systemctl stop $CONSUMER_SERVICE_3
 sleep 10
 
 # Stop validator
@@ -305,9 +310,16 @@ sleep 60
 # Restart whale
 echo "> Restarting whale validator."
 sudo systemctl start $CONSUMER_SERVICE_1
+sudo systemctl start $CONSUMER_SERVICE_2
+sudo systemctl start $CONSUMER_SERVICE_3
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
 sleep 120
+
+echo "> Node 1:"
+journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
+echo "> Node 2:"
+journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
 
 # echo "con1 log:"
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
