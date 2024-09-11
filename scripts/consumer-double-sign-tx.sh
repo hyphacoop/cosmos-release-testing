@@ -358,6 +358,7 @@ $CONSUMER_CHAIN_BINARY q block $evidence_block --home $CONSUMER_HOME_1 | jq '.'
 echo "> Consumer evidence at height $height:"
 $CONSUMER_CHAIN_BINARY q block $height --home $CONSUMER_HOME_1 | jq '.'
 echo "> Provider evidence at height $evidence_block:"
+$CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1
 $CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1 | jq '.'
 echo "> Evidence block: $evidence_block"
 $CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1 | jq '.evidence.evidence[0].duplicate_vote_evidence' > evidence.json
