@@ -363,8 +363,8 @@ $CONSUMER_CHAIN_BINARY q block $evidence_block --home $CONSUMER_HOME_1 | jq '.'
 echo "> Consumer evidence at height $evidence_block_1:"
 $CONSUMER_CHAIN_BINARY q block $evidence_block_1 --home $CONSUMER_HOME_1 | jq '.'
 echo "> Consumer evidence at height $evidence_block_1 (gaiad):"
-$CHAIN_BINARY q block --type=height $evidence_block_1 --home $CONSUMER_HOME_1 | jq '.'
-$CONSUMER_CHAIN_BINARY q block $evidence_block_1 --home $CONSUMER_HOME_1 | jq '.evidence.evidence[0]' > evidence.json
+$CHAIN_BINARY q block --type=height $evidence_block_1 --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY q block $evidence_block_1 --home $CONSUMER_HOME_1 | jq '.block.evidence.evidence[0]' > evidence.json
 echo "> Evidence JSON:"
 jq '.' evidence.json
 
