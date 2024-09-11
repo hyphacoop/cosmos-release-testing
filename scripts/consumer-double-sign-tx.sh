@@ -317,10 +317,10 @@ echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
 sleep 180
 
-# echo "> Node 1:"
-# journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
-# echo "> Node 2:"
-# journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
+echo "> Node 1:"
+journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
+echo "> Node 2:"
+journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
 
 # echo "con1 log:"
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
