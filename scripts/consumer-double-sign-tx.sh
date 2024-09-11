@@ -300,12 +300,12 @@ sudo systemctl enable $EQ_CONSUMER_SERVICE_2 --now
 # Start original
 echo "Starting first node..."
 sudo systemctl start $EQ_CONSUMER_SERVICE_1
-sleep 30
+sleep 60
 
 # Restart whale
 echo "Restarting whale validator..."
 sudo systemctl start $CONSUMER_SERVICE_1
-sleep 90
+sleep 120
 
 # echo "con1 log:"
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
@@ -327,6 +327,37 @@ if [ -z "$validator_check" ]; then
 else
   echo "Equivocation evidence found!"
 fi
+
+
+
+echo "> Collecting evidence height."
+height=$($CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq -r '.evidence[0].height')
+echo "> Evidence height: $height"
+
+echo "> Collecting evidence from one block after the evidence height."
+evidence_block=$(($height+1))
+echo "> Evidence block: $evidence_block"
+$CHAIN_BINARY q block --type=height $evidence_block --home $HOME_1 -o json | jq '.evidence.evidence[0].duplicate_vote_evidence' > evidence.json
+echo "> Evidence JSON:"
+jq '.' evidence.json
+
+# # echo "> COllecting I
+# ## Get IBC header at infraction height
+# interchain-security-pd q ibc client header --height 59 --home /consu/validatoralice --node tcp://7.7.8.252:26658 -o json \
+#     | jq . > header.json
+
+
+# ## Query consumer id from client-id (optional)
+# interchain-security-pd q provider consumer-id-from-client-id 07-tendermint-0 --home /provi/validatoralice \
+#     --node tcp://7.7.7.5:26658
+
+# ## submit evidence
+# interchain-security-pd tx provider submit-consumer-double-voting 0 evidence.json header.json \
+#     --from validatoralice \
+#     --chain-id provi \
+#     --home /provi/validatoralice \
+#     --keyring-backend test \
+#     --node tcp://7.7.7.5:26658 -y
 
 
 
