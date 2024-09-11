@@ -270,9 +270,9 @@ sudo systemctl stop $EQ_CONSUMER_SERVICE_1
 echo "Duplicating home folder..."
 cp -r $EQ_CONSUMER_HOME_1/ $EQ_CONSUMER_HOME_2/
 
-CON3_NODE_ID=$($CONSUMER_CHAIN_BINARY tedermint show-node-id --home $CONSUMER_HOME_3)
+CON3_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_3)
 CON3_PEER="$CON3_NODE_ID@localhost:$CON3_P2P_PORT"
-toml set --toml-path $EQ_CONSUMER_HOME_2/config/config.toml p2p.persistent_peers "$CON2_PEER"
+toml set --toml-path $EQ_CONSUMER_HOME_2/config/config.toml p2p.persistent_peers "$CON3_PEER"
 
 # Update ports
 toml set --toml-path $EQ_CONSUMER_HOME_2/config/app.toml api.address "tcp://0.0.0.0:$EQ_CON_API_PORT_2"
