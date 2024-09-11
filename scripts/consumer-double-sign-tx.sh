@@ -116,7 +116,7 @@ echo "Starting provider service..."
 sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 
 sleep 30
-journalctl -u $EQ_PROVIDER_SERVICE
+# journalctl -u $EQ_PROVIDER_SERVICE
 
 # $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
 echo "> New provider node status:"
@@ -216,7 +216,7 @@ echo "Starting consumer service..."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_1 --now
 
 sleep 30
-journalctl -u $EQ_CONSUMER_SERVICE_1
+# journalctl -u $EQ_CONSUMER_SERVICE_1
 
 echo "> Submitting opt-in transaction."
 key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
@@ -266,7 +266,7 @@ echo "Stopping whale validator..."
 sudo systemctl stop $CONSUMER_SERVICE_1
 sudo systemctl stop $CONSUMER_SERVICE_2
 sudo systemctl stop $CONSUMER_SERVICE_3
-sleep 10
+sleep 5
 
 # Stop validator
 sudo systemctl stop $EQ_CONSUMER_SERVICE_1
@@ -316,10 +316,10 @@ echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
 sleep 120
 
-echo "> Node 1:"
-journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
-echo "> Node 2:"
-journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
+# echo "> Node 1:"
+# journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
+# echo "> Node 2:"
+# journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
 
 # echo "con1 log:"
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
@@ -332,8 +332,8 @@ journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
 
 echo "> Consumer chain evidence:"
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'
-echo "> Provider chain evidence:"
-$CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq '.'
+# echo "> Provider chain evidence:"
+# $CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq '.'
 
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1)
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.' | grep $consensus_address)
@@ -349,14 +349,21 @@ echo "> Collecting infraction height."
 height=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq -r '.evidence[0].height')
 echo "> Evidence height: $height"
 
-echo "> Collecting evidence from one block after the infraction height in consumer chain."
+echo "> Collecting evidence around the infraction height in consumer chain."
+height_1=$(($height-1))
 evidence_block=$(($height+1))
+evidence_block_1=$(($height+2))
+echo "> Consumer evidence at height $height_1:"
+$CONSUMER_CHAIN_BINARY q block $height_1 --home $CONSUMER_HOME_1 | jq '.'
 echo "> Consumer evidence at height $height:"
 $CONSUMER_CHAIN_BINARY q block $height --home $CONSUMER_HOME_1 | jq '.'
 echo "> Consumer evidence at height $evidence_block:"
 $CONSUMER_CHAIN_BINARY q block $evidence_block --home $CONSUMER_HOME_1 | jq '.'
-echo "> Consumer evidence at height $height:"
-$CONSUMER_CHAIN_BINARY q block $height --home $CONSUMER_HOME_1 | jq '.'
+echo "> Consumer evidence at height $evidence_block_1:"
+$CONSUMER_CHAIN_BINARY q block $evidence_block_1 --home $CONSUMER_HOME_1 | jq '.'
+
+exit 0
+
 echo "> Provider evidence at height $evidence_block:"
 $CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1
 $CHAIN_BINARY q block --type=height $evidence_block --home $CONSUMER_HOME_1 | jq '.'
