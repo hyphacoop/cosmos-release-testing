@@ -78,8 +78,7 @@ toml set --toml-path $EQ_PROVIDER_HOME/config/config.toml p2p.laddr "tcp://0.0.0
 # Allow duplicate IPs in p2p
 toml set --toml-path $EQ_PROVIDER_HOME/config/config.toml p2p.allow_duplicate_ip true
 echo "Setting a short commit timeout..."
-seconds=s
-toml set --toml-path $EQ_PROVIDER_HOME/config/config.toml consensus.timeout_commit "$COMMIT_TIMEOUT$seconds"
+toml set --toml-path $EQ_PROVIDER_HOME/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
 # Set persistent peers
 echo "Setting persistent peers..."
 VAL2_NODE_ID=$($CHAIN_BINARY tendermint show-node-id --home $HOME_2)
@@ -178,7 +177,7 @@ CON2_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_H
 CON2_PEER="$CON2_NODE_ID@localhost:$CON2_P2P_PORT"
 toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml p2p.persistent_peers "$CON2_PEER"
 echo "Setting a short commit timeout..."
-toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml consensus.timeout_commit "$COMMIT_TIMEOUT$seconds"
+toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
 # Set fast_sync to false - or block_sync for ICS v3
 toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml fast_sync false
 toml set --toml-path $EQ_CONSUMER_HOME_1/config/config.toml block_sync false
@@ -217,8 +216,9 @@ echo "Starting consumer service..."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_1 --now
 
 sleep 30
+journalctl -u $EQ_CONSUMER_SERVICE_1
 
-echo "Submit opt-in transaction..."
+echo "> Submitting opt-in transaction."
 key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
 echo "Consumer key: $key"
 echo "Consumer ID: $CONSUMER_ID"
