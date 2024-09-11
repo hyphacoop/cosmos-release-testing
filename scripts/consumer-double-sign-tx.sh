@@ -115,8 +115,8 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$EQ_P
 echo "Starting provider service..."
 sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 
-sleep 20
-# journalctl -u $EQ_PROVIDER_SERVICE
+sleep 30
+journalctl -u $EQ_PROVIDER_SERVICE
 
 # $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
 echo "> New provider node status:"
