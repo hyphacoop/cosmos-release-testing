@@ -300,7 +300,7 @@ echo "{}" > $EQ_CONSUMER_HOME_1/config/addrbook.json
 # Start duplicate node
 echo "> Starting second node."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_2 --now
-# sleep 10
+sleep 10
 
 # Start original node
 echo "> Starting first node."
@@ -309,12 +309,13 @@ sleep 60
 
 # Restart whale
 echo "> Restarting whale validator."
-sudo systemctl start $CONSUMER_SERVICE_1
 sudo systemctl start $CONSUMER_SERVICE_2
 sudo systemctl start $CONSUMER_SERVICE_3
+sleep 10
+sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 120
+sleep 180
 
 # echo "> Node 1:"
 # journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
