@@ -518,13 +518,18 @@ sleep $(($COMMIT_TIMEOUT*2))
 echo "> Evidence submission tx:"
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
-
 # sudo systemctl enable hermes-evidence --now
 
 # echo "Wait for evidence to reach the provider chain..."
 # sleep 60
 
 # journalctl -u hermes-evidence
+echo "> Wait for validator to be removed from validator set."
+sleep $(($COMMIT_TIMEOUT*2))
+echo "> Signing infos:"
+$CHAIN_BINARY q slashing signing-infos --home $HOME_1 -O json | jq '.'
+echo "> Validators:"
+$CHAIN_BINARY q staking validators --home $HOME_1 -O json | jq '.'
 
 status=$($CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) --home $HOME_1 -o json | jq '.tombstoned')
 echo "Status: $status"
