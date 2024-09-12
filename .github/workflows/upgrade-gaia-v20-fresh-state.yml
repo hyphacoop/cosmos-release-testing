@@ -178,6 +178,8 @@
           uses: actions/checkout@v4
         - name: Set up Python
           uses: actions/setup-python@v5
+          with:
+            python-version: '3.10'
         - name: Install dependencies
           run: |
             python -m pip install --upgrade pip
@@ -215,6 +217,8 @@
           uses: actions/checkout@v4
         - name: Set up Python
           uses: actions/setup-python@v5
+          with:
+            python-version: '3.10'
         - name: Install dependencies
           run: |
             python -m pip install --upgrade pip
@@ -340,6 +344,7 @@
           ${{ fromJSON(needs.set-version-matrix-relayer.outputs.upgrade_versions) }}
         fail-fast: false
       env:
+        COMMIT_TIMEOUT: 5
         COSMOVISOR_VERSION: ${{ matrix.cv_version }}
         UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
         # Consumer chain variables
@@ -626,8 +631,11 @@
             sudo systemctl enable $CONSUMER_SERVICE_2 --now
             sudo systemctl enable $CONSUMER_SERVICE_3 --now
             sleep 10
+            echo "val1:"
             journalctl -u $CONSUMER_SERVICE_1
-            echo "Val3:"
+            echo "val2:"
+            journalctl -u $CONSUMER_SERVICE_2
+            echo "val3:"
             journalctl -u $CONSUMER_SERVICE_3
         - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
           env:
@@ -656,6 +664,7 @@
           env:
             CONSUMER_HOME_1: /home/runner/.v400-2-1
             CON1_RPC_PORT: 40221
+            CON1_P2P_PORT: 40231
           run: tests/test_ccv_key_assignment.sh
         - name: _IBC transfer successful> ICS v4.0.0 chain 2
           env:
@@ -707,6 +716,35 @@
             sleep $(($COMMIT_TIMEOUT*30))
         - name: _Downtime test> val2 must be jailed - 2
           run: tests/test_validator_jailed.sh $VALOPER_2 true
+        - name: Unjail validator
+          env:
+            CONSUMER_SERVICE_2: v400-2-2.service
+          run: |
+            sudo systemctl enable $CONSUMER_SERVICE_2 --now
+            sleep $(($COMMIT_TIMEOUT*10))
+            $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+            sleep $(($COMMIT_TIMEOUT*2))
+        - name: _Downtime test> val2 must not be jailed 
+          run: |
+            tests/test_validator_jailed.sh $VALOPER_2 null
+        
+        - name: _Test equivocation tx
+          env:
+            CONSUMER_CHAIN_ID: v400-two
+            CONSUMER_HOME_1: /home/runner/.v400-2-1
+            CONSUMER_HOME_2: /home/runner/.v400-2-2
+            CONSUMER_HOME_3: /home/runner/.v400-2-3
+            CONSUMER_SERVICE_1: v400-2-1.service
+            CONSUMER_SERVICE_2: v400-2-2.service
+            CONSUMER_SERVICE_3: v400-2-3.service
+            CON1_RPC_PORT: 40221
+            CON1_P2P_PORT: 40231
+            CON2_P2P_PORT: 40232
+            CON3_P2P_PORT: 40233
+          run: |
+            export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+            scripts/consumer-double-sign-tx.sh
+
         - name: _Remove consumer chain> ICS v4.0.0 chain 2
           run: |
             echo "Consumer chains:"
