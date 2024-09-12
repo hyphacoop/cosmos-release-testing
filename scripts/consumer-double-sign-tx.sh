@@ -370,30 +370,81 @@ jq '.' evidence.json
 
 echo "***** EVIDENCE JSON MODIFICATION BEGINS *****"
 
-echo "> Casting vote a height as integer."
+echo "> Cast vote a height as integer."
 jq '.vote_a.height |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
-echo "> Casting vote b height as integer."
+echo "> Cast vote b height as integer."
 jq '.vote_b.height |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
-echo "Renaming vote_a parts key."
+echo "Rename vote_a parts key."
 jq '.vote_a.block_id.parts as $p | .vote_a.block_id.part_set_header = $p | del(.vote_a.block_id.parts)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
-echo "Renaming vote_b parts key."
+echo "Rename vote_b parts key."
 jq '.vote_b.block_id.parts as $p | .vote_b.block_id.part_set_header = $p | del(.vote_b.block_id.parts)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
+
+echo "> Base64 encode vote_a val address."
+addr=$(jq -r '.vote_a.validator_address' | xxd -r -p | base64)
+echo "Base64-encoded: $addr"
+jq --arg ADDR "$addr" '.vote_a.validator_address |= $ADDR' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Base64 encode vote_b val address."
+addr=$(jq -r '.vote_b.validator_address' | xxd -r -p | base64)
+echo "Base64-encoded: $addr"
+jq --arg ADDR "$addr" '.vote_b.validator_address |= $ADDR' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Rename total voting power."
+jq '.TotalVotingPower as $p | .total_voting_power = $p | del(.TotalVotingPower)' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Rename validator power key."
+jq '.ValidatorPower as $p | .validator_power = $p | del(.ValidatorPower)' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Rename timestamp key."
+jq '.Timestamp as $p | .timestamp = $p | del(.Timestamp)' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Cast total voting power as integer."
+jq '.total_voting_power |= tonumber' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Cast validator power as integer."
+jq '.validator_power |= tonumber' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
 
 echo "> Collecting IBC header at infraction height in consumer chain."
 $CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $HOME_1 -o json | jq '.' > ibc-header.json
 echo "> IBC header JSON:"
 jq '.' ibc-header.json
+
+echo "***** IBC HEADER JSON MODIFICATION BEGINS *****"
+
+echo "> Cast height as integer."
+jq '.signed_header.header.height |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
+
 
 echo "> Submitting evidence."
 txhash=$($CHAIN_BINARY tx provider submit-consumer-double-voting $CONSUMER_ID evidence.json ibc-header.json \
