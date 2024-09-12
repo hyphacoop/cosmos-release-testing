@@ -125,7 +125,8 @@ jobs:
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
-          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C /home/runner/.gaia/data --strip-components=1
+          cd ~/.gaia
+          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
       - name: Get addrbook
         run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
@@ -222,6 +223,8 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: ls ~/.gaia/wasm/state/wasm/
+        run: ls -al ~/.gaia/wasm/state/wasm/
       - name: Compress and upload files
         run: |
           echo "Compressing ~/.gaia ..."
