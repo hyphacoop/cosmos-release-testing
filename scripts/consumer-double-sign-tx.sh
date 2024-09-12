@@ -380,25 +380,25 @@ jq '.vote_b.height |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
-echo "Rename vote_a parts key."
+echo "> Rename vote_a parts key."
 jq '.vote_a.block_id.parts as $p | .vote_a.block_id.part_set_header = $p | del(.vote_a.block_id.parts)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
-echo "Rename vote_b parts key."
+echo "> Rename vote_b parts key."
 jq '.vote_b.block_id.parts as $p | .vote_b.block_id.part_set_header = $p | del(.vote_b.block_id.parts)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
 echo "> Base64 encode vote_a val address."
-addr=$(jq -r '.vote_a.validator_address' | xxd -r -p | base64)
+addr=$(jq -r '.vote_a.validator_address' evidence.json | xxd -r -p | base64)
 echo "Base64-encoded: $addr"
 jq --arg ADDR "$addr" '.vote_a.validator_address |= $ADDR' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
 jq '.' evidence.json
 
 echo "> Base64 encode vote_b val address."
-addr=$(jq -r '.vote_b.validator_address' | xxd -r -p | base64)
+addr=$(jq -r '.vote_b.validator_address' evidence.json | xxd -r -p | base64)
 echo "Base64-encoded: $addr"
 jq --arg ADDR "$addr" '.vote_b.validator_address |= $ADDR' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
@@ -438,8 +438,43 @@ jq '.' ibc-header.json
 
 echo "***** IBC HEADER JSON MODIFICATION BEGINS *****"
 
-echo "> Cast height as integer."
+echo "> Cast header height to integer."
 jq '.signed_header.header.height |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Cast commit height to integer."
+jq '.signed_header.commit.height |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Replace BLOCK_ID_FLAG_COMMIT with 2."
+sed "s%\"BLOCK_ID_FLAG_COMMIT\"%2%g" ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Replace BLOCK_ID_FLAG_NIL with 3."
+sed "s%\"BLOCK_ID_FLAG_NIL\"%3%g" ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Cast validators' voting power to integer."
+jq '.validator_set.validators[].voting_power |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Cast validators' proposer priority to integer."
+jq '.validator_set.validators[].proposer_priority |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Cast proposer's voting power to integer."
+jq '.validator_set.proposer.voting_power |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Cast proposer's proposer priority to integer."
+jq '.validator_set.proposer.proposer_priority |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
 jq '.' ibc-header.json
 
