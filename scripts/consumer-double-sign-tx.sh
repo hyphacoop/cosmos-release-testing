@@ -311,7 +311,7 @@ sleep 60
 echo "> Restarting whale validator."
 sudo systemctl start $CONSUMER_SERVICE_2
 sudo systemctl start $CONSUMER_SERVICE_3
-# sleep 10
+sleep 60
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
