@@ -270,7 +270,7 @@ sleep 5
 
 # Stop validator
 sudo systemctl stop $EQ_CONSUMER_SERVICE_1
-
+sleep 3
 # Duplicate home folder
 echo "Duplicating home folder..."
 cp -r $EQ_CONSUMER_HOME_1/ $EQ_CONSUMER_HOME_2/
@@ -318,9 +318,9 @@ sudo systemctl restart $RELAYER
 sleep 180
 
 echo "> Node 1:"
-journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
+journalctl -u $EQ_CONSUMER_SERVICE_1
 echo "> Node 2:"
-journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 50
+journalctl -u $EQ_CONSUMER_SERVICE_2
 
 # echo "con1 log:"
 # journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
@@ -475,6 +475,16 @@ jq '.' ibc-header.json
 
 echo "> Cast proposer's proposer priority to integer."
 jq '.validator_set.proposer.proposer_priority |= tonumber' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Remove total_voting_power."
+jq 'del(.validator_set.total_voting_power)' ibc-header.json > header-mod.json
+mv header-mod.json ibc-header.json
+jq '.' ibc-header.json
+
+echo "> Remove revision_number."
+jq 'del(.trusted_height.revision_number)' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
 jq '.' ibc-header.json
 
