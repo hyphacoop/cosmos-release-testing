@@ -315,7 +315,7 @@ sudo systemctl start $CONSUMER_SERVICE_3
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 180
+sleep 300
 
 echo "> Node 1:"
 journalctl -u $EQ_CONSUMER_SERVICE_1
