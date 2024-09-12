@@ -448,19 +448,19 @@ jq '.' evidence.json
 echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
 
 echo "> IBC header signatures at height $(($height-2))"
-$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height-2)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height-2)) --home $CONSUMER_HOME_1 -o json | jq '.signed_header.commit.signatures | length'
 echo "> IBC header signatures at height $(($height-1))"
-$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height-1)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height-1)) --home $CONSUMER_HOME_1 -o json | jq '.signed_header.commit.signatures | length'
 echo "> IBC header signatures at height $(($height))"
-$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height)) --home $CONSUMER_HOME_1 -o json | jq '.signed_header.commit.signatures | length'
 echo "> IBC header signatures at height $(($height+1))"
-$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height+1)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height+1)) --home $CONSUMER_HOME_1 -o json | jq '.signed_header.commit.signatures | length'
 echo "> IBC header signatures at height $(($height+2))"
-$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height+2)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height+2)) --home $CONSUMER_HOME_1 -o json | jq '.signed_header.commit.signatures | length'
 
 
 echo "> Collecting IBC header at infraction height in consumer chain."
-$CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $HOME_1 -o json | jq '.' > ibc-header.json
+$CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $CONSUMER_HOME_1 -o json | jq '.' > ibc-header.json
 echo "> IBC header JSON:"
 jq '.' ibc-header.json
 
