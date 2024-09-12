@@ -373,7 +373,6 @@ echo "***** EVIDENCE JSON MODIFICATION BEGINS *****"
 echo "> Cast vote a height as integer."
 jq '.vote_a.height |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Cast vote b height as integer."
 jq '.vote_b.height |= tonumber' evidence.json > evidence-mod.json
@@ -448,6 +447,18 @@ jq '.' evidence.json
 
 echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
 
+echo "> IBC header signatures at height $(($height-2))"
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height-2)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+echo "> IBC header signatures at height $(($height-1))"
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height-1)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+echo "> IBC header signatures at height $(($height))"
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+echo "> IBC header signatures at height $(($height+1))"
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height+1)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+echo "> IBC header signatures at height $(($height+2))"
+$CONSUMER_CHAIN_BINARY q ibc client header --height $(($height+2)) --home $HOME_1 -o json | jq '.signed_header.commit.signatures | length'
+
+
 echo "> Collecting IBC header at infraction height in consumer chain."
 $CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $HOME_1 -o json | jq '.' > ibc-header.json
 echo "> IBC header JSON:"
@@ -497,7 +508,7 @@ mv header-mod.json ibc-header.json
 
 jq '.' ibc-header.json
 
-echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
+echo "***** IBC HEADER JSON MODIFICATION ENDS *****"
 
 
 echo "> Submitting evidence."
