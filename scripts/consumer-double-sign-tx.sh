@@ -532,6 +532,8 @@ echo "> Wait for validator to be removed from validator set."
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Signing infos:"
 $CHAIN_BINARY q slashing signing-infos --home $HOME_1 -o json | jq '.'
+echo "> Signing info:"
+$CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) --home $HOME_1 -o json | jq '.'
 echo "> Validators:"
 $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
 
