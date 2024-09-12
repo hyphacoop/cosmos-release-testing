@@ -513,7 +513,7 @@ echo "***** IBC HEADER JSON MODIFICATION ENDS *****"
 
 echo "> Submitting evidence."
 txhash=$($CHAIN_BINARY tx provider submit-consumer-double-voting $CONSUMER_ID evidence.json ibc-header.json \
-    --from $WALLET_1  --home $HOME_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq '.txhash')
+    --from $WALLET_1  --home $HOME_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Evidence submission tx:"
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
