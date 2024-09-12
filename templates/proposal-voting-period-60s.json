@@ -16,6 +16,7 @@
        "threshold": "0.500000000000000000",
        "veto_threshold": "0.334000000000000000",
        "min_initial_deposit_ratio": "0.100000000000000000",
+       "proposal_cancel_ratio": "0.100000000000000000",
        "burn_vote_quorum": false,
        "burn_proposal_deposit_prevote": false,
        "burn_vote_veto": true,

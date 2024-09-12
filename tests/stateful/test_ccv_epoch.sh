@@ -1,12 +1,16 @@
 #!/bin/bash
+set -e
+
 # Test Validator Set Changes
 epoch=$1
 
 # Get VP before test
 PROVIDER_BADDRESS=$(jq -r '.address' $HOME_1/config/priv_validator_key.json)
+CONSUMER_BADDRESS=$(jq -r '.address' $CONSUMER_HOME_1/config/priv_validator_key.json)
+
 PROVIDER_POWER_START=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 # Verify new voting power in consumer chain
-CONSUMER_POWER_START=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
+CONSUMER_POWER_START=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$CONSUMER_BADDRESS'") | '.voting_power'')
 echo "[INFO] Starting Top validator VP: $PROVIDER_POWER_START (provider), $CONSUMER_POWER_START (consumer)"
 
 # Delegate additional stake to val 1
@@ -26,7 +30,7 @@ then
 fi
 
 # Verify new voting power in consumer chain
-CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
+CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$CONSUMER_BADDRESS'") | '.voting_power'')
 
 # Wait 60 more seconds if VP stll the same
 if [ $PROVIDER_POWER == $PROVIDER_POWER_START ]; then
@@ -52,7 +56,7 @@ tests/test_block_production.sh localhost $CON1_RPC_PORT $epoch 120
 
 # Get VP on both chains after epoch
 PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
-CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
+CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$CONSUMER_BADDRESS'") | '.voting_power'')
 echo "[INFO] Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
 
 # Check if both chain matches

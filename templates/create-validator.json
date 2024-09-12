@@ -1,7 +1,7 @@
 {
-    "pubkey": "",
+    "pubkey": {"@type":"/cosmos.crypto.ed25519.PubKey","key":"cnyjd1Qnh2HZ/VzMnVX1Pzl69dCD53u15BX+JqBmnsM="},
     "amount": "1000000uatom",
-    "moniker": "newval",
+    "moniker": "ugpradeval-1",
     "identity": null,
     "website": null,
     "security": null,
