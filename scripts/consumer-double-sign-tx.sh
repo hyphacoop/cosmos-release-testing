@@ -315,7 +315,7 @@ echo "{}" > $CONSUMER_HOME_3/config/addrbook.json
 echo "> Restarting whale validator."
 sudo systemctl start $CONSUMER_SERVICE_2
 sudo systemctl start $CONSUMER_SERVICE_3
-sleep 60
+sleep 120
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
@@ -326,19 +326,8 @@ journalctl -u $EQ_CONSUMER_SERVICE_1
 echo "> Node 2:"
 journalctl -u $EQ_CONSUMER_SERVICE_2
 
-# echo "con1 log:"
-# journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
-# echo con2 log:
-# # journalctl -u $CONSUMER_SERVICE_2 | tail -n 50
-# echo "Original log:"
-# journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 50
-# echo "Double log:"
-# journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 100
-
 echo "> Consumer chain evidence:"
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'
-# echo "> Provider chain evidence:"
-# $CHAIN_BINARY q evidence list --home $HOME_1 -o json | jq '.'
 
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1)
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.' | grep $consensus_address)
