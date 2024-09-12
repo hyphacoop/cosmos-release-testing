@@ -378,12 +378,34 @@ jq '.' evidence.json
 echo "> Cast vote b height as integer."
 jq '.vote_b.height |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
+
+echo "> Base64 encode vote a block id hash."
+hash=$(jq -r '.vote_a.block_id.hash' evidence.json | xxd -r -p | base64)
+echo "Hash: >$hash<"
+jq --arg HASH "$hash" '.vote_a.block_id.hash |= $HASH' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+
+echo "> Base64 encode vote a block id part hash."
+hash=$(jq -r '.vote_a.block_id.parts.hash' evidence.json | xxd -r -p | base64)
+echo "Hash: >$hash<"
+jq --arg HASH "$hash" '.vote_a.block_id.parts.hash |= $HASH' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+
+echo "> Base64 encode vote b block id hash."
+hash=$(jq -r '.vote_b.block_id.hash' evidence.json | xxd -r -p | base64)
+echo "Hash: >$hash<"
+jq --arg HASH "$hash" '.vote_b.block_id.hash |= $HASH' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+
+echo "> Base64 encode vote b block id part hash."
+hash=$(jq -r '.vote_b.block_id.parts.hash' evidence.json | xxd -r -p | base64)
+echo "Hash: >$hash<"
+jq --arg HASH "$hash" '.vote_b.block_id.parts.hash |= $HASH' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
 
 echo "> Rename vote_a parts key."
 jq '.vote_a.block_id.parts as $p | .vote_a.block_id.part_set_header = $p | del(.vote_a.block_id.parts)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Rename vote_b parts key."
 jq '.vote_b.block_id.parts as $p | .vote_b.block_id.part_set_header = $p | del(.vote_b.block_id.parts)' evidence.json > evidence-mod.json
@@ -395,38 +417,33 @@ addr=$(jq -r '.vote_a.validator_address' evidence.json | xxd -r -p | base64)
 echo "Base64-encoded: $addr"
 jq --arg ADDR "$addr" '.vote_a.validator_address |= $ADDR' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Base64 encode vote_b val address."
 addr=$(jq -r '.vote_b.validator_address' evidence.json | xxd -r -p | base64)
 echo "Base64-encoded: $addr"
 jq --arg ADDR "$addr" '.vote_b.validator_address |= $ADDR' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Rename total voting power."
 jq '.TotalVotingPower as $p | .total_voting_power = $p | del(.TotalVotingPower)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Rename validator power key."
 jq '.ValidatorPower as $p | .validator_power = $p | del(.ValidatorPower)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Rename timestamp key."
 jq '.Timestamp as $p | .timestamp = $p | del(.Timestamp)' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Cast total voting power as integer."
 jq '.total_voting_power |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
-jq '.' evidence.json
 
 echo "> Cast validator power as integer."
 jq '.validator_power |= tonumber' evidence.json > evidence-mod.json
 mv evidence-mod.json evidence.json
+
 jq '.' evidence.json
 
 echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
@@ -441,51 +458,43 @@ echo "***** IBC HEADER JSON MODIFICATION BEGINS *****"
 echo "> Cast header height to integer."
 jq '.signed_header.header.height |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Cast commit height to integer."
 jq '.signed_header.commit.height |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Replace BLOCK_ID_FLAG_COMMIT with 2."
 sed "s%\"BLOCK_ID_FLAG_COMMIT\"%2%g" ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Replace BLOCK_ID_FLAG_NIL with 3."
 sed "s%\"BLOCK_ID_FLAG_NIL\"%3%g" ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Cast validators' voting power to integer."
 jq '.validator_set.validators[].voting_power |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Cast validators' proposer priority to integer."
 jq '.validator_set.validators[].proposer_priority |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Cast proposer's voting power to integer."
 jq '.validator_set.proposer.voting_power |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Cast proposer's proposer priority to integer."
 jq '.validator_set.proposer.proposer_priority |= tonumber' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Remove total_voting_power."
 jq 'del(.validator_set.total_voting_power)' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
-jq '.' ibc-header.json
 
 echo "> Remove revision_number."
 jq 'del(.trusted_height.revision_number)' ibc-header.json > header-mod.json
 mv header-mod.json ibc-header.json
+
 jq '.' ibc-header.json
 
 echo "***** EVIDENCE JSON MODIFICATION ENDS *****"
