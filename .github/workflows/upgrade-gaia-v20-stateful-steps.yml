@@ -445,12 +445,12 @@ jobs:
         run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
       - name: Set up relayer
         run: scripts/stateful/setup_relayer.sh
-      # - name: Download consumer chain binaries
-      #   run: |
-      #     wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-      #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-      #     wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
-      #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+      - name: Download consumer chain binaries
+        run: |
+          wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+          wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
 
       # - name: Installing secondary chain binaries
       #   env:
