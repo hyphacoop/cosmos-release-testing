@@ -368,6 +368,28 @@ $CONSUMER_CHAIN_BINARY q block $evidence_block_1 --home $CONSUMER_HOME_1 | jq '.
 echo "> Evidence JSON:"
 jq '.' evidence.json
 
+echo "***** EVIDENCE JSON MODIFICATION BEGINS *****"
+
+echo "> Casting vote a height as integer."
+jq '.vote_a.height |= tonumber' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "> Casting vote b height as integer."
+jq '.vote_b.height |= tonumber' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "Renaming vote_a parts key."
+jq '.vote_a.block_id.parts as $p | .vote_a.block_id.part_set_header = $p | del(.vote_a.block_id.parts)' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
+echo "Renaming vote_b parts key."
+jq '.vote_b.block_id.parts as $p | .vote_b.block_id.part_set_header = $p | del(.vote_b.block_id.parts)' evidence.json > evidence-mod.json
+mv evidence-mod.json evidence.json
+jq '.' evidence.json
+
 echo "> Collecting IBC header at infraction height in consumer chain."
 $CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $HOME_1 -o json | jq '.' > ibc-header.json
 echo "> IBC header JSON:"
