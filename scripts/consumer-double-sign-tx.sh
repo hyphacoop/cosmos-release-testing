@@ -537,7 +537,7 @@ $CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator 
 echo "> Validators:"
 $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
 
-status=$($CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) --home $HOME_1 -o json | jq '.tombstoned')
+status=$($CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) --home $HOME_1 -o json | jq '.val_signing_info.tombstoned')
 echo "Status: $status"
 if [ $status == "true" ]; then
   echo "Success: validator has been tombstoned!"
