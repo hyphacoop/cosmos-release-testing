@@ -690,12 +690,12 @@ jobs:
           CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
           CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
         run: tests/stateful/test_ccv.sh
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS consumerb
         env:
           CONSUMER_CHAIN_ID: consumerb
@@ -718,6 +718,9 @@ jobs:
       - name: Print opt-in consumer tendermint validators consumerb
         env:
           CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
         run: |
           echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
           $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
@@ -730,8 +733,21 @@ jobs:
           echo "[INFO] Optin second validator"
           node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_2 tendermint show-validator)
           $CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
-      - name: Wait for 2 blocks
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 600
+      - name: Wait for 20 blocks
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 600
+      - name: Print opt-in consumer tendermint validators consumerb after opt-in
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
       - name: Check number of signatures on consumerb
         run: |
           total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
