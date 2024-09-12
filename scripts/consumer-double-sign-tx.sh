@@ -300,12 +300,16 @@ echo "{}" > $EQ_CONSUMER_HOME_1/config/addrbook.json
 # Start duplicate node
 echo "> Starting second node."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_2 --now
-sleep 10
+# sleep 10
 
 # Start original node
 echo "> Starting first node."
 sudo systemctl start $EQ_CONSUMER_SERVICE_1
-sleep 60
+sleep 10
+
+echo "{}" > $CONSUMER_HOME_1/config/addrbook.json
+echo "{}" > $CONSUMER_HOME_2/config/addrbook.json
+echo "{}" > $CONSUMER_HOME_3/config/addrbook.json
 
 # Restart whale
 echo "> Restarting whale validator."
@@ -527,9 +531,9 @@ $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 echo "> Wait for validator to be removed from validator set."
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Signing infos:"
-$CHAIN_BINARY q slashing signing-infos --home $HOME_1 -O json | jq '.'
+$CHAIN_BINARY q slashing signing-infos --home $HOME_1 -o json | jq '.'
 echo "> Validators:"
-$CHAIN_BINARY q staking validators --home $HOME_1 -O json | jq '.'
+$CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
 
 status=$($CHAIN_BINARY q slashing signing-info $($CHAIN_BINARY tendermint show-validator --home $EQ_PROVIDER_HOME) --home $HOME_1 -o json | jq '.tombstoned')
 echo "Status: $status"
