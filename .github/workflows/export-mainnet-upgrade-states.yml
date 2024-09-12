@@ -127,8 +127,6 @@ jobs:
         run: |
           cd ~/.gaia
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Get addrbook
         run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
@@ -138,8 +136,6 @@ jobs:
         run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Syncing Chain
         run: |
           catching_up="true"
@@ -150,8 +146,6 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Stop gaiad
         run: |
           killall gaiad screen
@@ -169,8 +163,6 @@ jobs:
           git checkout ${{ vars.FORK_TOOL_TAG }}
           make build BUILD_TAGS="-tag unsafe_start_local_validator"
           cp build/gaiad /home/runner/go/bin/gaiad-fork
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
@@ -186,8 +178,6 @@ jobs:
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
           screen -L -Logfile /home/runner/artifact/gaiad_fork.log -S gaiad -d -m /home/runner/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --validator-pubkey "$pubkey" --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl --validator-privkey "$privkey" --home /home/runner/.gaia
           screen -r gaiad -p0 -X logfile flush 0
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Stop fork tool
@@ -195,15 +185,11 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad-fork screen
           sleep 10s
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Start gaiad
         run: |
           screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Submit and vote on the upgrade proposal
         run: |
           echo "Restoring validator key"
@@ -229,8 +215,6 @@ jobs:
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
           vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
           $vote
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Stop gaiad when reached upgrade height
         run: |
           current_block=0
@@ -239,8 +223,8 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
+      - name: ls ~/.gaia/wasm/state/wasm/
+        run: ls -al ~/.gaia/wasm/state/wasm/
       - name: Compress and upload files
         run: |
           echo "Compressing ~/.gaia ..."
@@ -250,8 +234,6 @@ jobs:
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
-      - name: ls .gaia/wasm/state/wasm/
-        run: ls -al .gaia/wasm/state/wasm/
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
