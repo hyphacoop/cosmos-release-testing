@@ -12,7 +12,7 @@ EQ_CONSUMER_HOME_2=/home/runner/.eqc2
 EQ_CONSUMER_SERVICE_1=eq_consumer_1.service
 EQ_CONSUMER_SERVICE_2=eq_consumer_2.service
 EQ_CON_API_PORT_1=50102
-EQ_CON_API_PORT_2=50202
+EQ_CON_API_PORT_2=51202
 EQ_CON_GRPC_PORT_1=50112
 EQ_CON_GRPC_PORT_2=50212
 EQ_CON_RPC_PORT_1=50122
@@ -315,11 +315,37 @@ echo "{}" > $CONSUMER_HOME_3/config/addrbook.json
 echo "> Restarting whale validator."
 sudo systemctl start $CONSUMER_SERVICE_2
 sudo systemctl start $CONSUMER_SERVICE_3
-sleep 120
+sleep 60
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 300
+sleep 60
+
+# Restart nodes again
+echo "Restarting nodes again..."
+sudo systemctl stop $CONSUMER_SERVICE_1
+sudo systemctl stop $CONSUMER_SERVICE_2
+sudo systemctl stop $CONSUMER_SERVICE_3
+sudo systemctl stop $EQ_CONSUMER_SERVICE_1
+sudo systemctl stop $EQ_CONSUMER_SERVICE_2
+sleep 2
+# Wipe the state and address books
+echo '{"height": "0","round": 0,"step": 0,"signature":"","signbytes":""}' > $EQ_CONSUMER_HOME_1/data/priv_validator_state.json
+echo '{"height": "0","round": 0,"step": 0,"signature":"","signbytes":""}' > $EQ_CONSUMER_HOME_2/data/priv_validator_state.json
+echo "{}" > $EQ_CONSUMER_HOME_1/config/addrbook.json
+echo "{}" > $EQ_CONSUMER_HOME_2/config/addrbook.json
+echo "{}" > $CONSUMER_HOME_1/config/addrbook.json
+echo "{}" > $CONSUMER_HOME_2/config/addrbook.json
+echo "{}" > $CONSUMER_HOME_3/config/addrbook.json
+sudo systemctl start $CONSUMER_SERVICE_2
+sudo systemctl start $CONSUMER_SERVICE_3
+sudo systemctl start $EQ_CONSUMER_SERVICE_1
+sudo systemctl start $EQ_CONSUMER_SERVICE_2
+sleep 60
+sudo systemctl start $CONSUMER_SERVICE_1
+echo "> Restarting Hermes."
+sudo systemctl restart $RELAYER
+sleep 60
 
 echo "> Node 1:"
 journalctl -u $EQ_CONSUMER_SERVICE_1
