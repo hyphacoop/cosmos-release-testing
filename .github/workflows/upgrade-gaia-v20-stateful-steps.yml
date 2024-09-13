@@ -736,6 +736,7 @@ jobs:
           json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
           txhash=$(echo "$json" | jq -r .txhash)
           echo "$json" | jq -r '.'
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
       - name: Wait for 20 blocks
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 600
