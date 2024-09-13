@@ -67,7 +67,7 @@ echo "[INFO]: Create and submit update-consumer proposal"
 jq -r --arg consumer_id "$consumer_id" '.messages[0].consumer_id = $consumer_id' templates/proposal-update-consumer.json > proposal-update.json
 jq -r --arg topn "$TOPN" '.messages[0].power_shaping_parameters.top_N = $topn' proposal-update.json > proposal-patch-topn.json
 # set allow_inactive_vals to true
-jq -r --arg allow_inactive_vals true '.messages[0].power_shaping_parameters.allow_inactive_vals = $allow_inactive_vals' proposal-patch-topn.json > proposal-topn.json
+jq -r --argjson allow_inactive_vals true '.messages[0].power_shaping_parameters.allow_inactive_vals = $allow_inactive_vals' proposal-patch-topn.json > proposal-topn.json
 
 tx="$CHAIN_BINARY --home $HOME_1 tx gov submit-proposal proposal-topn.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y -o json"
 txhash=$($tx | jq -r .txhash)
