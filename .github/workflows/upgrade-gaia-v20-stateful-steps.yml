@@ -689,6 +689,7 @@ jobs:
           CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
           CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
           CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+          CON1_RPC_PORT: ${{ env.CONB1_RPC_PORT }}
         run: tests/stateful/test_ccv.sh
       # - name: DEBUG
       #   run: |
@@ -748,7 +749,7 @@ jobs:
           # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
           echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
-      - name: Check number of signatures on consumerb
+      - name: _Check number of signatures on consumerb
         run: |
           total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 2 ]

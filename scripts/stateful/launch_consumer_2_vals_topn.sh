@@ -30,8 +30,6 @@ then
     cat create-$CONSUMER_CHAIN_ID.json
 fi
 
-jq -r --argjson TOPN 0 '.messages[0].top_N |= $TOPN' create-$CONSUMER_CHAIN_ID.json > create-topn.json
-
 if [ $debug -eq 1 ]
 then
     echo "[DEBUG] CREATE FILE AFTER SET PSS create-$CONSUMER_CHAIN_ID.json:"
