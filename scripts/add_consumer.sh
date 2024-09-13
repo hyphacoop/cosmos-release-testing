@@ -2,7 +2,7 @@
 
 echo "Patching add template with spawn time..."
 spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
-jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/proposal-add-template.json > proposal-add-spawn.json
+jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' templates/proposal-add-template-legacy.json > proposal-add-spawn.json
 
 if [ $PSS_ENABLED == true ]; then
     echo "Patching for PSS..."
