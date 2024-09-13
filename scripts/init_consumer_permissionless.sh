@@ -171,6 +171,12 @@ toml set --toml-path $CONSUMER_HOME_1/config/config.toml p2p.allow_duplicate_ip 
 toml set --toml-path $CONSUMER_HOME_2/config/config.toml p2p.allow_duplicate_ip true
 toml set --toml-path $CONSUMER_HOME_3/config/config.toml p2p.allow_duplicate_ip true
 
+# Turn pex off
+toml set --toml-path $CONSUMER_HOME_1/config/config.toml p2p.pex false
+toml set --toml-path $CONSUMER_HOME_2/config/config.toml p2p.pex false
+toml set --toml-path $CONSUMER_HOME_3/config/config.toml p2p.pex false
+
+
 echo "Setting persistent peers..."
 VAL1_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_1)
 # VAL2_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $CONSUMER_HOME_2)
