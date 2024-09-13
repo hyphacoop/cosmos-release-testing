@@ -649,8 +649,8 @@ jobs:
           hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           sleep 6
           hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          echo "[INFO]: cona1 $hash_val1"
-          echo "[INFO]: cona2 $hash_val1"
+          echo "[INFO]: conb1 $hash_val1"
+          echo "[INFO]: conb2 $hash_val1"
           if [ $hash_val1 != $hash_val2 ]
           then
             echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
@@ -733,7 +733,10 @@ jobs:
         run: |
           echo "[INFO] Optin second validator"
           node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_2 tendermint show-validator)
-          $CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "$json" | jq -r '.'
+          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
       - name: Wait for 20 blocks
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 600
       - name: Print opt-in consumer tendermint validators consumerb after opt-in
