@@ -22,7 +22,7 @@ txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
 echo "Submitting the store-instantiate proposal..."
 # echo $proposal
 # txhash=$($proposal | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "Getting proposal ID from txhash..."
 proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
