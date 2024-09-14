@@ -738,8 +738,8 @@ jobs:
           echo "$json" | jq -r '.'
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
-      - name: Wait for 1 block
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Wait for 20 block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
       - name: Print opt-in consumer tendermint validators consumerb after opt-in
         env:
           CONSUMER_CHAIN_ID: consumerb
@@ -772,8 +772,8 @@ jobs:
           echo "$json" | jq -r '.'
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
-      - name: Wait for 1 block
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Wait for 20 block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
       - name: Print opt-in consumer tendermint validators consumerb after opt-out
         env:
           CONSUMER_CHAIN_ID: consumerb
