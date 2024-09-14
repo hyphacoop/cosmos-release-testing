@@ -32,7 +32,7 @@ echo "Submitting the \"yes\" vote to proposal $proposal_id..."
 vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
 echo $vote
 txhash=$($vote | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 $CHAIN_BINARY q tx $txhash --home $HOME_1
 
 echo "Waiting for the voting period to end..."
@@ -57,7 +57,7 @@ fi
 
 txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
 echo "Execute tx hash: $txhash"
-sleep $(($COMMIT_TIMEOUT*2))
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
 # Query
