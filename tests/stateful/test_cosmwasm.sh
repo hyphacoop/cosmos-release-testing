@@ -6,6 +6,7 @@ QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
 $CHAIN_BINARY tx wasm store tests/gaia-v18/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1 -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 proposal=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     tests/gaia-v18/contract.wasm $INIT \
