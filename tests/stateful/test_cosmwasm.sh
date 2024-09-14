@@ -18,7 +18,7 @@ proposal=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     --from $WALLET_1 \
     --chain-id $CHAIN_ID \
     --gas 20000000 --gas-prices 0.005$DENOM \
-    --home $HOME_1 -o json | jq -r '.txhash')
+    --home $HOME_1 -o json)
 echo "Submitting the store-instantiate proposal..."
 echo $proposal | jq -r '.'
 txhash=$($proposal | jq -r .txhash)
