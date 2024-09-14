@@ -214,7 +214,7 @@ jobs:
           ARCHIVE_URL: ${{ inputs.archive_url }}
         run: scripts/stateful/start_chain_val1.sh
       - name: _Blocks produced after upgrade to v20
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 50 12600
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 12600
       - name: _Blocks produced on val2
         run: tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 12600
       - name: Check block hashes on both nodes

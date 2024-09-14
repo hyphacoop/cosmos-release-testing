@@ -7,21 +7,21 @@ EXEC="{\"increment\": {}}"
 
 $CHAIN_BINARY tx wasm store tests/gaia-v18/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1 -y
 
-txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
+proposal=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     tests/gaia-v18/contract.wasm $INIT \
     --label "my first contract" \
     --no-admin \
     --instantiate-nobody true \
     --title "Store and instantiate CW template" \
     --summary "This proposal will store and instantiate the cw template contract" \
-    --deposit 10000000$DENOM -y \
+    --deposit 1000000000$DENOM -y \
     --from $WALLET_1 \
     --chain-id $CHAIN_ID \
     --gas 20000000 --gas-prices 0.005$DENOM \
     --home $HOME_1 -o json | jq -r '.txhash')
 echo "Submitting the store-instantiate proposal..."
-# echo $proposal
-# txhash=$($proposal | jq -r .txhash)
+echo $proposal | jq -r '.'
+txhash=$($proposal | jq -r .txhash)
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "Getting proposal ID from txhash..."
