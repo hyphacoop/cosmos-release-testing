@@ -32,7 +32,7 @@ proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.
 echo "[INFO]: Proposal ID: $proposal_id"
 
 echo "[INFO]: Submitting the \"yes\" vote to proposal $proposal_id..."
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
+vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
 echo $vote
 txhash=$($vote | jq -r .txhash)
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
