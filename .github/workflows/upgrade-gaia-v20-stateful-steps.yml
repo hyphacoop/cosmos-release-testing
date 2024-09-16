@@ -834,7 +834,7 @@ jobs:
       - name: _Check number of signatures on consumera after opt-out
         run: |
           set -e
-          total_signatures=$(curl -s 127.0.0.1:$CONB_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 1 ]
           then
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
