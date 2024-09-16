@@ -47,9 +47,10 @@ echo "[INFO]: Status of proposal $proposal_id"
 proposal_results=$($CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id -o json)
 echo $proposal_results | jq -r
 
-# Use code 1
-# Get contract address
-code_id=21
+# Get contract address and code ID
+last_code_id=$($CHAIN_BINARY --home $HOME_1 q wasm list-code -o json | jq -r '.code_infos[-1].code_id')
+let code_id=$last_code_id+1
+echo "[INFO]: last code ID is: $last_code_id, code_id set to: $code_id"
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "[INFO]: Contract address: $contract_address"
 
