@@ -32,7 +32,7 @@ echo "> 0. Get trusted height."
 ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
 
 hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
-TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.result[2].revision_height')
+TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq -r '.result[-2].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
 echo "> 1. Copy validator home folders."
@@ -89,7 +89,7 @@ echo "After=network-online.target"          | sudo tee /etc/systemd/system/$LC_C
 echo ""                                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
-echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $LC_CONSUMER_HOME_2" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
+echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $LC_CONSUMER_HOME_2" | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 echo ""                                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
@@ -98,7 +98,7 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$LC_C
 
 sudo systemctl enable $LC_CONSUMER_SERVICE_1 --now
 sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
-sudo systemctl status s$LC_CONSUMER_SERVICE_2
+sudo systemctl status $LC_CONSUMER_SERVICE_2
 sleep 30
 
 journalctl -u $LC_CONSUMER_SERVICE_1
