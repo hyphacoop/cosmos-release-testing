@@ -49,7 +49,7 @@ echo $proposal_results | jq -r
 
 # Use code 1
 # Get contract address
-code_id=1
+code_id=21
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "[INFO]: Contract address: $contract_address"
 
