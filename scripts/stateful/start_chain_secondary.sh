@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 # 1. Set up a one-validator chain 
 
 # Initialize home directories

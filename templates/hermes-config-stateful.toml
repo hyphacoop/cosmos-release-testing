@@ -45,9 +45,9 @@ type = "CosmosSdk"
 
 [[chains]]
 id = 'consumerb'
-rpc_addr = 'http://localhost:27201'
-grpc_addr = 'http://localhost:26201'
-event_source = { mode = 'push', url = 'ws://localhost:27201/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:57101'
+grpc_addr = 'http://localhost:56101'
+event_source = { mode = 'push', url = 'ws://localhost:57101/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'

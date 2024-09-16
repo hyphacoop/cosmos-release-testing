@@ -19,7 +19,7 @@
   }
  ],
  "metadata": "ipfs://CID",
- "deposit": "10000000uatom",
+ "deposit": "1000000000uatom",
  "title": "Set top N",
  "summary": "Update power shaping parameters",
  "expedited": false

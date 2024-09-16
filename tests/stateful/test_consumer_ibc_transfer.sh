@@ -1,5 +1,6 @@
 #!/bin/bash
 # Test IBC transfer
+set -e
 
 echo "Running with $CONSUMER_CHAIN_BINARY."
 

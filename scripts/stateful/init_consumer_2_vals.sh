@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 # Initialize a consumer chain
 source ~/env/bin/activate
 

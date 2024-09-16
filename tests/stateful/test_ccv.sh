@@ -19,7 +19,7 @@ sleep 60
 PROVIDER_POWER=$(curl -s http://localhost:$VAL1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$PROVIDER_BADDRESS'") | '.voting_power'')
 echo "[INFO] Provider voting power is now: $PROVIDER_POWER"
 
-if [ $PROVIDER_POWER -eq $PROVIDER_POWER_START ]
+if [ "$PROVIDER_POWER" == "$PROVIDER_POWER_START" ]
 then
     echo "[ERROR] Provider voting power didn't update!!!"
     exit 2
@@ -29,7 +29,7 @@ fi
 CONSUMER_POWER=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.validators[] | select(.address=="'$CONSUMER_BADDRESS'") | '.voting_power'')
 
 echo "Top validator VP: $PROVIDER_POWER (provider), $CONSUMER_POWER (consumer)"
-if [ $PROVIDER_POWER != $CONSUMER_POWER ]; then
+if [ "$PROVIDER_POWER" != "$CONSUMER_POWER" ]; then
     echo "[ERROR] Consumer chain validator set does not match the provider's."
     exit 1
 fi
