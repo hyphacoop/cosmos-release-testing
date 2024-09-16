@@ -40,6 +40,12 @@ $CHAIN_BINARY q tx $txhash --home $HOME_1
 
 echo "[INFO]: Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
+echo "[INFO]: Wait for 2 blocks"
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 10
+
+echo "[INFO]: Status of proposal $proposal_id"
+proposal_results=$($CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id -o json)
+echo $proposal_results | jq -r
 
 # Use code 1
 # Get contract address
