@@ -28,11 +28,78 @@ $CONSUMER_CHAIN_BINARY init lc2 --chain-id $CONSUMER_CHAIN_ID --home $LC_CONSUME
 
 # Validators 1 and 2 will copy the chain
 
-echo "> 0. Get trusted height"
+echo "> 0. Get trusted height."
 ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json | jq '.')
 
 TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.result[2].revision_height')
-echo "Trusted height: $TRUSTED_HEIGHT"
+echo "> Trusted height: $TRUSTED_HEIGHT"
+
+echo "> 1. Copy validator home folders."
+cp -r $CONSUMER_HOME_1 $LC_CONSUMER_HOME_1
+cp -r $CONSUMER_HOME_2 $LC_CONSUMER_HOME_2
+
+echo "> 2. Clear persistent peers."
+CON1_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $LC_CONSUMER_HOME_1)
+CON2_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $LC_CONSUMER_HOME_2)
+CON1_PEER="$CON1_NODE_ID@127.0.0.1:$LC_CON_P2P_PORT_1"
+CON2_PEER="$CON2_NODE_ID@127.0.0.1:$LC_CON_P2P_PORT_2"
+toml set --toml-path $LC_CONSUMER_HOME_1/config/config.toml p2p.persistent_peers "$CON2_PEER"
+toml set --toml-path $LC_CONSUMER_HOME_2/config/config.toml p2p.persistent_peers "$CON1_PEER"
+
+echo "> 3. Update ports..."
+toml set --toml-path $LC_CONSUMER_HOME_1/config/app.toml api.address "tcp://0.0.0.0:$LC_CON_API_PORT_1"
+toml set --toml-path $LC_CONSUMER_HOME_2/config/app.toml api.address "tcp://0.0.0.0:$LC_CON_API_PORT_2"
+toml set --toml-path $LC_CONSUMER_HOME_1/config/app.toml grpc.address "0.0.0.0:$LC_CON_GRPC_PORT_1"
+toml set --toml-path $LC_CONSUMER_HOME_2/config/app.toml grpc.address "0.0.0.0:$LC_CON_GRPC_PORT_2"
+toml set --toml-path $LC_CONSUMER_HOME_1/config/config.toml rpc.laddr "tcp://0.0.0.0:$LC_CON_RPC_PORT_1"
+toml set --toml-path $LC_CONSUMER_HOME_2/config/config.toml rpc.laddr "tcp://0.0.0.0:$LC_CON_RPC_PORT_2"
+toml set --toml-path $LC_CONSUMER_HOME_1/config/config.toml rpc.pprof_laddr "127.0.0.1:$LC_CON_PPROF_PORT_1"
+toml set --toml-path $LC_CONSUMER_HOME_2/config/config.toml rpc.pprof_laddr "127.0.0.1:$LC_CON_PPROF_PORT_2"
+toml set --toml-path $LC_CONSUMER_HOME_1/config/config.toml p2p.laddr "tcp://0.0.0.0:$LC_CON_P2P_PORT_1"
+toml set --toml-path $LC_CONSUMER_HOME_2/config/config.toml p2p.laddr "tcp://0.0.0.0:$LC_CON_P2P_PORT_2"
+
+echo "> 4. Wipe the address book..."
+echo "{}" > $LC_CONSUMER_HOME_1/config/addrbook.json
+echo "{}" > $LC_CONSUMER_HOME_2/config/addrbook.json
+
+echo "> 5. Set up new services..."
+
+sudo touch /etc/systemd/system/$LC_CONSUMER_SERVICE_1
+echo "[Unit]"                               | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1
+echo "Description=Consumer service"         | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "After=network-online.target"          | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo ""                                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "[Service]"                            | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "User=$USER"                           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $LC_CONSUMER_HOME_1" | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "Restart=no"                           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo ""                                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "[Install]"                            | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_1 -a
+
+sudo touch /etc/systemd/system/$LC_CONSUMER_SERVICE_2
+echo "[Unit]"                               | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2
+echo "Description=Consumer service"         | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "After=network-online.target"          | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo ""                                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "[Service]"                            | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "User=$USER"                           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_2" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
+echo "Restart=no"                           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo ""                                     | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "[Install]"                            | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
+
+sudo systemctl enable $LC_CONSUMER_SERVICE_1 --now
+sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
+sleep 30
+
+journalctl -u $LC_CONSUMER_SERVICE_1
+
+echo "> 6. Update the light client of the consumer chain on the provider chain."
+hermes --config ~/.hermes/config-lc.toml update client --client 07-tendermint-0 --host-chain $CHAIN_ID --trusted-height $TRUSTED_HEIGHT
 
 exit 0
 
