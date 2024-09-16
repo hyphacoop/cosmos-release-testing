@@ -39,18 +39,7 @@ upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
 # Auto download: Set the binary paths need for the proposal message
 if [ $COSMOS_SDK == "v45" ]; then
     proposal="$CHAIN_BINARY --output json tx gov submit-proposal software-upgrade $upgrade_name --from $WALLET_1 --keyring-backend test --upgrade-height $upgrade_height --upgrade-info $upgrade_info --title gaia-upgrade --description 'test' --chain-id $CHAIN_ID --deposit $VAL3_STAKE$DENOM --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
-elif [ $COSMOS_SDK == "v47" ]; then
-    echo "Starting proposal:"
-    jq '.' templates/proposal-software-upgrade.json
-    # Set up metadata
-    jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-software-upgrade.json > upgrade-1.json
-    jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
-    jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
-    jq -r '.expedited |= true' upgrade-3.json > upgrade-4.json
-    echo "Modified proposal:"
-    jq '.' upgrade-4.json
-    proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
-elif [ $COSMOS_SDK == "v50" ]; then
+else
     echo "Starting proposal:"
     jq '.' templates/proposal-software-upgrade.json
     # Set up metadata
@@ -131,7 +120,7 @@ else
         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
         git clone https://github.com/cosmos/gaia.git
         cd gaia
-        git checkout main
+        git checkout v20.0.0-rc0
         make install
         cd ..
     else
