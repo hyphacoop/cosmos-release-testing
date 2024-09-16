@@ -15,24 +15,13 @@ LC_CON_P2P_PORT_2=61232
 LC_CON_PPROF_PORT_1=60142
 LC_CON_PPROF_PORT_2=60242
 
-# echo "Setting up consumer nodes..."
-# $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $LC_CONSUMER_HOME_1
-# $CONSUMER_CHAIN_BINARY config keyring-backend test --home $LC_CONSUMER_HOME_1
-# $CONSUMER_CHAIN_BINARY config node tcp://localhost:$LC_CON_RPC_PORT_1 --home $LC_CONSUMER_HOME_1
-# $CONSUMER_CHAIN_BINARY init lc1 --chain-id $CONSUMER_CHAIN_ID --home $LC_CONSUMER_HOME_1
-
-# $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $LC_CONSUMER_HOME_2
-# $CONSUMER_CHAIN_BINARY config keyring-backend test --home $LC_CONSUMER_HOME_2
-# $CONSUMER_CHAIN_BINARY config node tcp://localhost:$LC_CON_RPC_PORT_2 --home $LC_CONSUMER_HOME_2
-# $CONSUMER_CHAIN_BINARY init lc2 --chain-id $CONSUMER_CHAIN_ID --home $LC_CONSUMER_HOME_2
-
 # Validators 1 and 2 will copy the chain
 
 echo "> 0. Get trusted height."
 ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
 
 hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
-TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq -r '.result[-2].revision_height')
+TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq -r '.result[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
 echo "> 1. Copy validator home folders."
