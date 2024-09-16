@@ -31,6 +31,7 @@ LC_CON_PPROF_PORT_2=60242
 echo "> 0. Get trusted height."
 ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
 
+hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
 TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.result[2].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
