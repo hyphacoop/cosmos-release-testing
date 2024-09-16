@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Generic submit proposal script
 # ./submit_proposal.sh <path/to/prop/file> 

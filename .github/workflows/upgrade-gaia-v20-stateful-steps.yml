@@ -174,8 +174,7 @@ jobs:
         with:
           go-version: ${{ vars.GO_VER }}
       - name: Consumer chain binary URLs
-        run: |
-          echo "$CONSUMER_CHAIN_BINARY runs off $CONSUMER_CHAIN_BINARY_URL"
+        run: echo "$CONSUMER_CHAIN_BINARY runs off $CONSUMER_CHAIN_BINARY_URL"
       - name: Update PATH
         run: |
           echo "$HOME/go/bin" >> $GITHUB_PATH
@@ -219,6 +218,7 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 12600
       - name: Check block hashes on both nodes
         run: |
+          set -e
           latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
@@ -237,6 +237,7 @@ jobs:
           $CHAIN_BINARY keys list --home $HOME_2
       - name: Get starting balances
         run: |
+          set -e
           echo "[INFO] val1:"
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
@@ -245,6 +246,7 @@ jobs:
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
       - name: Migration query consumer-chain 0 (neutron-1)
         run: |
+          set -e
           $CHAIN_BINARY --home $HOME_1 q provider consumer-chain 0 -o json | jq '.'
           json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 0 -o json)
           chain_id=$(echo $json | jq -r '.chain_id')
@@ -263,6 +265,7 @@ jobs:
           fi
       - name: Migration query consumer-chain 1 (stride-1)
         run: |
+          set -e
           $CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json | jq '.'
           json=$($CHAIN_BINARY --home $HOME_1 q provider consumer-chain 1 -o json)
           chain_id=$(echo $json | jq -r '.chain_id')
@@ -292,6 +295,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q staking params
       - name: Update templates/proposal-add-template.json unbonding time
         run: |
+          set -e
           # unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000000000" | bc)
           # jq ". .unbonding_period=$unbonding_period" templates/proposal-add-template.json > proposal-add-template.json
           echo "$CONSUMER_UNBOND_TIME"
@@ -313,6 +317,7 @@ jobs:
         run: $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
       - name: Check BlocksPerEpoch is 1
         run: |
+          set -e
           BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
           echo "BlocksPerEpoch is: $BPE"
           if [ $BPE != 1 ]
@@ -322,6 +327,7 @@ jobs:
           fi
       - name: Create val2 validator
         run: |
+          set -e
           echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
           $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 1000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           echo "[INFO]: Wait for one block to pass"
@@ -344,8 +350,7 @@ jobs:
           echo "[INFO]: Query staking validators"
           $CHAIN_BINARY --home $HOME_2 query staking validators
       - name: Check tendermint validators
-        run: |
-          $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
+        run: $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
       - name: Check validator set is 1
         run: |
           $CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.'
@@ -357,6 +362,7 @@ jobs:
           fi
       - name: Check number of signatures
         run: |
+          set -e
           total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 1 ]
           then
@@ -437,6 +443,7 @@ jobs:
       #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: Get wallet balances
         run: |
+          set -e
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: _Test permissioned cosmwasm
@@ -449,6 +456,7 @@ jobs:
         run: scripts/stateful/setup_relayer.sh
       - name: Download consumer chain binaries
         run: |
+          set -e
           wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
           chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
           wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
@@ -458,6 +466,7 @@ jobs:
         env:
           START_VERSION: ${{ vars.ICA_CHAIN_GAIA_VERSION }}
         run: |
+          set -e
           export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
           echo "Chain binary URL: $CHAIN_BINARY_URL"
           echo "Installing secondary chain binary..."
@@ -496,6 +505,7 @@ jobs:
         env:
           CHAIN_HOME: /home/runner/.val1
         run: |
+          set -e
           screen -XS hermes.service quit || true
           killall hermes || true
           sleep 1
@@ -522,8 +532,7 @@ jobs:
         env:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
-        run: |
-          tests/stateful/test_ica_controller.sh 
+        run: tests/stateful/test_ica_controller.sh 
       - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
@@ -544,6 +553,7 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
       - name: Check block hashes on both consumer nodes
         run: |
+          set -e
           latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
@@ -570,6 +580,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
       - name: Check number of signatures on consumera
         run: |
+          set -e
           total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 2 ]
           then
@@ -580,6 +591,7 @@ jobs:
           fi
       - name: Establish CCV channel for consumer a
         run: |
+          set -e
           screen -XS hermes.service quit || true
           killall hermes || true
           sleep 1
@@ -599,7 +611,7 @@ jobs:
         env:
           CONSUMER_CHAIN_ID: consumera
         run: |
-          set -x
+          set -e
           client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
           echo "Client ID: $client_id"
           connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
@@ -646,6 +658,7 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $CONB2_RPC_PORT 10
       - name: Check block hashes on both consumerb nodes
         run: |
+          set -e
           latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
@@ -662,6 +675,7 @@ jobs:
           fi
       - name: Check number of signatures on consumerb
         run: |
+          set -e
           total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 1 ]
           then
@@ -672,6 +686,7 @@ jobs:
           fi
       - name: Establish CCV channel for consumerb
         run: |
+          set -e
           screen -XS hermes.service quit || true
           killall hermes || true
           sleep 1
@@ -702,7 +717,6 @@ jobs:
           CONSUMER_SERVICE_1: conb1.service
           CONSUMER_SERVICE_2: conb2.service
         run: |
-          set -x
           set -e
           client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
           echo "Client ID: $client_id"
@@ -727,6 +741,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
       - name: Opt-in second validator to consumerb
         run: |
+          set -e
           echo "[INFO] Optin second validator"
           node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_2 tendermint show-validator)
           json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
@@ -751,6 +766,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
       - name: _Check number of signatures on consumerb
         run: |
+          set -e
           total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 2 ]
           then
@@ -762,6 +778,7 @@ jobs:
       # Opt-out consumerb
       - name: Opt-out second validator to consumerb
         run: |
+          set -e
           echo "[INFO] Opt-out second validator"
           json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID_TOPN }} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
           txhash=$(echo "$json" | jq -r .txhash)
@@ -785,6 +802,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
       - name: _Check number of signatures on consumerb after opt-out
         run: |
+          set -e
           total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 1 ]
           then
@@ -796,6 +814,7 @@ jobs:
       # Opt-out consumera
       - name: Opt-out second validator to consumera
         run: |
+          set -e
           echo "[INFO] Opt-out second validator"
           json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID }} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
           txhash=$(echo "$json" | jq -r .txhash)
@@ -814,6 +833,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID }} -o json | jq -r '.'
       - name: _Check number of signatures on consumera after opt-out
         run: |
+          set -e
           total_signatures=$(curl -s 127.0.0.1:$CONB_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
           if [ $total_signatures != 1 ]
           then
@@ -854,24 +874,24 @@ jobs:
         # env:
         #   CON1_RPC_PORT: 27201
         run: tests/stateful/test_ccv_epoch.sh 100
-      - name: Test expedited proposal
+      - name: _Test expedited proposal
         run: |
           export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
           echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
           tests/stateful/gaia-v18/test_expedited_proposal.sh
-      - name: Print block params
-        run: |
-          params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
-          echo "$params"
-      - name: Set block params
-        env:
-          MAX_BYTES: 1000000
-          MAX_GAS: 100000000
-          EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
-          EVIDENCE_MAX_AGE_DURATION: 172800s
-          EVIDENCE_MAX_BYTES: 50000
-        run: |
-          scripts/stateful/set_block_size.sh
+      # - name: Print block params
+      #   run: |
+      #     params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
+      #     echo "$params"
+      # - name: Set block params
+      #   env:
+      #     MAX_BYTES: 1000000
+      #     MAX_GAS: 100000000
+      #     EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
+      #     EVIDENCE_MAX_AGE_DURATION: 172800s
+      #     EVIDENCE_MAX_BYTES: 50000
+      #   run: |
+      #     scripts/stateful/set_block_size.sh
       # - name: Query feemarket params
       #   run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
       # - name: Set feemarket params

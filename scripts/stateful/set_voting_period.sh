@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # usage:
 # ./set_voting_period.sh path/to/prop.json

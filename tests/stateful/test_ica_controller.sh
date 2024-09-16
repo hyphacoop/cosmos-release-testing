@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "Getting connection ID from controller"
 # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')

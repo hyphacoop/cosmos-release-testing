@@ -1,8 +1,7 @@
 #!/bin/bash
 # Test transactions with a fresh state.
 
-set +e
-set -x 
+set -e
 
 check_code()
 {
