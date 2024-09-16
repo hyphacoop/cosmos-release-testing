@@ -5,6 +5,11 @@ INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
+# Get last code_id
+last_code_id=$($CHAIN_BINARY --home $HOME_1 q wasm list-code -o json | jq -r '.code_infos[-1].code_id')
+let code_id=$last_code_id+1
+echo "[INFO]: last code ID is: $last_code_id, code_id set to: $code_id"
+
 echo "[INFO]: Store contract.wasm"
 $CHAIN_BINARY tx wasm store tests/gaia-v18/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1 -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
@@ -47,10 +52,7 @@ echo "[INFO]: Status of proposal $proposal_id"
 proposal_results=$($CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id -o json)
 echo $proposal_results | jq -r
 
-# Get contract address and code ID
-last_code_id=$($CHAIN_BINARY --home $HOME_1 q wasm list-code -o json | jq -r '.code_infos[-1].code_id')
-let code_id=$last_code_id+1
-echo "[INFO]: last code ID is: $last_code_id, code_id set to: $code_id"
+# Get contract address
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "[INFO]: Contract address: $contract_address"
 
