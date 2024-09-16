@@ -2,14 +2,14 @@
 # Set up a relayer and IBC channels
 source ~/env/bin/activate
 
-set -e
-
 PROVIDER_CLIENT=$1
 
 # Clear existing installation
 rm -rf ~/.hermes
 rm hermes
 rm hermes*gz
+
+set -e
 
 echo "Downloading Hermes..."
 wget -O  hermes.tar.gz https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz
