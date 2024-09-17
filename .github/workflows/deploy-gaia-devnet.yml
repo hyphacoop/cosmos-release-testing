@@ -129,14 +129,14 @@ jobs:
           NODE_HOME: /home/sysadmin/.gaia
         run: |
           rm $NODE_HOME/config/addrbook.json
-          pubkey=$(jq -r .pub_key.value $NODE_HOME/.gaia/config/priv_validator_key.json)
-          privkey=$(jq -r .priv_key.value $NODE_HOME/.gaia/config/priv_validator_key.json)
+          pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
+          privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
           sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
           sed -i -e '/enable =/ s/= .*/= false/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
-          screen -L -Logfile /home/sysadmin/artifact/gaiad_fork.log -S gaiad -d -m /home/sysadmin/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx --validator-pubkey "$pubkey" --accounts-to-fund cosmos1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4x37ym4 --validator-privkey "$privkey" --home /home/sysadmin/.gaia
+          screen -L -Logfile /home/sysadmin/artifact/gaiad_fork.log -S gaiad -d -m /home/sysadmin/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx --validator-pubkey "$pubkey" --accounts-to-fund cosmos1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4x37ym4 --validator-privkey "$privkey" --home $NODE_HOME
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
