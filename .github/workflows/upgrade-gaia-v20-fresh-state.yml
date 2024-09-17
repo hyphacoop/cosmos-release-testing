@@ -340,12 +340,6 @@
           run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
         - name: _RPC endpoints check
           run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
-        - name: Print consensus and feemarket params
-          run: |
-            echo "> consensus params:"
-            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
-            echo "> feemarket params:"
-            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
 
     Baseline-2-ics-optin:
       runs-on: ubuntu-22.04
@@ -2698,3 +2692,24 @@
         - name: _Test feemarket
           run: |
             tests/test_feemarket.sh
+
+        - name: Print consensus and feemarket params
+          run: |
+            echo "> consensus params:"
+            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+            echo "> feemarket params:"
+            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+        - name: Change consensus and feemarket params
+          run: |
+            txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            echo "tx hash: $txhash"
+            sleep $(($COMMIT_TIMEOUT+2))
+            prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
+            $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+            sleep $(($VOTING_PERIOD+2))
+        - name: Print consensus and feemarket params
+          run: |
+            echo "> consensus params:"
+            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+            echo "> feemarket params:"
+            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
