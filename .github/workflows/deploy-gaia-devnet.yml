@@ -45,6 +45,10 @@ jobs:
         run: rm -rf /home/sysadmin/.gaia
       - name: Remove repo ~/gaia
         run: rm -rf /home/sysadmin/gaia
+      - name: Remove old artifacts
+        run: |
+          sudo rm -rf ~/artifact/
+          mkdir ~/artifact/
       - name: Build gaiad from source
         run: |
           cd /home/sysadmin
@@ -176,17 +180,14 @@ jobs:
           systemctl stop gaiad
       - name: Compress and upload files
         run: |
-          echo "Compressing ~/.gaia ..."
-          cd /home/sysadmin/
-          tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
+          echo "[INFO]: Creating archive ..."
+          cd /home/sysadmin/.gaia
+          mv data/priv_validator_state.json ../
+          echo "${{ env.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
+          tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
+          # Remove old archives
+          echo "[INFO]: Removing old archives"
+          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz
           echo "Uploading archived state to files.polypore.xyz"
-          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/
-          # Update latest file symlinks
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: export-cosmos-hub-mainnet
-          path: ~/artifact/
+          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
  
