@@ -192,7 +192,7 @@ jobs:
           #tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
           # Remove old archives
           echo "[INFO]: Removing old archives from files.polypore.xyz"
-          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz
+          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
           echo "[INFO]: Cleaning up..."
