@@ -51,6 +51,10 @@ jobs:
         run: |
           sudo rm -rf ~/artifact/
           mkdir ~/artifact/
+      - name: Remove old archives on files.polypore.xyz
+        run: |
+          echo "[INFO]: Removing old archives from files.polypore.xyz"
+          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
       - name: Build gaiad from source
         run: |
           cd /home/sysadmin
@@ -187,15 +191,11 @@ jobs:
         run: |
           echo "[INFO]: Creating archive ..."
           cd /home/sysadmin/.gaia
-          mv data/priv_validator_state.json ../
+          mv data/priv_validator_state.json ./priv_validator_state.json
           echo "${{ env.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
           tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
-          # Remove old archives
-          echo "[INFO]: Removing old archives from files.polypore.xyz"
-          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
           echo "Uploading archived state to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
           echo "[INFO]: Cleaning up..."
-          mv priv_validator_state.json data/
+          mv ./priv_validator_state.json data/
           rm ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz
-          
