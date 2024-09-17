@@ -43,159 +43,169 @@ jobs:
       # Wipe chain
       - name: Stop gaiad service
         run: sudo systemctl disable --now gaiad
-      - name: Remove ~/.gaia
-        run: rm -rf /home/sysadmin/.gaia
-      - name: Remove repo ~/gaia
-        run: rm -rf /home/sysadmin/gaia
-      - name: Remove old artifacts
-        run: |
-          sudo rm -rf ~/artifact/
-          mkdir ~/artifact/
-      - name: Remove old archives on files.polypore.xyz
-        run: |
-          echo "[INFO]: Removing old archives from files.polypore.xyz"
-          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
-      - name: Build gaiad from source
-        run: |
-          cd /home/sysadmin
-          git clone https://github.com/cosmos/gaia.git
-          cd gaia
-          git checkout ${{ env.RUNNING_VERSION }}
-          make build
-          make install
-      - name: Initializing chain to sync with mainnet
+      # - name: Remove ~/.gaia
+      #   run: rm -rf /home/sysadmin/.gaia
+      # - name: Remove repo ~/gaia
+      #   run: rm -rf /home/sysadmin/gaia
+      # - name: Remove old artifacts
+      #   run: |
+      #     sudo rm -rf ~/artifact/
+      #     mkdir ~/artifact/
+      # - name: Remove old archives on files.polypore.xyz
+      #   run: |
+      #     echo "[INFO]: Removing old archives from files.polypore.xyz"
+      #     ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
+      # - name: Build gaiad from source
+      #   run: |
+      #     cd /home/sysadmin
+      #     git clone https://github.com/cosmos/gaia.git
+      #     cd gaia
+      #     git checkout ${{ env.RUNNING_VERSION }}
+      #     make build
+      #     make install
+      # - name: Initializing chain to sync with mainnet
+      #   env:
+      #     NODE_HOME: /home/sysadmin/.gaia
+      #     NODE_MONIKER: mainnet-export
+      #     SERVICE_NAME: mainnet-export
+      #     CHAIN_ID: cosmoshub-4
+      #     CHAIN_BINARY: 'gaiad'
+      #     GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
+      #     GAS_PRICES: "0.0025uatom"
+      #   run: |
+      #     echo "Initializing $NODE_HOME..."
+      #     $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+      #     $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+      #     $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+      #     $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+      #     sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+      #     echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
+      #     echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
+      #     echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
+      #     echo "Replaceing genesis..."
+      #     wget -nv $GENESIS_URL -O genesis.json.gz
+      #     gunzip genesis.json.gz
+      #     mv genesis.json $NODE_HOME/config/genesis.json
+      # - name: Get archive url
+      #   run: |
+      #     # Node Stake
+      #     SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+      #     echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
+      #     # Polkachu
+      #     # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
+      #     # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
+      # - name: Download snapshot
+      #   run: |
+      #     cd ~/.gaia
+      #     curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
+      #     sudo chown -R sysadmin:sysadmin ~/.gaia
+      # - name: Get addrbook
+      #   run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/sysadmin/.gaia/config/addrbook.json
+      # - name: Start Chain
+      #   env:
+      #     NODE_HOME: /home/sysadmin/.gaia
+      #     CHAIN_BINARY: 'gaiad'
+      #   run: sudo systemctl start gaiad
+      # - name: Wait for gaiad to start and stabilize
+      #   run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
+      # - name: Syncing Chain
+      #   run: |
+      #     catching_up="true"
+      #     while [ $catching_up == "true" ]
+      #     do
+      #       status_json=$(curl -s 127.0.0.1:26657/status)
+      #       catching_up=$(echo $status_json | jq -r .result.sync_info.catching_up)
+      #       cur_block=$(echo $status_json | jq -r .result.sync_info.latest_block_height)
+      #       echo "Still Syncing: $catching_up, block $cur_block"
+      #       sleep 5
+      #     done
+      #     echo "Done Syncing"
+      # - name: Stop gaiad
+      #   run: |
+      #     sudo systemctl stop gaiad
+      #     sleep 10
+      # - name: Build fork tool
+      #   run: |
+      #     cd /home/sysadmin/gaia
+      #     git checkout ${{ vars.FORK_TOOL_TAG }}
+      #     make build BUILD_TAGS="-tag unsafe_start_local_validator"
+      #     cp build/gaiad /home/sysadmin/go/bin/gaiad-fork
+      # - name: Fork the chain
+      #   env:
+      #     NODE_HOME: /home/sysadmin/.gaia
+      #   run: |
+      #     rm $NODE_HOME/config/addrbook.json
+      #     pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
+      #     privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
+      #     sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+      #     sed -i -e '/enable =/ s/= .*/= false/' $NODE_HOME/config/config.toml
+      #     sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
+      #     sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
+      #     sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+      #     screen -L -Logfile /home/sysadmin/artifact/gaiad_fork.log -S gaiad -d -m /home/sysadmin/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx --validator-pubkey "$pubkey" --accounts-to-fund cosmos1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4x37ym4 --validator-privkey "$privkey" --home $NODE_HOME
+      #     screen -r gaiad -p0 -X logfile flush 0
+      # - name: Wait for gaiad to start and stabilize
+      #   run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      # - name: Stop fork tool
+      #   run: |
+      #     echo "exiting gaia and screen"
+      #     killall gaiad-fork screen
+      #     sleep 10s
+      # - name: Start gaiad
+      #   run: sudo systemctl start gaiad
+      # - name: Wait for gaiad to start and stabilize
+      #   run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      # - name: Submit and vote on the upgrade proposal
+      #   run: |
+      #     echo "Restoring validator key"
+      #     echo "${{ secrets.VAL_WALLET_KEY }}" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      #     echo "Delegate 10ATOM to validator."
+      #     gaiad tx staking delegate cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+      #     echo "Wait for the delegation to go on chain..."
+      #     tests/test_block_production.sh 127.0.0.1 26657 1 10
+      #     current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+      #     upgrade_height=$(($current_block+20))
+      #     echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+      #     echo "Submitting the upgrade proposal..."
+      #     echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
+      #     echo "Creating json proposal"
+      #     jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+      #     proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000000uatom --from val --yes"
+      #     $proposal
+      #     txhash=$($proposal | jq -r .txhash)
+      #     echo "Wait for the proposal to go on chain..."
+      #     tests/test_block_production.sh 127.0.0.1 26657 1 1
+      #     echo "Get proposal ID from txhash..."
+      #     proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+      #     echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+      #     vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+      #     $vote
+      # - name: Stop gaiad when reached upgrade height
+      #   run: |
+      #     current_block=0
+      #     echo "Upgrade height is: ${{ env.upgrade_height }}"
+      #     ( journalctl -fu gaiad & ) | grep -q "CONSENSUS FAILURE"
+      #     echo "exiting gaia and screen"
+      #     sudo systemctl stop gaiad
+      # - name: Compress and upload files
+      #   run: |
+      #     echo "[INFO]: Creating archive ..."
+      #     cd /home/sysadmin/.gaia
+      #     mv data/priv_validator_state.json ./priv_validator_state.json
+      #     echo "${{ env.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
+      #     tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
+      #     echo "Uploading archived state to files.polypore.xyz"
+      #     scp -6 -v ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
+      #     echo "[INFO]: Cleaning up..."
+      #     mv ./priv_validator_state.json data/
+      #     rm ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz
+      - name: Build gaiad
         env:
-          NODE_HOME: /home/sysadmin/.gaia
-          NODE_MONIKER: mainnet-export
-          SERVICE_NAME: mainnet-export
-          CHAIN_ID: cosmoshub-4
-          CHAIN_BINARY: 'gaiad'
-          GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
-          GAS_PRICES: "0.0025uatom"
-        run: |
-          echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
-          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
-          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
-          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
-          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
-          echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
-          echo "Replaceing genesis..."
-          wget -nv $GENESIS_URL -O genesis.json.gz
-          gunzip genesis.json.gz
-          mv genesis.json $NODE_HOME/config/genesis.json
-      - name: Get archive url
-        run: |
-          # Node Stake
-          SNAP_NAME=$(curl -s https://ss.cosmos.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
-          echo "ARCHIVE_URL=https://ss.cosmos.nodestake.org/${SNAP_NAME}" >> $GITHUB_ENV
-          # Polkachu
-          # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
-          # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
-      - name: Download snapshot
-        run: |
-          cd ~/.gaia
-          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
-          sudo chown -R sysadmin:sysadmin ~/.gaia
-      - name: Get addrbook
-        run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/sysadmin/.gaia/config/addrbook.json
-      - name: Start Chain
-        env:
-          NODE_HOME: /home/sysadmin/.gaia
-          CHAIN_BINARY: 'gaiad'
-        run: sudo systemctl start gaiad
-      - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
-      - name: Syncing Chain
-        run: |
-          catching_up="true"
-          while [ $catching_up == "true" ]
-          do
-            status_json=$(curl -s 127.0.0.1:26657/status)
-            catching_up=$(echo $status_json | jq -r .result.sync_info.catching_up)
-            cur_block=$(echo $status_json | jq -r .result.sync_info.latest_block_height)
-            echo "Still Syncing: $catching_up, block $cur_block"
-            sleep 5
-          done
-          echo "Done Syncing"
-      - name: Stop gaiad
-        run: |
-          sudo systemctl stop gaiad
-          sleep 10
-      - name: Build fork tool
+          DEVNET_BRANCH: v20.0.0-rc0
         run: |
           cd /home/sysadmin/gaia
-          git checkout ${{ vars.FORK_TOOL_TAG }}
-          make build BUILD_TAGS="-tag unsafe_start_local_validator"
-          cp build/gaiad /home/sysadmin/go/bin/gaiad-fork
-      - name: Fork the chain
-        env:
-          NODE_HOME: /home/sysadmin/.gaia
-        run: |
-          rm $NODE_HOME/config/addrbook.json
-          pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
-          privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
-          sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
-          sed -i -e '/enable =/ s/= .*/= false/' $NODE_HOME/config/config.toml
-          sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
-          sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
-          sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
-          screen -L -Logfile /home/sysadmin/artifact/gaiad_fork.log -S gaiad -d -m /home/sysadmin/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx --validator-pubkey "$pubkey" --accounts-to-fund cosmos1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4x37ym4 --validator-privkey "$privkey" --home $NODE_HOME
-          screen -r gaiad -p0 -X logfile flush 0
-      - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
-      - name: Stop fork tool
-        run: |
-          echo "exiting gaia and screen"
-          killall gaiad-fork screen
-          sleep 10s
+          git checkout ${{ env.DEVNET_BRANCH }}
+          make build
+          make install
       - name: Start gaiad
-        run: sudo systemctl start gaiad
-      - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
-      - name: Submit and vote on the upgrade proposal
-        run: |
-          echo "Restoring validator key"
-          echo "${{ secrets.VAL_WALLET_KEY }}" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
-          echo "Delegate 10ATOM to validator."
-          gaiad tx staking delegate cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
-          echo "Wait for the delegation to go on chain..."
-          tests/test_block_production.sh 127.0.0.1 26657 1 10
-          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
-          upgrade_height=$(($current_block+20))
-          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
-          echo "Submitting the upgrade proposal..."
-          echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
-          echo "Creating json proposal"
-          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
-          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000000uatom --from val --yes"
-          $proposal
-          txhash=$($proposal | jq -r .txhash)
-          echo "Wait for the proposal to go on chain..."
-          tests/test_block_production.sh 127.0.0.1 26657 1 1
-          echo "Get proposal ID from txhash..."
-          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
-          $vote
-      - name: Stop gaiad when reached upgrade height
-        run: |
-          current_block=0
-          echo "Upgrade height is: ${{ env.upgrade_height }}"
-          ( journalctl -fu gaiad & ) | grep -q "CONSENSUS FAILURE"
-          echo "exiting gaia and screen"
-          sudo systemctl stop gaiad
-      - name: Compress and upload files
-        run: |
-          echo "[INFO]: Creating archive ..."
-          cd /home/sysadmin/.gaia
-          mv data/priv_validator_state.json ./priv_validator_state.json
-          echo "${{ env.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
-          tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
-          echo "Uploading archived state to files.polypore.xyz"
-          scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
-          echo "[INFO]: Cleaning up..."
-          mv ./priv_validator_state.json data/
-          rm ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz
+        run: sudo systemctl enable --now gaiad
