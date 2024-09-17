@@ -87,11 +87,11 @@ mv ica_host.json $HOME_1/config/genesis.json
 # jq '.app_state.interchainaccounts' $HOME_1/config/genesis.json
 
 echo "Patching genesis for 2m bytes block size..."
-jq -r '.consensus_params.block.max_bytes = "2000000"' $HOME_1/config/genesis.json > blocksize.json
+jq -r '.consensus.params.block.max_bytes = "2000000"' $HOME_1/config/genesis.json > blocksize.json
 cp blocksize.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for 100_000_000 gas..."
-jq -r '.consensus_params.block.max_gas = "100000000"' $HOME_1/config/genesis.json > maxgas.json
+jq -r '.consensus.params.block.max_gas = "100000000"' $HOME_1/config/genesis.json > maxgas.json
 cp maxgas.json $HOME_1/config/genesis.json
 
 # Introduced in Gaia v19 upgrade workflow
