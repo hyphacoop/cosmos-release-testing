@@ -92,6 +92,7 @@ jobs:
         run: |
           cd ~/.gaia
           curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
+          sudo chown -R sysadmin:sysadmin ~/.gaia
       - name: Get addrbook
         run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/sysadmin/.gaia/config/addrbook.json
       - name: Start Chain
