@@ -4,7 +4,7 @@ LC_CONSUMER_HOME_1=/home/runner/.lc1
 LC_CONSUMER_HOME_2=/home/runner/.lc2
 LC_CONSUMER_SERVICE_1=lc_consumer_1.service
 LC_CONSUMER_SERVICE_2=lc_consumer_2.service
-LC_CON_API_PORT_1=60102
+LC_CON_API_PORT_1=61102
 LC_CON_API_PORT_2=61202
 LC_CON_GRPC_PORT_1=60112
 LC_CON_GRPC_PORT_2=60212
@@ -87,7 +87,6 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$LC_C
 
 sudo systemctl enable $LC_CONSUMER_SERVICE_1 --now
 sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
-sudo systemctl status $LC_CONSUMER_SERVICE_2
 sleep 30
 
 journalctl -u $LC_CONSUMER_SERVICE_1
