@@ -1,5 +1,7 @@
 ---
 name: Deploy gaia-devnet node
+concurrency:
+  group: gaia-devnet-deploy
 on:
   workflow_dispatch:
   push:
