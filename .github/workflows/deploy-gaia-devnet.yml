@@ -188,8 +188,8 @@ jobs:
           echo "[INFO]: Creating archive ..."
           cd /home/sysadmin/.gaia
           mv data/priv_validator_state.json ../
-          echo "${{ env.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
-          tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
+          #echo "${{ env.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
+          #tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz data wasm
           # Remove old archives
           echo "[INFO]: Removing old archives from files.polypore.xyz"
           ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz
