@@ -2705,8 +2705,10 @@
             echo "tx hash: $txhash"
             sleep $(($COMMIT_TIMEOUT+2))
             prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
+            echo "> Proposal ID: $prop_id"
             $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-            sleep $(($VOTING_PERIOD+2))
+            sleep $VOTING_PERIOD
+            sleep $(($COMMIT_TIMEOUT+2))
         - name: Print consensus and feemarket params
           run: |
             echo "> consensus params:"
