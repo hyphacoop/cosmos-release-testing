@@ -2587,7 +2587,7 @@
           run: |
             tests/gaia-v19/test_cosmwasm.sh
 
-    Baseline-13-feemarket:
+    Baseline-11-feemarket:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
       strategy:
@@ -2670,6 +2670,13 @@
         - name: _Test feemarket
           run: |
             tests/test_feemarket.sh
+
+        - name: Print consensus and feemarket params
+          run: |
+            echo "> consensus params:"
+            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+            echo "> feemarket params:"
+            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
 
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
