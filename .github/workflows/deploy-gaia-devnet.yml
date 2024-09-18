@@ -195,7 +195,7 @@ jobs:
           upgrade_height: 22242439
         run: |
           # echo "[INFO]: Creating archive ..."
-          # cd /home/sysadmin/.gaia
+          cd /home/sysadmin/.gaia
           # mv data/priv_validator_state.json ./priv_validator_state.json
           # echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
           # tar --use-compress-program="pigz --best --recursive" -cf gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
