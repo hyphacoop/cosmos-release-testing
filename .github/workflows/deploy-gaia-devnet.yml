@@ -194,8 +194,10 @@ jobs:
           mv data/priv_validator_state.json ./priv_validator_state.json
           echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
           tar --use-compress-program="pigz --best --recursive" -cf gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
-          echo "Uploading archived state to files.polypore.xyz"
+          echo "[INFO]: Uploading archived state to files.polypore.xyz"
           scp -6 gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
+          echo "[INFO]: Updating symlink"
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/gaia-devnet/gaia-devnet-${{ env.upgrade_height }}.tar.gz /var/www/html/gaia-devnet/latest.tar.gz
           echo "[INFO]: Cleaning up..."
           mv ./priv_validator_state.json data/
           rm gaia-devnet-${{ env.upgrade_height }}.tar.gz
