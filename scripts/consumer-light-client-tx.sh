@@ -133,21 +133,15 @@ tee lc_misbehaviour.json<<EOF
 }
 EOF
 
-jq '.' misbehaviour.json
-exit 0
+jq '.' lc_misbehaviour.json
 
+echo "> Submit misbehaviour to provider"
 
-echo "Hermes:"
-journalctl -u hermes | tail -n 100
-echo "consumer 1:"
-journalctl -u $CONSUMER_SERVICE_1 | tail -n 20
-echo "consumer 1 lc:"
-journalctl -u $LC_CONSUMER_SERVICE_1 | tail -n 20
-echo "validator 1:"
-journalctl -u $PROVIDER_SERVICE_1 | tail -n 10
+$CHAIN_BINARY tx  provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --home $HOME_1 -y 
+sleep 10
 
-$CHAIN_BINARY q ibc client status 07-tendermint-0 --home $HOME_1
-$CHAIN_BINARY q ibc client state 07-tendermint-0 -o json --home $HOME_1 | jq '.'
-$CHAIN_BINARY q ibc client state 07-tendermint-0 -o json --home $HOME_1 | jq -r '.client_state.frozen_height'
+$CHAIN_BINARY q ibc client status $client_id --home $HOME_1
+$CHAIN_BINARY q ibc client state $client_id -o json --home $HOME_1 | jq '.'
+$CHAIN_BINARY q ibc client state $client_id -o json --home $HOME_1 | jq -r '.client_state.frozen_height'
 
 $CHAIN_BINARY q slashing signing-infos --home $HOME_1
