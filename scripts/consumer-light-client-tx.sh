@@ -33,8 +33,8 @@ echo "> 1. Copy validator home folders."
 cp -r $CONSUMER_HOME_1 $LC_CONSUMER_HOME_1
 cp -r $CONSUMER_HOME_2 $LC_CONSUMER_HOME_2
 
-echo "LC1 genesis file:"
-jq '.' $LC_CONSUMER_HOME_1/config/genesis.json
+# echo "LC1 genesis file:"
+# jq '.' $LC_CONSUMER_HOME_1/config/genesis.json
 
 echo "> 2. Clear persistent peers."
 CON1_NODE_ID=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home $LC_CONSUMER_HOME_1)
@@ -97,6 +97,7 @@ sleep 30
 journalctl -u $LC_CONSUMER_SERVICE_1
 
 echo "> Get current height header from main consumer"
+$CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1
 OG_HEIGHT=$($CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1 | jq -r '.sync_info.latest_block_height')
 echo "Height: $OG_HEIGHT"
 sleep 5
