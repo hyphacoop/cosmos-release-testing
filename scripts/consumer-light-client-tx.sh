@@ -122,7 +122,7 @@ TRUSTED_VALS=$(echo $TRUSTED_HEADER | jq -r '.validator_set')
 OG_HEADER=$(echo $OG_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
 LC_HEADER=$(echo $LC_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
 
-OG_HEADER=$(echo $HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
+OG_HEADER=$(echo $OG_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
 LC_HEADER=$(echo $LC_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
 
 tee lc_misbehaviour.json<<EOF
