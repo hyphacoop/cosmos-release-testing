@@ -19,7 +19,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 pigz
       - run: lscpu
       - run: df -h
       - run: free -m
@@ -193,7 +193,7 @@ jobs:
           cd /home/sysadmin/.gaia
           mv data/priv_validator_state.json ./priv_validator_state.json
           echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
-          tar cfz gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
+          tar --use-compress-program="pigz --best --recursive" -cf gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
           echo "Uploading archived state to files.polypore.xyz"
           scp -6 gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
           echo "[INFO]: Cleaning up..."
