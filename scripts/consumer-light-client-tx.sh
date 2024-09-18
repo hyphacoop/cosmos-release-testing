@@ -97,7 +97,7 @@ sleep 30
 journalctl -u $LC_CONSUMER_SERVICE_1
 
 echo "> Get current height header from main consumer"
-OG_HEIGHT=$($CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1 -o json | jq -r '.sync_info.latest_block_height')
+OG_HEIGHT=$($CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1 | jq -r '.sync_info.latest_block_height')
 echo "Height: $OG_HEIGHT"
 sleep 5
 echo "> Get IBC header from main consumer:"
