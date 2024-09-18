@@ -22,11 +22,11 @@ echo "> 0. Get trusted height using provider consensus state."
 client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
 echo "> Client ID: $client_id"
 echo "> Hermes:"
-hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
+hermes --json query client consensus --chain $CHAIN_ID --client $client_id | tail -n 1 | jq '.'
 echo "> Gaia:"
 $CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.'
 
-TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_ID -o json | jq -r '.consensus_state_heights[-1].revision_height')
+TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.consensus_state_heights[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
 echo "> 1. Copy validator home folders."
