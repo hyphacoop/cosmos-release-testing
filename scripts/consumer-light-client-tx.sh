@@ -111,7 +111,7 @@ echo "$LC_HEADER"
 ## Get IBC header at trusted height +1 since the trusted validators hash
 ## corresponds to the consensus state "NextValidatorHash" of the consumer client
 echo "> IBC header at trusted height + 1 from main consumer:"
-TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home $CONSUMER_HOME_1 -o json
+TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home $CONSUMER_HOME_1 -o json)
 echo "$TRUSTED_HEADER"
 
 ## Create a consumer misbehaviour struct by joining the conflicting headers
@@ -119,11 +119,11 @@ echo "$TRUSTED_HEADER"
 
 echo "> Fill trusted valset and height"
 TRUSTED_VALS=$(echo $TRUSTED_HEADER | jq -r '.validator_set')
-OG_HEADERHEADER=$(echo $OG_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
-LC_HEADER=$(echo $LC_BAD_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
+OG_HEADER=$(echo $OG_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
+LC_HEADER=$(echo $LC_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
 
 OG_HEADER=$(echo $HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
-LC_HEADER=$(echo $BAD_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
+LC_HEADER=$(echo $LC_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
 
 tee lc_misbehaviour.json<<EOF
 {
