@@ -20,13 +20,13 @@ LC_CON_PPROF_PORT_2=60242
 echo "> 0. Get trusted height using provider consensus state."
 # ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
 client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-echo "> Client ID: $client ID"
+echo "> Client ID: $client_id"
 echo "> Hermes:"
 hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
 echo "> Gaia:"
 $CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.'
 
-TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id | tail -n 1 | jq -r '.result[-1].revision_height')
+TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_ID -o json | jq -r '.consensus_state_heights[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
 echo "> 1. Copy validator home folders."
@@ -113,15 +113,28 @@ echo "> IBC header at trusted height + 1 from main consumer:"
 TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home $CONSUMER_HOME_1 -o json
 echo "$TRUSTED_HEADER"
 
+## Create a consumer misbehaviour struct by joining the conflicting headers
+## updated with trusted header info
+
+echo "> Fill trusted valset and height"
+TRUSTED_VALS=$(echo $TRUSTED_HEADER | jq -r '.validator_set')
+OG_HEADERHEADER=$(echo $OG_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
+LC_HEADER=$(echo $LC_BAD_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
+
+OG_HEADER=$(echo $HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
+LC_HEADER=$(echo $BAD_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
+
+tee lc_misbehaviour.json<<EOF
+{
+    "client_id": "$client_id",
+    "header_1": $OG_HEADER,
+    "header_2": $LC_HEADER
+}
+EOF
+
+jq '.' misbehaviour.json
 exit 0
 
-echo "> 6. Update the light client of the consumer chain on the provider chain."
-hermes --config ~/.hermes/config-lc.toml update client --client 07-tendermint-0 --host-chain $CHAIN_ID --trusted-height $TRUSTED_HEIGHT
-
-echo "> 7. Waiting for evidence to be sent to provider chain..."
-sleep 30
-sudo systemctl restart hermes
-sleep 60
 
 echo "Hermes:"
 journalctl -u hermes | tail -n 100
