@@ -195,10 +195,10 @@ jobs:
           echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
           tar cfz gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
           echo "Uploading archived state to files.polypore.xyz"
-          scp -6 -v gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
+          scp -6 gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
           echo "[INFO]: Cleaning up..."
           mv ./priv_validator_state.json data/
-          rm ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-gaia-devnet.tar.gz
+          rm gaia-devnet-${{ env.upgrade_height }}.tar.gz
       - name: Build gaiad
         env:
           DEVNET_BRANCH: v20.0.0-rc0
