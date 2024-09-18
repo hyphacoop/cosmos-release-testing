@@ -17,11 +17,17 @@ LC_CON_PPROF_PORT_2=60242
 
 # Validators 1 and 2 will copy the chain
 
-echo "> 0. Get trusted height."
-ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
-
+echo "> 0. Get trusted height using provider consensus state."
+# ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
+client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+echo "> Client ID: $client ID"
+echo "> Hermes:"
 hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
-TRUSTED_HEIGHT=$(hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq -r '.result[-1].revision_height')
+echo "> Gaia:"
+$CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.'
+exit 0
+
+TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id | tail -n 1 | jq -r '.result[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
 echo "> 1. Copy validator home folders."
