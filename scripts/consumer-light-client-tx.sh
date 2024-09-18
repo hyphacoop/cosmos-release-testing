@@ -137,7 +137,7 @@ jq '.' lc_misbehaviour.json
 
 echo "> Submit misbehaviour to provider"
 
-$CHAIN_BINARY tx  provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --home $HOME_1 -y 
+$CHAIN_BINARY tx  provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y 
 sleep 10
 
 $CHAIN_BINARY q ibc client status $client_id --home $HOME_1
