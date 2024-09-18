@@ -25,7 +25,6 @@ echo "> Hermes:"
 hermes --json query client consensus --chain $CHAIN_ID --client 07-tendermint-0 | tail -n 1 | jq '.'
 echo "> Gaia:"
 $CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.'
-exit 0
 
 TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id | tail -n 1 | jq -r '.result[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
@@ -96,6 +95,25 @@ sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
 sleep 30
 
 journalctl -u $LC_CONSUMER_SERVICE_1
+
+echo "> Get current height header from main consumer"
+OG_HEIGHT=$($CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1 -o json | jq -r '.sync_info.latest_block_height')
+echo "Height: $OG_HEIGHT"
+sleep 5
+echo "> Get IBC header from main consumer:"
+OG_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home $CONSUMER_HOME_1 -o json)
+echo "$OG_HEADER"
+echo "> Get IBC header from second consumer:"
+LC_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home $LC_CONSUMER_HOME_1 -o json)
+echo "$LC_HEADER"
+
+## Get IBC header at trusted height +1 since the trusted validators hash
+## corresponds to the consensus state "NextValidatorHash" of the consumer client
+echo "> IBC header at trusted height + 1 from main consumer:"
+TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home $CONSUMER_HOME_1 -o json
+echo "$TRUSTED_HEADER"
+
+exit 0
 
 echo "> 6. Update the light client of the consumer chain on the provider chain."
 hermes --config ~/.hermes/config-lc.toml update client --client 07-tendermint-0 --host-chain $CHAIN_ID --trusted-height $TRUSTED_HEIGHT
