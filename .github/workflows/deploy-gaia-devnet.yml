@@ -205,8 +205,7 @@ jobs:
           # echo "[INFO]: Updating symlink"
           # ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/gaia-devnet/gaia-devnet-${{ env.upgrade_height }}.tar.gz /var/www/html/gaia-devnet/latest.tar.gz
           echo "[INFO]: Updating HTML page]"
-          echo "${{ vars.STATUS_HTML_PAGE }}" > /tmp/status-index.html.base64
-          cat /tmp/status-index.html.base64 | base64 --decode > /tmp/status-index.html
+          echo "${{ vars.STATUS_HTML_PAGE }}" | base64 --decode > /tmp/status-index.html
           sed -i -e "s/_BIN_VERSION_/${{ env.DEVNET_BRANCH }}/g" /tmp/status-index.html
           sed -i -e "s/_ARCHIVE_TARBALL_/gaia-devnet-${{ env.upgrade_height }}.tar.gz/g" /tmp/status-index.html
           tarball_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
