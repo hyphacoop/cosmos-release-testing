@@ -100,7 +100,8 @@ sudo systemctl enable $LC_CONSUMER_SERVICE_1 --now
 sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
 sleep 30
 
-journalctl -u $LC_CONSUMER_SERVICE_1
+echp "> Consumer service 3:"
+journalctl -u $CONSUMER_SERVICE_3
 
 echo "> Get current height header from main consumer"
 $CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1
