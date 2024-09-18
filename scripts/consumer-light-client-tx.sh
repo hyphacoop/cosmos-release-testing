@@ -29,6 +29,9 @@ $CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o 
 TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.consensus_state_heights[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
+sudo systemctl stop $CONSUMER_SERVICE_1
+sudo systemctl stop $CONSUMER_SERVICE_2
+
 echo "> 1. Copy validator home folders."
 cp -r $CONSUMER_HOME_1 $LC_CONSUMER_HOME_1
 cp -r $CONSUMER_HOME_2 $LC_CONSUMER_HOME_2
@@ -90,6 +93,9 @@ echo ""                                     | sudo tee /etc/systemd/system/$LC_C
 echo "[Install]"                            | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$LC_CONSUMER_SERVICE_2 -a
 
+sudo systemctl start $CONSUMER_SERVICE_1
+sudo systemctl start $CONSUMER_SERVICE_2
+
 sudo systemctl enable $LC_CONSUMER_SERVICE_1 --now
 sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
 sleep 30
@@ -107,6 +113,12 @@ echo "$OG_HEADER"
 echo "> Get IBC header from second consumer:"
 LC_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home $LC_CONSUMER_HOME_1 -o json)
 echo "$LC_HEADER"
+
+echo "CON1 net info:"
+curl -s http://localhost:$CON1_RPC_PORT/net_info | jq '.'
+echo "LC_CON1 net info:"
+curl -s http://localhost:$LC_CON_RPC_PORT_1/net_info | jq '.'
+
 
 ## Get IBC header at trusted height +1 since the trusted validators hash
 ## corresponds to the consensus state "NextValidatorHash" of the consumer client
