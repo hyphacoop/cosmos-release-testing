@@ -234,8 +234,6 @@ jobs:
       #   run: tests/test_block_production.sh 127.0.0.1 26657 20 100
       - name: Send faucet tokens
         run: |
-          pwd
-          cd /home/sysadmin
           gaiad tx bank send val ${{ vars.FAUCET_ADDRESS }} 1000000000000uatom --from val --gas 20000000 --gas-prices 0.005uatom -y
           tests/test_block_production.sh 127.0.0.1 26657 1 10
       - name: Query faucet account
