@@ -101,6 +101,9 @@ sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
 
 sleep 10
 echo "> Submit bank send on LC consumer."
+$CONSUMER_CHAIN_BINARY keys list --output json | jq -r '.'
+$CONSUMER_CHAIN_BINARY keys list --output json | jq -r '.[1].address'
+echo "Command: <$CONSUMER_CHAIN_BINARY tx bank send $MONIKER_1 $($CONSUMER_CHAIN_BINARY keys list --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y>"
 $CONSUMER_CHAIN_BINARY tx bank send $MONIKER_1 $($CONSUMER_CHAIN_BINARY keys list --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y
 
 sleep 30
