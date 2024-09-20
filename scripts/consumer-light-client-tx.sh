@@ -36,6 +36,10 @@ echo "> 1. Copy validator home folders."
 cp -r $CONSUMER_HOME_1 $LC_CONSUMER_HOME_1
 cp -r $CONSUMER_HOME_2 $LC_CONSUMER_HOME_2
 
+echo "> Adjust RPC port in LC home folders."
+$CONSUMER_CHAIN_BINARY config node tcp://localhost:$LC_CON_RPC_PORT_1 --home $LC_CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config node tcp://localhost:$LC_CON_RPC_PORT_2 --home $LC_CONSUMER_HOME_2
+
 # echo "LC1 genesis file:"
 # jq '.' $LC_CONSUMER_HOME_1/config/genesis.json
 
@@ -108,7 +112,7 @@ $CONSUMER_CHAIN_BINARY tx bank send $MONIKER_1 $($CONSUMER_CHAIN_BINARY keys lis
 
 sleep 30
 
-echp "> Consumer service 3:"
+echo "> Consumer service 3:"
 journalctl -u $CONSUMER_SERVICE_3
 
 echo "> Main consumer signing infos:"
