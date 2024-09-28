@@ -191,7 +191,6 @@ jobs:
       - name: Compress and upload files
         env:
           DEVNET_BRANCH: v20.0.0-rc0
-          upgrade_height: 22242439
         run: |
           echo "[INFO]: Creating archive ..."
           cd /home/sysadmin/.gaia
