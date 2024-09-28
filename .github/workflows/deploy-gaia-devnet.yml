@@ -55,7 +55,7 @@ jobs:
         run: |
           echo "[INFO]: Removing old archives from files.polypore.xyz"
           ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
-          echo "<h1>gaia-devnet is currently rebuilding...</h1>" > /tmp/status-index.html
+          echo "<html><head><title>Gaia Devnet Rebuilding...</title></head><body><h1>gaia-devnet is currently rebuilding...</h1></body></html>" > /tmp/status-index.html
           scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/index.html
       - name: Build gaiad from source
         run: |
@@ -134,8 +134,6 @@ jobs:
           NODE_HOME: /home/sysadmin/.gaia
         run: |
           rm $NODE_HOME/config/addrbook.json
-          pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
-          privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
           sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
           sed -i -e '/enable =/ s/= .*/= false/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
@@ -143,6 +141,8 @@ jobs:
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
           echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
+          pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
+          privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
           screen -L -Logfile /home/sysadmin/artifact/gaiad_fork.log -S gaiad -d -m /home/sysadmin/go/bin/gaiad-fork testnet unsafe-start-local-validator --validator-operator cosmosvaloper1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4r923hx --validator-pubkey "$pubkey" --accounts-to-fund cosmos1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4x37ym4 --validator-privkey "$privkey" --home $NODE_HOME
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
