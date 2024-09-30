@@ -42,8 +42,10 @@ if [ $TOPN -eq "0" ]; then
     sleep $(($COMMIT_TIMEOUT+2))
     $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 else
-    $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+    txhash=$($CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
     sleep $(($COMMIT_TIMEOUT+2))
+    echo "> Val 1 assign key tx:"
+    $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
     $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON2_PUBKEY --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
     sleep $(($COMMIT_TIMEOUT+2))
     $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
