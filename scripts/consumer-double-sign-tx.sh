@@ -116,7 +116,7 @@ echo "Starting provider service..."
 sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 
 sleep 30
-# journalctl -u $EQ_PROVIDER_SERVICE
+journalctl -u $EQ_PROVIDER_SERVICE
 
 # $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
 echo "> New provider node status:"
