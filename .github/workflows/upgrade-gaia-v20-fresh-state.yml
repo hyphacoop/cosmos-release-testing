@@ -1829,7 +1829,7 @@
             CONSUMER_SERVICE_3: neutron-3.service
           run: |
             sudo systemctl enable $CONSUMER_SERVICE_1 --now
-            sleep 5
+            sleep 10
             journalctl -u $CONSUMER_SERVICE_1
         - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
           env:
