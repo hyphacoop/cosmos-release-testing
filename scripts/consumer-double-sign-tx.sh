@@ -222,18 +222,23 @@ echo "> Submitting opt-in transaction."
 key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
 echo "Consumer key: $key"
 echo "Consumer ID: $CONSUMER_ID"
-command="$CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $EQ_PROVIDER_HOME -y"
-echo $command
-$command
+txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $EQ_PROVIDER_HOME -y -o json | jq -r '.txhash')
+sleep $COMMIT_TIMEOUT
+echo "> txhash: $txhash"
+echo "> Opt-in tx result:"
+$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
 sleep 30
+echo "> Consumer key:"
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
+echo "> Consumer address:"
+$CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1
 
-echo "Check validator is in the consumer chain..."
+echo "> Check validator is in the consumer chain."
 total_after=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
-total=$(( $total_after - $total_before ))
+diff=$(( $total_after - $total_before ))
 
-if [ $total == 1 ]; then
+if [ $diff == 1 ]; then
   echo "Validator created!"
 else
   echo "Validator not created."
