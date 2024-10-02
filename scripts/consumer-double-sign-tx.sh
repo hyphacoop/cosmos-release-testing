@@ -229,10 +229,12 @@ echo "> Opt-in tx result:"
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
 sleep 30
-echo "> Consumer key:"
+echo "> EQ Consumer key:"
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
-echo "> Consumer address:"
+echo "> EQ Consumer address:"
 $CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1
+echo "> EQ Consumer address (hex format):"
+jq '.address' $EQ_CONSUMER_HOME_1/config/priv_validator_key.json
 
 echo "> Check validator is in the consumer chain."
 total_after=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
