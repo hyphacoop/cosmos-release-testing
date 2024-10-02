@@ -116,7 +116,7 @@ echo "Starting provider service..."
 sudo systemctl enable $EQ_PROVIDER_SERVICE --now
 
 sleep 30
-journalctl -u $EQ_PROVIDER_SERVICE
+# journalctl -u $EQ_PROVIDER_SERVICE
 
 # $CHAIN_BINARY q block --home $EQ_PROVIDER_HOME | jq '.'
 echo "> New provider node status:"
@@ -326,7 +326,7 @@ sleep 60
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 60
+sleep 180
 
 # Restart nodes again
 echo "Restarting nodes again..."
@@ -352,12 +352,12 @@ sleep 60
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 60
+sleep 180
 
 echo "> Node 1:"
-journalctl -u $EQ_CONSUMER_SERVICE_1
+journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 10
 echo "> Node 2:"
-journalctl -u $EQ_CONSUMER_SERVICE_2
+journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 10
 
 echo "> Consumer chain evidence:"
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'
