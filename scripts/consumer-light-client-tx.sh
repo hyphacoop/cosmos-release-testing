@@ -179,6 +179,7 @@ $CHAIN_BINARY q ibc client state $client_id -o json --home $HOME_1 | jq -r '.cli
 echo "> Signing infos:"
 $CHAIN_BINARY q slashing signing-infos --home $HOME_1 -o json
 val1_address=$($CHAIN_BINARY tendermint show-address --home $HOME_1)
+val2_address=$($CHAIN_BINARY tendermint show-address --home $HOME_2)
 echo "Val1 address: $val1_address"
 echo "Val2 address: $val2_address"
 val1_tombstoned=$($CHAIN_BINARY q slashing signing infos -o json --home $HOME_1 | jq -r --arg ADDR "$val1_address" '.info[] | select(.address==$ADDR).tombstoned')
