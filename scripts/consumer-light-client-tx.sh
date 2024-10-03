@@ -182,7 +182,7 @@ val1_address=$($CHAIN_BINARY tendermint show-address --home $HOME_1)
 val2_address=$($CHAIN_BINARY tendermint show-address --home $HOME_2)
 echo "Val1 address: $val1_address"
 echo "Val2 address: $val2_address"
-val1_tombstoned=$($CHAIN_BINARY q slashing signing infos -o json --home $HOME_1 | jq -r --arg ADDR "$val1_address" '.info[] | select(.address==$ADDR).tombstoned')
-val2_tombstoned=$($CHAIN_BINARY q slashing signing infos -o json --home $HOME_1 | jq -r --arg ADDR "$val2_address" '.info[] | select(.address==$ADDR).tombstoned')
+val1_tombstoned=$($CHAIN_BINARY q slashing signing-infos -o json --home $HOME_1 | jq -r --arg ADDR "$val1_address" '.info[] | select(.address==$ADDR).tombstoned')
+val2_tombstoned=$($CHAIN_BINARY q slashing signing-infos -o json --home $HOME_1 | jq -r --arg ADDR "$val2_address" '.info[] | select(.address==$ADDR).tombstoned')
 echo "Val1 tombstoned: $val1_tombstoned"
 echo "Val2 tombstoned: $val2_tombstoned"
