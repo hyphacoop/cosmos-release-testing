@@ -168,10 +168,20 @@ jq '.' lc_misbehaviour.json
 echo "> Submit misbehaviour to provider"
 
 $CHAIN_BINARY tx  provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y 
-sleep 10
+sleep $(($COMMIT_TIMEOUT*3))
 
+echo "> Client $client_id status:"
 $CHAIN_BINARY q ibc client status $client_id --home $HOME_1
-$CHAIN_BINARY q ibc client state $client_id -o json --home $HOME_1 | jq '.'
+# $CHAIN_BINARY q ibc client state $client_id -o json --home $HOME_1 | jq '.'
+echo "> Client $client_id state frozen height:"
 $CHAIN_BINARY q ibc client state $client_id -o json --home $HOME_1 | jq -r '.client_state.frozen_height'
 
-$CHAIN_BINARY q slashing signing-infos --home $HOME_1
+echo "> Signing infos:"
+$CHAIN_BINARY q slashing signing-infos --home $HOME_1 -o json
+val1_address=$($CHAIN_BINARY tendermint show-address --home $HOME_1)
+echo "Val1 address: $val1_address"
+echo "Val2 address: $val2_address"
+val1_tombstoned=$($CHAIN_BINARY q slashing signing infos -o json --home $HOME_1 | jq -r --arg ADDR "$val1_address" '.info[] | select(.address==$ADDR).tombstoned')
+val2_tombstoned=$($CHAIN_BINARY q slashing signing infos -o json --home $HOME_1 | jq -r --arg ADDR "$val2_address" '.info[] | select(.address==$ADDR).tombstoned')
+echo "Val1 tombstoned: $val1_tombstoned"
+echo "Val2 tombstoned: $val2_tombstoned"
