@@ -18,7 +18,7 @@
     VERSION_CUTOFF: v19.2.0
     TARGET_VERSION: v20
     # All chain variables
-    COMMIT_TIMEOUT: 3
+    COMMIT_TIMEOUT: 5
     DOWNTIME_BLOCKS: 10000
     # Provider chain variables
     CHAIN_BINARY: gaiad
@@ -1684,6 +1684,7 @@
         CONSUMER_ICS: v4.0.0
         PROVIDER_ICS: v3.3.0
         # Reference ICS chain variables
+        TOPN: 95
         ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
         ICS_TRANSFORM_BINARY: cd-transform
         STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
@@ -1828,7 +1829,7 @@
             CONSUMER_SERVICE_3: neutron-3.service
           run: |
             sudo systemctl enable $CONSUMER_SERVICE_1 --now
-            sleep 5
+            sleep 10
             journalctl -u $CONSUMER_SERVICE_1
         - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
           env:
