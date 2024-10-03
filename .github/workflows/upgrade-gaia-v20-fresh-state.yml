@@ -748,49 +748,6 @@
         #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
         #     scripts/consumer-double-sign-tx.sh
 
-        # - name: _Remove consumer chain> ICS v4.0.0 chain 2
-        #   run: |
-        #     echo "Consumer chains:"
-        #     $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-        #     consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-two").consumer_id')
-        #     echo "Removing v400-two (consumer_id = $consumer_id):"
-        #     $CHAIN_BINARY tx provider remove-consumer $consumer_id --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-        #     sleep $(($COMMIT_TIMEOUT*2))
-        #     echo "Consumer chains:"
-        #     $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-        #     phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-two").phase')
-        #     if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
-        #       echo "PASS: Consumer chain was stopped."
-        #     else
-        #       echo "FAIL: Consumer chain was not stopped."
-        #       exit 1
-        #     fi
-        # - name: _Remove consumer chain> ICS v4.0.0 chain 1
-        #   run: |
-        #     echo "Consumer chains:"
-        #     $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-        #     consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-one").consumer_id')
-        #     echo "Removing v400-one (consumer_id = $consumer_id):"
-
-        #     jq -r --arg CONSUMER "$consumer_id" '.messages[0].consumer_id |= $CONSUMER' templates/proposal-remove-consumer.json > remove-consumer.json
-        #     jq '.' remove-consumer.json
-        #     txhash=$($CHAIN_BINARY tx gov submit-proposal remove-consumer.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
-        #     sleep $(($COMMIT_TIMEOUT*2))
-        #     proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-        #     echo "Voting on consumer removal proposal $proposal_id."
-        #     $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment 3 --yes --home $HOME_1
-        #     sleep $(($COMMIT_TIMEOUT*2))
-        #     sleep $VOTING_PERIOD
-        #     echo "Consumer chains:"
-        #     $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
-        #     phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-one").phase')
-        #     if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
-        #       echo "PASS: Consumer chain was stopped."
-        #     else
-        #       echo "FAIL: Consumer chain was not stopped."
-        #       exit 1
-        #     fi
-
         - name: _Test light client attack
           env:
             CONSUMER_CHAIN_ID: v400-two
@@ -808,6 +765,49 @@
             cp templates/hermes-config-lc.toml /home/runner/.hermes/config-lc.toml
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/consumer-light-client-tx.sh
+
+        - name: _Remove consumer chain> ICS v4.0.0 chain 2
+          run: |
+            echo "Consumer chains:"
+            $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
+            consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-two").consumer_id')
+            echo "Removing v400-two (consumer_id = $consumer_id):"
+            $CHAIN_BINARY tx provider remove-consumer $consumer_id --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+            sleep $(($COMMIT_TIMEOUT*2))
+            echo "Consumer chains:"
+            $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
+            phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-two").phase')
+            if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
+              echo "PASS: Consumer chain was stopped."
+            else
+              echo "FAIL: Consumer chain was not stopped."
+              exit 1
+            fi
+        - name: _Remove consumer chain> ICS v4.0.0 chain 1
+          run: |
+            echo "Consumer chains:"
+            $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
+            consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-one").consumer_id')
+            echo "Removing v400-one (consumer_id = $consumer_id):"
+
+            jq -r --arg CONSUMER "$consumer_id" '.messages[0].consumer_id |= $CONSUMER' templates/proposal-remove-consumer.json > remove-consumer.json
+            jq '.' remove-consumer.json
+            txhash=$($CHAIN_BINARY tx gov submit-proposal remove-consumer.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
+            sleep $(($COMMIT_TIMEOUT*2))
+            proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            echo "Voting on consumer removal proposal $proposal_id."
+            $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment 3 --yes --home $HOME_1
+            sleep $(($COMMIT_TIMEOUT*2))
+            sleep $VOTING_PERIOD
+            echo "Consumer chains:"
+            $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
+            phase=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r '.chains[] | select(.chain_id == "v400-one").phase')
+            if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
+              echo "PASS: Consumer chain was stopped."
+            else
+              echo "FAIL: Consumer chain was not stopped."
+              exit 1
+            fi
 
     # Baseline-3-ics-topn:
     #   runs-on: ubuntu-22.04

@@ -21,10 +21,10 @@ echo "> 0. Get trusted height using provider consensus state."
 # ibc_client=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.')
 client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
 echo "> Client ID: $client_id"
-echo "> Hermes:"
-hermes --json query client consensus --chain $CHAIN_ID --client $client_id | tail -n 1 | jq '.'
-echo "> Gaia:"
-$CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.'
+# echo "> Hermes:"
+# hermes --json query client consensus --chain $CHAIN_ID --client $client_id | tail -n 1 | jq '.'
+# echo "> Gaia:"
+# $CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.'
 
 TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id --home $HOME_1 -o json | jq -r '.consensus_state_heights[-1].revision_height')
 echo "> Trusted height: $TRUSTED_HEIGHT"
@@ -105,20 +105,20 @@ sudo systemctl enable $LC_CONSUMER_SERVICE_2 --now
 
 sleep 10
 echo "> Submit bank send on LC consumer."
-$CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.'
-$CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address'
+# $CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.'
+# $CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address'
 echo "Command: <$CONSUMER_CHAIN_BINARY tx bank send $MONIKER_1 $($CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y>"
 $CONSUMER_CHAIN_BINARY tx bank send $MONIKER_1 $($CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y
 
 sleep 30
 
-echo "> Consumer service 3:"
-journalctl -u $CONSUMER_SERVICE_3
+# echo "> Consumer service 3:"
+# journalctl -u $CONSUMER_SERVICE_3
 
-echo "> Main consumer signing infos:"
-$CONSUMER_CHAIN_BINARY q slashing signing-infos --home $CONSUMER_HOME_1
-echo "> Second consumer signing infos:"
-$CONSUMER_CHAIN_BINARY q slashing signing-infos --home $LC_CONSUMER_HOME_1
+# echo "> Main consumer signing infos:"
+# $CONSUMER_CHAIN_BINARY q slashing signing-infos --home $CONSUMER_HOME_1
+# echo "> Second consumer signing infos:"
+# $CONSUMER_CHAIN_BINARY q slashing signing-infos --home $LC_CONSUMER_HOME_1
 
 echo "> Get current height header from main consumer"
 $CONSUMER_CHAIN_BINARY status --home $CONSUMER_HOME_1
@@ -127,22 +127,22 @@ echo "Height: $OG_HEIGHT"
 sleep 5
 echo "> Get IBC header from main consumer:"
 OG_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home $CONSUMER_HOME_1 -o json)
-echo "$OG_HEADER"
+# echo "$OG_HEADER"
 echo "> Get IBC header from second consumer:"
 LC_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home $LC_CONSUMER_HOME_1 -o json)
-echo "$LC_HEADER"
+# echo "$LC_HEADER"
 
-echo "CON1 net info:"
-curl -s http://localhost:$CON1_RPC_PORT/net_info | jq '.'
-echo "LC_CON1 net info:"
-curl -s http://localhost:$LC_CON_RPC_PORT_1/net_info | jq '.'
+# echo "CON1 net info:"
+# curl -s http://localhost:$CON1_RPC_PORT/net_info | jq '.'
+# echo "LC_CON1 net info:"
+# curl -s http://localhost:$LC_CON_RPC_PORT_1/net_info | jq '.'
 
 
 ## Get IBC header at trusted height +1 since the trusted validators hash
 ## corresponds to the consensus state "NextValidatorHash" of the consumer client
 echo "> IBC header at trusted height + 1 from main consumer:"
 TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home $CONSUMER_HOME_1 -o json)
-echo "$TRUSTED_HEADER"
+# echo "$TRUSTED_HEADER"
 
 ## Create a consumer misbehaviour struct by joining the conflicting headers
 ## updated with trusted header info
@@ -163,7 +163,7 @@ tee lc_misbehaviour.json<<EOF
 }
 EOF
 
-jq '.' lc_misbehaviour.json
+# jq '.' lc_misbehaviour.json
 
 echo "> Submit misbehaviour to provider"
 
