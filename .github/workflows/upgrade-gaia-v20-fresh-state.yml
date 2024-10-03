@@ -679,6 +679,7 @@
             connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
+        
         - name: _Downtime test> val3 must not be jailed 
           run: |
             tests/test_validator_jailed.sh $VALOPER_3 null
@@ -747,6 +748,24 @@
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/consumer-double-sign-tx.sh
 
+        - name: _Test light client attack
+          env:
+            CONSUMER_CHAIN_ID: v400-two
+            CONSUMER_HOME_1: /home/runner/.v400-2-1
+            CONSUMER_HOME_2: /home/runner/.v400-2-2
+            CONSUMER_HOME_3: /home/runner/.v400-2-3
+            CONSUMER_SERVICE_1: v400-2-1.service
+            CONSUMER_SERVICE_2: v400-2-2.service
+            CONSUMER_SERVICE_3: v400-2-3.service
+            CON1_RPC_PORT: 40221
+            CON1_P2P_PORT: 40231
+            CON2_P2P_PORT: 40232
+            CON3_P2P_PORT: 40233
+          run: |
+            cp templates/hermes-config-lc.toml /home/runner/.hermes/config-lc.toml
+            export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+            scripts/consumer-light-client-tx.sh
+
         - name: _Remove consumer chain> ICS v4.0.0 chain 2
           run: |
             echo "Consumer chains:"
@@ -789,23 +808,6 @@
               echo "FAIL: Consumer chain was not stopped."
               exit 1
             fi
-        # - name: _Test light client attack
-        #   env:
-        #     CONSUMER_CHAIN_ID: v400-two
-        #     CONSUMER_HOME_1: /home/runner/.v400-2-1
-        #     CONSUMER_HOME_2: /home/runner/.v400-2-2
-        #     CONSUMER_HOME_3: /home/runner/.v400-2-3
-        #     CONSUMER_SERVICE_1: v400-2-1.service
-        #     CONSUMER_SERVICE_2: v400-2-2.service
-        #     CONSUMER_SERVICE_3: v400-2-3.service
-        #     CON1_RPC_PORT: 40221
-        #     CON1_P2P_PORT: 40231
-        #     CON2_P2P_PORT: 40232
-        #     CON3_P2P_PORT: 40233
-        #   run: |
-        #     cp templates/hermes-config-lc.toml /home/runner/.hermes/config-lc.toml
-        #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-        #     scripts/consumer-light-client-tx.sh
 
     Baseline-3-ics-topn:
       runs-on: ubuntu-22.04
