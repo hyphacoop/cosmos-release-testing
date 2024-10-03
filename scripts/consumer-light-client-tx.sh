@@ -186,3 +186,14 @@ val1_tombstoned=$($CHAIN_BINARY q slashing signing-infos -o json --home $HOME_1 
 val2_tombstoned=$($CHAIN_BINARY q slashing signing-infos -o json --home $HOME_1 | jq -r --arg ADDR "$val2_address" '.info[] | select(.address==$ADDR).tombstoned')
 echo "Val1 tombstoned: $val1_tombstoned"
 echo "Val2 tombstoned: $val2_tombstoned"
+if [ $val1_tombstoned == "true" ]; then
+    echo "PASS: Val1 was tombstoned."
+else
+    echo "FAIL: Val1 was not tombstoned."
+fi
+
+if [ $val2_tombstoned == "true" ]; then
+    echo "PASS: Val2 was tombstoned."
+else
+    echo "FAIL: Val2 was not tombstoned."
+fi
