@@ -767,7 +767,7 @@
               CON3_P2P_PORT: 40233
             run: |
               cp templates/hermes-config-lc.toml /home/runner/.hermes/config-lc.toml
-              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
               scripts/consumer-light-client-tx.sh
   
           - name: _Remove consumer chain> ICS v4.5.0 chain 2
