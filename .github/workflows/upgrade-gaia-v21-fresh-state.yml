@@ -906,8 +906,9 @@
             env:
               CONSUMER_CHAIN_ID: v400-one
               PSS_ENABLED: true
+              COSMOS_SDK: v50
             run: |
-              scripts/add_consumer.sh
+              scripts/add_consumer_topn.sh
           - name: Initialize consumer chain with ICS v4.0.0
             env:
               CONSUMER_CHAIN_ID: v400-one
@@ -935,7 +936,7 @@
               DOWNTIME_BLOCKS: 100000
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-              scripts/init_consumer_assign_keys.sh
+              scripts/init_consumer_permissionless.sh
               sleep 20
           - name: Prepare consumer chain v400-one
             env:
@@ -948,7 +949,7 @@
               PROVIDER_ICS: v4.2.0
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-              scripts/prepare_consumer.sh
+              scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain v400-one
             env:
               CONSUMER_CHAIN_ID: v400-one
@@ -1781,8 +1782,9 @@
             env:
               CONSUMER_CHAIN_ID: neutron-test
               PSS_ENABLED: true
+              COSMOS_SDK: v50
             run: |
-              scripts/add_consumer.sh
+              scripts/add_consumer_topn.sh
           - name: Initialize Neutron consumer chain
             env:
               CONSUMER_CHAIN_ID: neutron-test
@@ -1811,7 +1813,7 @@
               DOWNTIME_BLOCKS: 100000
             run: |
               export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
-              scripts/init_consumer_assign_keys.sh
+              scripts/init_consumer_permissionless.sh
               sleep 20
           - name: Prepare consumer chain neutron-test
             env:
@@ -1823,7 +1825,7 @@
               PROVIDER_ICS: v4.2.0
             run: |
               export CONSUMER_CHAIN_BINARY=$NEUTRON_CHAIN_BINARY
-              scripts/prepare_consumer.sh
+              scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain neutron-test
             env:
               CONSUMER_CHAIN_ID: neutron-test
@@ -1882,8 +1884,9 @@
             env:
               CONSUMER_CHAIN_ID: stride-test
               PSS_ENABLED: true
+              COSMOS_SDK: v50
             run: |
-              scripts/add_consumer.sh
+              scripts/add_consumer_topn.sh
           - name: Initialize Stride consumer chain
             env:
               CONSUMER_CHAIN_ID: stride-test
@@ -1912,7 +1915,7 @@
               DOWNTIME_BLOCKS: 100000
             run: |
               export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-              scripts/init_consumer_assign_keys.sh
+              scripts/init_consumer_permissionless.sh
               sleep 20
           - name: Prepare consumer chain stride-test
             env:
@@ -1924,7 +1927,7 @@
               PROVIDER_ICS: v4.2.0
             run: |
               export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-              scripts/prepare_consumer.sh
+              scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain stride-test
             env:
               CONSUMER_CHAIN_ID: stride-test
