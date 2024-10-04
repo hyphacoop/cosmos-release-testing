@@ -416,6 +416,8 @@
             run: |
               wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
+              wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
+              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
               wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
               chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
           - name: Consumer chain binary URLs
