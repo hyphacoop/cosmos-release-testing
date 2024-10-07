@@ -24,6 +24,7 @@
       CHAIN_BINARY: gaiad
       BINARY_SOURCE: BUILD
       # BINARY_SOURCE: DOWNLOAD
+      BUILD_TAG: v21.0.0-alpha0
       CHAIN_ID: testnet
       DENOM: uatom
       BASE_FEES: 2000
