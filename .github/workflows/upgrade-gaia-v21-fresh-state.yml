@@ -1047,22 +1047,22 @@
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
     
-          - name: Add consumer chain with ICS v4.0.0
+          - name: Add consumer chain with ICS v4.5.0
             env:
-              CONSUMER_CHAIN_ID: v400-two
+              CONSUMER_CHAIN_ID: v450-two
               PSS_ENABLED: true
               COSMOS_SDK: v50
             run: |
               scripts/add_consumer_topn.sh
-          - name: Initialize consumer chain with ICS v4.0.0
+          - name: Initialize consumer chain with ICS v4.5.0
             env:
-              CONSUMER_CHAIN_ID: v400-two
-              CONSUMER_HOME_1: /home/runner/.v400-2-1
-              CONSUMER_HOME_2: /home/runner/.v400-2-2
-              CONSUMER_HOME_3: /home/runner/.v400-2-3
-              CONSUMER_SERVICE_1: v400-2-1.service
-              CONSUMER_SERVICE_2: v400-2-2.service
-              CONSUMER_SERVICE_3: v400-2-3.service
+              CONSUMER_CHAIN_ID: v450-two
+              CONSUMER_HOME_1: /home/runner/.v450-2-1
+              CONSUMER_HOME_2: /home/runner/.v450-2-2
+              CONSUMER_HOME_3: /home/runner/.v450-2-3
+              CONSUMER_SERVICE_1: v450-2-1.service
+              CONSUMER_SERVICE_2: v450-2-2.service
+              CONSUMER_SERVICE_3: v450-2-3.service
               CON1_API_PORT: 40201
               CON2_API_PORT: 40202
               CON3_API_PORT: 40203
@@ -1080,38 +1080,38 @@
               CON3_PPROF_PORT: 40243
               DOWNTIME_BLOCKS: 20
             run: |
-              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
               scripts/init_consumer_permissionless.sh
               sleep 60
-          - name: Prepare consumer chain v400-two
+          - name: Prepare consumer chain v450-two
             env:
-              CONSUMER_CHAIN_ID: v400-two
-              CONSUMER_HOME_1: /home/runner/.v400-2-1
-              CONSUMER_HOME_2: /home/runner/.v400-2-2
-              CONSUMER_HOME_3: /home/runner/.v400-2-3
+              CONSUMER_CHAIN_ID: v450-two
+              CONSUMER_HOME_1: /home/runner/.v450-2-1
+              CONSUMER_HOME_2: /home/runner/.v450-2-2
+              CONSUMER_HOME_3: /home/runner/.v450-2-3
               ICS_400: true
               CONSUMER_ICS: v4.0.0
               PROVIDER_ICS: v4.2.0
             run: |
-              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
               scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain v400-two
             env:
-              CONSUMER_CHAIN_ID: v400-two
-              CONSUMER_SERVICE_1: v400-2-1.service
-              CONSUMER_SERVICE_2: v400-2-2.service
-              CONSUMER_SERVICE_3: v400-2-3.service
+              CONSUMER_CHAIN_ID: v450-two
+              CONSUMER_SERVICE_1: v450-2-1.service
+              CONSUMER_SERVICE_2: v450-2-2.service
+              CONSUMER_SERVICE_3: v450-2-3.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_1 --now
               sleep 5
               journalctl -u $CONSUMER_SERVICE_1
-          - name: _Consumer chain produces blocks> ICS v4.0.0 chain 2
+          - name: _Consumer chain produces blocks> ICS v4.5.0 chain 2
             env:
               CON1_RPC_PORT: 40221
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-          - name: Establish CCV channel for v400-two
+          - name: Establish CCV channel for v450-two
             env:
-              CONSUMER_CHAIN_ID: v400-two
+              CONSUMER_CHAIN_ID: v450-two
             run: |
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               if [ $RELAYER == "hermes" ]; then
@@ -1128,18 +1128,18 @@
               fi
               sudo systemctl restart $RELAYER
               sleep 10
-          - name: _CCV channel verified> ICS v4.0.0 chain 2
+          - name: _CCV channel verified> ICS v4.5.0 chain 2
             env:
-              CONSUMER_HOME_1: /home/runner/.v400-2-1
+              CONSUMER_HOME_1: /home/runner/.v450-2-1
               CON1_RPC_PORT: 40221
             run: tests/test_ccv_key_assignment.sh
-          - name: _IBC transfer successful> ICS v4.0.0 chain 2
+          - name: _IBC transfer successful> ICS v4.5.0 chain 2
             env:
-              CONSUMER_CHAIN_ID: v400-two
-              CONSUMER_HOME_1: /home/runner/.v400-2-1
+              CONSUMER_CHAIN_ID: v450-two
+              CONSUMER_HOME_1: /home/runner/.v450-2-1
               RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             run: |
-              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
@@ -1152,8 +1152,8 @@
               tests/test_validator_jailed.sh $VALOPER_3 null
           - name: Stop validator services
             env:
-              CONSUMER_SERVICE_2: v400-2-2.service
-              CONSUMER_SERVICE_3: v400-2-3.service
+              CONSUMER_SERVICE_2: v450-2-2.service
+              CONSUMER_SERVICE_3: v450-2-3.service
             run: |
               sudo systemctl disable $CONSUMER_SERVICE_2 --now
               sudo systemctl disable $CONSUMER_SERVICE_3 --now
@@ -1165,7 +1165,7 @@
               tests/test_validator_jailed.sh $VALOPER_3 null
           - name: Unjail validator
             env:
-              CONSUMER_SERVICE_2: v400-2-2.service
+              CONSUMER_SERVICE_2: v450-2-2.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_2 --now
               sleep $(($COMMIT_TIMEOUT*10))
@@ -1175,7 +1175,7 @@
             run: tests/test_validator_jailed.sh $VALOPER_2 null
           - name: Stop validator services
             env:
-              CONSUMER_SERVICE_2: v400-2-2.service
+              CONSUMER_SERVICE_2: v450-2-2.service
             run: |
               sudo systemctl disable $CONSUMER_SERVICE_2 --now
               sleep $(($COMMIT_TIMEOUT*30))

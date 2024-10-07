@@ -216,7 +216,7 @@ echo "Starting consumer service..."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_1 --now
 
 sleep 30
-# journalctl -u $EQ_CONSUMER_SERVICE_1
+journalctl -u $EQ_CONSUMER_SERVICE_1
 
 echo "> Submitting opt-in transaction."
 key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
