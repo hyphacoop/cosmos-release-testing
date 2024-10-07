@@ -5,9 +5,9 @@ set -e
 
 # Initialize home directories
 echo "Initializing node home..."
-$CHAIN_BINARY_SECONDARY config chain-id $CHAIN_ID --home $CHAIN_HOME
-$CHAIN_BINARY_SECONDARY config keyring-backend test --home $CHAIN_HOME
-$CHAIN_BINARY_SECONDARY config node tcp://localhost:$RPC_PORT --home $CHAIN_HOME
+$CHAIN_BINARY_SECONDARY config set client chain-id $CHAIN_ID --home $CHAIN_HOME
+$CHAIN_BINARY_SECONDARY config set client keyring-backend test --home $CHAIN_HOME
+$CHAIN_BINARY_SECONDARY config set client node tcp://localhost:$RPC_PORT --home $CHAIN_HOME
 $CHAIN_BINARY_SECONDARY init $MONIKER_1 --chain-id $CHAIN_ID --home $CHAIN_HOME
 
 # Create self-delegation accounts
