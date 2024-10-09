@@ -5,9 +5,8 @@ denom_hash=$1
 echo "Patching template with consumer denom..."
 jq -r --arg DENOMTOADD "ibc/$denom_hash" '.denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
 
-echo "Submitting proposal..."
-
-echo "Preparing proposal with v50 command..."
+echo "> Submit proposal with v50 command."
+jq '.' proposal-denom-hash.json
 proposal="$CHAIN_BINARY tx gov submit-proposal proposal-denom-hash.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_2 --keyring-backend test --home $HOME_1  --chain-id $CHAIN_ID -y -o json"
 txhash=$($proposal | jq -r .txhash)
 # Wait for the proposal to go on chain

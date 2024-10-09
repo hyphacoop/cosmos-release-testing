@@ -702,7 +702,7 @@
               $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --gas-prices $CONSUMER_GAS_PRICE$CONSUMER_DENOM --gas-adjustment 2 \
-              --home $CONSUMER_HOME_1 -o json | jq '.'
+              --home $CONSUMER_HOME_1 -o json -y | jq '.'
               sleep $(($COMMIT_TIMEOUT*10))
               echo "> Balance in consumer chain recipient:"
               $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
@@ -714,6 +714,7 @@
               CONSUMER_DENOM: ucon
             run: |
               denom_450=$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              echo "> Denom: $denom_450"
               scripts/change_denoms.sh $denom_450
               $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.'
 
