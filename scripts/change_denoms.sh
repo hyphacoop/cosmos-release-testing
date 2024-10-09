@@ -3,7 +3,7 @@
 denom_hash=$1
 
 echo "Patching template with consumer denom..."
-jq -r --arg DENOMTOADD "ibc/$denom_hash" '.denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
+jq -r --arg DENOMTOADD "ibc/$denom_hash" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
 
 echo "> Submit proposal with v50 command."
 jq '.' proposal-denom-hash.json
