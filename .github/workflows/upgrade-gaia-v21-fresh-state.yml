@@ -694,6 +694,8 @@
               CON1_P2P_PORT: 40231
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
               echo "> Val1 outstanding rewards:"
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
               echo "> Send tx with high fees in consumer chain."
@@ -711,12 +713,15 @@
             env:
               CONSUMER_DENOM: ucon
             run: |
-              denom_450=$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-              scripts/register_denoms.sh $denom_450
+              denom_450=$(echo -n "transfer/channel-1/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              scripts/change_denoms.sh $denom_450
               $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.'
 
           - name: Query outstanding rewards
             run: |
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
           # - name: _Downtime test> val3 must not be jailed 
