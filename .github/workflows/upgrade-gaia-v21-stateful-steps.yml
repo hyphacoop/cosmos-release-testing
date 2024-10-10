@@ -93,11 +93,13 @@ jobs:
       CON1_RPC_PORT: 27101
       CON1_P2P_PORT: 28101
       CON1_PPROF_PORT: 6163
+      CON1_MIN_GAS_PRICES: 0.0025
       CON2_API_PORT: 25102
       CON2_GRPC_PORT: 26102
       CON2_RPC_PORT: 27102
       CON2_P2P_PORT: 28102
       CON2_PPROF_PORT: 6164
+      CON2_MIN_GAS_PRICES: 0.0025
       CONSUMER_SERVICE_1: cona1.service
       CONSUMER_SERVICE_2: cona2.service
       CONB1_API_PORT: 55101
@@ -539,6 +541,7 @@ jobs:
           DOWNTIME_BLOCKS: 20
           CONSUMER_NEW: true
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_MIN_GAS_PRICES: ${{ env.CON2_MIN_GAS_PRICES }}
         run: scripts/stateful/init_consumer_2_vals.sh
       - name: Launch opt-in consumer chain a
         env:
@@ -649,6 +652,7 @@ jobs:
           CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
           CONSUMER_SERVICE_1: conb1.service
           CONSUMER_SERVICE_2: conb2.service
+          CONSUMER_MIN_GAS_PRICES: ${{ env.CON1_MIN_GAS_PRICES }}
           PSS_ENABLED: true
           TOPN: 95
         run: scripts/stateful/launch_consumer_2_vals_topn.sh
