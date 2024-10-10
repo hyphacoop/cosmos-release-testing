@@ -731,9 +731,12 @@
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
               val1_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
               echo "> val1_rewards: $val1_rewards"
-              val1_consumer_rewards=$(echo $val1_rewards | jq -r -arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
               echo "> val1_consumer_rewards: $val1_consumer_rewards"
-
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
+              fi
 
           # - name: _Downtime test> val3 must not be jailed 
           #   run: |
