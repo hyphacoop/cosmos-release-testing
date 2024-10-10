@@ -723,7 +723,7 @@
           - name: _Consumer rewards distribution> ICS v4.5.0
             run: |
               last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-              ibc_denom=ibc$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              ibc_denom=ibc/$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
               echo "> Denom: $ibc_denom"
               echo "> Consumer rewards pool balances:"
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
