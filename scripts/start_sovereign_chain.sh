@@ -34,7 +34,7 @@ jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.crisis.constant_fee.denom |= $DE
 jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.gov.params.min_deposit[0].denom |= $DENOM' crisis.json > min_deposit.json
 jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.mint.params.mint_denom |= $DENOM' min_deposit.json > mint.json
 jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.staking.params.bond_denom |= $DENOM' mint.json > bond_denom.json
-cp reward_reg.json $CONSUMER_HOME_1/config/genesis.json
+cp bond_denom.json $CONSUMER_HOME_1/config/genesis.json
 
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_2 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
