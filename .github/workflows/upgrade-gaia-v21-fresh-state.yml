@@ -739,7 +739,7 @@
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --gas-prices $CONSUMER_GAS_PRICE$CONSUMER_DENOM --gas-adjustment 2 \
               --home $CONSUMER_HOME_1 -o json -y | jq '.'
-              sleep $(($COMMIT_TIMEOUT*10))
+              sleep 30
               echo "> Balance in consumer chain recipient:"
               $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
               echo "> Val1 outstanding rewards:"
@@ -3150,14 +3150,14 @@
               RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             run: |
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V450_BINARY
-              echo "> List consumer chains:"
-              $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              echo "> Client ID: $client_id"
-              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-              echo "> Connection ID: $connection_id"
-              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-              tests/test_consumer_ibc_transfer.sh $channel_id
+              # echo "> List consumer chains:"
+              # $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
+              # client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              # echo "> Client ID: $client_id"
+              # connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              # echo "> Connection ID: $connection_id"
+              # channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_changeover_ibc_transfer.sh
           
           - name: Trigger consumer rewards distribution> ICS v4.5.0
             env:
