@@ -35,8 +35,13 @@ jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $S
 jq -r --argjson HEIGHT $revision_height '.initialization_parameters.initial_height.revision_height |= $HEIGHT' create-spawn.json > consumer.json
 cp consumer.json create-spawn.json
 
+jq -r '.initialization_parameters.distribution_transmission_channel |= "channel-0"' create-spawn.json > channel.json
+cp channel.json create-spawn.json
+
 sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" create-spawn.json > create-$CONSUMER_CHAIN_ID.json
 rm create-spawn.json
+
+jq '.' create-$CONSUMER_CHAIN_ID.json
 
 echo "Submitting transaction..."
 
@@ -66,4 +71,33 @@ sleep $(($COMMIT_TIMEOUT+2))
 
 echo "Querying txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+
+sleep 30
 $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
+echo "> Collect the CCV state."
+$CHAIN_BINARY q provider consumer-genesis 0 -o json --home $HOME_1 > temp/ccv.json
+
+jq '.params.reward_denoms |= ["ucon"]' temp/ccv.json > temp/ccv-denom.json
+cp temp/ccv-denom.json temp/ccv.json
+
+jq '.params.provider_reward_denoms |= ["uatom"]' temp/ccv.json > temp/ccv-provider-denom.json
+cp temp/ccv-provider-denom.json temp/ccv.json
+
+# cd-transform genesis transform --to v3.2.x temp/ccv.json > temp/ccv-transform.json
+
+echo "> Patch the consumer genesis file."
+jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json temp/ccv.json > consumer-genesis.json
+cp consumer-genesis.json ~/.sovereign/config/genesis.json
+
+systemctl daemon-reload
+echo "> Start consumer chain."
+sudo systemctl stop $CONSUMER_SERVICE_1
+sudo systemctl stop $CONSUMER_SERVICE_2
+sudo systemctl stop $CONSUMER_SERVICE_3
+
+cp ~/go/bin/$CHANGEOVER_CHAIN_V450_BINARY ~/go/bin/$CONSUMER_CHAIN_BINARY
+sudo systemctl start $CONSUMER_SERVICE_1
+sudo systemctl start $CONSUMER_SERVICE_2
+sudo systemctl start $CONSUMER_SERVICE_3
+
+sleep 10
