@@ -620,7 +620,8 @@
               COSMOS_SDK: v50
             run: |
               $CHAIN_BINARY q ibc channel channels --home $HOME_1
-              export IBC_DENOM=ibc/$(echo -n "transfer/channel-4/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              export IBC_DENOM_1=ibc/$(echo -n "transfer/channel-3/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              export IBC_DENOM_2=ibc/$(echo -n "transfer/channel-4/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
               scripts/add_consumer_optin_allowlist.sh
           - name: Initialize consumer chain with ICS v4.5.0
             env:
