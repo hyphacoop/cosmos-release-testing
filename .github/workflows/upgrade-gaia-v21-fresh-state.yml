@@ -2928,6 +2928,8 @@
             run: 
               journalctl -u $CONSUMER_SERVICE_1
           - name: Sovereign block production check
+            env:
+              CON1_RPC_PORT: 40121
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5 # 5 blocks
           # - name: Add consumer chain with ICS v4.0.0
           #   env:
