@@ -933,12 +933,12 @@ jobs:
       #     export FEE_MARKET_10_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET10 }} -o json | jq -r '.account.value.account_number')
       #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET10 }} is: $FEE_MARKET_10_ACCOUNT_NUMBER"
       #     tests/stateful/gaia-v18/test_feemarket.sh
-      # - name: DEBUG
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Stop services
         if: always()
         run: |
