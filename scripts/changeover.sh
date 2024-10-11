@@ -77,6 +77,7 @@ cp ccv-provider-denom.json ccv.json
 
 echo "> Patch the consumer genesis file."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json ccv.json > consumer-genesis.json
+mkdir -p ~/.sovereign/config/
 cp consumer-genesis.json ~/.sovereign/config/genesis.json
 
 systemctl daemon-reload
