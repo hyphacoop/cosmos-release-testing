@@ -29,7 +29,7 @@ revision_height=$(($upgrade_height+3))
 echo "> Revision height is set to $revision_height."
 
 echo "Patching add template with spawn time..."
-spawn_time=$(date -u --iso-8601=ns -d '10 secs' | sed s/+00:00/Z/ | sed s/,/./) # 10 seconds in the future: not enough time to opt in
+spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 10 seconds in the future: not enough time to opt in
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' templates/create-consumer.json > create-spawn.json
 
 jq -r --argjson HEIGHT $revision_height '.initialization_parameters.initial_height.revision_height |= $HEIGHT' create-spawn.json > consumer.json
@@ -44,7 +44,6 @@ rm create-spawn.json
 jq '.' create-$CONSUMER_CHAIN_ID.json
 
 echo "Submitting transaction..."
-
 tx="$CHAIN_BINARY tx provider create-consumer create-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y -o json"
 txhash=$($tx | jq -r .txhash)
 # Wait for the proposal to go on chain
@@ -57,36 +56,27 @@ export consumer_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | j
 echo "Consumer ID: $consumer_id"
 echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
 
-echo "Wait for spawn time without validators opting in..."
-sleep 10
-$CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
-
-spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
-jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' templates/update-spawn-time.json > update-spawn.json
-jq -r --arg CONSUMERID "$consumer_id" '.consumer_id |= $CONSUMERID' update-spawn.json > update-consumer.json
-
-echo "Moving spawn time to 30 seconds in the future..."
-txhash=$($CHAIN_BINARY tx provider update-consumer update-consumer.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -o json -y | jq -r '.txhash')
-sleep $(($COMMIT_TIMEOUT+2))
-
-echo "Querying txhash..."
-$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+echo "> Opt in."
+CON1_PUBKEY=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1)
+CON2_PUBKEY=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_2)
+$CHAIN_BINARY tx provider opt-in 0 $CON1_PUBKEY --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+$CHAIN_BINARY tx provider opt-in 0 $CON2_PUBKEY --from $MONIKER_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
 
 sleep 30
 $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
 echo "> Collect the CCV state."
-$CHAIN_BINARY q provider consumer-genesis 0 -o json --home $HOME_1 > temp/ccv.json
+$CHAIN_BINARY q provider consumer-genesis 0 -o json --home $HOME_1 > ccv.json
 
-jq '.params.reward_denoms |= ["ucon"]' temp/ccv.json > temp/ccv-denom.json
-cp temp/ccv-denom.json temp/ccv.json
+jq '.params.reward_denoms |= ["ucon"]' ccv.json > ccv-denom.json
+cp ccv-denom.json ccv.json
 
-jq '.params.provider_reward_denoms |= ["uatom"]' temp/ccv.json > temp/ccv-provider-denom.json
-cp temp/ccv-provider-denom.json temp/ccv.json
+jq '.params.provider_reward_denoms |= ["uatom"]' ccv.json > ccv-provider-denom.json
+cp ccv-provider-denom.json ccv.json
 
 # cd-transform genesis transform --to v3.2.x temp/ccv.json > temp/ccv-transform.json
 
 echo "> Patch the consumer genesis file."
-jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json temp/ccv.json > consumer-genesis.json
+jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json ccv.json > consumer-genesis.json
 cp consumer-genesis.json ~/.sovereign/config/genesis.json
 
 systemctl daemon-reload
