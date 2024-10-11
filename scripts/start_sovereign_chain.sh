@@ -2,7 +2,7 @@
 # 1. Set up a three-validator sovereign chain.
 
 echo "> Installing Binary."
-wget $CHAIN_BINARY_URL -O $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
+wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
 chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
 
 # Initialize home directories
@@ -179,16 +179,6 @@ toml set --toml-path $CONSUMER_HOME_1/config/config.toml fast_sync false
 toml set --toml-path $CONSUMER_HOME_2/config/config.toml fast_sync false
 toml set --toml-path $CONSUMER_HOME_3/config/config.toml fast_sync false
 
-echo "Setting up cosmovisor..."
-if [ "$COSMOVISOR" = true ]; then
-    mkdir -p $CONSUMER_HOME_1/cosmovisor/genesis/bin
-    mkdir -p $CONSUMER_HOME_2/cosmovisor/genesis/bin
-    mkdir -p $CONSUMER_HOME_3/cosmovisor/genesis/bin
-    cp $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY $CONSUMER_HOME_1/cosmovisor/genesis/bin/
-    cp $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY $CONSUMER_HOME_2/cosmovisor/genesis/bin/
-    cp $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY $CONSUMER_HOME_3/cosmovisor/genesis/bin/
-fi
-
 echo "Setting up services..."
 
 sudo touch /etc/systemd/system/$CONSUMER_SERVICE_1
@@ -198,7 +188,7 @@ echo "After=network-online.target"          | sudo tee /etc/systemd/system/$CONS
 echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
-echo "ExecStart=$CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_1" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
+echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_1" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
 echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_1 -a
@@ -212,7 +202,7 @@ echo "After=network-online.target"          | sudo tee /etc/systemd/system/$CONS
 echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
-echo "ExecStart=$CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_2" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
+echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_2" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_2 -a
 
@@ -227,7 +217,7 @@ echo "After=network-online.target"          | sudo tee /etc/systemd/system/$CONS
 echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
-echo "ExecStart=$CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_3" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
+echo "ExecStart=$HOME/go/bin/$CONSUMER_CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $CONSUMER_HOME_3" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_3 -a
 
