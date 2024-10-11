@@ -107,9 +107,9 @@
       CONSUMER_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-cd-linux
       CONSUMER_CHAIN_V450_BINARY: consumerd_v4.5.0
       SOVEREIGN_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-sd-linux
-      SOVEREIGN_CHAIN_V450_BINARY: consumerd_v4.5.0
+      SOVEREIGN_CHAIN_V450_BINARY: consumersd_v4.5.0
       CHANGEOVER_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-cdd-linux
-      CHANGEOVER_CHAIN_V450_BINARY: consumerd_v4.5.0
+      CHANGEOVER_CHAIN_V450_BINARY: consumerdd_v4.5.0
       ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
       ICS_TRANSFORM_BINARY: cd-transform
       # Stride chain variables
@@ -2870,6 +2870,10 @@
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
               wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
+              wget $SOVEREIGN_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY -q
+              chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY
+              wget $CHANGEOVER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY -q
+              chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY
               wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
               chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
           - name: Consumer chain binary URLs
@@ -2914,7 +2918,7 @@
               CON3_PPROF_PORT: 40143
               DOWNTIME_BLOCKS: 100000
             run: |
-              export CHAIN_BINARY_URL=$CONSUMER_CHAIN_V450_BINARY_URL
+              export CHAIN_BINARY_URL=$SOVEREIGN_CHAIN_V450_BINARY_URL
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V450_BINARY
               scripts/start_sovereign_chain.sh
           - name: Sovereign block production check
