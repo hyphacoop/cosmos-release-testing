@@ -2931,6 +2931,13 @@
             env:
               CON1_RPC_PORT: 40121
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5 # 5 blocks
+          - name: Create transfer channel with sovereign chain
+            env:
+              CONSUMER_CHAIN_ID: v450-one
+            run: |
+              hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
+              hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
+
           # - name: Add consumer chain with ICS v4.0.0
           #   env:
           #     CONSUMER_CHAIN_ID: v400-one
@@ -3029,26 +3036,26 @@
           #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
           #     tests/test_consumer_ibc_transfer.sh $channel_id
     
-          # - name: Test software upgrade for published releases
-          #   if: ${{ matrix.upgrade_version != 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          #   run: |
-          #     echo $DOWNLOAD_URL
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-          # - name: Test software upgrade for main branch
-          #   if: ${{ matrix.upgrade_version == 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          #   run: |
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+          - name: Test software upgrade for published releases
+            if: ${{ matrix.upgrade_version != 'main' }}
+            env:
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+            run: |
+              echo $DOWNLOAD_URL
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+          - name: Test software upgrade for main branch
+            if: ${{ matrix.upgrade_version == 'main' }}
+            env:
+              DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+            run: |
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
     
-          # - name: _Blocks produced after upgrade
-          #   run: |
-          #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          - name: _Blocks produced after upgrade
+            run: |
+              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
     
-          # - name: Restart relayer
-          #   run: sudo systemctl restart $RELAYER
+          - name: Restart relayer
+            run: sudo systemctl restart $RELAYER
     
           # - name: Flush "migration successful" lines
           #   run: |
