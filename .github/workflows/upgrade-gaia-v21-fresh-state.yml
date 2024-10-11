@@ -554,6 +554,9 @@
             
           - name: Print outstanding rewards
             run: |
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
+              echo "> Validator outstanding rewards:"
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
           - name: Test software upgrade for published releases
