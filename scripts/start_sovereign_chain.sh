@@ -2,8 +2,8 @@
 # 1. Set up a three-validator sovereign chain.
 
 echo "> Installing Binary."
-wget $CONSUMER_CHAIN_BINARY_URL -O $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
-chmod +x $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY
+wget $CHAIN_BINARY_URL -O $CONSUMER_HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
+chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
 
 # Initialize home directories
 echo "Initializing node homes..."
