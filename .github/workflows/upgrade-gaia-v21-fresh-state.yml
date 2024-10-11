@@ -2921,6 +2921,12 @@
               export CHAIN_BINARY_URL=$SOVEREIGN_CHAIN_V450_BINARY_URL
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V450_BINARY
               scripts/start_sovereign_chain.sh
+              sleep 10
+          - name: Print sovereign logs
+            env:
+              CONSUMER_SERVICE_1: v450-1-1.service
+            run: 
+              journalctl -u $CONSUMER_SERVICE_1
           - name: Sovereign block production check
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5 # 5 blocks
           # - name: Add consumer chain with ICS v4.0.0
