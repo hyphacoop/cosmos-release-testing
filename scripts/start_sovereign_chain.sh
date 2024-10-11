@@ -30,11 +30,10 @@ echo $MNEMONIC_4 | $CONSUMER_CHAIN_BINARY keys add $MONIKER_4 --keyring-backend 
 echo $MNEMONIC_5 | $CONSUMER_CHAIN_BINARY keys add $MONIKER_5 --keyring-backend test --home $CONSUMER_HOME_1 --recover
 
 echo "Setting denom to $CONSUMER_DENOM..."
-jq -r --arg denom "$CONSUMER_DENOM" '.app_state.crisis.constant_fee.denom |= $CONSUMER_DENOM' $CONSUMER_HOME_1/config/genesis.json > crisis.json
-jq -r --arg denom "$CONSUMER_DENOM" '.app_state.gov.params.min_deposit[0].denom |= $CONSUMER_DENOM' crisis.json > min_deposit.json
-jq -r --arg denom "$CONSUMER_DENOM" '.app_state.mint.params.mint_denom |= $CONSUMER_DENOM' min_deposit.json > mint.json
-jq -r --arg denom "$CONSUMER_DENOM" '.app_state.staking.params.bond_denom |= $CONSUMER_DENOM' mint.json > bond_denom.json
-jq -r --arg denom "$CONSUMER_DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $CONSUMER_DENOM' bond_denom.json > reward_reg.json
+jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.crisis.constant_fee.denom |= $DENOM' $CONSUMER_HOME_1/config/genesis.json > crisis.json
+jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.gov.params.min_deposit[0].denom |= $DENOM' crisis.json > min_deposit.json
+jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.mint.params.mint_denom |= $DENOM' min_deposit.json > mint.json
+jq -r --arg DENOM "$CONSUMER_DENOM" '.app_state.staking.params.bond_denom |= $DENOM' mint.json > bond_denom.json
 cp reward_reg.json $CONSUMER_HOME_1/config/genesis.json
 
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
