@@ -3118,189 +3118,95 @@
               scripts/changeover.sh
               journalctl -u $CONSUMER_SERVICE_1
     
-          # - name: Flush "migration successful" lines
-          #   run: |
-          #     $CHAIN_BINARY keys list --home $HOME_1
-    
-          # - name: _CCV channel verified> ICS v4.0.0 chain 1
-          #   env:
-          #     CONSUMER_HOME_1: /home/runner/.v400-1-1
-          #     CON1_RPC_PORT: 40121
-          #   run: tests/test_ccv_key_assignment.sh
-          # - name: _IBC transfer successful> ICS v4.0.0 chain 1
-          #   env:
-          #     CONSUMER_CHAIN_ID: v400-one
-          #     CONSUMER_HOME_1: /home/runner/.v400-1-1
-          #     RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-          #   run: |
-          #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-          #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-          #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-          #     tests/test_consumer_ibc_transfer.sh $channel_id
-  
-          # - name: _Downtime test> val3 must not be jailed 
-          #   run: |
-          #     tests/test_validator_jailed.sh $VALOPER_3 null
+          - name: Establish CCV channel for v450-one
+            env:
+              CONSUMER_CHAIN_ID: v450-one
+            run: |
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              if [ $RELAYER == "hermes" ]; then
+                echo "Creating channel with Hermes..."
+                hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+                hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              elif [ $RELAYER == "rly" ]; then
+                echo "Creating channel with Go relayer..."
+                jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
+                jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v400-1.json > v400-2.json
+                rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v400-2.json
+                rly transact connection v400-1
+                rly transact channel v400-1 --src-port consumer --dst-port provider --order ordered --version 1
+              fi
+              sudo systemctl restart $RELAYER
+              sleep 10
+          - name: _CCV channel verified> ICS v4.5.0 chain 1
+            env:
+              CONSUMER_HOME_1: /home/runner/.v450-1-1
+              CON1_RPC_PORT: 40121
+              CON1_P2P_PORT: 40131
+            run: tests/test_ccv_key_assignment.sh
+          - name: _IBC transfer successful> ICS v4.5.0 chain 1
+            env:
+              CONSUMER_CHAIN_ID: v450-one
+              CONSUMER_HOME_1: /home/runner/.v450-1-1
+              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+            run: |
+              export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V450_BINARY
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
           
-          # - name: Add consumer chain with ICS v4.5.0
-          #   env:
-          #     CONSUMER_CHAIN_ID: v450-two
-          #     PSS_ENABLED: true
-          #     COSMOS_SDK: v50
-          #   run: |
-          #     scripts/add_consumer_optin.sh
-          # - name: Initialize consumer chain with ICS v4.5.0
-          #   env:
-          #     CONSUMER_CHAIN_ID: v450-two
-          #     CONSUMER_HOME_1: /home/runner/.v450-2-1
-          #     CONSUMER_HOME_2: /home/runner/.v450-2-2
-          #     CONSUMER_HOME_3: /home/runner/.v450-2-3
-          #     CONSUMER_SERVICE_1: v450-2-1.service
-          #     CONSUMER_SERVICE_2: v450-2-2.service
-          #     CONSUMER_SERVICE_3: v450-2-3.service
-          #     CON1_API_PORT: 40201
-          #     CON2_API_PORT: 40202
-          #     CON3_API_PORT: 40203
-          #     CON1_GRPC_PORT: 40211
-          #     CON2_GRPC_PORT: 40212
-          #     CON3_GRPC_PORT: 40213
-          #     CON1_RPC_PORT: 40221
-          #     CON2_RPC_PORT: 40222
-          #     CON3_RPC_PORT: 40223
-          #     CON1_P2P_PORT: 40231
-          #     CON2_P2P_PORT: 40232
-          #     CON3_P2P_PORT: 40233
-          #     CON1_PPROF_PORT: 40241
-          #     CON2_PPROF_PORT: 40242
-          #     CON3_PPROF_PORT: 40243
-          #     DOWNTIME_BLOCKS: 20
-          #   run: |
-          #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
-          #     scripts/init_consumer_permissionless.sh
-          #     sleep 30
-          # - name: Prepare consumer chain v450-two
-          #   env:
-          #     CONSUMER_CHAIN_ID: v450-two
-          #     CONSUMER_HOME_1: /home/runner/.v450-2-1
-          #     CONSUMER_HOME_2: /home/runner/.v450-2-2
-          #     CONSUMER_HOME_3: /home/runner/.v450-2-3
-          #     ICS_400: true
-          #     CONSUMER_ICS: v4.0.0
-          #     PROVIDER_ICS: v4.2.0
-          #   run: |
-          #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-          #     scripts/prepare_consumer_permissionless.sh
-          # - name: Start consumer chain v400-two
-          #   env:
-          #     CONSUMER_CHAIN_ID: v450-two
-          #     CONSUMER_SERVICE_1: v450-2-1.service
-          #     CONSUMER_SERVICE_2: v450-2-2.service
-          #     CONSUMER_SERVICE_3: v450-2-3.service
-          #   run: |
-          #     sudo systemctl enable $CONSUMER_SERVICE_1 --now
-          #     sudo systemctl enable $CONSUMER_SERVICE_2 --now
-          #     sudo systemctl enable $CONSUMER_SERVICE_3 --now
-          #     sleep 10
-          #     echo "val1:"
-          #     journalctl -u $CONSUMER_SERVICE_1
-          #     echo "val2:"
-          #     journalctl -u $CONSUMER_SERVICE_2
-          #     echo "val3:"
-          #     journalctl -u $CONSUMER_SERVICE_3
-          # - name: _Consumer chain produces blocks> ICS v4.5.0 chain 2
-          #   env:
-          #     CON1_RPC_PORT: 40221
-          #   run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-          # - name: Establish CCV channel for v450-two
-          #   env:
-          #     CONSUMER_CHAIN_ID: v450-two
-          #   run: |
-          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-          #     if [ $RELAYER == "hermes" ]; then
-          #       echo "Creating channel with Hermes..."
-          #       hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-          #       hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-          #     elif [ $RELAYER == "rly" ]; then
-          #       echo "Creating channel with Go relayer..."
-          #       jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
-          #       jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v400-1.json > v400-2.json
-          #       rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v400-2.json
-          #       rly transact connection v400-1
-          #       rly transact channel v400-1 --src-port consumer --dst-port provider --order ordered --version 1
-          #     fi
-          #     sudo systemctl restart $RELAYER
-          #     sleep 10
-          # - name: _CCV channel verified> ICS v4.5.0 chain 2
-          #   env:
-          #     CONSUMER_HOME_1: /home/runner/.v450-2-1
-          #     CON1_RPC_PORT: 40221
-          #     CON1_P2P_PORT: 40231
-          #   run: tests/test_ccv_key_assignment.sh
-          # - name: _IBC transfer successful> ICS v4.5.0 chain 2
-          #   env:
-          #     CONSUMER_CHAIN_ID: v450-two
-          #     CONSUMER_HOME_1: /home/runner/.v450-2-1
-          #     RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-          #   run: |
-          #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
-          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-          #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-          #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-          #     tests/test_consumer_ibc_transfer.sh $channel_id
-          
-          # - name: Trigger consumer rewards distribution> ICS v4.5.0
-          #   env:
-          #     CONSUMER_HOME_1: /home/runner/.v450-2-1
-          #     CON1_RPC_PORT: 40221
-          #     CON1_P2P_PORT: 40231
-          #   run: |
-          #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
-          #     echo "> Consumer rewards pool balances:"
-          #     $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
-          #     echo "> Val1 outstanding rewards:"
-          #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
-          #     echo "> Send tx with high fees in consumer chain."
-          #     $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
-          #     --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
-          #     --gas auto --gas-prices $CONSUMER_GAS_PRICE$CONSUMER_DENOM --gas-adjustment 2 \
-          #     --home $CONSUMER_HOME_1 -o json -y | jq '.'
-          #     sleep $(($COMMIT_TIMEOUT*10))
-          #     echo "> Balance in consumer chain recipient:"
-          #     $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
-          #     echo "> Val1 outstanding rewards:"
-          #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+          - name: Trigger consumer rewards distribution> ICS v4.5.0
+            env:
+              CONSUMER_HOME_1: /home/runner/.v450-1-1
+              CON1_RPC_PORT: 40121
+              CON1_P2P_PORT: 40131
+            run: |
+              export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V450_BINARY
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 10000ucon \
+              --home $CONSUMER_HOME_1 -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
-          # - name: Register consumer reward denoms
-          #   env:
-          #     CONSUMER_DENOM: ucon
-          #   run: |
-          #     last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-          #     echo "> Last channel: $last_channel"
-          #     denom_450=$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-          #     echo "> Denom: $denom_450"
-          #     scripts/change_denoms.sh $denom_450
-          #     $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.'
+          - name: Register consumer reward denoms
+            env:
+              CONSUMER_DENOM: ucon
+            run: |
+              last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
+              echo "> Last channel: $last_channel"
+              denom_450=$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              echo "> Denom: $denom_450"
+              scripts/change_denoms.sh $denom_450
+              $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.'
 
-          # - name: _Consumer rewards distribution> ICS v4.5.0
-          #   run: |
-          #     last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-          #     ibc_denom=ibc/$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-          #     echo "> Denom: $ibc_denom"
-          #     echo "> Consumer rewards pool balances:"
-          #     $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
-          #     echo "> Val1 outstanding rewards:"
-          #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
-          #     val1_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
-          #     echo "> val1_rewards: $val1_rewards"
-          #     val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
-          #     echo "> val1_consumer_rewards: $val1_consumer_rewards"
-          #     if [ -z "$val1_consumer_rewards" ]; then
-          #       echo "FAIL: No consumer rewards distributed to val1."
-          #       exit 1
-          #     else
-          #       echo "PASS: Consumer rewards distributed to val1."
-          #     fi
+          - name: _Consumer rewards distribution> ICS v4.5.0
+            run: |
+              last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
+              ibc_denom=ibc/$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              echo "> Denom: $ibc_denom"
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+              val1_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+              echo "> val1_rewards: $val1_rewards"
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              echo "> val1_consumer_rewards: $val1_consumer_rewards"
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
+              else
+                echo "PASS: Consumer rewards distributed to val1."
+              fi
 
           # - name: _Downtime test> val3 must not be jailed 
           #   run: |
