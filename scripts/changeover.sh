@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo "Calculate upgrade height"
-let voting_blocks_delta=$VOTING_PERIOD/$COMMIT_TIMEOUT+5
+voting_period_seconds=${VOTING_PERIOD::-1}
+let voting_blocks_delta=$voting_period_seconds/$COMMIT_TIMEOUT+5
 height=$(curl -s http://localhost:$CON1_RPC_PORT/block | jq -r .result.block.header.height)
 echo "Current height: $height"
 upgrade_height=$(($height+$voting_blocks_delta))
@@ -20,3 +21,6 @@ echo "Proposal ID: $proposal_id"
 printf "\nVoting...\n"
 $CONSUMER_CHAIN_BINARY tx gov vote $proposal_id yes --from $MONIKER_1 --gas $GAS --gas-prices $GAS_PRICE$CONSUMER_DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $CONSUMER_HOME_1
 
+sleep $VOTING_PERIOD
+
+$CONSUMER_CHAIN_BINARY q gov proposal $proposal_id --home $CONSUMER_HOME_1
