@@ -8,7 +8,7 @@ sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" create-spawn.j
 rm create-spawn.json
 
 echo "> Add denoms to allowlist."
-jq -r --arg denom "[\"$IBC_DENOM_1\",\"$IBC_DENOM_2\"]" '.allowlisted_reward_denoms.denoms |= $denom' create-$CONSUMER_CHAIN_ID.json > create-denoms.json
+jq -r --arg denom1 "$IBC_DENOM_1" --arg denom2 "$IBC_DENOM_2" '.allowlisted_reward_denoms.denoms |= [$denom,$denom2]' create-$CONSUMER_CHAIN_ID.json > create-denoms.json
 mv create-denoms.json create-$CONSUMER_CHAIN_ID.json
 jq '.' create-$CONSUMER_CHAIN_ID.json
 
