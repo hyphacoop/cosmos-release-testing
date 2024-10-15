@@ -190,7 +190,7 @@ jobs:
           sudo systemctl stop gaiad
       - name: Compress and upload files
         env:
-          DEVNET_BRANCH: v21.0.0-alpha0
+          DEVNET_BRANCH: v21.0.0-rc0
         run: |
           echo "[INFO]: Creating archive ..."
           cd /home/sysadmin/.gaia
