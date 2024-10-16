@@ -629,7 +629,7 @@ jobs:
       - name: _Check rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 5 blocks to pass"
-          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 5
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
           echo "Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           demon=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r \".balances[] | select(.denom==\"$CONSUMERA_DENOM\") | .denom\")
