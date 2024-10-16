@@ -621,8 +621,42 @@ jobs:
           echo "Connection ID: $connection_id"
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
-          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1000
           echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
+          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
+          echo "consumera denom: $denom"
+          echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
+      - name: _Check rewards in rewards pool balances
+        run: |
+          echo "[INFO]: Wait for 5 blocks to pass"
+          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 5
+          echo "Rewards pool balances:"
+          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          demon=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r \".balances[] | select(.denom==\"$CONSUMERA_DENOM\") | .denom\")
+          if $( "$denom" != "$CONSUMERA_DENOM")
+          then
+            echo "[ERROR]: Consumer denom not found in rewards pool"
+            exit 1
+          else
+            echo "[PASS]: Denom is in rewards pool: $demon"
+      - name: Register reward denom for consumer a
+        run: |
+          jq -r --arg DENOMTOADD "$CONSUMERA_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
+          scripts/submit_proposal.sh proposal-denom-hash.json
+      - name: _Check validator outstanding rewards for consumer chain a
+        run: |
+          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+          echo "[INFO]: Current validator outstanding rewards:"
+          echo "$outstanding_rewards"
+          echo "[INFO]: Checking if expected reward listed..."
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r ".rewards.rewards[] | select(.denom==\"$CONSUMERA_DENOM\") | .denom" )
+          if $( "$denom" != "$CONSUMERA_DENOM")
+          then
+            echo "[ERROR]: Consumer denom not found in validator's outstanding rewards"
+            exit 1
+          else
+            echo "[PASS]: Denom is in validator's outstanding rewards: $demon"
+
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumerb
@@ -728,8 +762,11 @@ jobs:
           echo "Connection ID: $connection_id"
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
-          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1002
           echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
+          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq '.balances[] | select(.amount=="1002") | .denom')
+          echo "consumerb denom: $denom"
+          echo "CONSUMERB_DENOM=$denom" >> $GITHUB_ENV
       - name: Print opt-in consumer tendermint validators consumerb
         env:
           CONSUMER_CHAIN_ID: consumerb
