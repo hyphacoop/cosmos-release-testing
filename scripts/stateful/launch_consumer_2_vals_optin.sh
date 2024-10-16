@@ -91,6 +91,8 @@ echo "[INFO] Collecting the CCV state..."
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 > ccv-pre.json
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 >  ~/artifact/$CONSUMER_CHAIN_ID-ccv-pre.txt
 jq '.params |= . + {"soft_opt_out_threshold": "0.05"}' ccv-pre.json > ccv.json
+jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv.json > ccv-denom.json
+mv ccv-denom.json ccv.json
 jq '.' ccv.json
 
 if [ ! -z $transform ]
@@ -106,8 +108,6 @@ cp ccv.json ~/artifact/$CONSUMER_CHAIN_ID-ccv.json
 
 echo "[INFO] Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json ccv.json > consumer-genesis.json
-jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' consumer-genesis.json > consumer-genesis-denom.json
-mv consumer-genesis-denom.json consumer-genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_1/config/genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_2/config/genesis.json
 
