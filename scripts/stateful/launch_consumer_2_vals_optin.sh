@@ -106,6 +106,8 @@ cp ccv.json ~/artifact/$CONSUMER_CHAIN_ID-ccv.json
 
 echo "[INFO] Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $CONSUMER_HOME_1/config/genesis.json ccv.json > consumer-genesis.json
+jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' consumer-genesis.json > consumer-genesis-denom.json
+mv consumer-genesis-denom.json consumer-genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_1/config/genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_2/config/genesis.json
 
