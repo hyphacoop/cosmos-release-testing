@@ -639,6 +639,7 @@ jobs:
             exit 1
           else
             echo "[PASS]: Denom is in rewards pool: $demon"
+          fi
       - name: Register reward denom for consumer a
         run: |
           jq -r --arg DENOMTOADD "$CONSUMERA_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
@@ -656,6 +657,7 @@ jobs:
             exit 1
           else
             echo "[PASS]: Denom is in validator's outstanding rewards: $demon"
+          fi
 
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
         env:
