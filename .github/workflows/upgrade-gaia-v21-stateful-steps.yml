@@ -630,9 +630,9 @@ jobs:
         run: |
           echo "[INFO]: Wait for 5 blocks to pass"
           tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-          echo "Rewards pool balances:"
+          echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
-          demon=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r \".balances[] | select(.denom==\"$CONSUMERA_DENOM\") | .denom\")
+          demon=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r \".balances[] | select\(.denom==\"$CONSUMERA_DENOM\"\) | .denom\")
           if $( "$denom" != "$CONSUMERA_DENOM")
           then
             echo "[ERROR]: Consumer denom not found in rewards pool"
@@ -649,7 +649,7 @@ jobs:
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
-          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r ".rewards.rewards[] | select(.denom==\"$CONSUMERA_DENOM\") | .denom" )
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r ".rewards.rewards[] | select\(.denom==\"$CONSUMERA_DENOM\"\) | .denom" )
           if $( "$denom" != "$CONSUMERA_DENOM")
           then
             echo "[ERROR]: Consumer denom not found in validator's outstanding rewards"
