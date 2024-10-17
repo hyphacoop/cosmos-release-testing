@@ -636,6 +636,12 @@ jobs:
           txhash=$(echo "$json" | jq -r .txhash)
           echo "[INFO]: TX result..."
           $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: _Check rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
@@ -828,12 +834,6 @@ jobs:
           else
             echo "Expected correct number of validators: $total_signatures"
           fi
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
       # Opt-out consumerb
       - name: Opt-out second validator to consumerb
         run: |
