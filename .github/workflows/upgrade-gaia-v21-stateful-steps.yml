@@ -631,6 +631,8 @@ jobs:
           json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
           echo "[INFO]: Transection Result..."
           echo "$json"
+          echo "[INFO]: Wait for 1 block to pass..."
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
           txhash=$(echo "$json" | jq -r .txhash)
           echo "[INFO]: TX result..."
           $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
