@@ -626,35 +626,35 @@ jobs:
           denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
           echo "consumera denom: $denom"
           echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
-      - name: Send tx on consumer with huge gas
-        run: |
-          json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
-          echo "[INFO]: Transection Result..."
-          echo "$json"
-          echo "[INFO]: Wait for 1 block to pass..."
-          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
-          txhash=$(echo "$json" | jq -r .txhash)
-          echo "[INFO]: TX result..."
-          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: Send tx on consumer with huge gas
+      #   run: |
+      #     json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
+      #     echo "[INFO]: Transection Result..."
+      #     echo "$json"
+      #     echo "[INFO]: Wait for 1 block to pass..."
+      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
+      #     txhash=$(echo "$json" | jq -r .txhash)
+      #     echo "[INFO]: TX result..."
+      #     $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Check rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
           tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
           echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
-          demon=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
+          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
             echo "[ERROR] Consumer denom not found in rewards pool"
             exit 1
           else
-            echo "[PASS] Denom is in rewards pool: $demon"
+            echo "[PASS] Denom is in rewards pool: $denom"
           fi
       - name: Register reward denom for consumer a
         run: |
@@ -672,7 +672,7 @@ jobs:
             echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
             exit 1
           else
-            echo "[PASS] Denom is in validator's outstanding rewards: $demon"
+            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
           fi
 
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
