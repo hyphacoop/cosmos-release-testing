@@ -628,17 +628,17 @@ jobs:
           echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
       - name: _Check rewards in rewards pool balances
         run: |
-          echo "[INFO]: Wait for 5 blocks to pass"
-          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+          echo "[INFO]: Wait for 20 blocks to pass"
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
           echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           demon=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
-            echo "[ERROR]: Consumer denom not found in rewards pool"
+            echo "[ERROR] Consumer denom not found in rewards pool"
             exit 1
           else
-            echo "[PASS]: Denom is in rewards pool: $demon"
+            echo "[PASS] Denom is in rewards pool: $demon"
           fi
       - name: Register reward denom for consumer a
         run: |
@@ -653,10 +653,10 @@ jobs:
           denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom=="$CONSUMERA_DENOM") | .denom' )
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
-            echo "[ERROR]: Consumer denom not found in validator's outstanding rewards"
+            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
             exit 1
           else
-            echo "[PASS]: Denom is in validator's outstanding rewards: $demon"
+            echo "[PASS] Denom is in validator's outstanding rewards: $demon"
           fi
 
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
