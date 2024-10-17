@@ -662,11 +662,11 @@ jobs:
           scripts/submit_proposal.sh proposal-denom-hash.json
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
-          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
-          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom=="$CONSUMERA_DENOM") | .denom' )
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
             echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
