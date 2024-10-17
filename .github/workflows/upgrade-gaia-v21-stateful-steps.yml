@@ -626,6 +626,14 @@ jobs:
           denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
           echo "consumera denom: $denom"
           echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
+      - name: Send tx on consumer with huge gas
+        run: |
+          json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
+          echo "[INFO]: Transection Result..."
+          echo "$json"
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "[INFO]: TX result..."
+          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
       - name: _Check rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
