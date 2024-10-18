@@ -12,7 +12,9 @@ jobs:
     environment: gaia-devnet-deploy
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
-      RUNNING_VERSION: ${{ vars.RUNNING_VERSION }}
+      RPC_NODE: ${{ vars.RPC_NODE }}
+      # RUNNING_VERSION: ${{ vars.RUNNING_VERSION }}
+      DEVNET_BRANCH: v21.0.0-rc1
     steps:
       # Get system info
       - name: Install required packages
@@ -57,6 +59,11 @@ jobs:
           ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
           echo "<html><head><title>Gaia Devnet Rebuilding...</title></head><body><h1>gaia-devnet is currently rebuilding...</h1></body></html>" > /tmp/status-index.html
           scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/index.html
+      - name: Get current mainnet gaia version
+        run: |
+          RUNNING_VERSION=$(curl -s $RPC_NODE/abci_info | jq -r '.result.response.version')
+          echo "$RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Build gaiad from source
         run: |
           cd /home/sysadmin
@@ -189,8 +196,6 @@ jobs:
           echo "exiting gaia and screen"
           sudo systemctl stop gaiad
       - name: Compress and upload files
-        env:
-          DEVNET_BRANCH: v21.0.0-rc1
         run: |
           echo "[INFO]: Creating archive ..."
           cd /home/sysadmin/.gaia
@@ -214,8 +219,6 @@ jobs:
           mv ./priv_validator_state.json data/
           rm gaia-devnet-${{ env.upgrade_height }}.tar.gz
       - name: Build gaiad
-        env:
-          DEVNET_BRANCH: v21.0.0-alpha0
         run: |
           cd /home/sysadmin/gaia
           git checkout ${{ env.DEVNET_BRANCH }}
