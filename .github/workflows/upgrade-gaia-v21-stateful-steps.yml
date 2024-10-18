@@ -660,6 +660,7 @@ jobs:
         run: |
           jq -r --arg DENOMTOADD "$CONSUMERA_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
           scripts/submit_proposal.sh proposal-denom-hash.json
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
@@ -852,6 +853,7 @@ jobs:
         run: |
           jq -r --arg DENOMTOADD "$CONSUMERB_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
           scripts/submit_proposal.sh proposal-denom-hash.json
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
       - name: _Check validator outstanding rewards for consumer chain b
         run: |
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
