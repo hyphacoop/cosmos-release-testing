@@ -642,7 +642,7 @@ jobs:
       #     do
       #       sleep 1
       #     done
-      - name: _Check rewards in rewards pool balances
+      - name: _Check consumera rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
           tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
@@ -833,6 +833,38 @@ jobs:
             exit 1
           else
             echo "Expected correct number of validators: $total_signatures"
+          fi
+      - name: _Check consumer b rewards in rewards pool balances
+        run: |
+          echo "[INFO]: Wait for 20 blocks to pass"
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
+          echo "[INFO]: Rewards pool balances:"
+          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.balances[] | select(.denom==$CONSUMERB_DENOM) | .denom')
+          if [ "$denom" != "$CONSUMERB_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in rewards pool"
+            exit 1
+          else
+            echo "[PASS] Denom is in rewards pool: $denom"
+          fi
+      - name: Register reward denom for consumer b
+        run: |
+          jq -r --arg DENOMTOADD "$CONSUMERB_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
+          scripts/submit_proposal.sh proposal-denom-hash.json
+      - name: _Check validator outstanding rewards for consumer chain b
+        run: |
+          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
+          echo "[INFO]: Current validator outstanding rewards:"
+          echo "$outstanding_rewards"
+          echo "[INFO]: Checking if expected reward listed..."
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERB_DENOM) | .denom' )
+          if [ "$denom" != "$CONSUMERB_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
+            exit 1
+          else
+            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
           fi
       # Opt-out consumerb
       - name: Opt-out second validator to consumerb
