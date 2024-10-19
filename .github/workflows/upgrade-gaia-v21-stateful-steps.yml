@@ -668,8 +668,8 @@ jobs:
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
-          echo "[INFO]: Looking for denom: $denom"
           denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
+          echo "[INFO]: Looking for denom: $denom"
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
             echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
@@ -785,7 +785,7 @@ jobs:
           echo "Channel ID: $channel_id"
           tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1002
           echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq '.balances[] | select(.amount=="1002") | .denom')
+          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1002") | .denom')
           echo "consumerb denom: $denom"
           echo "CONSUMERB_DENOM=$denom" >> $GITHUB_ENV
       - name: Print opt-in consumer tendermint validators consumerb
@@ -863,8 +863,8 @@ jobs:
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
-          echo "[INFO]: Looking for denom: $denom"
           denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERB_DENOM) | .denom' )
+          echo "[INFO]: Looking for denom: $denom"
           if [ "$denom" != "$CONSUMERB_DENOM" ]
           then
             echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
