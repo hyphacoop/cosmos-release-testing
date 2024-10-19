@@ -649,6 +649,7 @@ jobs:
           echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
+          echo "[INFO]: Looking for denom: $denom"
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
             echo "[ERROR] Consumer denom not found in rewards pool"
@@ -667,6 +668,7 @@ jobs:
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
+          echo "[INFO]: Looking for denom: $denom"
           denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
@@ -842,6 +844,7 @@ jobs:
           echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.balances[] | select(.denom==$CONSUMERB_DENOM) | .denom')
+          echo "[INFO]: Looking for denom: $denom"
           if [ "$denom" != "$CONSUMERB_DENOM" ]
           then
             echo "[ERROR] Consumer denom not found in rewards pool"
@@ -860,6 +863,7 @@ jobs:
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
+          echo "[INFO]: Looking for denom: $denom"
           denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERB_DENOM) | .denom' )
           if [ "$denom" != "$CONSUMERB_DENOM" ]
           then
