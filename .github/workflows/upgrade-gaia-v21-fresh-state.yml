@@ -24,7 +24,7 @@
       CHAIN_BINARY: gaiad
       # BINARY_SOURCE: BUILD
       BINARY_SOURCE: DOWNLOAD
-      BUILD_TAG: v21.0.0-rc0
+      BUILD_TAG: v21.0.0-rc1
       CHAIN_ID: testnet
       DENOM: uatom
       BASE_FEES: 2000
@@ -121,7 +121,7 @@
       STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
       # Neutron chain variables
       NEUTRON_CHAIN_BINARY: neutrond
-      NEUTRON_VERSION: v4.2.2
+      NEUTRON_VERSION: v4.2.4
       NEUTRON_CHAIN_ID: neutron-test
       NEUTRON_DENOM: untrn
       # Relayer variables
@@ -1846,11 +1846,14 @@
               chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
           - name: Install Neutron binary
             run: |
-              go version
-              git clone https://github.com/neutron-org/neutron.git
-              cd neutron
-              git checkout $NEUTRON_VERSION
-              make install
+              # go version
+              # git clone https://github.com/neutron-org/neutron.git
+              # cd neutron
+              # git checkout $NEUTRON_VERSION
+              # make install
+              wget https://github.com/neutron-org/neutron/releases/download/$NEUTRON_VERSION/neutrond-linux-amd64 -O neutrond
+              chmod +x neutrond
+              cp neutrond $HOME/go/bin
           - name: Install Stride binary
             run: |
               go version
