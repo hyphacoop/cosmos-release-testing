@@ -22,7 +22,7 @@ then
     echo "[DEBUG] ADD FILE AFTER ADD SPAWN create-spawn.json:"
     cat create-spawn.json
 fi
-jq -r --arg denom1 "$IBC_DENOM_1" --arg denom2 "$IBC_DENOM_2" '.allowlisted_reward_denoms.denoms |= [$denom1,$denom2]' create-spawn.json > create-denoms.json
+jq -r --arg denom1 "$CONSUMER_DENOM" '.allowlisted_reward_denoms.denoms |= [$denom1]' create-spawn.json > create-denoms.json
 if [ $debug -eq 1 ]
 then
     echo "[DEBUG] ADD FILE AFTER ADD SPAWN create-denoms.json:"
