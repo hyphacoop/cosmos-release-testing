@@ -1,0 +1,22 @@
+{
+    "chain_id": "",
+    "consumer_id": "",
+    "metadata": {
+      "name": "consumer chain",
+      "description": "no description",
+      "metadata": "no metadata"
+    },
+    "power_shaping_parameters": {
+      "top_N": 0,
+      "validators_power_cap": 0,
+      "validator_set_cap": 0,
+      "allowlist": [],
+      "denylist": [],
+      "min_stake": 0,
+      "allow_inactive_vals": true
+    },
+    "allowlisted_reward_denoms": {
+      "denoms": [
+      ]
+    }
+  }
