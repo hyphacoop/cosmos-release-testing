@@ -536,96 +536,96 @@ jobs:
       #     ICA_HOME: /home/runner/.ica-chain
       #     CHAIN_HOME: /home/runner/.val1
       #   run: tests/stateful/test_ica_controller.sh 
-      # - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
-      #   env:
-      #     CONSUMER_CHAIN_ID: consumera
-      #     DOWNTIME_BLOCKS: 20
-      #     CONSUMER_NEW: true
-      #     CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-      #   run: scripts/stateful/init_consumer_2_vals.sh
-      # - name: Launch opt-in consumer chain a
-      #   env:
-      #     CONSUMER_CHAIN_ID: consumera
-      #     CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-      #     PSS_ENABLED: true
-      #     TOPN: 0
-      #   run: scripts/stateful/launch_consumer_2_vals_optin.sh
-      # - name: _Opt-in consumer chain produces blocks val1> ICS v4.0.0
-      #   run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
-      # - name: _Opt-in consumer chain produces blocks val2> ICS v4.0.0
-      #   run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
-      # - name: Check block hashes on both consumer nodes
-      #   run: |
-      #     set -e
-      #     latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
-      #     echo "[INFO]: Block height is $latest_block"
-      #     hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-      #     sleep 6
-      #     hash_val2=$(curl -s 127.0.0.1:$CON2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-      #     echo "[INFO]: cona1 $hash_val1"
-      #     echo "[INFO]: cona2 $hash_val1"
-      #     if [ $hash_val1 != $hash_val2 ]
-      #     then
-      #       echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-      #       exit 1
-      #     else
-      #       echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-      #     fi
-      # - name: Print opt-in consumer tendermint validators
-      #   env:
-      #     CONSUMER_CHAIN_ID: consumera
-      #   run: |
-      #     echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-      #     $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-      #     # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-      #     # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-      #     echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
-      #     $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
-      # - name: Check number of signatures on consumera
-      #   run: |
-      #     set -e
-      #     total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-      #     if [ $total_signatures != 2 ]
-      #     then
-      #       echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
-      #       exit 1
-      #     else
-      #       echo "Expected correct number of validators: $total_signatures"
-      #     fi
-      # - name: Establish CCV channel for consumer a
-      #   run: |
-      #     set -e
-      #     screen -XS hermes.service quit || true
-      #     killall hermes || true
-      #     sleep 1
-      #     client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
-      #     hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
-      #     hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-      #     echo "Starting Hermes"
-      #     screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
-      #     # set screen to flush log to 0
-      #     screen -r hermes.service -p0 -X logfile flush 0
-      #     echo "Wait for hermes to start..."
-      #     ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
-      #     sleep 60
-      # - name: _VSC successful> Interchain Security (Consumer) PSS
-      #   run: tests/stateful/test_ccv.sh
-      # - name: _IBC transfer successful> Interchain Security (Consumer) PSS
-      #   env:
-      #     CONSUMER_CHAIN_ID: consumera
-      #   run: |
-      #     set -e
-      #     client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
-      #     echo "Client ID: $client_id"
-      #     connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
-      #     echo "Connection ID: $connection_id"
-      #     channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
-      #     echo "Channel ID: $channel_id"
-      #     tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1000
-      #     echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      #     denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
-      #     echo "consumera denom: $denom"
-      #     echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
+      - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          DOWNTIME_BLOCKS: 20
+          CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+        run: scripts/stateful/init_consumer_2_vals.sh
+      - name: Launch opt-in consumer chain a
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+          PSS_ENABLED: true
+          TOPN: 0
+        run: scripts/stateful/launch_consumer_2_vals_optin.sh
+      - name: _Opt-in consumer chain produces blocks val1> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
+      - name: _Opt-in consumer chain produces blocks val2> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
+      - name: Check block hashes on both consumer nodes
+        run: |
+          set -e
+          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
+          echo "[INFO]: Block height is $latest_block"
+          hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          sleep 6
+          hash_val2=$(curl -s 127.0.0.1:$CON2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          echo "[INFO]: cona1 $hash_val1"
+          echo "[INFO]: cona2 $hash_val1"
+          if [ $hash_val1 != $hash_val2 ]
+          then
+            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+            exit 1
+          else
+            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+          fi
+      - name: Print opt-in consumer tendermint validators
+        env:
+          CONSUMER_CHAIN_ID: consumera
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
+      - name: Check number of signatures on consumera
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 2 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
+            exit 1
+          else
+            echo "Expected correct number of validators: $total_signatures"
+          fi
+      - name: Establish CCV channel for consumer a
+        run: |
+          set -e
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
+          hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      - name: _VSC successful> Interchain Security (Consumer) PSS
+        run: tests/stateful/test_ccv.sh
+      - name: _IBC transfer successful> Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumera
+        run: |
+          set -e
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          echo "Client ID: $client_id"
+          connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
+          echo "Connection ID: $connection_id"
+          channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
+          echo "Channel ID: $channel_id"
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1000
+          echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
+          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
+          echo "consumera denom: $denom"
+          echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
       # - name: Send tx on consumer with huge gas (not needed keep commented out)
       #   run: |
       #     json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
@@ -636,41 +636,54 @@ jobs:
       #     txhash=$(echo "$json" | jq -r .txhash)
       #     echo "[INFO]: TX result..."
       #     $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
-      # - name: _Check consumera rewards in rewards pool balances
-      #   run: |
-      #     echo "[INFO]: Wait for 20 blocks to pass"
-      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
-      #     echo "[INFO]: Rewards pool balances:"
-      #     ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
-      #     denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
-      #     echo "[INFO]: Looking for denom: $denom"
-      #     if [ "$denom" != "$CONSUMERA_DENOM" ]
-      #     then
-      #       echo "[ERROR] Consumer denom not found in rewards pool"
-      #       exit 1
-      #     else
-      #       echo "[PASS] Denom is in rewards pool: $denom"
-      #     fi
+      - name: _Check consumera rewards in rewards pool balances
+        run: |
+          echo "[INFO]: Wait for 20 blocks to pass"
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
+          echo "[INFO]: Rewards pool balances:"
+          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
+          echo "[INFO]: Looking for denom: $denom"
+          if [ "$denom" != "$CONSUMERA_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in rewards pool"
+            exit 1
+          else
+            echo "[PASS] Denom is in rewards pool: $denom"
+          fi
       # - name: Register reward denom for consumer a using proposal
       #   run: |
       #     jq -r --arg DENOMTOADD "$CONSUMERA_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
       #     scripts/submit_proposal.sh proposal-denom-hash.json
       #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
-      # - name: _Check validator outstanding rewards for consumer chain a
-      #   run: |
-      #     outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
-      #     echo "[INFO]: Current validator outstanding rewards:"
-      #     echo "$outstanding_rewards"
-      #     echo "[INFO]: Checking if expected reward listed..."
-      #     denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
-      #     echo "[INFO]: Looking for denom: $denom"
-      #     if [ "$denom" != "$CONSUMERA_DENOM" ]
-      #     then
-      #       echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
-      #       exit 1
-      #     else
-      #       echo "[PASS] Denom is in validator's outstanding rewards: $denom"
-      #     fi
+      - name: Register reward denom for consumer a using update consumer
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          CONSUMER_DENOM: ${{ env.CONSUMERB_DENOM }}
+        run: |
+          jq -r --arg denom1 "$CONSUMER_DENOM" '.allowlisted_reward_denoms.denoms |= [$denom1]' templates/update-consumer-params.json > $CONSUMER_CHAIN_ID-set-allowed-denoms.json
+          jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chain_id=$chain_id' $CONSUMER_CHAIN_ID-set-allowed-denoms.json > $CONSUMER_CHAIN_ID-set-chain_id.json
+          jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
+          echo "[INFO]: Update consumer json:"
+          cat $CONSUMER_CHAIN_ID-register-denoms.json
+          echo "[INFO]: Create and submit update-consumer proposal"
+          $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
+      - name: _Check validator outstanding rewards for consumer chain a
+        run: |
+          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
+          echo "[INFO]: Current validator outstanding rewards:"
+          echo "$outstanding_rewards"
+          echo "[INFO]: Checking if expected reward listed..."
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
+          echo "[INFO]: Looking for denom: $denom"
+          if [ "$denom" != "$CONSUMERA_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
+            exit 1
+          else
+            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
+          fi
 
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
         env:
