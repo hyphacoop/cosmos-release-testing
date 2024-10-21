@@ -836,7 +836,7 @@ jobs:
       - name: _Check consumer b rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
-          tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 20
+          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 20
           echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.balances[] | select(.denom==$CONSUMERB_DENOM) | .denom')
