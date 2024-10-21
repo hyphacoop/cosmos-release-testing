@@ -860,7 +860,9 @@ jobs:
         run: |
           jq -r --arg denom1 "$CONSUMER_DENOM" '.allowlisted_reward_denoms.denoms |= [$denom1]' templates/update-consumer-params.json > $CONSUMER_CHAIN_ID-set-allowed-denoms.json
           jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chain_id=$chain_id' $CONSUMER_CHAIN_ID-set-allowed-denoms.json > $CONSUMER_CHAIN_ID-set-chain_id.json
-          jq -r --arg consumer_id "$CONSUMER_ID" '.chain_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
+          jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
+          echo "[INFO]: Update consumer json:"
+          cat $CONSUMER_CHAIN_ID-register-denoms.json
           echo "[INFO]: Create and submit update-consumer proposal"
           $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
