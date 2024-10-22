@@ -22,8 +22,14 @@ then
     echo "[DEBUG] ADD FILE AFTER ADD SPAWN create-spawn.json:"
     cat create-spawn.json
 fi
-sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" create-spawn.json > create-$CONSUMER_CHAIN_ID.json
-rm create-spawn.json
+jq -r --arg denom1 "$CONSUMER_DENOM" '.allowlisted_reward_denoms.denoms |= [$denom1]' create-spawn.json > create-denoms.json
+if [ $debug -eq 1 ]
+then
+    echo "[DEBUG] ADD FILE AFTER ADD SPAWN create-denoms.json:"
+    cat create-denoms.json
+fi
+sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" create-denoms.json > create-$CONSUMER_CHAIN_ID.json
+rm create-denoms.json
 if [ $debug -eq 1 ]
 then
     echo "[DEBUG] CREATE SPAWN FILE AFTER SET chain_id create-$CONSUMER_CHAIN_ID.json:"
