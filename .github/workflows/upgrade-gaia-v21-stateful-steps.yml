@@ -451,6 +451,8 @@ jobs:
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: _Test permissioned cosmwasm
         run: tests/stateful/test_cosmwasm.sh
+      - name: Print netstat
+        run: netstat -ntap
       - name: _Provider API tests> gaiad
         run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
       - name: _Provider RPC tests> gaiad
