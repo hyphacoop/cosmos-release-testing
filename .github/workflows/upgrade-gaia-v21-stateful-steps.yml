@@ -352,27 +352,27 @@ jobs:
           Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_num_blocks')
           Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_duration')
           Q_CONSUNSUS_EVIDENCE_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_bytes')
-          if [ "$Q_CONSUNSUS_BLOCK_MAX_BYTES" != "CONSUNSUS_BLOCK_MAX_BYTES" ]
+          if [ "$Q_CONSUNSUS_BLOCK_MAX_BYTES" != "$CONSUNSUS_BLOCK_MAX_BYTES" ]
           then
             echo "[ERROR]: CONSUNSUS_BLOCK_MAX_BYTES does not match query: $CONSUNSUS_BLOCK_MAX_BYTES $Q_CONSUNSUS_BLOCK_MAX_BYTES"
             error="1"
           fi
-          if [ "$Q_CONSUNSUS_BLOCK_MAX_GAS" != "CONSUNSUS_BLOCK_MAX_GAS" ]
+          if [ "$Q_CONSUNSUS_BLOCK_MAX_GAS" != "$CONSUNSUS_BLOCK_MAX_GAS" ]
           then
             echo "[ERROR]: CONSUNSUS_BLOCK_MAX_GAS does not match query: $CONSUNSUS_BLOCK_MAX_GAS $Q_CONSUNSUS_BLOCK_MAX_GAS"
             error="1"
           fi
-          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" != "CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" ]
+          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" != "$CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" ]
           then
             echo "[ERROR]: CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS does not match query: $CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS $Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS"
             error="1"
           fi
-          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION" != "CONSUNSUS_EVIDENCE_MAX_AGE_DURATION" ]
+          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION" != "$CONSUNSUS_EVIDENCE_MAX_AGE_DURATION" ]
           then
             echo "[ERROR]: CONSUNSUS_EVIDENCE_MAX_AGE_DURATION does not match query: $CONSUNSUS_EVIDENCE_MAX_AGE_DURATION $Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION"
             error="1"
           fi
-          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_BYTES" != "CONSUNSUS_EVIDENCE_MAX_BYTES" ]
+          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_BYTES" != "$CONSUNSUS_EVIDENCE_MAX_BYTES" ]
           then
             echo "[ERROR]: CONSUNSUS_EVIDENCE_MAX_BYTES does not match query: $CONSUNSUS_EVIDENCE_MAX_BYTES $Q_CONSUNSUS_EVIDENCE_MAX_BYTES"
             error="1"
