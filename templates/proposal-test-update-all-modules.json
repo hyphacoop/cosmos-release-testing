@@ -28,8 +28,8 @@
                         "numerator": "1",
                         "denominator": "3"
                     },
-                    "trusting_period": "0s",
-                    "unbonding_period": "0s",
+                    "trusting_period": "3600s",
+                    "unbonding_period": "1800s",
                     "max_clock_drift": "10s",
                     "frozen_height": {
                         "revision_number": "0",
