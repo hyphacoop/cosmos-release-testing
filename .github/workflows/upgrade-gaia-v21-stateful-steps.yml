@@ -314,7 +314,7 @@ jobs:
 
 
 
-- name: Query current consensus params
+      - name: Query current consensus params
         run: |
           echo "Query current consensus params"
           $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
