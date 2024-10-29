@@ -456,7 +456,7 @@ jobs:
           echo "Query current consensus params"
           $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
       - name: Submit proposal to update modules params
-        run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-100.json
+        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
       
       - name: Print netstat
         run: netstat -ntap
