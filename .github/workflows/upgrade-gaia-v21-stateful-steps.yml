@@ -285,6 +285,84 @@ jobs:
             echo "Expected Top_N 95"
             exit 2
           fi
+      
+
+
+
+
+
+      - name: Query current consensus params
+        run: |
+          echo "Query current consensus params"
+          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+      - name: Query current provider params
+        run: |
+          echo "Query current provider params"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+      - name: Query current feemarket params
+        run: |
+          echo "Query current feemarket params"
+          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      - name: Query current staking params
+        run: |
+          echo "Query current staking params"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+      - name: Query current gov params
+        run: |
+          echo "Query current gov params"
+          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
+      - name: Submit proposal to update modules params
+        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
+
+      - name: _Verify consensus params prop is set
+        env:
+          CONSUNSUS_BLOCK_MAX_BYTES: "5000000"
+          CONSUNSUS_BLOCK_MAX_GAS: "76000000"
+          CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS: "2000000"
+          CONSUNSUS_EVIDENCE_MAX_AGE_DURATION: "48h0m0s"
+          CONSUNSUS_EVIDENCE_MAX_BYTES: "60000"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+          Q_CONSUNSUS_BLOCK_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_bytes')
+          Q_CONSUNSUS_BLOCK_MAX_GAS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_gas')
+          Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_num_blocks')
+          Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_duration')
+          Q_CONSUNSUS_EVIDENCE_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_bytes')
+          if [ "$Q_CONSUNSUS_BLOCK_MAX_BYTES" != "CONSUNSUS_BLOCK_MAX_BYTES" ]
+          then
+            echo "[ERROR]: CONSUNSUS_BLOCK_MAX_BYTES does not match query: $CONSUNSUS_BLOCK_MAX_BYTES $Q_CONSUNSUS_BLOCK_MAX_BYTES"
+            error="1"
+          fi
+          if [ "$Q_CONSUNSUS_BLOCK_MAX_GAS" != "CONSUNSUS_BLOCK_MAX_GAS" ]
+          then
+            echo "[ERROR]: CONSUNSUS_BLOCK_MAX_GAS does not match query: $CONSUNSUS_BLOCK_MAX_GAS $Q_CONSUNSUS_BLOCK_MAX_GAS"
+            error="1"
+          fi
+          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" != "CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" ]
+          then
+            echo "[ERROR]: CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS does not match query: $CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS $Q_CONSUNSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS"
+            error="1"
+          fi
+          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION" != "CONSUNSUS_EVIDENCE_MAX_AGE_DURATION" ]
+          then
+            echo "[ERROR]: CONSUNSUS_EVIDENCE_MAX_AGE_DURATION does not match query: $CONSUNSUS_EVIDENCE_MAX_AGE_DURATION $Q_CONSUNSUS_EVIDENCE_MAX_AGE_DURATION"
+            error="1"
+          fi
+          if [ "$Q_CONSUNSUS_EVIDENCE_MAX_BYTES" != "CONSUNSUS_EVIDENCE_MAX_BYTES" ]
+          then
+            echo "[ERROR]: CONSUNSUS_EVIDENCE_MAX_BYTES does not match query: $CONSUNSUS_EVIDENCE_MAX_BYTES $Q_CONSUNSUS_EVIDENCE_MAX_BYTES"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          fi
+
+
+
+
+
       - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
@@ -450,31 +528,7 @@ jobs:
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: _Test permissioned cosmwasm
-        run: tests/stateful/test_cosmwasm.sh
-
-      - name: Query current consensus params
-        run: |
-          echo "Query current consensus params"
-          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
-      - name: Query current provider params
-        run: |
-          echo "Query current provider params"
-          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
-      - name: Query current feemarket params
-        run: |
-          echo "Query current feemarket params"
-          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
-      - name: Query current staking params
-        run: |
-          echo "Query current staking params"
-          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
-      - name: Query current gov params
-        run: |
-          echo "Query current gov params"
-          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
-      - name: Submit proposal to update modules params
-        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
-      
+        run: tests/stateful/test_cosmwasm.sh      
       - name: Print netstat
         run: netstat -ntap
       - name: _Provider API tests using localhost> gaiad
