@@ -451,10 +451,27 @@ jobs:
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: _Test permissioned cosmwasm
         run: tests/stateful/test_cosmwasm.sh
+
       - name: Query current consensus params
         run: |
           echo "Query current consensus params"
           $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+      - name: Query current provider params
+        run: |
+          echo "Query current provider params"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+      - name: Query current feemarket params
+        run: |
+          echo "Query current feemarket params"
+          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      - name: Query current staking params
+        run: |
+          echo "Query current staking params"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+      - name: Query current gov params
+        run: |
+          echo "Query current gov params"
+          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
       
