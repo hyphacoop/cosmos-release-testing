@@ -336,7 +336,6 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
-
       - name: _Verify consensus params prop is set
         env:
           CONSUNSUS_BLOCK_MAX_BYTES: "5000000"
@@ -380,6 +379,8 @@ jobs:
           if [ "$error" == "1" ]
           then
             exit 1
+          else
+            echo "PASSED!"
           fi
       - name: _Verify provider params prop is set
         env:
@@ -438,6 +439,8 @@ jobs:
           if [ "$error" == "1" ]
           then
             exit 1
+          else
+            echo "PASSED!"
           fi
       - name: _Verify feemarket params prop is set
         env:
@@ -503,6 +506,8 @@ jobs:
           if [ "$error" == "1" ]
           then
             exit 1
+          else
+            echo "PASSED!"
           fi
       - name: _Verify staking params prop is set
         env:
@@ -568,6 +573,8 @@ jobs:
           if [ "$error" == "1" ]
           then
             exit 1
+          else
+            echo "PASSED!"
           fi
       - name: _Verify gov params prop is set
         env:
@@ -605,6 +612,8 @@ jobs:
           if [ "$error" == "1" ]
           then
             exit 1
+          else
+            echo "PASSED!"
           fi
 
 
