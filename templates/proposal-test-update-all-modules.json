@@ -94,15 +94,15 @@
                     "allow_update_after_expiry": true,
                     "allow_update_after_misbehaviour": true
             },
-            "trusting_period_fraction": "0.66",
+            "trusting_period_fraction": "0.76",
             "ccv_timeout_period": "2419200s",
-            "slash_meter_replenish_period": "3600s",
-            "slash_meter_replenish_fraction": "0.05",
+            "slash_meter_replenish_period": "1800s",
+            "slash_meter_replenish_fraction": "0.01",
             "consumer_reward_denom_registration_fee": {
                 "denom": "uatom",
-                "amount": "10000000"
+                "amount": "50000000"
             },
-            "blocks_per_epoch": "1",
+            "blocks_per_epoch": "10",
             "number_of_epochs_to_start_receiving_rewards": "24",
             "max_provider_consensus_validators": "1"
             }
@@ -110,14 +110,14 @@
         {
             "@type": "/feemarket.feemarket.v1.MsgParams",
             "params": {
-                "alpha": "0.000000000000000000",
+                "alpha": "0.100000000000000000",
                 "beta": "1.000000000000000000",
-                "gamma": "0.000000000000000000",
-                "delta": "0.000000000000000000",
+                "gamma": "1.500000000000000000",
+                "delta": "2.000000000000000000",
                 "min_base_gas_price": "0.005000000000000000",
-                "min_learning_rate": "0.125000000000000000",
-                "max_learning_rate": "0.125000000000000000",
-                "max_block_utilization": "30000000",
+                "min_learning_rate": "0.125500000000000000",
+                "max_learning_rate": "0.125600000000000000",
+                "max_block_utilization": "50000000",
                 "window": "1",
                 "fee_denom": "uatom",
                 "enabled": true,
@@ -129,15 +129,15 @@
             "@type": "/cosmos.staking.v1beta1.MsgUpdateParams",
             "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
             "params": {
-                "unbonding_time": "504h0m0s",
-                "max_validators": 2,
-                "max_entries": 7,
-                "historical_entries": 10000,
+                "unbonding_time": "240h0m0s",
+                "max_validators": 10,
+                "max_entries": 8,
+                "historical_entries": 15000,
                 "bond_denom": "uatom",
-                "min_commission_rate": "0.050000000000000000",
-                "validator_bond_factor": "250.000000000000000000",
-                "global_liquid_staking_cap": "0.250000000000000000",
-                "validator_liquid_staking_cap": "0.500000000000000000"
+                "min_commission_rate": "0.010000000000000000",
+                "validator_bond_factor": "200.000000000000000000",
+                "global_liquid_staking_cap": "0.200000000000000000",
+                "validator_liquid_staking_cap": "0.400000000000000000"
             }
         },
         {
@@ -150,16 +150,16 @@
                         "amount": "100000000"
                     }
                 ],
-                "max_deposit_period": "3600s",
+                "max_deposit_period": "600s",
                 "voting_period": "60s",
                 "quorum": "0.334000000000000000",
                 "threshold": "0.500000000000000000",
                 "veto_threshold": "0.334000000000000000",
                 "min_initial_deposit_ratio": "0.100000000000000000",
                 "proposal_cancel_ratio": "0.100000000000000000",
-                "burn_vote_quorum": false,
-                "burn_proposal_deposit_prevote": false,
-                "burn_vote_veto": true,
+                "burn_vote_quorum": true,
+                "burn_proposal_deposit_prevote": true,
+                "burn_vote_veto": false,
                 "min_deposit_ratio": "0.010000000000000000",
                 "expedited_voting_period": "15s",
                 "expedited_threshold": "0.667000000000000000",
