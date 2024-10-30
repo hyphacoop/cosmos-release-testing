@@ -388,7 +388,7 @@ jobs:
           TRUSTING_PERIOD_FRACTION: "0.76"
           CCV_TIMEOUT_PERIOD: "2419200s"
           SLASH_METER_REPLENISH_PERIOD: "1800s"
-          SLASH_METER_REPLENISH_FRACTION: "0.1"
+          SLASH_METER_REPLENISH_FRACTION: "0.01"
           CONSUMER_REWARD_DENOM_REGISTRATION_FEE: "50000000"
         run: |
           echo "[INFO]: Current params:"
@@ -399,7 +399,7 @@ jobs:
           Q_CCV_TIMEOUT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.ccv_timeout_period')
           Q_SLASH_METER_REPLENISH_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_period')
           Q_SLASH_METER_REPLENISH_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_fraction')
-          Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.consumer_reward_denom_registration_fee')
+          Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.consumer_reward_denom_registration_fee.amount')
           if [ "$Q_TEMPLATE_CLIENT_TRUSTING_PERIOD" != "$TEMPLATE_CLIENT_TRUSTING_PERIOD" ]
           then
             echo "[ERROR]: TEMPLATE_CLIENT_TRUSTING_PERIOD does not match query: $TEMPLATE_CLIENT_TRUSTING_PERIOD $Q_TEMPLATE_CLIENT_TRUSTING_PERIOD"
