@@ -571,7 +571,7 @@ jobs:
           fi
       - name: _Verify gov params prop is set
         env:
-          MAX_DEPOSIT_PERIOD: "0h10m0s"
+          MAX_DEPOSIT_PERIOD: "10m0s"
           BURN_VOTE_QUORUM: "true"
           BURN_PROPOSAL_DEPOSIT_PREVOTE: "true"
           BURN_VOTE_VETO: "false"
@@ -579,9 +579,9 @@ jobs:
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
           Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
-          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
-          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
-          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
+          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_quorum')
+          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_proposal_deposit_prevote')
+          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_veto')
           if [ "$Q_MAX_DEPOSIT_PERIOD" != "$MAX_DEPOSIT_PERIOD" ]
           then
             echo "[ERROR]: MAX_DEPOSIT_PERIOD does not match query: $MAX_DEPOSIT_PERIOD $Q_MAX_DEPOSIT_PERIOD"
