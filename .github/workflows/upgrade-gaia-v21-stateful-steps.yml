@@ -504,7 +504,7 @@ jobs:
           then
             exit 1
           fi
-    - name: _Verify staking params prop is set
+      - name: _Verify staking params prop is set
         env:
           UNBONDING_TIME: "240h0m0s"
           MAX_VALIDATORS: 10
@@ -569,7 +569,7 @@ jobs:
           then
             exit 1
           fi
-    - name: _Verify gov params prop is set
+      - name: _Verify gov params prop is set
         env:
           MAX_DEPOSIT_PERIOD: "0h10m0s"
           BURN_VOTE_QUORUM: "true"
