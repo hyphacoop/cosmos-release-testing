@@ -44,10 +44,10 @@ sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0.0025$DENOM\"^" $HOME_1/config/app
 toml set --toml-path $HOME_1/config/app.toml api.enable true
 
 # Set different ports for api
-toml set --toml-path $HOME_1/config/app.toml api.address "tcp://0.0.0.0:$VAL1_API_PORT"
+toml set --toml-path $HOME_1/config/app.toml api.address "tcp://127.0.0.1:$VAL1_API_PORT"
 
 # Set different ports for grpc
-toml set --toml-path $HOME_1/config/app.toml grpc.address "0.0.0.0:$VAL1_GRPC_PORT"
+toml set --toml-path $HOME_1/config/app.toml grpc.address "127.0.0.1:$VAL1_GRPC_PORT"
 
 # Turn off grpc web
 toml set --toml-path $HOME_1/config/app.toml grpc-web.enable false
@@ -57,7 +57,7 @@ toml set --toml-path $HOME_1/config/app.toml grpc-web.enable false
 sed -i -e "s\fast_sync\block_sync\g" $HOME_1/config/config.toml
 
 # Set different ports for rpc
-toml set --toml-path $HOME_1/config/config.toml rpc.laddr "tcp://0.0.0.0:$VAL1_RPC_PORT"
+toml set --toml-path $HOME_1/config/config.toml rpc.laddr "tcp://127.0.0.1:$VAL1_RPC_PORT"
 
 # Set different ports for rpc pprof
 toml set --toml-path $HOME_1/config/config.toml rpc.pprof_laddr "localhost:$VAL1_PPROF_PORT"
