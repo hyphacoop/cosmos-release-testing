@@ -574,7 +574,7 @@ jobs:
           MAX_DEPOSIT_PERIOD: "10m0s"
           BURN_VOTE_QUORUM: "true"
           BURN_PROPOSAL_DEPOSIT_PREVOTE: "true"
-          BURN_VOTE_VETO: "false"
+          BURN_VOTE_VETO: "null"
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
