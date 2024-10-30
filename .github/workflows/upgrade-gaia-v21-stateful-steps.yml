@@ -578,10 +578,10 @@ jobs:
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
-          Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.params.max_deposit_period')
-          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.params.max_deposit_period')
-          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.params.max_deposit_period')
-          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.params.max_deposit_period')
+          Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
+          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
+          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
+          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
           if [ "$Q_MAX_DEPOSIT_PERIOD" != "$MAX_DEPOSIT_PERIOD" ]
           then
             echo "[ERROR]: MAX_DEPOSIT_PERIOD does not match query: $MAX_DEPOSIT_PERIOD $Q_MAX_DEPOSIT_PERIOD"
