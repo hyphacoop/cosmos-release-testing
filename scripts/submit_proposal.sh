@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+vote_option="$2"
+
+if [ ! $vote_option ]
+then
+    vote_option="yes"
+fi
+
 # Generic submit proposal script
 # ./submit_proposal.sh <path/to/prop/file> 
 
@@ -23,7 +30,7 @@ $CHAIN_BINARY q tx $txhash --home $HOME_1
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "[INFO] Voting on proposal $proposal_id..."
-$CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y
+$CHAIN_BINARY tx gov vote $proposal_id $vote_option --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y
 $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
 echo "[INFO] Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
