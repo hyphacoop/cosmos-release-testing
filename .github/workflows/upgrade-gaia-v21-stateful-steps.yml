@@ -486,11 +486,11 @@ jobs:
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
       - name: _Verify consensus params prop is set
         env:
-          CONSENSUS_BLOCK_MAX_BYTES: "5000000"
+          CONSENSUS_BLOCK_MAX_BYTES: "3000"
           CONSENSUS_BLOCK_MAX_GAS: "76000000"
           CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS: "2000000"
           CONSENSUS_EVIDENCE_MAX_AGE_DURATION: "48h0m0s"
-          CONSENSUS_EVIDENCE_MAX_BYTES: "60000"
+          CONSENSUS_EVIDENCE_MAX_BYTES: "2900"
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
