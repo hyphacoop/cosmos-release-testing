@@ -766,11 +766,11 @@ jobs:
       - name: _Verify Gov params
         run: |
           echo "Verify deposit not burned when quorum is reached voting no"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount)
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and voting no"
           scripts/submit_proposal.sh templates/proposal-text.json no
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount)
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Balance after no vote: $current_balance"
           echo "[INFO]: Calculate currect balance"
           expected_deduction=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES| bc)
