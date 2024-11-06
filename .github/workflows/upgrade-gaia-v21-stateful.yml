@@ -43,12 +43,14 @@ jobs:
         id: generate-start
         run: |
           start=$(scripts/generate_version_matrix.py $GAIA_LATEST)
+          start='{"gaia_version": ["v21.0.0", "v20.0.0", "v21.0.0-rc1", "v21.0.0-rc0"]}'
           echo $start
           echo "start_versions=$start" >> $GITHUB_OUTPUT
       - name: Generate upgrade versions
         id: generate-upgrade
         run: |
           upgrade=$(scripts/stateful/generate_upgrade_matrix_v21.py $GAIA_LATEST)
+          upgrade='{"include": [{"gaia_version": "v20.0.1", "upgrade_version": "v21.0.0"}]}'
           echo $upgrade
           echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:
