@@ -118,8 +118,8 @@ jobs:
       BASE_FEES: 30000
       HIGH_FEES: 25000
       GAS: auto
-      GAS_ADJUSTMENT: 4.0
-      GAS_PRICES: 0.0025
+      GAS_ADJUSTMENT: 2.0
+      GAS_PRICES: 0.005
       DELEGATE_1: ${{ vars.DELEGATE_1 }}
       DELEGATE_1_AMOUNT: ${{ vars.DELEGATE_1_AMOUNT }}
       DELEGATE_2_AMOUNT: ${{ vars.DELEGATE_2_AMOUNT }}
@@ -556,8 +556,7 @@ jobs:
       - name: _Pre-proposal test current consensus params
         run: |
           echo "[INFO]: Submit large proposal..."
-          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas $GAS_PRICES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
-
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
           if [ $? -eq 0 ]
           then
             echo "[DEBUG]: json output:"
