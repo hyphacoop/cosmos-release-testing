@@ -930,6 +930,7 @@ jobs:
           fi
       - name: _Verify consensus params
         run: |
+          set +e
           echo "[INFO]: Submit large proposal..."
           json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
           if [ $? -eq 0 ]
