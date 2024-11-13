@@ -1,6 +1,6 @@
 # Gaia User Stories
 
-The user stories in this document drive the validation tests that are run for each Gaia release. User stories have been split into several roles:
+The user stories in this document drive the validation tests that are run for each Gaia release. The user stories are split into several roles:
 * Validator
 * Delegator
 * Interchain Security (ICS) - Consumer chain team
@@ -28,6 +28,8 @@ The user stories in this document drive the validation tests that are run for ea
 | **Staking**                                   |
 | Delegate stake                                | I can increase my self-delegation amount               |
 | Undelegate stake                              | I can decrease my self-delegation amount               |
+| Bond stake                                    | I can participate in liquid staking                    |
+| Unbond stake                                  | I can stop participating in liquid staking             |
 
 ## Delegator
 
