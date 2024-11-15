@@ -457,504 +457,6 @@ jobs:
         run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
       - name: _Provider RPC tests using localhost> gaiad
         run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
-      
-
-
-
-      ### Param tests
-      - name: Query current consensus params
-        run: |
-          echo "Query current consensus params"
-          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
-      - name: Query current provider params
-        run: |
-          echo "Query current provider params"
-          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
-      - name: Query current feemarket params
-        run: |
-          echo "Query current feemarket params"
-          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
-      - name: Query current staking params
-        run: |
-          echo "Query current staking params"
-          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
-      - name: Query current gov params
-        run: |
-          echo "Query current gov params"
-          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
-      - name: _Pre-proposal test current gov params
-        run: |
-          echo "Verify deposit is not burned when quorum is reached by voting no"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Starting balance: $starting_balance"
-          echo "[INFO]: Submiting proposal and voting no"
-          scripts/submit_proposal.sh templates/proposal-text.json no
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Balance after no vote: $current_balance"
-          echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
-          echo "[DEBUG]: expected_balance: $expected_balance"
-          if [ $expected_balance -ne $current_balance ]
-          then
-            echo "[ERROR] Amount is not correct"
-            echo "Expected balance should be $expected_balance, bank have $current_balance"
-            error="1"
-          else
-            echo "Bank balance matches the caluclated balance"
-            echo "Expected balance is $expected_balance and bank have $current_balance"
-          fi
-
-          echo "[INFO]: Verify deposit is burned when no_with_veto passed"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Starting balance: $starting_balance"
-          echo "[INFO]: Submiting proposal and voting no"
-          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Balance after no vote: $current_balance"
-          echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES - 100000000" | bc)
-          echo "[DEBUG]: expected_balance: $expected_balance"
-          if [ $expected_balance -ne $current_balance ]
-          then
-            echo "[ERROR] Amount is not correct"
-            echo "Expected balance should be $expected_balance, bank have $current_balance"
-            error="1"
-          else
-            echo "Bank balance matches the caluclated balance"
-            echo "Expected balance is $expected_balance and bank have $current_balance"
-          fi
-
-          echo "[INFO]: Verify deposit is not burned when quorum is not reached"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Starting balance: $starting_balance"
-          echo "[INFO]: Submiting proposal and not voting"
-          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
-          echo "[INFO]: Wait for voting period to end..."
-          sleep $VOTING_PERIOD
-          sleep $VOTING_PERIOD
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Balance after no vote: $current_balance"
-          echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES" | bc)
-          echo "[DEBUG]: expected_balance: $expected_balance"
-          if [ $expected_balance -ne $current_balance ]
-          then
-            echo "[ERROR] Amount is not correct"
-            echo "Expected balance should be $expected_balance, bank have $current_balance"
-            error="1"
-          else
-            echo "Bank balance matches the caluclated balance"
-            echo "Expected balance is $expected_balance and bank have $current_balance"
-          fi
-
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Pre-proposal test current consensus params
-        run: |
-          echo "[INFO]: Submit large proposal..."
-          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
-          if [ $? -eq 0 ]
-          then
-            echo "[DEBUG]: json output:"
-            echo "$json"
-            echo "[INFO]: Waiting for proposal to end"
-            sleep $VOTING_PERIOD
-            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-            # get tx hash
-            txhash=$(echo $json | jq -r '.txhash')
-            $CHAIN_BINARY --home $HOME_1 q tx $txhash
-            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
-          else
-            echo "[DEBUG]: json output:"
-            echo "$json"
-            echo "[ERROR]: Proposal did not go through"
-            exit 1
-          fi
-
-      - name: Submit proposal to update modules params
-        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
-      - name: _Verify consensus params prop is set
-        env:
-          CONSENSUS_BLOCK_MAX_BYTES: "3000"
-          CONSENSUS_BLOCK_MAX_GAS: "76000000"
-          CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS: "2000000"
-          CONSENSUS_EVIDENCE_MAX_AGE_DURATION: "48h0m0s"
-          CONSENSUS_EVIDENCE_MAX_BYTES: "2900"
-        run: |
-          echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
-          Q_CONSENSUS_BLOCK_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_bytes')
-          Q_CONSENSUS_BLOCK_MAX_GAS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_gas')
-          Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_num_blocks')
-          Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_duration')
-          Q_CONSENSUS_EVIDENCE_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_bytes')
-          if [ "$Q_CONSENSUS_BLOCK_MAX_BYTES" != "$CONSENSUS_BLOCK_MAX_BYTES" ]
-          then
-            echo "[ERROR]: CONSENSUS_BLOCK_MAX_BYTES does not match query: $CONSENSUS_BLOCK_MAX_BYTES $Q_CONSENSUS_BLOCK_MAX_BYTES"
-            error="1"
-          fi
-          if [ "$Q_CONSENSUS_BLOCK_MAX_GAS" != "$CONSENSUS_BLOCK_MAX_GAS" ]
-          then
-            echo "[ERROR]: CONSENSUS_BLOCK_MAX_GAS does not match query: $CONSENSUS_BLOCK_MAX_GAS $Q_CONSENSUS_BLOCK_MAX_GAS"
-            error="1"
-          fi
-          if [ "$Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" != "$CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" ]
-          then
-            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS does not match query: $CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS $Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS"
-            error="1"
-          fi
-          if [ "$Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION" != "$CONSENSUS_EVIDENCE_MAX_AGE_DURATION" ]
-          then
-            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_AGE_DURATION does not match query: $CONSENSUS_EVIDENCE_MAX_AGE_DURATION $Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION"
-            error="1"
-          fi
-          if [ "$Q_CONSENSUS_EVIDENCE_MAX_BYTES" != "$CONSENSUS_EVIDENCE_MAX_BYTES" ]
-          then
-            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_BYTES does not match query: $CONSENSUS_EVIDENCE_MAX_BYTES $Q_CONSENSUS_EVIDENCE_MAX_BYTES"
-            error="1"
-          fi
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify provider params prop is set
-        env:
-          TEMPLATE_CLIENT_TRUSTING_PERIOD: "3600s"
-          TEMPLATE_CLIENT_UNBONDING_PERIOD: "1800s"
-          TRUSTING_PERIOD_FRACTION: "0.76"
-          CCV_TIMEOUT_PERIOD: "2419200s"
-          SLASH_METER_REPLENISH_PERIOD: "1800s"
-          SLASH_METER_REPLENISH_FRACTION: "0.01"
-          CONSUMER_REWARD_DENOM_REGISTRATION_FEE: "50000000"
-        run: |
-          echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
-          Q_TEMPLATE_CLIENT_TRUSTING_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.template_client.trusting_period') 
-          Q_TEMPLATE_CLIENT_UNBONDING_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.template_client.unbonding_period')
-          Q_TRUSTING_PERIOD_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.trusting_period_fraction')
-          Q_CCV_TIMEOUT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.ccv_timeout_period')
-          Q_SLASH_METER_REPLENISH_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_period')
-          Q_SLASH_METER_REPLENISH_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_fraction')
-          Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.consumer_reward_denom_registration_fee.amount')
-          if [ "$Q_TEMPLATE_CLIENT_TRUSTING_PERIOD" != "$TEMPLATE_CLIENT_TRUSTING_PERIOD" ]
-          then
-            echo "[ERROR]: TEMPLATE_CLIENT_TRUSTING_PERIOD does not match query: $TEMPLATE_CLIENT_TRUSTING_PERIOD $Q_TEMPLATE_CLIENT_TRUSTING_PERIOD"
-            error="1"
-          fi
-          if [ "$Q_TEMPLATE_CLIENT_UNBONDING_PERIOD" != "$TEMPLATE_CLIENT_UNBONDING_PERIOD" ]
-          then
-            echo "[ERROR]: TEMPLATE_CLIENT_UNBONDING_PERIOD does not match query: $TEMPLATE_CLIENT_UNBONDING_PERIOD $Q_TEMPLATE_CLIENT_UNBONDING_PERIOD"
-            error="1"
-          fi
-          if [ "$Q_TRUSTING_PERIOD_FRACTION" != "$TRUSTING_PERIOD_FRACTION" ]
-          then
-            echo "[ERROR]: TRUSTING_PERIOD_FRACTION does not match query: $TRUSTING_PERIOD_FRACTION $TRUSTING_PERIOD_FRACTION"
-            error="1"
-          fi
-          if [ "$Q_CCV_TIMEOUT_PERIOD" != "$CCV_TIMEOUT_PERIOD" ]
-          then
-            echo "[ERROR]: CCV_TIMEOUT_PERIOD does not match query: $CCV_TIMEOUT_PERIOD $Q_CCV_TIMEOUT_PERIOD"
-            error="1"
-          fi
-          if [ "$Q_SLASH_METER_REPLENISH_PERIOD" != "$SLASH_METER_REPLENISH_PERIOD" ]
-          then
-            echo "[ERROR]: SLASH_METER_REPLENISH_PERIOD does not match query: $SLASH_METER_REPLENISH_PERIOD $Q_SLASH_METER_REPLENISH_PERIOD"
-            error="1"
-          fi
-          if [ "$Q_SLASH_METER_REPLENISH_FRACTION" != "$SLASH_METER_REPLENISH_FRACTION" ]
-          then
-            echo "[ERROR]: SLASH_METER_REPLENISH_FRACTION does not match query: $SLASH_METER_REPLENISH_FRACTION $Q_SLASH_METER_REPLENISH_FRACTION"
-            error="1"
-          fi
-          if [ "$Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE" != "$CONSUMER_REWARD_DENOM_REGISTRATION_FEE" ]
-          then
-            echo "[ERROR]: CONSUMER_REWARD_DENOM_REGISTRATION_FEE does not match query: $CONSUMER_REWARD_DENOM_REGISTRATION_FEE $Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE"
-            error="1"
-          fi
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify feemarket params prop is set
-        env:
-          ALPHA: "0.100000000000000000"
-          BETA: "1.000000000000000000"
-          GAMMA: "1.500000000000000000"
-          DELTA: "2.000000000000000000"
-          MIN_BASE_GAS_PRICE: "0.005000000000000000"
-          MIN_LEARNING_RATE: "0.125500000000000000"
-          MAX_LEARNING_RATE: "0.125600000000000000"
-          MAX_BLOCK_UTILIZATION: "50000000"
-        run: |
-          echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
-          Q_ALPHA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.alpha')
-          Q_BETA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.beta')
-          Q_GAMMA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.gamma')
-          Q_DELTA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.delta')
-          Q_MIN_BASE_GAS_PRICE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.min_base_gas_price')
-          Q_MIN_LEARNING_RATE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.min_learning_rate')
-          Q_MAX_LEARNING_RATE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.max_learning_rate')
-          Q_MAX_BLOCK_UTILIZATION=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.max_block_utilization')
-          if [ "$Q_ALPHA" != "$ALPHA" ]
-          then
-            echo "[ERROR]: ALPHA does not match query: $ALPHA $Q_ALPHA"
-            error="1"
-          fi
-          if [ "$Q_BETA" != "$BETA" ]
-          then
-            echo "[ERROR]: BETA does not match query: $BETA $Q_BETA"
-            error="1"
-          fi
-          if [ "$Q_GAMMA" != "$GAMMA" ]
-          then
-            echo "[ERROR]: GAMMA does not match query: $GAMMA $Q_GAMMA"
-            error="1"
-          fi
-          if [ "$Q_DELTA" != "$DELTA" ]
-          then
-            echo "[ERROR]: DELTA does not match query: $DELTA $Q_DELTA"
-            error="1"
-          fi
-          if [ "$Q_MIN_BASE_GAS_PRICE" != "$MIN_BASE_GAS_PRICE" ]
-          then
-            echo "[ERROR]: MIN_BASE_GAS_PRICE does not match query: $MIN_BASE_GAS_PRICE $MIN_BASE_GAS_PRICE"
-            error="1"
-          fi
-          if [ "$Q_MIN_LEARNING_RATE" != "$MIN_LEARNING_RATE" ]
-          then
-            echo "[ERROR]: MIN_LEARNING_RATE does not match query: $MIN_LEARNING_RATE $Q_MIN_LEARNING_RATE"
-            error="1"
-          fi
-          if [ "$Q_MAX_LEARNING_RATE" != "$MAX_LEARNING_RATE" ]
-          then
-            echo "[ERROR]: MAX_LEARNING_RATE does not match query: $MAX_LEARNING_RATE $Q_MAX_LEARNING_RATE"
-            error="1"
-          fi
-          if [ "$Q_MAX_BLOCK_UTILIZATION" != "$MAX_BLOCK_UTILIZATION" ]
-          then
-            echo "[ERROR]: MAX_BLOCK_UTILIZATION does not match query: $MAX_BLOCK_UTILIZATION $Q_MAX_BLOCK_UTILIZATION"
-            error="1"
-          fi
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify staking params prop is set
-        env:
-          UNBONDING_TIME: "240h0m0s"
-          MAX_VALIDATORS: 10
-          MAX_ENTRIES: 8
-          HISTORICAL_ENTRIES: 15000
-          MIN_COMMISSION_RATE: "10000000000000000"
-          VALIDATOR_BOND_FACTOR: "200000000000000000000"
-          GLOBAL_LIQUID_STAKING_CAP: "200000000000000000"
-          VALIDATOR_LIQUID_STAKING_CAP: "400000000000000000"
-        run: |
-          echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
-          Q_UNBONDING_TIME=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
-          Q_MAX_VALIDATORS=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_validators')
-          Q_MAX_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_entries')
-          Q_HISTORICAL_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.historical_entries')
-          Q_MIN_COMMISSION_RATE=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.min_commission_rate')
-          Q_VALIDATOR_BOND_FACTOR=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_bond_factor')
-          Q_GLOBAL_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.global_liquid_staking_cap')
-          Q_VALIDATOR_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_liquid_staking_cap')
-          if [ "$Q_UNBONDING_TIME" != "$UNBONDING_TIME" ]
-          then
-            echo "[ERROR]: UNBONDING_TIME does not match query: $UNBONDING_TIME $Q_UNBONDING_TIME"
-            error="1"
-          fi
-          if [ "$Q_MAX_VALIDATORS" != "$MAX_VALIDATORS" ]
-          then
-            echo "[ERROR]: MAX_VALIDATORS does not match query: $MAX_VALIDATORS $Q_MAX_VALIDATORS"
-            error="1"
-          fi
-          if [ "$Q_MAX_ENTRIES" != "$MAX_ENTRIES" ]
-          then
-            echo "[ERROR]: MAX_ENTRIES does not match query: $MAX_ENTRIES $Q_MAX_ENTRIES"
-            error="1"
-          fi
-          if [ "$Q_HISTORICAL_ENTRIES" != "$HISTORICAL_ENTRIES" ]
-          then
-            echo "[ERROR]: HISTORICAL_ENTRIES does not match query: $HISTORICAL_ENTRIES $Q_HISTORICAL_ENTRIES"
-            error="1"
-          fi
-          if [ "$Q_MIN_COMMISSION_RATE" != "$MIN_COMMISSION_RATE" ]
-          then
-            echo "[ERROR]: MIN_COMMISSION_RATE does not match query: $MIN_COMMISSION_RATE $Q_MIN_COMMISSION_RATE"
-            error="1"
-          fi
-          if [ "$Q_VALIDATOR_BOND_FACTOR" != "$VALIDATOR_BOND_FACTOR" ]
-          then
-            echo "[ERROR]: VALIDATOR_BOND_FACTOR does not match query: $VALIDATOR_BOND_FACTOR $Q_VALIDATOR_BOND_FACTOR"
-            error="1"
-          fi
-          if [ "$Q_GLOBAL_LIQUID_STAKING_CAP" != "$GLOBAL_LIQUID_STAKING_CAP" ]
-          then
-            echo "[ERROR]: GLOBAL_LIQUID_STAKING_CAP does not match query: $GLOBAL_LIQUID_STAKING_CAP $Q_GLOBAL_LIQUID_STAKING_CAP"
-            error="1"
-          fi
-          if [ "$Q_VALIDATOR_LIQUID_STAKING_CAP" != "$VALIDATOR_LIQUID_STAKING_CAP" ]
-          then
-            echo "[ERROR]: VALIDATOR_LIQUID_STAKING_CAP does not match query: $VALIDATOR_LIQUID_STAKING_CAP $Q_VALIDATOR_LIQUID_STAKING_CAP"
-            error="1"
-          fi
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify gov params prop is set
-        env:
-          MAX_DEPOSIT_PERIOD: "10m0s"
-          BURN_VOTE_QUORUM: "true"
-          BURN_PROPOSAL_DEPOSIT_PREVOTE: "true"
-          BURN_VOTE_VETO: "null"
-        run: |
-          echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
-          Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
-          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_quorum')
-          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_proposal_deposit_prevote')
-          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_veto')
-          if [ "$Q_MAX_DEPOSIT_PERIOD" != "$MAX_DEPOSIT_PERIOD" ]
-          then
-            echo "[ERROR]: MAX_DEPOSIT_PERIOD does not match query: $MAX_DEPOSIT_PERIOD $Q_MAX_DEPOSIT_PERIOD"
-            error="1"
-          fi
-          if [ "$Q_BURN_VOTE_QUORUM" != "$BURN_VOTE_QUORUM" ]
-          then
-            echo "[ERROR]: BURN_VOTE_QUORUM does not match query: $BURN_VOTE_QUORUM $Q_BURN_VOTE_QUORUM"
-            error="1"
-          fi
-          if [ "$Q_BURN_PROPOSAL_DEPOSIT_PREVOTE" != "$BURN_PROPOSAL_DEPOSIT_PREVOTE" ]
-          then
-            echo "[ERROR]: BURN_PROPOSAL_DEPOSIT_PREVOTE does not match query: $BURN_PROPOSAL_DEPOSIT_PREVOTE $Q_BURN_PROPOSAL_DEPOSIT_PREVOTE"
-            error="1"
-          fi
-          if [ "$Q_BURN_VOTE_VETO" != "$BURN_VOTE_VETO" ]
-          then
-            echo "[ERROR]: BURN_VOTE_VETO does not match query: $BURN_VOTE_VETO $Q_BURN_VOTE_VETO"
-            error="1"
-          fi
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify Gov params
-        run: |
-          echo "Verify deposit is not burned when quorum is reached by voting no"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Starting balance: $starting_balance"
-          echo "[INFO]: Submiting proposal and voting no"
-          scripts/submit_proposal.sh templates/proposal-text.json no
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Balance after no vote: $current_balance"
-          echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
-          echo "[DEBUG]: expected_balance: $expected_balance"
-          if [ $expected_balance -ne $current_balance ]
-          then
-            echo "[ERROR] Amount is not correct"
-            echo "Expected balance should be $expected_balance, bank have $current_balance"
-            error="1"
-          else
-            echo "Bank balance matches the caluclated balance"
-            echo "Expected balance is $expected_balance and bank have $current_balance"
-          fi
-
-          echo "[INFO]: Verify deposit is not burned when no_with_veto passed"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Starting balance: $starting_balance"
-          echo "[INFO]: Submiting proposal and voting no"
-          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Balance after no vote: $current_balance"
-          echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
-          echo "[DEBUG]: expected_balance: $expected_balance"
-          if [ $expected_balance -ne $current_balance ]
-          then
-            echo "[ERROR] Amount is not correct"
-            echo "Expected balance should be $expected_balance, bank have $current_balance"
-            error="1"
-          else
-            echo "Bank balance matches the caluclated balance"
-            echo "Expected balance is $expected_balance and bank have $current_balance"
-          fi
-
-          echo "[INFO]: Verify deposit is burned when quorum is not reached"
-          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Starting balance: $starting_balance"
-          echo "[INFO]: Submiting proposal and not voting"
-          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
-          echo "[INFO]: Wait for voting period to end..."
-          sleep $VOTING_PERIOD
-          sleep $VOTING_PERIOD
-          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
-          echo "[INFO]: Balance after no vote: $current_balance"
-          echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
-          echo "[DEBUG]: expected_balance: $expected_balance"
-          if [ $expected_balance -ne $current_balance ]
-          then
-            echo "[ERROR] Amount is not correct"
-            echo "Expected balance should be $expected_balance, bank have $current_balance"
-            error="1"
-          else
-            echo "Bank balance matches the caluclated balance"
-            echo "Expected balance is $expected_balance and bank have $current_balance"
-          fi
-
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify consensus params
-        run: |
-          set +e
-          echo "[INFO]: Submit large proposal..."
-          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
-          if [ $? -eq 0 ]
-          then
-            echo "[DEBUG]: json output:"
-            echo "$json"
-            echo "[INFO]: Waiting for proposal to end"
-            sleep $VOTING_PERIOD
-            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-            # get tx hash
-            txhash=$(echo $json | jq -r '.txhash')
-            $CHAIN_BINARY --home $HOME_1 q tx $txhash
-            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
-            echo "[ERROR]: Proposal went through"
-            exit 1
-          else
-            echo "[DEBUG]: json output:"
-            echo "$json"
-            echo "[PASS]: Proposal did not go through"
-          fi
-
-
-
 
       - name: Set up relayer
         run: scripts/stateful/setup_relayer.sh
@@ -1543,7 +1045,496 @@ jobs:
       #     done
 
       ### Param tests
-      
+      - name: Query current consensus params
+        run: |
+          echo "Query current consensus params"
+          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+      - name: Query current provider params
+        run: |
+          echo "Query current provider params"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+      - name: Query current feemarket params
+        run: |
+          echo "Query current feemarket params"
+          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      - name: Query current staking params
+        run: |
+          echo "Query current staking params"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+      - name: Query current gov params
+        run: |
+          echo "Query current gov params"
+          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
+      - name: _Pre-proposal test current gov params
+        run: |
+          echo "Verify deposit is not burned when quorum is reached by voting no"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is burned when no_with_veto passed"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES - 100000000" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is not burned when quorum is not reached"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and not voting"
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          echo "[INFO]: Wait for voting period to end..."
+          sleep $VOTING_PERIOD
+          sleep $VOTING_PERIOD
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Pre-proposal test current consensus params
+        run: |
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[ERROR]: Proposal did not go through"
+            exit 1
+          fi
+
+      - name: Submit proposal to update modules params
+        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
+      - name: _Verify consensus params prop is set
+        env:
+          CONSENSUS_BLOCK_MAX_BYTES: "3000"
+          CONSENSUS_BLOCK_MAX_GAS: "76000000"
+          CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS: "2000000"
+          CONSENSUS_EVIDENCE_MAX_AGE_DURATION: "48h0m0s"
+          CONSENSUS_EVIDENCE_MAX_BYTES: "2900"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+          Q_CONSENSUS_BLOCK_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_bytes')
+          Q_CONSENSUS_BLOCK_MAX_GAS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_gas')
+          Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_num_blocks')
+          Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_duration')
+          Q_CONSENSUS_EVIDENCE_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_bytes')
+          if [ "$Q_CONSENSUS_BLOCK_MAX_BYTES" != "$CONSENSUS_BLOCK_MAX_BYTES" ]
+          then
+            echo "[ERROR]: CONSENSUS_BLOCK_MAX_BYTES does not match query: $CONSENSUS_BLOCK_MAX_BYTES $Q_CONSENSUS_BLOCK_MAX_BYTES"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_BLOCK_MAX_GAS" != "$CONSENSUS_BLOCK_MAX_GAS" ]
+          then
+            echo "[ERROR]: CONSENSUS_BLOCK_MAX_GAS does not match query: $CONSENSUS_BLOCK_MAX_GAS $Q_CONSENSUS_BLOCK_MAX_GAS"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" != "$CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" ]
+          then
+            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS does not match query: $CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS $Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION" != "$CONSENSUS_EVIDENCE_MAX_AGE_DURATION" ]
+          then
+            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_AGE_DURATION does not match query: $CONSENSUS_EVIDENCE_MAX_AGE_DURATION $Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_EVIDENCE_MAX_BYTES" != "$CONSENSUS_EVIDENCE_MAX_BYTES" ]
+          then
+            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_BYTES does not match query: $CONSENSUS_EVIDENCE_MAX_BYTES $Q_CONSENSUS_EVIDENCE_MAX_BYTES"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify provider params prop is set
+        env:
+          TEMPLATE_CLIENT_TRUSTING_PERIOD: "3600s"
+          TEMPLATE_CLIENT_UNBONDING_PERIOD: "1800s"
+          TRUSTING_PERIOD_FRACTION: "0.76"
+          CCV_TIMEOUT_PERIOD: "2419200s"
+          SLASH_METER_REPLENISH_PERIOD: "1800s"
+          SLASH_METER_REPLENISH_FRACTION: "0.01"
+          CONSUMER_REWARD_DENOM_REGISTRATION_FEE: "50000000"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+          Q_TEMPLATE_CLIENT_TRUSTING_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.template_client.trusting_period') 
+          Q_TEMPLATE_CLIENT_UNBONDING_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.template_client.unbonding_period')
+          Q_TRUSTING_PERIOD_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.trusting_period_fraction')
+          Q_CCV_TIMEOUT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.ccv_timeout_period')
+          Q_SLASH_METER_REPLENISH_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_period')
+          Q_SLASH_METER_REPLENISH_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_fraction')
+          Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.consumer_reward_denom_registration_fee.amount')
+          if [ "$Q_TEMPLATE_CLIENT_TRUSTING_PERIOD" != "$TEMPLATE_CLIENT_TRUSTING_PERIOD" ]
+          then
+            echo "[ERROR]: TEMPLATE_CLIENT_TRUSTING_PERIOD does not match query: $TEMPLATE_CLIENT_TRUSTING_PERIOD $Q_TEMPLATE_CLIENT_TRUSTING_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_TEMPLATE_CLIENT_UNBONDING_PERIOD" != "$TEMPLATE_CLIENT_UNBONDING_PERIOD" ]
+          then
+            echo "[ERROR]: TEMPLATE_CLIENT_UNBONDING_PERIOD does not match query: $TEMPLATE_CLIENT_UNBONDING_PERIOD $Q_TEMPLATE_CLIENT_UNBONDING_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_TRUSTING_PERIOD_FRACTION" != "$TRUSTING_PERIOD_FRACTION" ]
+          then
+            echo "[ERROR]: TRUSTING_PERIOD_FRACTION does not match query: $TRUSTING_PERIOD_FRACTION $TRUSTING_PERIOD_FRACTION"
+            error="1"
+          fi
+          if [ "$Q_CCV_TIMEOUT_PERIOD" != "$CCV_TIMEOUT_PERIOD" ]
+          then
+            echo "[ERROR]: CCV_TIMEOUT_PERIOD does not match query: $CCV_TIMEOUT_PERIOD $Q_CCV_TIMEOUT_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_SLASH_METER_REPLENISH_PERIOD" != "$SLASH_METER_REPLENISH_PERIOD" ]
+          then
+            echo "[ERROR]: SLASH_METER_REPLENISH_PERIOD does not match query: $SLASH_METER_REPLENISH_PERIOD $Q_SLASH_METER_REPLENISH_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_SLASH_METER_REPLENISH_FRACTION" != "$SLASH_METER_REPLENISH_FRACTION" ]
+          then
+            echo "[ERROR]: SLASH_METER_REPLENISH_FRACTION does not match query: $SLASH_METER_REPLENISH_FRACTION $Q_SLASH_METER_REPLENISH_FRACTION"
+            error="1"
+          fi
+          if [ "$Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE" != "$CONSUMER_REWARD_DENOM_REGISTRATION_FEE" ]
+          then
+            echo "[ERROR]: CONSUMER_REWARD_DENOM_REGISTRATION_FEE does not match query: $CONSUMER_REWARD_DENOM_REGISTRATION_FEE $Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify feemarket params prop is set
+        env:
+          ALPHA: "0.100000000000000000"
+          BETA: "1.000000000000000000"
+          GAMMA: "1.500000000000000000"
+          DELTA: "2.000000000000000000"
+          MIN_BASE_GAS_PRICE: "0.005000000000000000"
+          MIN_LEARNING_RATE: "0.125500000000000000"
+          MAX_LEARNING_RATE: "0.125600000000000000"
+          MAX_BLOCK_UTILIZATION: "50000000"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+          Q_ALPHA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.alpha')
+          Q_BETA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.beta')
+          Q_GAMMA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.gamma')
+          Q_DELTA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.delta')
+          Q_MIN_BASE_GAS_PRICE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.min_base_gas_price')
+          Q_MIN_LEARNING_RATE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.min_learning_rate')
+          Q_MAX_LEARNING_RATE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.max_learning_rate')
+          Q_MAX_BLOCK_UTILIZATION=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.max_block_utilization')
+          if [ "$Q_ALPHA" != "$ALPHA" ]
+          then
+            echo "[ERROR]: ALPHA does not match query: $ALPHA $Q_ALPHA"
+            error="1"
+          fi
+          if [ "$Q_BETA" != "$BETA" ]
+          then
+            echo "[ERROR]: BETA does not match query: $BETA $Q_BETA"
+            error="1"
+          fi
+          if [ "$Q_GAMMA" != "$GAMMA" ]
+          then
+            echo "[ERROR]: GAMMA does not match query: $GAMMA $Q_GAMMA"
+            error="1"
+          fi
+          if [ "$Q_DELTA" != "$DELTA" ]
+          then
+            echo "[ERROR]: DELTA does not match query: $DELTA $Q_DELTA"
+            error="1"
+          fi
+          if [ "$Q_MIN_BASE_GAS_PRICE" != "$MIN_BASE_GAS_PRICE" ]
+          then
+            echo "[ERROR]: MIN_BASE_GAS_PRICE does not match query: $MIN_BASE_GAS_PRICE $MIN_BASE_GAS_PRICE"
+            error="1"
+          fi
+          if [ "$Q_MIN_LEARNING_RATE" != "$MIN_LEARNING_RATE" ]
+          then
+            echo "[ERROR]: MIN_LEARNING_RATE does not match query: $MIN_LEARNING_RATE $Q_MIN_LEARNING_RATE"
+            error="1"
+          fi
+          if [ "$Q_MAX_LEARNING_RATE" != "$MAX_LEARNING_RATE" ]
+          then
+            echo "[ERROR]: MAX_LEARNING_RATE does not match query: $MAX_LEARNING_RATE $Q_MAX_LEARNING_RATE"
+            error="1"
+          fi
+          if [ "$Q_MAX_BLOCK_UTILIZATION" != "$MAX_BLOCK_UTILIZATION" ]
+          then
+            echo "[ERROR]: MAX_BLOCK_UTILIZATION does not match query: $MAX_BLOCK_UTILIZATION $Q_MAX_BLOCK_UTILIZATION"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify staking params prop is set
+        env:
+          UNBONDING_TIME: "240h0m0s"
+          MAX_VALIDATORS: 10
+          MAX_ENTRIES: 8
+          HISTORICAL_ENTRIES: 15000
+          MIN_COMMISSION_RATE: "10000000000000000"
+          VALIDATOR_BOND_FACTOR: "200000000000000000000"
+          GLOBAL_LIQUID_STAKING_CAP: "200000000000000000"
+          VALIDATOR_LIQUID_STAKING_CAP: "400000000000000000"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+          Q_UNBONDING_TIME=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
+          Q_MAX_VALIDATORS=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_validators')
+          Q_MAX_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_entries')
+          Q_HISTORICAL_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.historical_entries')
+          Q_MIN_COMMISSION_RATE=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.min_commission_rate')
+          Q_VALIDATOR_BOND_FACTOR=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_bond_factor')
+          Q_GLOBAL_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.global_liquid_staking_cap')
+          Q_VALIDATOR_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_liquid_staking_cap')
+          if [ "$Q_UNBONDING_TIME" != "$UNBONDING_TIME" ]
+          then
+            echo "[ERROR]: UNBONDING_TIME does not match query: $UNBONDING_TIME $Q_UNBONDING_TIME"
+            error="1"
+          fi
+          if [ "$Q_MAX_VALIDATORS" != "$MAX_VALIDATORS" ]
+          then
+            echo "[ERROR]: MAX_VALIDATORS does not match query: $MAX_VALIDATORS $Q_MAX_VALIDATORS"
+            error="1"
+          fi
+          if [ "$Q_MAX_ENTRIES" != "$MAX_ENTRIES" ]
+          then
+            echo "[ERROR]: MAX_ENTRIES does not match query: $MAX_ENTRIES $Q_MAX_ENTRIES"
+            error="1"
+          fi
+          if [ "$Q_HISTORICAL_ENTRIES" != "$HISTORICAL_ENTRIES" ]
+          then
+            echo "[ERROR]: HISTORICAL_ENTRIES does not match query: $HISTORICAL_ENTRIES $Q_HISTORICAL_ENTRIES"
+            error="1"
+          fi
+          if [ "$Q_MIN_COMMISSION_RATE" != "$MIN_COMMISSION_RATE" ]
+          then
+            echo "[ERROR]: MIN_COMMISSION_RATE does not match query: $MIN_COMMISSION_RATE $Q_MIN_COMMISSION_RATE"
+            error="1"
+          fi
+          if [ "$Q_VALIDATOR_BOND_FACTOR" != "$VALIDATOR_BOND_FACTOR" ]
+          then
+            echo "[ERROR]: VALIDATOR_BOND_FACTOR does not match query: $VALIDATOR_BOND_FACTOR $Q_VALIDATOR_BOND_FACTOR"
+            error="1"
+          fi
+          if [ "$Q_GLOBAL_LIQUID_STAKING_CAP" != "$GLOBAL_LIQUID_STAKING_CAP" ]
+          then
+            echo "[ERROR]: GLOBAL_LIQUID_STAKING_CAP does not match query: $GLOBAL_LIQUID_STAKING_CAP $Q_GLOBAL_LIQUID_STAKING_CAP"
+            error="1"
+          fi
+          if [ "$Q_VALIDATOR_LIQUID_STAKING_CAP" != "$VALIDATOR_LIQUID_STAKING_CAP" ]
+          then
+            echo "[ERROR]: VALIDATOR_LIQUID_STAKING_CAP does not match query: $VALIDATOR_LIQUID_STAKING_CAP $Q_VALIDATOR_LIQUID_STAKING_CAP"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify gov params prop is set
+        env:
+          MAX_DEPOSIT_PERIOD: "10m0s"
+          BURN_VOTE_QUORUM: "true"
+          BURN_PROPOSAL_DEPOSIT_PREVOTE: "true"
+          BURN_VOTE_VETO: "null"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+          Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
+          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_quorum')
+          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_proposal_deposit_prevote')
+          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_veto')
+          if [ "$Q_MAX_DEPOSIT_PERIOD" != "$MAX_DEPOSIT_PERIOD" ]
+          then
+            echo "[ERROR]: MAX_DEPOSIT_PERIOD does not match query: $MAX_DEPOSIT_PERIOD $Q_MAX_DEPOSIT_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_BURN_VOTE_QUORUM" != "$BURN_VOTE_QUORUM" ]
+          then
+            echo "[ERROR]: BURN_VOTE_QUORUM does not match query: $BURN_VOTE_QUORUM $Q_BURN_VOTE_QUORUM"
+            error="1"
+          fi
+          if [ "$Q_BURN_PROPOSAL_DEPOSIT_PREVOTE" != "$BURN_PROPOSAL_DEPOSIT_PREVOTE" ]
+          then
+            echo "[ERROR]: BURN_PROPOSAL_DEPOSIT_PREVOTE does not match query: $BURN_PROPOSAL_DEPOSIT_PREVOTE $Q_BURN_PROPOSAL_DEPOSIT_PREVOTE"
+            error="1"
+          fi
+          if [ "$Q_BURN_VOTE_VETO" != "$BURN_VOTE_VETO" ]
+          then
+            echo "[ERROR]: BURN_VOTE_VETO does not match query: $BURN_VOTE_VETO $Q_BURN_VOTE_VETO"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify Gov params
+        run: |
+          echo "Verify deposit is not burned when quorum is reached by voting no"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is not burned when no_with_veto passed"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is burned when quorum is not reached"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and not voting"
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          echo "[INFO]: Wait for voting period to end..."
+          sleep $VOTING_PERIOD
+          sleep $VOTING_PERIOD
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify consensus params
+        run: |
+          set +e
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+            echo "[ERROR]: Proposal went through"
+            exit 1
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[PASS]: Proposal did not go through"
+          fi
 
       - name: Stop services
         if: always()
