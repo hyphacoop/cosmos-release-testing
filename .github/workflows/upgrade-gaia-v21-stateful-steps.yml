@@ -457,6 +457,7 @@ jobs:
         run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
       - name: _Provider RPC tests using localhost> gaiad
         run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+
       - name: Set up relayer
         run: scripts/stateful/setup_relayer.sh
       - name: Download consumer chain binaries
@@ -1064,15 +1065,109 @@ jobs:
         run: |
           echo "Query current gov params"
           $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
+      - name: _Pre-proposal test current gov params
+        run: |
+          echo "Verify deposit is not burned when quorum is reached by voting no"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is burned when no_with_veto passed"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES - 100000000" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is not burned when quorum is not reached"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and not voting"
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          echo "[INFO]: Wait for voting period to end..."
+          sleep $VOTING_PERIOD
+          sleep $VOTING_PERIOD
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Pre-proposal test current consensus params
+        run: |
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[ERROR]: Proposal did not go through"
+            exit 1
+          fi
+
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
       - name: _Verify consensus params prop is set
         env:
-          CONSENSUS_BLOCK_MAX_BYTES: "5000000"
+          CONSENSUS_BLOCK_MAX_BYTES: "3000"
           CONSENSUS_BLOCK_MAX_GAS: "76000000"
           CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS: "2000000"
           CONSENSUS_EVIDENCE_MAX_AGE_DURATION: "48h0m0s"
-          CONSENSUS_EVIDENCE_MAX_BYTES: "60000"
+          CONSENSUS_EVIDENCE_MAX_BYTES: "2900"
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
@@ -1345,6 +1440,102 @@ jobs:
           else
             echo "PASSED!"
           fi
+      - name: _Verify Gov params
+        run: |
+          echo "Verify deposit is not burned when quorum is reached by voting no"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is not burned when no_with_veto passed"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is burned when quorum is not reached"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and not voting"
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          echo "[INFO]: Wait for voting period to end..."
+          sleep $VOTING_PERIOD
+          sleep $VOTING_PERIOD
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify consensus params
+        run: |
+          set +e
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+            echo "[ERROR]: Proposal went through"
+            exit 1
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[PASS]: Proposal did not go through"
+          fi
+
       - name: Stop services
         if: always()
         run: |
