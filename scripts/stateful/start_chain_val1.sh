@@ -24,13 +24,15 @@ curl -6 -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
 # chmod +x $HOME/go/bin/$CHAIN_BINARY
 
 # Build Gaia binary
+cwd=$(pwd)
+cd ~/
 echo "Building gaiad branch: $UPGRADE_VERSION"
 git clone https://github.com/cosmos/gaia.git
 cd gaia
 git checkout $UPGRADE_VERSION
 make build
 cp build/gaiad $HOME/go/bin/$CHAIN_BINARY
-cd ..
+cd $cwd
 
 # Printing Gaia binary checksum
 echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
