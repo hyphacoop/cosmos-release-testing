@@ -1160,7 +1160,7 @@ jobs:
           fi
 
       - name: Submit feearket prams
-        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
+        run: scripts/submit_proposal.sh tests/test_feemarket.sh
       - name: _Verify feemarket params
         run: |
           echo "[INFO]: Submit large proposal..."
