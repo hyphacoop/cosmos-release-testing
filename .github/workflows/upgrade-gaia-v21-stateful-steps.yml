@@ -578,32 +578,32 @@ jobs:
           fi
 
       - name: Submit feearket prams
-        run: scripts/submit_proposal.sh templates/proposal-feemarket.json
-      # - name: _Verify feemarket params
-      #   run: |
-      #     echo "[INFO]: Submit large proposal..."
-      #     json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
-      #     if [ $? -eq 0 ]
-      #     then
-      #       echo "[DEBUG]: json output:"
-      #       echo "$json"
-      #       echo "[INFO]: Waiting for proposal to end"
-      #       sleep $VOTING_PERIOD
-      #       tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #       # get tx hash
-      #       txhash=$(echo $json | jq -r '.txhash')
-      #       $CHAIN_BINARY --home $HOME_1 q tx $txhash
-      #       proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-      #       $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
-      #     else
-      #       echo "[DEBUG]: json output:"
-      #       echo "$json"
-      #       echo "[ERROR]: Proposal did not go through"
-      #       exit 1
-      #     fi
+        run: scripts/submit_proposal.sh templates/proposal-feemarket-stateful.json
       - name: _Verify feemarket params
         run: |
-          tests/stateful/test_feemarket.sh
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[ERROR]: Proposal did not go through"
+            exit 1
+          fi
+      # - name: _Verify feemarket params
+      #   run: |
+      #     tests/stateful/test_feemarket.sh
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
       - name: _Verify consensus params prop is set
