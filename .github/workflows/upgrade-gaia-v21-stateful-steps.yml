@@ -590,9 +590,9 @@ jobs:
           if [ $? -eq 0 ]
           then
             echo "[PASS]: Proposal did not go through"
-            exit 1
           else
             echo "[ERROR]: No insufficient fee from log!"
+            exit 1
           fi
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
