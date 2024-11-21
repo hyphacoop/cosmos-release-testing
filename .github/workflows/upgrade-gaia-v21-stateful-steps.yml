@@ -589,10 +589,10 @@ jobs:
           echo $json | jq -r '.raw_log' | grep "insufficient fee"
           if [ $? -eq 0 ]
           then
-            echo "[ERROR]: Proposal went through"
+            echo "[PASS]: Proposal did not go through"
             exit 1
           else
-            echo "[PASS]: Proposal did not go through"
+            echo "[ERROR]: No insufficient fee from log!"
           fi
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
