@@ -1,0 +1,9 @@
+name: Test VM runner
+on:
+  push:
+jobs:
+  set-version-matrix:
+    runs-on: cosmos-ubuntu2404-vm-set
+    steps:
+      # Get system info
+      - run: cat /proc/cpuinfo
