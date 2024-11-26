@@ -3,7 +3,7 @@ on:
   push:
 jobs:
   set-version-matrix:
-    runs-on: cosmos-ubuntu2404-vm-set
+    runs-on: git-runner-ubuntu-2404
     steps:
       # Get system info
       - run: cat /proc/cpuinfo
