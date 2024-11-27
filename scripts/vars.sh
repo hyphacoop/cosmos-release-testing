@@ -1,7 +1,7 @@
 export validator_count=5
 
 # Upgrade configuration
-export UPGRADE_VERSION=v21.0.1
+export UPGRADE_VERSION=v21.0.0
 export UPGRADE_BINARY_SOURCE=DOWNLOAD
 export UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64
 
