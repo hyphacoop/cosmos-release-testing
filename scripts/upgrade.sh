@@ -88,7 +88,7 @@ echo "> Stopping nodes"
 sleep 3
 if [ "$UPGRADE_BINARY_SOURCE" = "DOWNLOAD" ]; then
     echo "> Downloading binary"
-    wget $UPGRADE_BINARY_URL -O $CHAIN_BINARY
+    wget -q $UPGRADE_BINARY_URL -O $CHAIN_BINARY
     chmod +x $CHAIN_BINARY
 elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     echo "> Building binary"

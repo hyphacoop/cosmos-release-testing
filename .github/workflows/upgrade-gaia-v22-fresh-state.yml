@@ -301,11 +301,15 @@
           - name: Upgrade chain
             run: |
               source scripts/vars.sh
+              # export UPGRADE_VERSION=${{ matrix.upgrade_version }}
+              # export UPGRADE_BINARY_SOURCE=DOWNLOAD
+              # export UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64
               scripts/upgrade.sh
 
           - name: Confirm chain is online
             run: |
               source scripts/vars.sh
+
               scripts/wait_for_block.sh 3
           # - name: Install Cosmovisor > v1.3.0
           #   if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
