@@ -2,11 +2,8 @@
 # Configure variables before running this file.
 # source vars.sh
 
-# Install dependencies
-python -m pip install toml-cli
-
 # echo "Downloading binary..."
-wget $CHAIN_BINARY_URL -O $CHAIN_BINARY
+wget $CHAIN_BINARY_URL -q -O $CHAIN_BINARY
 chmod +x $CHAIN_BINARY
 
 rm -rf temp

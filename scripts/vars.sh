@@ -1,4 +1,4 @@
-validator_count=1
+export validator_count=1
 
 # Upgrade configuration
 export UPGRADE_VERSION=v20.0.1
