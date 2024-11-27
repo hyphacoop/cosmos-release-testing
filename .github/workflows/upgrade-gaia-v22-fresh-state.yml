@@ -292,8 +292,10 @@
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               scripts/setup.sh
               ./start.sh
+              sleep 5
           - name: Confirm chain is online
             run: |
+              source scripts/vars.sh
               scripts/wait_for_block.sh 10
 
           # - name: Install Cosmovisor > v1.3.0
