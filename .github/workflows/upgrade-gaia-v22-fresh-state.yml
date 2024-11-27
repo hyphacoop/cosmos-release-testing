@@ -296,8 +296,17 @@
           - name: Confirm chain is online
             run: |
               source scripts/vars.sh
-              scripts/wait_for_block.sh 10
+              scripts/wait_for_block.sh 3
 
+          - name: Upgrade chain
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh
+
+          - name: Confirm chain is online
+            run: |
+              source scripts/vars.sh
+              scripts/wait_for_block.sh 3
           # - name: Install Cosmovisor > v1.3.0
           #   if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
           #   run: |
