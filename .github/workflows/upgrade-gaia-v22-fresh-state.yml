@@ -288,8 +288,8 @@
               START_VERSION: ${{matrix.gaia_version}}
             run: |
               source scripts/vars.sh
-              export CHAIN_VERSION=$START_VERSION
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+              # export CHAIN_VERSION=$START_VERSION
+              # export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               scripts/setup.sh
               ./start.sh
               sleep 5
