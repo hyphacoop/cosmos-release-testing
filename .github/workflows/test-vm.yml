@@ -21,6 +21,7 @@ jobs:
       - name: Provision runner VM
         run: |
           source ~/env/bin/activate
+          cd ansible
           ansible-playbook provision-runner.yml -e "api_password=${{ secrets.PROXMOX_SECRET }}"
   run-on-vm:
     needs: provision-runner
