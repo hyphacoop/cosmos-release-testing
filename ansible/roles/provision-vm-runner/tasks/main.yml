@@ -11,3 +11,5 @@
     format: qcow2
     timeout: 500
     pool: ci
+    full: true
+    state: started
