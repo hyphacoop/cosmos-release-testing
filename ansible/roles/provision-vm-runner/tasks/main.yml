@@ -19,7 +19,7 @@
     api_host: cosmos-kvm1.polypore.xyz
     api_user: ciuser@pve
     vmid: 600
-    disk: virtio
+    disk: virtio0
     size: 100G
     state: resized
 
