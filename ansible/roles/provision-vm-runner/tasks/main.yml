@@ -16,7 +16,7 @@
   register: proxmox_info
 - name: Store vmid
   set_fact:
-    vmid: "{{ proxmox_info.data.vmid }}"
+    vmid: "{{ proxmox_info.vmid }}"
 - name: Grow existing disk
   community.general.proxmox_disk:
     api_host: cosmos-kvm1.polypore.xyz
