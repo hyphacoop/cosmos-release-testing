@@ -22,11 +22,15 @@ done
 signature_count=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '[.result.block.last_commit.signatures[] | select(.block_id_flag==2)] | length')
 echo "> Signature count: $signature_count"
 if [ "$signature_count" = "$validator_count" ]; then
-    echo "> All validators are signing."
+    echo "> All validators are signing"
     exit 0
 else
-    echo "> Not all validators are signing."
+    echo "> Not all validators are signing"
+    echo "> Signatures:"
     curl -s http://localhost:${rpc_ports[0]}/block | jq -r '.result.block.last_commit.signatures'
+    echo "> Log from last validator:"
     tail -n 50 ${logs[-1]}
+    echo "> Genesis file:"
+    jq '.' ${homes[0]}/config/genesis.json
     exit 1
 fi
