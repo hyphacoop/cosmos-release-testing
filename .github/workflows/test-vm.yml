@@ -3,6 +3,7 @@ on:
   push:
 jobs:
   provision-runner:
+    environment:  github-runner-vm
     runs-on: cosmos-runner-set
     steps:
       - name: Install required packages
