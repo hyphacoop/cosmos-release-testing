@@ -1,26 +1,25 @@
 ---
 - name: Clone ubuntu runner template
   community.general.proxmox_kvm:
-    api_user: ciuser@pve
-    # api_password: "{{ api_password }}"
-    pool: ci
     api_host: cosmos-kvm1.polypore.xyz
+    api_user: ciuser@pve
+    node: cosmos-kvm4
+    pool: ci
     clone: git-runner-ubuntu-2404
     name: cosmos-git-runner-ubuntu-600
     vmid: 9351
     newid: 600
-    node: cosmos-kvm4
     storage: local
     format: qcow2
     timeout: 500
     full: true
 - name: Start runner VM
   community.general.proxmox_kvm:
-    api_user: ciuser@pve
-    # api_password: "{{ api_password }}"
-    pool: ci
     api_host: cosmos-kvm1.polypore.xyz
-    clone: git-runner-ubuntu-2404
+    api_user: ciuser@pve
+    node: cosmos-kvm4
+    pool: ci
     name: cosmos-git-runner-ubuntu-600
     vmid: 600
     started: true
+    
