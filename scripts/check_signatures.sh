@@ -28,6 +28,6 @@ if [ "$signature_count" = "$validator_count" ]; then
 else
     echo "> Not all validators are signing"
     echo "> Signatures:"
-    jq $signatures
+    echo $signatures | jq '.'
     exit 1
 fi
