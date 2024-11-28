@@ -23,14 +23,20 @@
     size: 100G
     state: resized
 
-- name: Configure and Start runner VM
+- name: Configure runner VM
   community.general.proxmox_kvm:
     api_host: cosmos-kvm1.polypore.xyz
     api_user: ciuser@pve
-    node: cosmos-kvm4
     pool: ci
     vmid: 600
     cores: 8
     memory: 16384
     update: true
+
+- name: Start runner VM
+  community.general.proxmox_kvm:
+    api_host: cosmos-kvm1.polypore.xyz
+    api_user: ciuser@pve
+    pool: ci
+    vmid: 600
     state: started
