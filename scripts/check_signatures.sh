@@ -19,7 +19,7 @@ do
     logs+=($log)
 done
 
-signatures=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '[.result.block.last_commit.signatures')
+signatures=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '.result.block.last_commit.signatures')
 signature_count=$(echo $signatures | jq -r '[.[] | select((.block_id_flag==2) or .block_id_flag==3)] | length')
 echo "> Signature count: $signature_count"
 if [ "$signature_count" = "$validator_count" ]; then
@@ -29,4 +29,5 @@ else
     echo "> Not all validators are signing"
     echo "> Signatures:"
     jq $signatures
+    exit 1
 fi
