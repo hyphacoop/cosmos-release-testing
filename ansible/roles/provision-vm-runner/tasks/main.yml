@@ -18,8 +18,6 @@
   community.general.proxmox_disk:
     api_host: cosmos-kvm1.polypore.xyz
     api_user: ciuser@pve
-    node: cosmos-kvm4
-    pool: ci
     vmid: 600
     disk: virtio
     size: 100G
