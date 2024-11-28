@@ -95,11 +95,11 @@ jq -r '.app_state.provider.params.blocks_per_epoch = 1' ${homes[0]}/config/genes
 cp temp/bpe.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis file for max consensus validators"
-jq -r '.app_state.provider.params.max_provider_consensus_validators = 1' ${homes[0]}/config/genesis.json  > temp/bpe.json
+jq -r '.app_state.provider.params.max_provider_consensus_validators = 50' ${homes[0]}/config/genesis.json  > temp/bpe.json
 cp temp/bpe.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis file for max validators"
-jq -r '.app_state.staking.params.max_validators = 2' ${homes[0]}/config/genesis.json  > temp/vals.json
+jq -r '.app_state.staking.params.max_validators = 100' ${homes[0]}/config/genesis.json  > temp/vals.json
 cp temp/vals.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis file for deposit period"
