@@ -314,9 +314,7 @@
             run: |
               source scripts/vars.sh
               height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
-              echo "> Current height: $height"
               let target=$height+3
-              echo "> Target height: $height"
               scripts/wait_for_block.sh $target
           - name: Confirm all validators are signing
             run: |
