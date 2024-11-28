@@ -77,14 +77,14 @@ if [ "$major_upgrade" -eq 1 ]; then
     txhash=$($vote | jq -r .txhash)
     sleep $[ $TIMEOUT_COMMIT+1 ]
     $CHAIN_BINARY q tx $txhash --home ${homes[0]}
-    ./wait_for_block.sh $upgrade_height
+    scripts/wait_for_block.sh $upgrade_height
     echo "> Upgrade height reached."
 else
     echo "> Not a major upgrade."
 fi
 
 echo "> Stopping nodes"
-./stop.sh
+scripts/stop.sh
 sleep 3
 if [ "$UPGRADE_BINARY_SOURCE" = "DOWNLOAD" ]; then
     echo "> Downloading binary"
@@ -100,7 +100,7 @@ elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     cp gaia/build/gaiad $CHAIN_BINARY
 fi
 echo "> Starting nodes"
-./start.sh
+scripts/start.sh
 sleep 3
 echo "> Check upgrade version."
 current_version=$(curl -s http://localhost:${rpc_ports[0]}/abci_info | jq -r '.result.response.version')
