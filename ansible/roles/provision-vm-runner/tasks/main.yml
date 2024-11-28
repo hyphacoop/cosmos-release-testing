@@ -7,7 +7,8 @@
     api_host: cosmos-kvm1.polypore.xyz
     clone: git-runner-ubuntu-2404
     name: cosmos-git-runner-ubuntu-600
-    vmid: 600
+    vmid: 9351
+    newid: 600
     node: cosmos-kvm4
     storage: local
     format: qcow2
