@@ -30,6 +30,7 @@ else
     echo "> Signatures:"
     echo $signatures | jq '.'
     echo "> Log file:"
+    cat ${logs[-2]}
     cat ${logs[-1]}
     exit 1
 fi
