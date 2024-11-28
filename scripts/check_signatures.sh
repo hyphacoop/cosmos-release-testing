@@ -15,6 +15,8 @@ do
     api_ports+=($api_port)
     rpc_port=$rpc_prefix$i
     rpc_ports+=($rpc_port)
+    log=$log_prefix$i
+    logs+=($log)
 done
 
 signature_count=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '[.result.block.last_commit.signatures[] | select(.block_id_flag==2)] | length')
@@ -24,5 +26,7 @@ if [ "$signature_count" = "$validator_count" ]; then
     exit 0
 else
     echo "> Not all validators are signing."
+    curl -s http://localhost:${rpc_ports[0]}/block | jq -r '.result.block.last_commit.signatures'
+    tail -n 50 ${logs[-1]}
     exit 1
 fi
