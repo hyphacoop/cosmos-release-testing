@@ -2,7 +2,26 @@ name: Test VM runner
 on:
   push:
 jobs:
-  set-version-matrix:
+  provision-runner:
+    runs-on: cosmos-runner-set
+    steps:
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install ansible
+          python -m pip install proxmoxer
+          python -m pip install requests
+      - name: Provision runner VM
+        ansible-playbook provision-runner.yml -e "api_password=${{ secrets.PROXMOX_SECRET }}"
+  run-on-vm:
+    needs: provision-runner
     runs-on: cosmos-ubuntu2404-vm-set
     steps:
       # Get system info

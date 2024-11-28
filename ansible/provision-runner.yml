@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  roles:
+  - role: provision-vm-runner
+    become: false
+  serial: 5
