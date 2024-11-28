@@ -313,7 +313,7 @@
           - name: Confirm chain is online
             run: |
               source scripts/vars.sh
-              height=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '.result.block.header.height')
+              height=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r .result.block.header.height)
               echo "> Current height: $height"
               target=$(($height+3))
               echo "> Target height: $height"
