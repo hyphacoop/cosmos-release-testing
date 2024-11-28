@@ -84,7 +84,7 @@ else
 fi
 
 echo "> Stopping nodes"
-scripts/stop.sh
+./stop.sh
 sleep 3
 if [ "$UPGRADE_BINARY_SOURCE" = "DOWNLOAD" ]; then
     echo "> Downloading binary"
@@ -100,8 +100,8 @@ elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     cp gaia/build/gaiad $CHAIN_BINARY
 fi
 echo "> Starting nodes"
-scripts/start.sh
-sleep 3
+./start.sh
+sleep 5
 echo "> Check upgrade version."
 current_version=$(curl -s http://localhost:${rpc_ports[0]}/abci_info | jq -r '.result.response.version')
 echo "> Current version: $current_version"
