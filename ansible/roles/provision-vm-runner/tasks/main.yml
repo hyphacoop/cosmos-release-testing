@@ -29,10 +29,7 @@
     api_user: ciuser@pve
     node: cosmos-kvm4
     pool: ci
-    name: cosmos-git-runner-ubuntu-600
     vmid: 600
     cores: 8
     memory: 16384
-    virtio:
-      virtio0: 'local:500'
     state: started
