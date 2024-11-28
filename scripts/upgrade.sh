@@ -72,9 +72,12 @@ if [ "$major_upgrade" -eq 1 ]; then
     proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home ${homes[0]} | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
     echo "> Proposal ID: $proposal_id"
     echo "> Voting yes on proposal $proposal_id"
-    vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home ${homes[0]} -o json"
-    echo $vote
-    txhash=$($vote | jq -r .txhash)
+    for i in $(seq 0 $[$validator_count-1])
+    do
+        vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from ${monikers[i]} --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home ${homes[0]} -o json"
+        # echo $vote
+        txhash=$($vote | jq -r .txhash)
+    done
     sleep $[ $TIMEOUT_COMMIT+1 ]
     $CHAIN_BINARY q tx $txhash --home ${homes[0]}
     scripts/wait_for_block.sh $upgrade_height
@@ -85,7 +88,7 @@ fi
 
 echo "> Stopping nodes"
 ./stop.sh
-sleep 3
+sleep 5
 if [ "$UPGRADE_BINARY_SOURCE" = "DOWNLOAD" ]; then
     echo "> Downloading binary"
     wget -q $UPGRADE_BINARY_URL -O $CHAIN_BINARY
