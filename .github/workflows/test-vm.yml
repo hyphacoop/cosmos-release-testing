@@ -20,6 +20,7 @@ jobs:
           python -m pip install requests
       - name: Provision runner VM
         run: |
+          pwd
           source ~/env/bin/activate
           cd ansible
           ansible-playbook provision-runner.yml -e "api_password=${{ secrets.PROXMOX_SECRET }}"
