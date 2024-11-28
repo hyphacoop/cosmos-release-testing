@@ -6,19 +6,22 @@
     node: cosmos-kvm4
     pool: ci
     clone: git-runner-ubuntu-2404
-    name: cosmos-git-runner-ubuntu-600
+    name: cosmos-git-runner-ubuntu-unset
     vmid: 9351
-    newid: 600
+    # newid: 600
     storage: local
     format: qcow2
     timeout: 500
     full: true
-
+  register: proxmox_info
+- name: Store vmid
+  set_fact:
+    vmid: "{{ proxmox_info.data.vmid }}"
 - name: Grow existing disk
   community.general.proxmox_disk:
     api_host: cosmos-kvm1.polypore.xyz
     api_user: ciuser@pve
-    vmid: 600
+    vmid: "{{ vmid }}"
     disk: virtio0
     size: 100G
     state: resized
@@ -29,8 +32,9 @@
     api_user: ciuser@pve
     node: cosmos-kvm4
     pool: ci
-    vmid: 600
+    vmid: "{{ vmid }}"
     cores: 8
+    name: cosmos-git-runner-ubuntu-{{ vmid }}
     memory: 16384
     update: true
 
@@ -40,5 +44,5 @@
     api_user: ciuser@pve
     node: cosmos-kvm4
     pool: ci
-    vmid: 600
+    vmid: "{{ vmid }}"
     state: started
