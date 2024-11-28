@@ -309,6 +309,7 @@
               # export UPGRADE_BINARY_SOURCE=DOWNLOAD
               # export UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64
               scripts/upgrade.sh
+              sleep 5
 
           - name: Confirm chain is online
             run: |
