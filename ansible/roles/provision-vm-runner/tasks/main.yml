@@ -13,6 +13,18 @@
     format: qcow2
     timeout: 500
     full: true
+
+- name: Grow existing disk
+  community.general.proxmox_disk:
+    api_host: cosmos-kvm1.polypore.xyz
+    api_user: ciuser@pve
+    node: cosmos-kvm4
+    pool: ci
+    vmid: 600
+    disk: virtio
+    size: 100G
+    state: resized
+
 - name: Configure and Start runner VM
   community.general.proxmox_kvm:
     api_host: cosmos-kvm1.polypore.xyz
