@@ -32,4 +32,5 @@
     vmid: 600
     cores: 8
     memory: 16384
+    update: true
     state: started
