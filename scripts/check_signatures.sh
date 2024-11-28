@@ -17,7 +17,7 @@ do
     rpc_ports+=($rpc_port)
 done
 
-signature_count=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '[.result.block.last_commit.signatures[] | select(.block_id_flag==2)] | length'
+signature_count=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r '[.result.block.last_commit.signatures[] | select(.block_id_flag==2)] | length')
 echo "> Signature count: $signature_count"
 if [ "$signature_count" = "$validator_count" ]; then
     echo "> All validators are signing."
