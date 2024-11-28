@@ -19,7 +19,7 @@ jobs:
           python -m pip install proxmoxer
           python -m pip install requests
       - name: Provision runner VM
-        ansible-playbook provision-runner.yml -e "api_password=${{ secrets.PROXMOX_SECRET }}"
+        run: ansible-playbook provision-runner.yml -e "api_password=${{ secrets.PROXMOX_SECRET }}"
   run-on-vm:
     needs: provision-runner
     runs-on: cosmos-ubuntu2404-vm-set
