@@ -29,7 +29,7 @@ else
     echo "> Signatures:"
     curl -s http://localhost:${rpc_ports[0]}/block | jq -r '.result.block.last_commit.signatures'
     echo "> Log from last validator:"
-    tail -n 50 ${logs[-1]}
+    cat ${logs[-1]}
     echo "> Genesis file:"
     jq '.' ${homes[0]}/config/genesis.json
     exit 1
