@@ -15,12 +15,11 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install ansible
-          python -m pip install proxmoxer
-          python -m pip install requests
+          python -m pip install ansible proxmoxer requests
       - name: Provision runner VM
         run: |
           pwd
+          ls -al
           source ~/env/bin/activate
           cd ansible
           ansible-playbook provision-runner.yml -e "api_password=${{ secrets.PROXMOX_SECRET }}"
