@@ -23,7 +23,7 @@
     api_user: "{{ api_user }}"
     vmid: "{{ vmid }}"
     disk: virtio0
-    size: "{{ disk-size }}"
+    size: "{{ disk_size }}"
     state: resized
 
 - name: Configure runner VM
