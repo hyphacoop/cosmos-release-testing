@@ -2,7 +2,6 @@
 - hosts: localhost
   roles:
   - role: provision-vm-runner
-    become: false
     api_host: cosmos-kvm1.polypore.xyz
     api_user: ciuser@pve
     vm_node: cosmos-kvm4
