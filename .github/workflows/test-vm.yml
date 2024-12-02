@@ -26,10 +26,10 @@ jobs:
           source ~/env/bin/activate
           cd ansible
           ansible-playbook provision-runner.yml
-  run-on-vm:
-    needs: provision-runner
-    runs-on: cosmos-ubuntu2404-vm-set
-    steps:
-      # Get system info
-      - run: cat /proc/cpuinfo
-      - run: uptime
+  # run-on-vm:
+  #   needs: provision-runner
+  #   runs-on: cosmos-ubuntu2404-vm-set
+  #   steps:
+  #     # Get system info
+  #     - run: cat /proc/cpuinfo
+  #     - run: uptime
