@@ -32,3 +32,5 @@ jobs:
     steps:
       # Get system info
       - run: cat /proc/cpuinfo
+      - run: uptime
+      - run: sleep 60

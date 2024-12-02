@@ -1,13 +1,13 @@
 ---
 - name: Clone ubuntu runner template
   community.general.proxmox_kvm:
-    api_host: cosmos-kvm1.polypore.xyz
-    api_user: ciuser@pve
-    node: cosmos-kvm4
-    pool: ci
-    clone: git-runner-ubuntu-2404
-    name: cosmos-git-runner-ubuntu-unset
-    vmid: 9351
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    node: "{{ vm_node }}"
+    pool: "{{ resource_pool }}"
+    clone: "{{ template_clone }}"
+    name: "{{ vm_name_prefix }}-unset"
+    vmid: "{{ template_id }}"
     # newid: 600
     storage: local
     format: qcow2
@@ -19,30 +19,30 @@
     vmid: "{{ proxmox_info.vmid }}"
 - name: Grow existing disk
   community.general.proxmox_disk:
-    api_host: cosmos-kvm1.polypore.xyz
-    api_user: ciuser@pve
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
     vmid: "{{ vmid }}"
     disk: virtio0
-    size: 100G
+    size: "{{ disk-size }}"
     state: resized
 
 - name: Configure runner VM
   community.general.proxmox_kvm:
-    api_host: cosmos-kvm1.polypore.xyz
-    api_user: ciuser@pve
-    node: cosmos-kvm4
-    pool: ci
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    node: "{{ vm_node }}"
+    pool: "{{ resource_pool }}"
     vmid: "{{ vmid }}"
-    cores: 8
-    name: cosmos-git-runner-ubuntu-{{ vmid }}
-    memory: 16384
+    cores: "{{ cpu_cores }}"
+    name: "{{ vm_name_prefix }}-{{ vmid }}"
+    memory: "{{ memory }}"
     update: true
 
 - name: Start runner VM
   community.general.proxmox_kvm:
-    api_host: cosmos-kvm1.polypore.xyz
-    api_user: ciuser@pve
-    node: cosmos-kvm4
-    pool: ci
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    node: "{{ vm_node }}"
+    pool: "{{ resource_pool }}"
     vmid: "{{ vmid }}"
     state: started
