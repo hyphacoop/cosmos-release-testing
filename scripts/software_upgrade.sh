@@ -118,6 +118,7 @@ else
         sudo apt install build-essential -y
         wget -q https://go.dev/dl/go1.22.4.linux-amd64.tar.gz
         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz
+        rm -rf gaia
         git clone https://github.com/cosmos/gaia.git
         cd gaia
         git checkout $BUILD_TAG
