@@ -215,7 +215,7 @@ jobs:
           START_VERSION: ${{inputs.gaia_version}}
           ARCHIVE_URL: ${{ inputs.archive_url }}
         run: scripts/stateful/start_chain_val1.sh
-      - name: _Blocks produced after upgrade to v21
+      - name: _Blocks produced after upgrade to v22
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 12600
       - name: _Blocks produced on val2
         run: tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 12600
@@ -1136,7 +1136,7 @@ jobs:
           else
             echo "PASSED!"
           fi
-      - name: _Pre-proposal test current consensus params
+      - name: _Pre-proposal test current consensus and feemarket params
         run: |
           echo "[INFO]: Submit large proposal..."
           json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
@@ -1158,7 +1158,6 @@ jobs:
             echo "[ERROR]: Proposal did not go through"
             exit 1
           fi
-
       - name: Submit proposal to update modules params
         run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
       - name: _Verify consensus params prop is set
@@ -1259,73 +1258,6 @@ jobs:
           if [ "$Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE" != "$CONSUMER_REWARD_DENOM_REGISTRATION_FEE" ]
           then
             echo "[ERROR]: CONSUMER_REWARD_DENOM_REGISTRATION_FEE does not match query: $CONSUMER_REWARD_DENOM_REGISTRATION_FEE $Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE"
-            error="1"
-          fi
-          if [ "$error" == "1" ]
-          then
-            exit 1
-          else
-            echo "PASSED!"
-          fi
-      - name: _Verify feemarket params prop is set
-        env:
-          ALPHA: "0.100000000000000000"
-          BETA: "1.000000000000000000"
-          GAMMA: "1.500000000000000000"
-          DELTA: "2.000000000000000000"
-          MIN_BASE_GAS_PRICE: "0.005000000000000000"
-          MIN_LEARNING_RATE: "0.125500000000000000"
-          MAX_LEARNING_RATE: "0.125600000000000000"
-          MAX_BLOCK_UTILIZATION: "50000000"
-        run: |
-          echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
-          Q_ALPHA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.alpha')
-          Q_BETA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.beta')
-          Q_GAMMA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.gamma')
-          Q_DELTA=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.delta')
-          Q_MIN_BASE_GAS_PRICE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.min_base_gas_price')
-          Q_MIN_LEARNING_RATE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.min_learning_rate')
-          Q_MAX_LEARNING_RATE=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.max_learning_rate')
-          Q_MAX_BLOCK_UTILIZATION=$($CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.max_block_utilization')
-          if [ "$Q_ALPHA" != "$ALPHA" ]
-          then
-            echo "[ERROR]: ALPHA does not match query: $ALPHA $Q_ALPHA"
-            error="1"
-          fi
-          if [ "$Q_BETA" != "$BETA" ]
-          then
-            echo "[ERROR]: BETA does not match query: $BETA $Q_BETA"
-            error="1"
-          fi
-          if [ "$Q_GAMMA" != "$GAMMA" ]
-          then
-            echo "[ERROR]: GAMMA does not match query: $GAMMA $Q_GAMMA"
-            error="1"
-          fi
-          if [ "$Q_DELTA" != "$DELTA" ]
-          then
-            echo "[ERROR]: DELTA does not match query: $DELTA $Q_DELTA"
-            error="1"
-          fi
-          if [ "$Q_MIN_BASE_GAS_PRICE" != "$MIN_BASE_GAS_PRICE" ]
-          then
-            echo "[ERROR]: MIN_BASE_GAS_PRICE does not match query: $MIN_BASE_GAS_PRICE $MIN_BASE_GAS_PRICE"
-            error="1"
-          fi
-          if [ "$Q_MIN_LEARNING_RATE" != "$MIN_LEARNING_RATE" ]
-          then
-            echo "[ERROR]: MIN_LEARNING_RATE does not match query: $MIN_LEARNING_RATE $Q_MIN_LEARNING_RATE"
-            error="1"
-          fi
-          if [ "$Q_MAX_LEARNING_RATE" != "$MAX_LEARNING_RATE" ]
-          then
-            echo "[ERROR]: MAX_LEARNING_RATE does not match query: $MAX_LEARNING_RATE $Q_MAX_LEARNING_RATE"
-            error="1"
-          fi
-          if [ "$Q_MAX_BLOCK_UTILIZATION" != "$MAX_BLOCK_UTILIZATION" ]
-          then
-            echo "[ERROR]: MAX_BLOCK_UTILIZATION does not match query: $MAX_BLOCK_UTILIZATION $Q_MAX_BLOCK_UTILIZATION"
             error="1"
           fi
           if [ "$error" == "1" ]
@@ -1534,6 +1466,23 @@ jobs:
             echo "[DEBUG]: json output:"
             echo "$json"
             echo "[PASS]: Proposal did not go through"
+          fi
+      - name: Submit feearket prams
+        run: scripts/submit_proposal.sh templates/proposal-feemarket-stateful.json
+      - name: _Verify feemarket params
+        run: |
+          set +e
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          echo "[DEBUG]: json output:"
+          echo "$json"
+          echo $json | jq -r '.raw_log' | grep "insufficient fee"
+          if [ $? -eq 0 ]
+          then
+            echo "[PASS]: Proposal did not go through"
+          else
+            echo "[ERROR]: No insufficient fee from log!"
+            exit 1
           fi
 
       - name: Stop services
