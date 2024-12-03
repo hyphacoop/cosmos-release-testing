@@ -1,0 +1,48 @@
+---
+- name: Clone ubuntu runner template
+  community.general.proxmox_kvm:
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    node: "{{ vm_node }}"
+    pool: "{{ resource_pool }}"
+    clone: "{{ template_clone }}"
+    name: "{{ vm_name_prefix }}-unset"
+    vmid: "{{ template_id }}"
+    # newid: 600
+    storage: local
+    format: qcow2
+    timeout: 500
+    full: true
+  register: proxmox_info
+- name: Store vmid
+  set_fact:
+    vmid: "{{ proxmox_info.vmid }}"
+- name: Grow existing disk
+  community.general.proxmox_disk:
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    vmid: "{{ vmid }}"
+    disk: virtio0
+    size: "{{ disk_size }}"
+    state: resized
+
+- name: Configure runner VM
+  community.general.proxmox_kvm:
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    node: "{{ vm_node }}"
+    pool: "{{ resource_pool }}"
+    vmid: "{{ vmid }}"
+    cores: "{{ cpu_cores }}"
+    name: "{{ vm_name_prefix }}-{{ vmid }}"
+    memory: "{{ memory }}"
+    update: true
+
+- name: Start runner VM
+  community.general.proxmox_kvm:
+    api_host: "{{ api_host }}"
+    api_user: "{{ api_user }}"
+    node: "{{ vm_node }}"
+    pool: "{{ resource_pool }}"
+    vmid: "{{ vmid }}"
+    state: started
