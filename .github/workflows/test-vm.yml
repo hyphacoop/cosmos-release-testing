@@ -1,6 +1,6 @@
 name: Test VM runner
-on:
-  # push:
+# on:
+#   push:
 jobs:
   provision-runner:
     environment:  github-runner-vm
