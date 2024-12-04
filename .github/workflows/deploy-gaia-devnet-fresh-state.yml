@@ -96,6 +96,9 @@ jobs:
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
+          echo "Restoring validator key"
+          echo "${{ secrets.VAL_WALLET_KEY }}" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          echo "Creating validator"
           $CHAIN_BINARY genesis gentx val 10000000000uatom --keyring-backend="test" --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
       - name: Start Chain
         env:
@@ -108,43 +111,29 @@ jobs:
         run: |
           sudo systemctl stop gaiad
           sleep 10
-      - name: Compress and upload files
-        run: |
-          echo "[INFO]: Creating archive ..."
-          cd /home/sysadmin/.gaia
-          mv data/priv_validator_state.json ./priv_validator_state.json
-          echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
-          tar --use-compress-program="pigz --best --recursive" -cf gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
-          archive_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
-          echo "[INFO]: Uploading archived state to files.polypore.xyz"
-          scp -6 gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
-          echo "[INFO]: Updating symlink"
-          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/gaia-devnet/gaia-devnet-${{ env.upgrade_height }}.tar.gz /var/www/html/gaia-devnet/latest.tar.gz
-          echo "[INFO]: Updating HTML page]"
-          echo "${{ vars.STATUS_HTML_PAGE }}" | base64 --decode > /tmp/status-index.html
-          sed -i -e "s/_BIN_VERSION_/${{ env.DEVNET_BRANCH }}/g" /tmp/status-index.html
-          sed -i -e "s/_ARCHIVE_TARBALL_/gaia-devnet-${{ env.upgrade_height }}.tar.gz/g" /tmp/status-index.html
-          tarball_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
-          sed -i -e "s/_TARBALL_SIZE_/$tarball_size/g" /tmp/status-index.html
-          echo "[INFO]: Uploading HTML page"
-          scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/index.html
-          echo "[INFO]: Cleaning up..."
-          mv ./priv_validator_state.json data/
-          rm gaia-devnet-${{ env.upgrade_height }}.tar.gz
-      - name: Build gaiad
-        run: |
-          cd /home/sysadmin/gaia
-          git checkout ${{ env.DEVNET_BRANCH }}
-          make build
-          make install
-      - name: Configure gaiad
-        run: |
-          source ~/env/bin/activate
-          pip install toml-cli
-          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.enable true
-          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.swagger true
-          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml p2p.seed_mode true
-          rm /home/sysadmin/.gaia/config/addrbook.json
+      # - name: Compress and upload files
+      #   run: |
+      #     echo "[INFO]: Creating archive ..."
+      #     cd /home/sysadmin/.gaia
+      #     mv data/priv_validator_state.json ./priv_validator_state.json
+      #     echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
+      #     tar --use-compress-program="pigz --best --recursive" -cf gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
+      #     archive_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
+      #     echo "[INFO]: Uploading archived state to files.polypore.xyz"
+      #     scp -6 gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
+      #     echo "[INFO]: Updating symlink"
+      #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/gaia-devnet/gaia-devnet-${{ env.upgrade_height }}.tar.gz /var/www/html/gaia-devnet/latest.tar.gz
+      #     echo "[INFO]: Updating HTML page]"
+      #     echo "${{ vars.STATUS_HTML_PAGE }}" | base64 --decode > /tmp/status-index.html
+      #     sed -i -e "s/_BIN_VERSION_/${{ env.DEVNET_BRANCH }}/g" /tmp/status-index.html
+      #     sed -i -e "s/_ARCHIVE_TARBALL_/gaia-devnet-${{ env.upgrade_height }}.tar.gz/g" /tmp/status-index.html
+      #     tarball_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
+      #     sed -i -e "s/_TARBALL_SIZE_/$tarball_size/g" /tmp/status-index.html
+      #     echo "[INFO]: Uploading HTML page"
+      #     scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/index.html
+      #     echo "[INFO]: Cleaning up..."
+      #     mv ./priv_validator_state.json data/
+      #     rm gaia-devnet-${{ env.upgrade_height }}.tar.gz
       - name: Start gaiad
         run: sudo systemctl enable --now gaiad
       - name: Wait for gaiad to start
