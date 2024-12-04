@@ -110,40 +110,15 @@ jobs:
         env:
           NODE_HOME: /home/sysadmin/.gaia
           CHAIN_BINARY: 'gaiad'
-        run: sudo systemctl start gaiad
+        run: sudo systemctl enable --now gaiad
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
-      - name: Stop gaiad
+      - name: Compress and upload files
+        env:
+          NODE_HOME: /home/sysadmin/.gaia
         run: |
-          sudo systemctl stop gaiad
-          sleep 10
-      # - name: Compress and upload files
-      #   run: |
-      #     echo "[INFO]: Creating archive ..."
-      #     cd /home/sysadmin/.gaia
-      #     mv data/priv_validator_state.json ./priv_validator_state.json
-      #     echo "${{ vars.PRIV_VALIDATOR_STATE }}" | base64 --decode > data/priv_validator_state.json
-      #     tar --use-compress-program="pigz --best --recursive" -cf gaia-devnet-${{ env.upgrade_height }}.tar.gz data wasm
-      #     archive_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
-      #     echo "[INFO]: Uploading archived state to files.polypore.xyz"
-      #     scp -6 gaia-devnet-${{ env.upgrade_height }}.tar.gz gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/
-      #     echo "[INFO]: Updating symlink"
-      #     ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/gaia-devnet/gaia-devnet-${{ env.upgrade_height }}.tar.gz /var/www/html/gaia-devnet/latest.tar.gz
-      #     echo "[INFO]: Updating HTML page]"
-      #     echo "${{ vars.STATUS_HTML_PAGE }}" | base64 --decode > /tmp/status-index.html
-      #     sed -i -e "s/_BIN_VERSION_/${{ env.DEVNET_BRANCH }}/g" /tmp/status-index.html
-      #     sed -i -e "s/_ARCHIVE_TARBALL_/gaia-devnet-${{ env.upgrade_height }}.tar.gz/g" /tmp/status-index.html
-      #     tarball_size=$(du -h "gaia-devnet-${{ env.upgrade_height }}.tar.gz" | cut -f1)
-      #     sed -i -e "s/_TARBALL_SIZE_/$tarball_size/g" /tmp/status-index.html
-      #     echo "[INFO]: Uploading HTML page"
-      #     scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/index.html
-      #     echo "[INFO]: Cleaning up..."
-      #     mv ./priv_validator_state.json data/
-      #     rm gaia-devnet-${{ env.upgrade_height }}.tar.gz
-      - name: Start gaiad
-        run: sudo systemctl enable --now gaiad
-      - name: Wait for gaiad to start
-        run: tests/test_block_production.sh 127.0.0.1 26657 20 100
+          echo "[INFO]: Uploading genesis.json"
+          scp -6 $NODE_HOME/config/genesis.json gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/genesis.json
       - name: Send faucet tokens
         run: |
           gaiad tx bank send val ${{ vars.FAUCET_ADDRESS }} 100000000000uatom --from val --gas 20000000 --gas-prices 0.005uatom -y
