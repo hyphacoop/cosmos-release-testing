@@ -96,7 +96,7 @@ jobs:
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
-          $CHAIN_BINARY genesis gentx validator 10000000000uatom --keyring-backend="test" --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
+          $CHAIN_BINARY genesis gentx val 10000000000uatom --keyring-backend="test" --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
       - name: Start Chain
         env:
           NODE_HOME: /home/sysadmin/.gaia
