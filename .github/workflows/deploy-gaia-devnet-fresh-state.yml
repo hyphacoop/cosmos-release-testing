@@ -113,7 +113,6 @@ jobs:
           /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.enable true
           /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.swagger true
           /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml p2p.seed_mode true
-          rm /home/sysadmin/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/sysadmin/.gaia
@@ -127,7 +126,7 @@ jobs:
         run: |
           echo "[INFO]: Uploading genesis.json"
           scp -6 $NODE_HOME/config/genesis.json gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/genesis.json
-          ssh -6 chmod 644 gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/genesis.json
+          ssh -6 gh-actions@files.polypore.xyz chmod 644 /var/www/html/gaia-devnet/genesis.json
       - name: Send faucet tokens
         run: |
           gaiad tx bank send val ${{ vars.FAUCET_ADDRESS }} 100000000000uatom --from val --gas 20000000 --gas-prices 0.005uatom -y
