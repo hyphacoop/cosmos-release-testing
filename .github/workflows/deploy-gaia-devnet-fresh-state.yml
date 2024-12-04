@@ -104,6 +104,8 @@ jobs:
           $CHAIN_BINARY genesis gentx val 850000000000uatom --keyring-backend test --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
           echo "Collect gentx"
           $CHAIN_BINARY genesis collect-gentxs --home $NODE_HOME
+          echo "Patch genesis with uatom"
+          sed -i 's/\"stake\"/\"uatom\"\g' $NODE_HOME/config/genesis.json
       - name: Start Chain
         env:
           NODE_HOME: /home/sysadmin/.gaia
