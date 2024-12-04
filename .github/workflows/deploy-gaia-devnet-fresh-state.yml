@@ -101,7 +101,9 @@ jobs:
           echo "Create validator account"
           $CHAIN_BINARY genesis add-genesis-account cosmos1m5eaeghy4l0r28tm2e6r8cnxj2tf56n4x37ym4 10000000000uatom --home $NODE_HOME
           echo "Creating validator"
-          $CHAIN_BINARY genesis gentx val 850000000000uatom --keyring-backend="test" --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
+          $CHAIN_BINARY genesis gentx val 850000000000uatom --keyring-backend test --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
+          echo "Collect gentx"
+          $CHAIN_BINARY genesis collect-gentxs --home $NODE_HOME
       - name: Start Chain
         env:
           NODE_HOME: /home/sysadmin/.gaia
