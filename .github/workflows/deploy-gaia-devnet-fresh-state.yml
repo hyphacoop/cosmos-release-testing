@@ -106,6 +106,14 @@ jobs:
           $CHAIN_BINARY genesis collect-gentxs --home $NODE_HOME
           echo "Patch genesis with uatom"
           sed -i 's/\"stake\"/\"uatom\"/g' $NODE_HOME/config/genesis.json
+      - name: Configure gaiad
+        run: |
+          source ~/env/bin/activate
+          pip install toml-cli
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.enable true
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.swagger true
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml p2p.seed_mode true
+          rm /home/sysadmin/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/sysadmin/.gaia
