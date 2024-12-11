@@ -96,7 +96,7 @@ elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     echo "> Building binary"
     git clone https://github.com/cosmos/gaia.git
     pushd gaia
-    git checkout $UPGRADE_VERSION
+    git checkout $UPGRADE_COMMIT
     make build
     popd
     cp gaia/build/gaiad $CHAIN_BINARY

@@ -329,7 +329,7 @@
             if: ${{ matrix.upgrade_version == 'main' }}
             run: |
               source scripts/vars.sh
-              export UPGRADE_VERSION=${{ matrix.upgrade_version }}
+              export UPGRADE_VERSION=$TARGET_VERSION
               export BINARY_SOURCE=BUILD
               scripts/upgrade.sh
     
