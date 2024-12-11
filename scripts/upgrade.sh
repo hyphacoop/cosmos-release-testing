@@ -92,6 +92,7 @@ if [ "$UPGRADE_BINARY_SOURCE" = "DOWNLOAD" ]; then
     echo "> Downloading binary"
     wget -q $UPGRADE_BINARY_URL -O $CHAIN_BINARY
     chmod +x $CHAIN_BINARY
+    $CHAIN_BINARY version --long
 elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     echo "> Building binary"
     git clone https://github.com/cosmos/gaia.git
@@ -100,6 +101,7 @@ elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     make build
     popd
     cp gaia/build/gaiad $CHAIN_BINARY
+    $CHAIN_BINARY version --long
 fi
 echo "> Starting nodes"
 ./start.sh
