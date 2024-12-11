@@ -330,7 +330,7 @@
             run: |
               source scripts/vars.sh
               export UPGRADE_VERSION=$TARGET_VERSION
-              export BINARY_SOURCE=BUILD
+              export UPGRADE_BINARY_SOURCE=BUILD
               scripts/upgrade.sh
     
           - name: Confirm chain is online

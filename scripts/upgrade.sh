@@ -78,7 +78,7 @@ if [ "$major_upgrade" -eq 1 ]; then
         txhash=$($vote | jq -r .txhash)
     done
     sleep $[ $TIMEOUT_COMMIT+1 ]
-    $CHAIN_BINARY q tx $txhash --home ${homes[0]}
+    # $CHAIN_BINARY q tx $txhash --home ${homes[0]}
     scripts/wait_for_block.sh $upgrade_height
     echo "> Upgrade height reached."
 else
