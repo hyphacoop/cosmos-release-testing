@@ -315,30 +315,32 @@
             run: |
               source scripts/vars.sh
               scripts/check_signatures.sh
-          # - name: Print feemarket params
-          #   run: |
-          #     sleep 10
-          #     $CHAIN_BINARY q feemarket params --home $HOME_1
-          #     $CHAIN_BINARY q feemarket gas-prices --home $HOME_1
-  
-          # - name: Test software upgrade for published releases
-          #   if: ${{ matrix.upgrade_version != 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          #   run: |
-          #     echo $DOWNLOAD_URL
-          #     wget $DOWNLOAD_URL -O gaiad-test
-          #     chmod +x gaiad-test
-          #     ./gaiad-test version
-          #     rm gaiad-test
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-          # - name: Test software upgrade for main branch
-          #   if: ${{ matrix.upgrade_version == 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          #   run: |
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+
+          - name: Test software upgrade for published releases
+            if: ${{ matrix.upgrade_version != 'main' }}
+            env:
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export UPGRADE_VERSION=${{ matrix.upgrade_version }}
+              export UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64
+              scripts/upgrade.sh
+          - name: Test software upgrade for main branch
+            if: ${{ matrix.upgrade_version == 'main' }}
+            run: |
+              source scripts/vars.sh
+              export UPGRADE_VERSION=${{ matrix.upgrade_version }}
+              export BINARY_SOURCE=BUILD
+              scripts/upgrade.sh
     
+          - name: Confirm chain is online
+            run: |
+              source scripts/vars.sh
+              scripts/wait_for_block.sh 3
+          - name: Confirm all validators are signing
+            run: |
+              source scripts/vars.sh
+              scripts/check_signatures.sh
           # - name: _Blocks produced after upgrade
           #   run: |
           #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
