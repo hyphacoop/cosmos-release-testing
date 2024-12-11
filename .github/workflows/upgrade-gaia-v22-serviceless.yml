@@ -307,6 +307,7 @@
               scripts/setup.sh
               ./start.sh
               sleep 5
+              ls
           - name: Confirm chain is online
             run: |
               source scripts/vars.sh
@@ -328,6 +329,7 @@
           - name: Test software upgrade for main branch
             if: ${{ matrix.upgrade_version == 'main' }}
             run: |
+              ls
               source scripts/vars.sh
               export UPGRADE_VERSION=$TARGET_VERSION
               export UPGRADE_BINARY_SOURCE=BUILD

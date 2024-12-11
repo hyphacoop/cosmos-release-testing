@@ -95,6 +95,7 @@ if [ "$UPGRADE_BINARY_SOURCE" = "DOWNLOAD" ]; then
     $CHAIN_BINARY version --long
 elif [ "$UPGRADE_BINARY_SOURCE" = "BUILD" ]; then
     echo "> Building binary"
+    rm -rf gaia
     git clone https://github.com/cosmos/gaia.git
     pushd gaia
     git checkout $UPGRADE_COMMIT
