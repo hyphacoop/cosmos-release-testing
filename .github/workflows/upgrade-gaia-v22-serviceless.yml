@@ -251,7 +251,7 @@
         needs: set-version-matrix
         strategy:
           matrix:
-            ${{ fromJSON(needs.set-version-matrix-cosmovisor.outputs.upgrade_versions) }}
+            ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
           fail-fast: false
         env:
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
