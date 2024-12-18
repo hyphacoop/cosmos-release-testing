@@ -190,6 +190,7 @@ done
 
 echo "./start.sh" >> reset.sh
 
+echo "sleep 3s" >> start.sh
 echo "echo \"tmux sessions:\"" >> start.sh
 echo "tmux list-sessions" >> start.sh
 echo "echo \"tmux sessions:\"" >> stop.sh
