@@ -6,9 +6,7 @@ echo "> Downloading binary..."
 wget $CHAIN_BINARY_URL -q -O $CHAIN_BINARY
 chmod +x $CHAIN_BINARY
 $CHAIN_BINARY version
-$($CHAIN_BINARY version)
 
-exit 0
 rm -rf temp
 mkdir temp
 
