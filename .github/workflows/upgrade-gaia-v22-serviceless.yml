@@ -286,6 +286,8 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
           - name: Load variables
+            env:
+              START_VERSION: ${{matrix.gaia_version}}
             run: |
               scripts/github_vars.sh
               echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
@@ -303,12 +305,12 @@
           #     echo "COSMOVISOR=true" >> $GITHUB_ENV
           #     echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Start chain
-            env:
-              START_VERSION: ${{matrix.gaia_version}}
             run: |
               # source scripts/vars.sh
               # echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
               # echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64" >> $GITHUB_ENV
+              echo "Start version: $START_VERSION"
+              echo "Binary URL: $CHAIN_BINARY_URL"
               scripts/setup.sh
               # ./start.sh
               # sleep 5
