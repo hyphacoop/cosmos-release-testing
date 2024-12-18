@@ -48,11 +48,12 @@ do
     $CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
     $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
     $CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} # &> /dev/null
 done
 
 echo "> Adding keys to first home"
 echo $MNEMONIC_1 | $CHAIN_BINARY keys add ${monikers[0]} --home ${homes[0]} --output json --recover > temp/keys-${monikers[0]}.json
+jq '.' temp/keys-${monikers[0]}.json
 for i in $(seq 1 $[$validator_count-1])
 do
     $CHAIN_BINARY keys add ${monikers[i]} --home ${homes[0]} --output json > temp/keys-${monikers[i]}.json
