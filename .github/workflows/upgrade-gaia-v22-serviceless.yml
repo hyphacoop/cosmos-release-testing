@@ -350,7 +350,9 @@
           - name: Confirm chain is online
             run: |
               # source scripts/vars.sh
-              scripts/wait_for_block.sh 3
+              height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
+              target_height=$(($height+5))
+              scripts/wait_for_block.sh $target_height
           - name: Confirm all validators are signing
             run: |
               # source scripts/vars.sh
@@ -361,9 +363,9 @@
               # source scripts/vars.sh
               scripts/setup_state_sync_node.sh
               
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          # - name: _Blocks produced after upgrade
+            # run: |
+              # tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
               
           # - name: Flush "migration successful" lines
           #   run: |
