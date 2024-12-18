@@ -2,7 +2,7 @@
 # Configure variables before running this file.
 # source vars.sh
 
-# echo "Downloading binary..."
+echo "> Downloading binary"
 wget $CHAIN_BINARY_URL -q -O $CHAIN_BINARY
 chmod +x $CHAIN_BINARY
 
