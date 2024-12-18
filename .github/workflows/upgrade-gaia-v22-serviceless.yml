@@ -340,6 +340,7 @@
               # source scripts/vars.sh
               echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
               echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+              echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
               scripts/upgrade.sh
     
           - name: Confirm chain is online
