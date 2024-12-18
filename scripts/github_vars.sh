@@ -8,6 +8,7 @@ echo "UPGRADE_BINARY_SOURCE=DOWNLOAD" >> $GITHUB_ENV
 echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
 
 # Test chain configuration
+DENOM=uatom
 echo "CHAIN_VERSION=v20.0.0" >> $GITHUB_ENV
 echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$CHAIN_VERSION/gaiad-$CHAIN_VERSION-linux-amd64" >> $GITHUB_ENV
 echo "CHAIN_BINARY=./gaiad" >> $GITHUB_ENV
@@ -15,7 +16,7 @@ echo "MNEMONIC_1=abandon abandon abandon abandon abandon abandon abandon abandon
 echo "WALLET_1=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" >> $GITHUB_ENV
 echo "VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv" >> $GITHUB_ENV
 echo "CHAIN_ID=testnet" >> $GITHUB_ENV
-echo "DENOM=uatom" >> $GITHUB_ENV
+echo "DENOM=$DENOM" >> $GITHUB_ENV
 echo "VAL_FUNDS=10000000000" >> $GITHUB_ENV
 echo "VAL_WHALE=100000000" >> $GITHUB_ENV
 echo "VAL_STAKE=10000000" >> $GITHUB_ENV
