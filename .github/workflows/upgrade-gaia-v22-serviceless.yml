@@ -312,51 +312,51 @@
               echo "Start version: $START_VERSION"
               echo "Binary URL: $CHAIN_BINARY_URL"
               scripts/setup.sh
-              # ./start.sh
-              # sleep 5
-          # - name: Confirm chain is online
-          #   run: |
-          #     # source scripts/vars.sh
-          #     scripts/wait_for_block.sh 3
-          # - name: Confirm all validators are signing
-          #   run: |
-          #     # source scripts/vars.sh
-          #     scripts/check_signatures.sh
+              ./start.sh
+              sleep 5
+          - name: Confirm chain is online
+            run: |
+              # source scripts/vars.sh
+              scripts/wait_for_block.sh 3
+          - name: Confirm all validators are signing
+            run: |
+              # source scripts/vars.sh
+              scripts/check_signatures.sh
 
-          # - name: Test software upgrade for published releases
-          #   if: ${{ matrix.upgrade_version != 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          #   run: |
-          #     # source scripts/vars.sh
-          #     echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
-          #     echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
-          #     scripts/upgrade.sh
-          # - name: Test software upgrade for main branch
-          #   if: ${{ matrix.upgrade_version == 'main' }}
-          #   run: |
-          #     # source scripts/vars.sh
-          #     echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
-          #     echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
-          #     scripts/upgrade.sh
+          - name: Test software upgrade for published releases
+            if: ${{ matrix.upgrade_version != 'main' }}
+            env:
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+            run: |
+              # source scripts/vars.sh
+              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+              echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+              scripts/upgrade.sh
+          - name: Test software upgrade for main branch
+            if: ${{ matrix.upgrade_version == 'main' }}
+            run: |
+              # source scripts/vars.sh
+              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+              echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+              scripts/upgrade.sh
     
-          # - name: Confirm chain is online
-          #   run: |
-          #     # source scripts/vars.sh
-          #     scripts/wait_for_block.sh 3
-          # - name: Confirm all validators are signing
-          #   run: |
-          #     # source scripts/vars.sh
-          #     scripts/check_signatures.sh
+          - name: Confirm chain is online
+            run: |
+              # source scripts/vars.sh
+              scripts/wait_for_block.sh 3
+          - name: Confirm all validators are signing
+            run: |
+              # source scripts/vars.sh
+              scripts/check_signatures.sh
 
-          # - name: Set up state sync
-          #   run: |
-          #     # source scripts/vars.sh
-          #     scripts/setup_state_sync_node.sh
+          - name: Set up state sync
+            run: |
+              # source scripts/vars.sh
+              scripts/setup_state_sync_node.sh
               
-          # - name: _Blocks produced after upgrade
-          #   run: |
-          #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          - name: _Blocks produced after upgrade
+            run: |
+              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
               
           # - name: Flush "migration successful" lines
           #   run: |

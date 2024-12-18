@@ -50,7 +50,7 @@ do
     $CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
     $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
     $CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} # &> /dev/null
+    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
 done
 
 echo "> Adding keys to first home"
