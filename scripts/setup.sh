@@ -5,6 +5,7 @@
 echo "> Downloading binary..."
 wget $CHAIN_BINARY_URL -q -O $CHAIN_BINARY
 chmod +x $CHAIN_BINARY
+$CHAIN_BINARY version
 
 rm -rf temp
 mkdir temp
@@ -44,6 +45,7 @@ done
 echo "> Creating homes"
 for i in $(seq 0 $[$validator_count-1])
 do
+    echo "> Home $i"
     $CHAIN_BINARY config set client chain-id $CHAIN_ID --home ${homes[i]}
     $CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
     $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
