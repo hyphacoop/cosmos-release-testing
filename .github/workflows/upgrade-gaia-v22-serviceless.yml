@@ -344,6 +344,12 @@
             run: |
               source scripts/vars.sh
               scripts/check_signatures.sh
+
+          - name: Set up state sync
+            run: |
+              source scripts/vars.sh
+              scripts/setup_state_sync_node.sh
+              
           # - name: _Blocks produced after upgrade
           #   run: |
           #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
