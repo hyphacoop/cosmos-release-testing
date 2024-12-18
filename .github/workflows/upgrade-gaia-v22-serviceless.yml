@@ -314,6 +314,7 @@
               scripts/setup.sh
               ./start.sh
               sleep 5
+              tail -n 100 log_001
           - name: Confirm chain is online
             run: |
               # source scripts/vars.sh
