@@ -285,6 +285,9 @@
             run: |
               python -m pip install --upgrade pip
               python -m pip install toml-cli
+          - name: Load variables
+            run: |
+              scripts/github_vars.sh
           - name: Install Cosmovisor > v1.3.0
             if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
             run: |
@@ -301,21 +304,19 @@
             env:
               START_VERSION: ${{matrix.gaia_version}}
             run: |
-              ls
-              source scripts/vars.sh
-              export CHAIN_VERSION=$START_VERSION
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+              # source scripts/vars.sh
+              echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
+              echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64" >> $GITHUB_ENV
               scripts/setup.sh
               ./start.sh
               sleep 5
-              ls
           - name: Confirm chain is online
             run: |
-              source scripts/vars.sh
+              # source scripts/vars.sh
               scripts/wait_for_block.sh 3
           - name: Confirm all validators are signing
             run: |
-              source scripts/vars.sh
+              # source scripts/vars.sh
               scripts/check_signatures.sh
 
           - name: Test software upgrade for published releases
@@ -323,31 +324,30 @@
             env:
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
             run: |
-              source scripts/vars.sh
-              export UPGRADE_VERSION=${{ matrix.upgrade_version }}
-              export UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64
+              # source scripts/vars.sh
+              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+              echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
               scripts/upgrade.sh
           - name: Test software upgrade for main branch
             if: ${{ matrix.upgrade_version == 'main' }}
             run: |
-              ls
-              source scripts/vars.sh
-              export UPGRADE_VERSION=$TARGET_VERSION
-              export UPGRADE_BINARY_SOURCE=BUILD
+              # source scripts/vars.sh
+              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+              echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
               scripts/upgrade.sh
     
           - name: Confirm chain is online
             run: |
-              source scripts/vars.sh
+              # source scripts/vars.sh
               scripts/wait_for_block.sh 3
           - name: Confirm all validators are signing
             run: |
-              source scripts/vars.sh
+              # source scripts/vars.sh
               scripts/check_signatures.sh
 
           - name: Set up state sync
             run: |
-              source scripts/vars.sh
+              # source scripts/vars.sh
               scripts/setup_state_sync_node.sh
               
           # - name: _Blocks produced after upgrade
