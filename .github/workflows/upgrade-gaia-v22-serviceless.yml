@@ -288,6 +288,8 @@
           - name: Load variables
             run: |
               scripts/github_vars.sh
+              echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
+              echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64" >> $GITHUB_ENV
           # - name: Install Cosmovisor > v1.3.0
           #   if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
           #   run: |
@@ -305,11 +307,11 @@
               START_VERSION: ${{matrix.gaia_version}}
             run: |
               # source scripts/vars.sh
-              echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
-              echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64" >> $GITHUB_ENV
+              # echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
+              # echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64" >> $GITHUB_ENV
               scripts/setup.sh
-              ./start.sh
-              sleep 5
+              # ./start.sh
+              # sleep 5
           # - name: Confirm chain is online
           #   run: |
           #     # source scripts/vars.sh
