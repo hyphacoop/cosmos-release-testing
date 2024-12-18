@@ -10,7 +10,7 @@ echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRA
 # Test chain configuration
 echo "CHAIN_VERSION=v20.0.0" >> $GITHUB_ENV
 echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$CHAIN_VERSION/gaiad-$CHAIN_VERSION-linux-amd64" >> $GITHUB_ENV
-echo "CHAIN_BINARY=\"./gaiad\"" >> $GITHUB_ENV
+echo "CHAIN_BINARY=./gaiad" >> $GITHUB_ENV
 echo "MNEMONIC_1=\"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art\"" >> $GITHUB_ENV
 echo "WALLET_1=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" >> $GITHUB_ENV
 echo "VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv" >> $GITHUB_ENV
