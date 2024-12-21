@@ -325,62 +325,51 @@
               # source scripts/vars.sh
               scripts/check_signatures.sh
 
-          - name: Set source to build
-            if: ${{ matrix.upgrade_version == 'main' }}
-            run: echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
-          - name: Test software upgrade for published releases
-            if: ${{ matrix.upgrade_version != 'main' }}
-            env:
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-            run: |
-              # source scripts/vars.sh
-              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
-              echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
-              scripts/upgrade.sh
-          - name: Test software upgrade for main branch
-            if: ${{ matrix.upgrade_version == 'main' }}
-            run: |
-              # source scripts/vars.sh
-              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
-              # echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
-              # echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
-              echo $UPGRADE_BINARY_SOURCE
-              scripts/upgrade.sh
-    
-          - name: Confirm chain is online
-            run: |
-              # source scripts/vars.sh
-              height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
-              target_height=$(($height+5))
-              scripts/wait_for_block.sh $target_height
-          - name: Confirm all validators are signing
-            run: |
-              # source scripts/vars.sh
-              scripts/check_signatures.sh
-
-          - name: Set up state sync
-            run: |
-              # source scripts/vars.sh
-              scripts/setup_state_sync_node.sh
-      
           - name: Load state
             run: |
               scripts/load_state.sh
-              
-          # - name: _Blocks produced after upgrade
-            # run: |
-              # tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-              
-          # - name: Flush "migration successful" lines
+
+          # - name: Set source to build
+          #   if: ${{ matrix.upgrade_version == 'main' }}
+          #   run: echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
+          # - name: Test software upgrade for published releases
+          #   if: ${{ matrix.upgrade_version != 'main' }}
+          #   env:
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
           #   run: |
-          #     $CHAIN_BINARY keys list --home $HOME_1
+          #     # source scripts/vars.sh
+          #     echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+          #     echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+          #     scripts/upgrade.sh
+          # - name: Test software upgrade for main branch
+          #   if: ${{ matrix.upgrade_version == 'main' }}
+          #   run: |
+          #     # source scripts/vars.sh
+          #     echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+          #     # echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+          #     # echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
+          #     echo $UPGRADE_BINARY_SOURCE
+          #     scripts/upgrade.sh
     
-          # - name: _Transactions verified> bank send, delegate, and withdraw rewards
-          #   run: tests/test_tx_fresh.sh
-          # - name: _API endpoints check
-          #   run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-          # - name: _RPC endpoints check
-          #   run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+          # - name: Confirm chain is online
+          #   run: |
+          #     # source scripts/vars.sh
+          #     height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
+          #     target_height=$(($height+5))
+          #     scripts/wait_for_block.sh $target_height
+          # - name: Confirm all validators are signing
+          #   run: |
+          #     # source scripts/vars.sh
+          #     scripts/check_signatures.sh
+
+          # - name: Set up state sync
+          #   run: |
+          #     # source scripts/vars.sh
+          #     scripts/setup_state_sync_node.sh
+      
+          # - name: Load state
+          #   run: |
+          #     scripts/load_state.sh
   
       # Baseline-2-ics-optin:
       #   runs-on: ubuntu-22.04

@@ -17,7 +17,7 @@ do
 done
 
 echo "> Query accounts"
-gaiad keys list --output json --home ${homes[0]} | jq '.'
+$CHAIN_BINARY keys list --output json --home ${homes[0]} | jq '.'
 
 # Bank send
 # echo "$CHAIN_BINARY tx bank send ${monikers[0]} ${monikers[1]} 1000000$DENOM --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y"
