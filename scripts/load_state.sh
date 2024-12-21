@@ -20,7 +20,7 @@ echo "> Query accounts"
 $CHAIN_BINARY keys list --output json --home ${homes[0]} | jq '.'
 
 account_1=$($CHAIN_BINARY keys list --output json --home ${homes[0]} | jq -r '.[0].address')
-account_2=$($CHAIN_BINARY keys list --output json --home ${homes[1]} | jq -r '.[1].address')
+account_2=$($CHAIN_BINARY keys list --output json --home ${homes[0]} | jq -r '.[1].address')
 echo "> Bank send"
 echo "$CHAIN_BINARY tx bank send send $account_1 $account_2 1000000$DENOM --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y"
 $CHAIN_BINARY tx bank send $account_1 $account_2 1000000$DENOM --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
