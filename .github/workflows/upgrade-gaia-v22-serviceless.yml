@@ -362,6 +362,10 @@
             run: |
               # source scripts/vars.sh
               scripts/setup_state_sync_node.sh
+      
+          - name: Load state
+            run: |
+              scripts/load_state.sh
               
           # - name: _Blocks produced after upgrade
             # run: |
