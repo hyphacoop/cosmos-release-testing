@@ -30,12 +30,12 @@ sleep $TIMEOUT_COMMIT
 echo "> Staking delegate"
 $CHAIN_BINARY tx staking delegate $validator_1 1000000$DENOM --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
+
 echo "> Gov submit-proposal"
 $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
+
 echo "> Wasm store and instantiate"
-# $CHAIN_BINARY tx wasm store contracts/counter.wasm --from ${monikers[0]} --gas 20000000 --gas-prices $GAS_PRICE --home ${homes[0]} -y
-# sleep $TIMEOUT_COMMIT
 INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
@@ -57,12 +57,20 @@ scripts/pass_proposal.sh $proposal_id
 
 code_id=1
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home ${homes[0]} -o json | jq -r '.contracts[0]')
-echo "Contract address: $contract_address"
+echo "> Wasm contract address: $contract_address"
 
-# Query
+echo "> Wasm query contract"
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home ${homes[0]} -o json | jq '.data.count')
 echo "Count: $count"
 
-$CHAIN_BINARY q gov proposals --home ${homes[0]}
+echo "> Wasm execute contract"
+txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
+sleep $TIMEOUT_COMMIT
+
+echo "> Wasm query contract"
+count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
+echo "Count: $count"
+
+# $CHAIN_BINARY q gov proposals --home ${homes[0]}
 $CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq -r '.validators[0]'
 
