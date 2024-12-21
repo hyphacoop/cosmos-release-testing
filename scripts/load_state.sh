@@ -22,8 +22,8 @@ account_1=$($CHAIN_BINARY keys list --output json --home ${homes[0]} | jq -r '.[
 account_2=$($CHAIN_BINARY keys list --output json --home ${homes[0]} | jq -r '.[1].address')
 
 echo "> Query validators"
-$CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq '.validators[0]'
-validator_1=$($CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq '.validators[0].operator_address')
+$CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq -r '.validators[0]'
+validator_1=$($CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq -r '.validators[0].operator_address')
 echo "> Bank send"
 $CHAIN_BINARY tx bank send $account_1 $account_2 1000000$DENOM --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
@@ -34,4 +34,4 @@ echo "> Gov submit-proposal"
 $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
 $CHAIN_BINARY q gov proposals
-$CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq '.validators[0]'
+$CHAIN_BINARY q staking validators --output json --home ${homes[0]} | jq -r '.validators[0]'
