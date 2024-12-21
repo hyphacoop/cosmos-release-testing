@@ -34,7 +34,7 @@ echo "> Gov submit-proposal"
 $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
 echo "> Wasm store"
-$CHAIN_BINARY tx wasm store contracts/counter.wasm --from ${monikers[0]} --gas 20000000 --gas-prices $GAS_PRICE --home $HOME_1
+$CHAIN_BINARY tx wasm store contracts/counter.wasm --from ${monikers[0]} --gas 20000000 --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
 
 $CHAIN_BINARY q gov proposals --home ${homes[0]}
