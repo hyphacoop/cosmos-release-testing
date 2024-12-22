@@ -21,4 +21,7 @@ echo "> Restarting nodes."
 ./stop.sh
 ./start.sh
 sleep 10
-# tail -n 100 ${logs-1}
+echo "> Val 1:"
+tail -n 100 ${logs[0]}
+echo "> Val n:"
+tail -n 100 ${logs[-1]}
