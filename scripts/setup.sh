@@ -154,7 +154,7 @@ done
 
 echo "> Configuring config.toml"
 val1_node_id=$($CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
-val1_peer="$val1_node_id@localhost:${p2p_ports[0]}"
+val1_peer="$val1_node_id@127.0.0.1:${p2p_ports[0]}"
 for i in $(seq 0 $[$validator_count-1])
 do
     toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${rpc_ports[i]}"

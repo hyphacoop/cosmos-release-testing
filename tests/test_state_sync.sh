@@ -73,7 +73,7 @@ toml set --toml-path $home/config/config.toml block_sync false
 toml set --toml-path $home/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
 toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer"
 toml set --toml-path $home/config/config.toml statesync.enable true
-toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://0.0.0.0:${rpc_ports[-1]},http://0.0.0.0:${rpc_ports[-1]}"
+toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://127.0.0.1:${rpc_ports[-1]},http://127.0.0.1:${rpc_ports[-1]}"
 toml set --toml-path $home/config/config.toml statesync.trust_height $height
 toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
 cat $home/config/config.toml
@@ -81,6 +81,6 @@ cat $home/config/config.toml
 echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 
-sleep 30
+sleep 60
 tail -n 100 $log
 
