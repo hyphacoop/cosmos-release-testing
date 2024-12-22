@@ -81,6 +81,6 @@ cat $home/config/config.toml
 echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 
-sleep 10
+sleep 30
 tail -n 100 $log
 
