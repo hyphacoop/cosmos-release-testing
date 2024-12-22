@@ -33,8 +33,8 @@ home=.statesync
 rpc_port=${rpc_prefix}999
 api_port=${api_prefix}999
 p2p_port=${p2p_prefix}999
-grpc=${grpc_prefix}999
-pprof=${pprof_prefix}999
+grpc_port=${grpc_prefix}999
+pprof_port=${pprof_prefix}999
 log=${log_prefix}999
 echo "> Creating home"
 $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $home
