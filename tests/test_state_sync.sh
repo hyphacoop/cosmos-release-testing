@@ -46,6 +46,7 @@ $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $home &> /dev/null
 echo "> Copying genesis"
 cp ${homes[0]}/config/genesis.json $home/config/genesis.json
 
+echo "> Wait for state sync snapshot"
 sleep $[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]
 
 echo "> Collect block height and hash"
@@ -53,25 +54,33 @@ status=$($CHAIN_BINARY status --home ${homes[0]})
 height=$(echo $status | jq -r '.sync_info.latest_block_height')
 hash=$(echo $status | jq -r '.sync_info.latest_block_hash')
 echo "Height: $height, hash: $hash"
-exit 0
 
-toml set --toml-path ${homes[i]}/config/app.toml minimum-gas-prices "$GAS_PRICE"
-toml set --toml-path ${homes[i]}/config/app.toml api.enable true
-toml set --toml-path ${homes[i]}/config/app.toml api.enabled-unsafe-cors true
-toml set --toml-path ${homes[i]}/config/app.toml api.address "tcp://0.0.0.0:$api_port"
-toml set --toml-path ${homes[i]}/config/app.toml grpc.address "0.0.0.0:$grpc_port"
-toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
+toml set --toml-path $home/config/app.toml minimum-gas-prices "$GAS_PRICE"
+toml set --toml-path $home/config/app.toml api.enable true
+toml set --toml-path $home/config/app.toml api.enabled-unsafe-cors true
+toml set --toml-path $home/config/app.toml api.address "tcp://0.0.0.0:$api_port"
+toml set --toml-path $home/config/app.toml grpc.address "0.0.0.0:$grpc_port"
+toml set --toml-path $home/config/app.toml grpc-web.enable false
 
 echo "> Configuring config.toml"
 val1_node_id=$($CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
 val1_peer="$val1_node_id@localhost:${p2p_ports[0]}"
-toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:$rpc_port"
-toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "localhost:$pprof_port"
-toml set --toml-path ${homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:$p2p_port"
-toml set --toml-path ${homes[i]}/config/config.toml p2p.allow_duplicate_ip true
-toml set --toml-path ${homes[i]}/config/config.toml block_sync false
-toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
-toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$val1_peer"
+toml set --toml-path $home/config/config.toml rpc.laddr "tcp://0.0.0.0:$rpc_port"
+toml set --toml-path $home/config/config.toml rpc.pprof_laddr "localhost:$pprof_port"
+toml set --toml-path $home/config/config.toml p2p.laddr "tcp://0.0.0.0:$p2p_port"
+toml set --toml-path $home/config/config.toml p2p.allow_duplicate_ip true
+toml set --toml-path $home/config/config.toml block_sync false
+toml set --toml-path $home/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
+toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer"
+toml set --toml-path $home/config/config.toml statesync.enable true
+toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://0.0.0.0:${rpc_ports[-1]},http://0.0.0.0:${rpc_ports[-1]}"
+toml set --toml-path $home/config/config.toml statesync.trust_height $height
+toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
+cat $home/config/config.toml
 
+echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}"
+
+sleep 10
+tail -n 100 $log
 
