@@ -79,7 +79,7 @@ toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
 cat $home/config/config.toml
 
 echo "> Starting state sync node"
-tmux new-session -d -s statesync "$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}"
+tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 
 sleep 10
 tail -n 100 $log
