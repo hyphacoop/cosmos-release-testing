@@ -46,6 +46,8 @@ $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $home &> /dev/null
 echo "> Copying genesis"
 cp ${homes[0]}/config/genesis.json $home/config/genesis.json
 
+sleep $[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]
+
 echo "> Collect block height and hash"
 status=$($CHAIN_BINARY status --home ${homes[0]})
 height=$(echo $status | jq -r '.sync_info.latest_block_height')

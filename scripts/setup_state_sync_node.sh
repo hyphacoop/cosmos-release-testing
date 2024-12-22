@@ -14,7 +14,7 @@ do
 done
 
 echo "> Enabling state sync"
-toml set --toml-path ${homes[-1]}/config/app.toml state-sync.snapshot-interval 50
+toml set --toml-path ${homes[-1]}/config/app.toml state-sync.snapshot-interval $STATE_SYNC_INTERVAL
 
 
 echo "> Restarting nodes."

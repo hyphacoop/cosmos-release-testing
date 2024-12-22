@@ -38,3 +38,6 @@ echo "rpc_prefix=27" >> $GITHUB_ENV
 echo "grpc_prefix=28" >> $GITHUB_ENV
 echo "pprof_prefix=29" >> $GITHUB_ENV
 echo "log_prefix=log_" >> $GITHUB_ENV
+
+# Node configuration
+echo "STATE_SYNC_INTERVAL=50" >> $GITHUB_ENV
