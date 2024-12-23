@@ -64,9 +64,9 @@ toml set --toml-path $home/config/app.toml grpc-web.enable false
 
 echo "> Configuring config.toml"
 val1_node_id=$($CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
-val1_peer="$val1_node_id@localhost:${p2p_ports[0]}"
+val1_peer="$val1_node_id@127.0.0.1:${p2p_ports[0]}"
 toml set --toml-path $home/config/config.toml rpc.laddr "tcp://0.0.0.0:$rpc_port"
-toml set --toml-path $home/config/config.toml rpc.pprof_laddr "localhost:$pprof_port"
+toml set --toml-path $home/config/config.toml rpc.pprof_laddr "0.0.0.0:$pprof_port"
 toml set --toml-path $home/config/config.toml p2p.laddr "tcp://0.0.0.0:$p2p_port"
 toml set --toml-path $home/config/config.toml p2p.allow_duplicate_ip true
 toml set --toml-path $home/config/config.toml block_sync false

@@ -158,7 +158,7 @@ val1_peer="$val1_node_id@127.0.0.1:${p2p_ports[0]}"
 for i in $(seq 0 $[$validator_count-1])
 do
     toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${rpc_ports[i]}"
-    toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "localhost:${pprof_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${pprof_ports[i]}"
     toml set --toml-path ${homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${p2p_ports[i]}"
     toml set --toml-path ${homes[i]}/config/config.toml p2p.allow_duplicate_ip true
     toml set --toml-path ${homes[i]}/config/config.toml block_sync false
