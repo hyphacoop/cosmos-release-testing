@@ -82,6 +82,15 @@ echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 
 sleep 120
-tail -n 200 $log
-tail -n 200 ${logs[-1]}
+catchingup=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
+echo "> Catching up: $catchingup"
+tail -n 10 $log
+# tail -n 10 ${logs[-1]}
+
+until [ "$catching_up" = "false" ]
+do
+    sleep $TIMEOUT_COMMIT
+    catchingup=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
+    echo "> Catching up: $catchingup"
+done
 
