@@ -85,12 +85,16 @@ sleep 120
 catchingup=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
 echo "> Catching up: $catchingup"
 tail -n 10 $log
-# tail -n 10 ${logs[-1]}
+tail -n 10 ${logs[-1]}
 
 until [ "$catching_up" = "false" ]
 do
     sleep $TIMEOUT_COMMIT
     catchingup=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
     echo "> Catching up: $catchingup"
+    echo "> Test node log:"
+    tail -n 10 $log
+    echo "> State sync node log:"
+    tail -n 10 ${logs[-1]}
 done
 
