@@ -64,14 +64,16 @@ toml set --toml-path $home/config/app.toml grpc-web.enable false
 
 echo "> Configuring config.toml"
 val1_node_id=$($CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
+state_sync_node_id=$($CHAIN_BINARY tendermint show-node-id --home ${homes[-1]})
 val1_peer="$val1_node_id@127.0.0.1:${p2p_ports[0]}"
+state_sync_peer="$state_sync_node_id@127.0.0.1:${p2p_ports[-1]}"
 toml set --toml-path $home/config/config.toml rpc.laddr "tcp://0.0.0.0:$rpc_port"
 toml set --toml-path $home/config/config.toml rpc.pprof_laddr "0.0.0.0:$pprof_port"
 toml set --toml-path $home/config/config.toml p2p.laddr "tcp://0.0.0.0:$p2p_port"
 toml set --toml-path $home/config/config.toml p2p.allow_duplicate_ip true
 toml set --toml-path $home/config/config.toml block_sync false
 toml set --toml-path $home/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
-toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer"
+toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer,$state_sync_peer"
 toml set --toml-path $home/config/config.toml statesync.enable true
 toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://127.0.0.1:${rpc_ports[-1]},http://127.0.0.1:${rpc_ports[-1]}"
 toml set --toml-path $home/config/config.toml statesync.trust_height $height
@@ -87,14 +89,14 @@ echo "> Catching up: $catchingup"
 tail -n 10 $log
 tail -n 10 ${logs[-1]}
 
-until [ "$catching_up" = "false" ]
+until [ "$catchingup" = "false" ]
 do
     sleep $TIMEOUT_COMMIT
     catchingup=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
     echo "> Catching up: $catchingup"
     echo "> Test node log:"
     tail -n 10 $log
-    echo "> State sync node log:"
-    tail -n 10 ${logs[-1]}
+    # echo "> State sync node log:"
+    # tail -n 10 ${logs[-1]}
 done
 
