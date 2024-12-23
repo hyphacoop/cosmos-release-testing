@@ -82,5 +82,6 @@ echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 
 sleep 120
-tail -n 100 $log
+tail -n 200 $log
+tail -n 200 ${logs[-1]}
 

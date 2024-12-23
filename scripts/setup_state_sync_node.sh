@@ -19,9 +19,10 @@ toml set --toml-path ${homes[-1]}/config/app.toml state-sync.snapshot-interval $
 
 echo "> Restarting nodes."
 ./stop.sh
+sleep 15
 ./start.sh
-sleep 10
+sleep 15
 echo "> Val 1:"
-tail -n 100 ${logs[0]}
+tail -n 200 ${logs[0]}
 echo "> Val n:"
-tail -n 100 ${logs[-1]}
+tail -n 200 ${logs[-1]}
