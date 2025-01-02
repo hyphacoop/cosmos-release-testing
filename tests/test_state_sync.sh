@@ -46,6 +46,11 @@ $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $home &> /dev/null
 echo "> Copying genesis"
 cp ${homes[0]}/config/genesis.json $home/config/genesis.json
 
+echo "> Peer app.toml:"
+cat ${homes[0]}/config/app.toml
+echo "> Peer config.toml:"
+cat ${homes[0]}/config/config.toml
+
 echo "> Wait for state sync snapshot"
 sleep $[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]
 
