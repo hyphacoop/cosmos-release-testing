@@ -82,7 +82,9 @@ sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' $home/config/config.toml
 toml set --toml-path $home/config/config.toml block_sync false
 toml set --toml-path $home/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
 # toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer,$state_sync_peer"
-toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer"
+# toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer"
+# sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
+toml set --toml-path $home/config/config.toml p2p.seeds "$val1_peer"
 toml set --toml-path $home/config/config.toml statesync.enable true
 toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://127.0.0.1:${rpc_ports[-1]},http://127.0.0.1:${rpc_ports[-1]}"
 toml set --toml-path $home/config/config.toml statesync.trust_height $height
