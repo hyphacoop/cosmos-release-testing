@@ -51,7 +51,7 @@ cat ${homes[0]}/config/app.toml
 echo "> Peer config.toml:"
 cat ${homes[0]}/config/config.toml
 
-echo "> Wait for state sync snapshot"
+echo "> Wait for state sync snapshot ($[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]s)"
 sleep $[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]
 
 echo "> Collect block height and hash"
@@ -82,17 +82,14 @@ sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' $home/config/config.toml
 toml set --toml-path $home/config/config.toml block_sync false
 toml set --toml-path $home/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
 # toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer,$state_sync_peer"
-# toml set --toml-path $home/config/config.toml p2p.persistent_peers "$val1_peer"
+toml set --toml-path $home/config/config.toml p2p.persistent_peers "$state_sync_peer"
 # sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
 toml set --toml-path $home/config/config.toml statesync.enable true
 toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://127.0.0.1:${rpc_ports[-1]},http://127.0.0.1:${rpc_ports[-1]}"
 toml set --toml-path $home/config/config.toml statesync.trust_height $height
 toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
-# cat $home/config/config.toml
-
-echo "> Copying address book from validator 1:"
-cp ${homes[0]}/config/addrbook.json $home/config/addrbook.json
-cat $home/config/addrbook.json
+echo "> Test node config.toml:"
+cat $home/config/config.toml
 
 echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
