@@ -160,8 +160,10 @@ do
     toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${rpc_ports[i]}"
     toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${pprof_ports[i]}"
     toml set --toml-path ${homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${p2p_ports[i]}"
-    toml set --toml-path ${homes[i]}/config/config.toml p2p.allow_duplicate_ip true
-    toml set --toml-path ${homes[i]}/config/config.toml p2p.addr_book_strict false
+    sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' ${homes[i]}/config/config.toml
+    # toml set --toml-path ${homes[i]}/config/config.toml p2p.allow_duplicate_ip true
+    sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
+    # toml set --toml-path ${homes[i]}/config/config.toml p2p.addr_book_strict false
     toml set --toml-path ${homes[i]}/config/config.toml block_sync false
     toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
     toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers ""
