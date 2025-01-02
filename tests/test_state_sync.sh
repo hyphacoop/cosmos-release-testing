@@ -88,10 +88,11 @@ toml set --toml-path $home/config/config.toml statesync.enable true
 toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://127.0.0.1:${rpc_ports[-1]},http://127.0.0.1:${rpc_ports[-1]}"
 toml set --toml-path $home/config/config.toml statesync.trust_height $height
 toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
-cat $home/config/config.toml
+# cat $home/config/config.toml
 
-echo "> Copying address book from validator 1"
+echo "> Copying address book from validator 1:"
 cp ${homes[0]}/config/addrbook.json $home/config/addrbook.json
+cat $home/config/addrbook.json
 
 echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
@@ -99,8 +100,8 @@ tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $l
 sleep 120
 catchingup=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
 echo "> Catching up: $catchingup"
-tail -n 10 $log
-tail -n 10 ${logs[-1]}
+# tail -n 10 $log
+# tail -n 10 ${logs[-1]}
 
 until [ "$catchingup" = "false" ]
 do
