@@ -78,13 +78,13 @@ cp ./priv_validator_state.json $home/data/
 echo "> Starting snapshot sync node"
 # $CHAIN_BINARY start --home $home
 tmux new-session -d -s snapshot "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
-sleep 120
-cat $log
+sleep 30
+# cat $log
 
 catching_up=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
 echo "> Catching up: $catching_up"
 
-tmux send-keys -t snapshot C-c
+# tmux send-keys -t snapshot C-c
 
 if [ $catching_up != "false" ]; then
     echo "Node did not sync."

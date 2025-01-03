@@ -246,7 +246,7 @@
       #   outputs:
       #     upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
   
-      Baseline-1-upgrade:
+      validator:
         runs-on: ubuntu-22.04
         needs: set-version-matrix
         strategy:
@@ -353,14 +353,19 @@
             run: |
               scripts/check_signatures.sh
 
-          - name: Test snapshot sync
+          # - name: Node setup - join network via state sync
+          #   run: |
+          #     scripts/setup_state_sync_node.sh
+          #     tests/test_state_sync.sh
+
+          - name: Node setup - join network via snapshot
             run: |
               tests/test_snapshot_sync.sh
 
-          - name: Test state sync
+          - name: Validator setup
             run: |
-              scripts/setup_state_sync_node.sh
-              tests/test_state_sync.sh
+              tests/test_validator_setup.sh
+
   
       # Baseline-2-ics-optin:
       #   runs-on: ubuntu-22.04
