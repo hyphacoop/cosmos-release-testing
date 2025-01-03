@@ -42,10 +42,11 @@ key=$($CHAIN_BINARY keys add validator --home $home --output json)
 address=$(echo $key | jq -r '.address')
 echo "> Key add output: $key"
 echo "> Address: $address"
-$CHAIN_BINARY keys parse $address --output json | jq -r '.'
+address_bytes=$($CHAIN_BINARY keys parse $address --output json | jq -r '.bytes')
+$CHAIN_BINARY keys parse $address_bytes --output json | jq -r '.'
 
 echo "> Receive funds"
-$CHAIN_BINARY tx bank send $WALLET_1 $address $VAL_STAKE$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
+$CHAIN_BINARY tx bank send $WALLET_1 $address $VAL_WHALE$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $(($TIMEOUT_COMMIT*2))
 $CHAIN_BINARY q bank balances $address -o json --home $home | jq '.'
 
@@ -53,19 +54,27 @@ echo "> Create validator"
 pubkey=$($CHAIN_BINARY tendermint show-validator --home $home)
 echo "> Patch pubkey: $pubkey"
 jq -r --argjson PUBKEY $pubkey '.pubkey |= $PUBKEY' templates/create-validator.json > validator-pubkey.json
-jq '.' validator-pubkey.json
-$CHAIN_BINARY tx staking create-validator validator-pubkey.json --from $address --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $home -y
+echo "> Patch stake amount: $VAL_STAKE$DENOM"
+jq -r --arg STAKE "$VAL_STAKE$DENOM" '.amount |= $STAKE' validator-pubkey.json > validator-stake.json
+jq '.' validator-stake.json
+$CHAIN_BINARY tx staking create-validator validator-stake.json --from $address --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $home -y
 sleep $(($TIMEOUT_COMMIT*2))
-$CHAIN_BINARY q staking validators -o json --home $home | jq '.'
+echo "> Validators:"
+$CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].operator_address'
+$CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].description.moniker'
 
 echo "> Edit validator metadata"
 $CHAIN_BINARY tx staking edit-validator --new-moniker "new-validator" --from $address --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $home -y
 sleep $(($TIMEOUT_COMMIT*2))
-$CHAIN_BINARY q staking validators -o json --home $home | jq '.'
+echo "> Validators:"
+$CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].operator_address'
+$CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].description.moniker'
 
 echo "> Verify validator is signing blocks"
-consensus_address=$(jq -r '.' $home/config/priv_validator_key.json)
+consensus_address=$(jq -r '.address' $home/config/priv_validator_key.json)
 echo "> Consensus address: $consensus_address"
+$CHAIN_BINARY tendermint show-address --home $home
+sleep $(($TIMEOUT_COMMIT*2))
 echo "> Last commit signatures:"
 curl -s http://localhost:$rpc_port/block | jq -r '.result.block.last_commit.signatures'
 
