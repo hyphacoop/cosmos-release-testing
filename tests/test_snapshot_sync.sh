@@ -76,7 +76,7 @@ cp ./priv_validator_state.json $home/data/
 ./start.sh
 
 echo "> Starting snapshot sync node"
-$CHAIN_BINARY start --home $home
+# $CHAIN_BINARY start --home $home
 tmux new-session -d -s snapshot "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 cat $log
 
