@@ -70,11 +70,13 @@ toml set --toml-path $home/config/config.toml p2p.persistent_peers "$peer"
 echo "> Copying data folder"
 ./stop.sh
 cp $home/data/priv_validator_state.json ./
+rm -rf $home/data
 cp -r ${homes[-1]}/data $home/data
 cp ./priv_validator_state.json $home/data/
 ./start.sh
 
 echo "> Starting snapshot sync node"
+$CHAIN_BINARY start --home $home
 tmux new-session -d -s snapshot "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
 cat $log
 
