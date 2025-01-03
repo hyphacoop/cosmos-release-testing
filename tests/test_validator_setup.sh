@@ -43,7 +43,8 @@ address=$(echo $key | jq -r '.address')
 echo "> Key add output: $key"
 echo "> Address: $address"
 address_bytes=$($CHAIN_BINARY keys parse $address --output json | jq -r '.bytes')
-$CHAIN_BINARY keys parse $address_bytes --output json | jq -r '.'
+valoper=$($CHAIN_BINARY keys parse $address_bytes --output json | jq -r '.formats[2]')
+echo "> Valoper address: $valoper"
 
 echo "> Receive funds"
 $CHAIN_BINARY tx bank send $WALLET_1 $address $VAL_WHALE$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
@@ -59,7 +60,6 @@ jq -r --arg STAKE "$VAL_STAKE$DENOM" '.amount |= $STAKE' validator-pubkey.json >
 jq '.' validator-stake.json
 $CHAIN_BINARY tx staking create-validator validator-stake.json --from $address --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $home -y
 sleep $(($TIMEOUT_COMMIT*2))
-echo "> Validators:"
 $CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].operator_address'
 $CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].description.moniker'
 
@@ -73,8 +73,7 @@ $CHAIN_BINARY q staking validators -o json --home $home | jq '.validators[].desc
 echo "> Verify validator is signing blocks"
 consensus_address=$(jq -r '.address' $home/config/priv_validator_key.json)
 echo "> Consensus address: $consensus_address"
-$CHAIN_BINARY tendermint show-address --home $home
 sleep $(($TIMEOUT_COMMIT*2))
-echo "> Last commit signatures:"
-curl -s http://localhost:$rpc_port/block | jq -r '.result.block.last_commit.signatures'
-
+echo "> Last commit signature check:"
+curl -s http://localhost:$rpc_port/block | jq -r --arg ADDRESS "$consensus_address" '.result.block.last_commit.signatures[] | select(.validator_address == $ADDRESS)'
+curl -s http://localhost:$rpc_port/block | grep $consensus_address'
