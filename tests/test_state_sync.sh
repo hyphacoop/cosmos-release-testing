@@ -82,8 +82,9 @@ toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
 
 echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
-
 sleep 120
+cat $log
+
 catching_up=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
 echo "> Catching up: $catching_up"
 

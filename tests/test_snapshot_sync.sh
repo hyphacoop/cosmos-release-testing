@@ -78,9 +78,9 @@ cp ./priv_validator_state.json $home/data/
 echo "> Starting snapshot sync node"
 # $CHAIN_BINARY start --home $home
 tmux new-session -d -s snapshot "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
+sleep 120
 cat $log
 
-sleep 120
 catching_up=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
 echo "> Catching up: $catching_up"
 
