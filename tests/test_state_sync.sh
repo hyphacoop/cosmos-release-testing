@@ -46,11 +46,6 @@ $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $home &> /dev/null
 echo "> Copying genesis"
 cp ${homes[0]}/config/genesis.json $home/config/genesis.json
 
-echo "> Peer app.toml:"
-cat ${homes[0]}/config/app.toml
-echo "> Peer config.toml:"
-cat ${homes[0]}/config/config.toml
-
 echo "> Wait for state sync snapshot ($[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]s)"
 sleep $[ $TIMEOUT_COMMIT*$STATE_SYNC_INTERVAL ]
 
@@ -82,8 +77,6 @@ toml set --toml-path $home/config/config.toml statesync.enable true
 toml set --toml-path $home/config/config.toml statesync.rpc_servers "http://127.0.0.1:${rpc_ports[-1]},http://127.0.0.1:${rpc_ports[-1]}"
 toml set --toml-path $home/config/config.toml statesync.trust_height $height
 toml set --toml-path $home/config/config.toml statesync.trust_hash $hash
-echo "> Test node config.toml:"
-cat $home/config/config.toml
 
 echo "> Starting state sync node"
 tmux new-session -d -s statesync "$CHAIN_BINARY start --home $home 2>&1 | tee $log"
@@ -92,20 +85,7 @@ sleep 120
 catching_up=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
 echo "> Catching up: $catching_up"
 
-
-# tail -n 10 $log
-# tail -n 10 ${logs[-1]}
-
-# until [ "$catching_up" = "false" ]
-# do
-#     sleep $TIMEOUT_COMMIT
-#     catching_up=$(curl -s http://localhost:$rpc_port/status | jq -r .result.sync_info.catching_up)
-#     echo "> Catching up: $catching_up"
-#     echo "> Test node log:"
-#     tail -n 10 $log
-#     # echo "> State sync node log:"
-#     # tail -n 10 ${logs[-1]}
-# done
+tmux send-keys -t statesync C-c
 
 if [ $catching_up != "false" ]; then
     echo "Node did not sync."

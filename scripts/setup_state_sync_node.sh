@@ -22,7 +22,3 @@ echo "> Restarting nodes."
 sleep 15
 ./start.sh
 sleep 15
-echo "> Val 1:"
-tail -n 200 ${logs[0]}
-echo "> Val n:"
-tail -n 200 ${logs[-1]}
