@@ -329,38 +329,38 @@
             run: |
               scripts/load_state.sh
 
-          # - name: Set source to build
-          #   if: ${{ matrix.upgrade_version == 'main' }}
-          #   run: echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
-          # - name: Test software upgrade for published releases
-          #   if: ${{ matrix.upgrade_version != 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          #   run: |
-          #     # source scripts/vars.sh
-          #     echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
-          #     echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
-          #     scripts/upgrade.sh
-          # - name: Test software upgrade for main branch
-          #   if: ${{ matrix.upgrade_version == 'main' }}
-          #   run: |
-          #     # source scripts/vars.sh
-          #     echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
-          #     # echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
-          #     # echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
-          #     echo $UPGRADE_BINARY_SOURCE
-          #     scripts/upgrade.sh
+          - name: Set source to build
+            if: ${{ matrix.upgrade_version == 'main' }}
+            run: echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
+          - name: Test software upgrade for published releases
+            if: ${{ matrix.upgrade_version != 'main' }}
+            env:
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+            run: |
+              # source scripts/vars.sh
+              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+              echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+              scripts/upgrade.sh
+          - name: Test software upgrade for main branch
+            if: ${{ matrix.upgrade_version == 'main' }}
+            run: |
+              # source scripts/vars.sh
+              echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
+              # echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
+              # echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
+              echo $UPGRADE_BINARY_SOURCE
+              scripts/upgrade.sh
     
-          # - name: Confirm chain is online
-          #   run: |
-          #     # source scripts/vars.sh
-          #     height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
-          #     target_height=$(($height+5))
-          #     scripts/wait_for_block.sh $target_height
-          # - name: Confirm all validators are signing
-          #   run: |
-          #     # source scripts/vars.sh
-          #     scripts/check_signatures.sh
+          - name: Confirm chain is online
+            run: |
+              # source scripts/vars.sh
+              height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
+              target_height=$(($height+5))
+              scripts/wait_for_block.sh $target_height
+          - name: Confirm all validators are signing
+            run: |
+              # source scripts/vars.sh
+              scripts/check_signatures.sh
 
           - name: Test state sync
             run: |
