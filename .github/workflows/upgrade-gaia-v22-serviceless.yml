@@ -307,9 +307,6 @@
           #     echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Start chain
             run: |
-              # source scripts/vars.sh
-              # echo "CHAIN_VERSION=$START_VERSION" >> $GITHUB_ENV
-              # echo "CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64" >> $GITHUB_ENV
               echo "Start version: $START_VERSION"
               echo "Binary URL: $CHAIN_BINARY_URL"
               scripts/setup.sh
@@ -318,11 +315,9 @@
               tail -n 100 log_001
           - name: Confirm chain is online
             run: |
-              # source scripts/vars.sh
               scripts/wait_for_block.sh 3
           - name: Confirm all validators are signing
             run: |
-              # source scripts/vars.sh
               scripts/check_signatures.sh
 
           - name: Load state
@@ -337,14 +332,12 @@
             env:
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
             run: |
-              # source scripts/vars.sh
               echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
               echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
               scripts/upgrade.sh
           - name: Test software upgrade for main branch
             if: ${{ matrix.upgrade_version == 'main' }}
             run: |
-              # source scripts/vars.sh
               echo "UPGRADE_VERSION=${{ matrix.upgrade_version }}" >> $GITHUB_ENV
               # echo "UPGRADE_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$UPGRADE_VERSION/gaiad-$UPGRADE_VERSION-linux-amd64" >> $GITHUB_ENV
               # echo "UPGRADE_BINARY_SOURCE=BUILD" >> $GITHUB_ENV
@@ -353,18 +346,19 @@
     
           - name: Confirm chain is online
             run: |
-              # source scripts/vars.sh
               height=$(curl -s http://localhost:${rpc_prefix}001/block | jq -r .result.block.header.height)
               target_height=$(($height+5))
               scripts/wait_for_block.sh $target_height
           - name: Confirm all validators are signing
             run: |
-              # source scripts/vars.sh
               scripts/check_signatures.sh
+
+          - name: Test snapshot sync
+            run: |
+              tests/test_snapshot_sync.sh
 
           - name: Test state sync
             run: |
-              # source scripts/vars.sh
               scripts/setup_state_sync_node.sh
               tests/test_state_sync.sh
   
