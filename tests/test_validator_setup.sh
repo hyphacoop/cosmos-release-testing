@@ -37,5 +37,13 @@ grpc_port=${grpc_prefix}999
 pprof_port=${pprof_prefix}999
 log=${log_prefix}999
 
-echo "> Creating account"
-$CHAIN_BINARY keys add validator --home $home --output json | jq -r '.'
+echo "> Create account"
+key=$($CHAIN_BINARY keys add validator --home $home --output json)
+address=$(echo $key | jq -r '.address')
+echo "Key add output: $key"
+echo "Address: $address"
+
+echo "> Receive funds"
+$CHAIN_BINARY tx bank send $WALLET_1 $address $VAL_STAKE$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
+sleep $TIMEOUT_COMMIT
+$CHAIN_BINARY q bank balances $address -o json | jq '.'
