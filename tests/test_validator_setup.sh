@@ -46,4 +46,4 @@ echo "Address: $address"
 echo "> Receive funds"
 $CHAIN_BINARY tx bank send $WALLET_1 $address $VAL_STAKE$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $TIMEOUT_COMMIT
-$CHAIN_BINARY q bank balances $address -o json | jq '.'
+$CHAIN_BINARY q bank balances $address -o json --home $home | jq '.'
