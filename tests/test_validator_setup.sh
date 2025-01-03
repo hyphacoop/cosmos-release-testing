@@ -38,4 +38,4 @@ pprof_port=${pprof_prefix}999
 log=${log_prefix}999
 
 echo "> Creating account"
-$CHAIN_BINARY keys add validator --home $home -o json | jq '.'
+$CHAIN_BINARY keys add validator --home $home --output json | jq -r '.'
