@@ -106,6 +106,8 @@ jobs:
           $CHAIN_BINARY genesis collect-gentxs --home $NODE_HOME
           echo "Patch genesis with uatom"
           sed -i 's/\"stake\"/\"uatom\"/g' $NODE_HOME/config/genesis.json
+          jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $HOME_1/config/genesis.json > /tmp/feemarket-min-base.json
+          mv /tmp/feemarket-min-base.json $NODE_HOME/config/genesis.json
       - name: Configure gaiad
         run: |
           source ~/env/bin/activate
