@@ -429,6 +429,8 @@
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
               wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
+              wget $CONSUMER_CHAIN_V520_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY -q
+              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY
               wget $CONSUMER_CHAIN_V630_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY
               wget $CONSUMER_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY -q
