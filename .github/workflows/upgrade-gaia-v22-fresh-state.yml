@@ -523,7 +523,6 @@
               CON1_RPC_PORT: 40121
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
 
-
           - name: Add consumer chain with ICS v5.2.0
             env:
               CONSUMER_CHAIN_ID: v520-one
@@ -3278,6 +3277,7 @@
             env:
               CONSUMER_CHAIN_ID: v640-one
             run: |
+              sed -i -e "s\ccv_consumer_chain = true\ccv_consumer_chain = false\g" ~/.hermes/config.toml
               hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
               hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
 
@@ -3433,6 +3433,7 @@
             env:
               CONSUMER_CHAIN_ID: v640-one
             run: |
+              sed -i -e "s\ccv_consumer_chain = false\ccv_consumer_chain = true\g" ~/.hermes/config.toml
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               if [ $RELAYER == "hermes" ]; then
                 echo "Creating channel with Hermes..."
