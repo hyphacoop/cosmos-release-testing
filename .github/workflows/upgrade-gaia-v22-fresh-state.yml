@@ -500,6 +500,7 @@
               PROVIDER_ICS: v6.3.0
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V520_BINARY
+              export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_V630_BINARY
               scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain v520-one
             env:
