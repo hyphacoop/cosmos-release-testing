@@ -70,7 +70,8 @@ if [ "$CONSUMER_ICS" == "v5.2.0" ]; then
         echo "> Transform binary version:"
         $ICS_TRANSFORM_BINARY version
         $ICS_TRANSFORM_BINARY genesis transform ccv.json > ccv-520-1.json
-        cp ccv-520-1.json ccv.json
+        jq 'del(.params.consumer_id)' ccv-520-1.json > ccv.json
+        # cp ccv-520-1.json ccv.json
     fi
     # elif [ "$PROVIDER_ICS" == "v4.1.0" ]; then
     #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
