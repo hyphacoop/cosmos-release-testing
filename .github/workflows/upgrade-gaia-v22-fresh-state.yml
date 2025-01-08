@@ -722,12 +722,13 @@
               CONSUMER_CHAIN_ID: v520-one
               CONSUMER_HOME_1: /home/runner/.v520-1-1
               RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+              CON1_RPC_PORT: 52121
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V520_BINARY
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-              tests/test_consumer_ibc_transfer.sh $channel_id
+              tests/test_consumer_ibc_transfer_node.sh $channel_id
 
           - name: _CCV channel verified> ICS v6.3.0 chain 1
             env:
@@ -3079,13 +3080,11 @@
       #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
       #     # Consumer chain variables
       #     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-      #     ICS_400: true
-      #     CONSUMER_ICS: v4.0.0
-      #     PROVIDER_ICS: v4.1.1
+      #     CONSUMER_ICS: v6.3.0
+      #     PROVIDER_ICS: v6.3.0
       #     # Reference ICS chain variables
       #     CONSUMER_DENOM: ucon
       #     CONSUMER_FEES: 500
-      #     ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
       #     ICS_TRANSFORM_BINARY: cd-transform
       #   steps:
       #     - name: start-version
@@ -3146,8 +3145,10 @@
       #         chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY
       #         wget $CHANGEOVER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY -q
       #         chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY
-      #         wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-      #         chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+      #         wget $SOVEREIGN_CHAIN_V630_BINARY_URL -O $HOME/go/bin/$SOVEREIGN_CHAIN_V630_BINARY -q
+      #         chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V630_BINARY
+      #         wget $CHANGEOVER_CHAIN_V630_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V630_BINARY -q
+      #         chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V630_BINARY
       #     - name: Consumer chain binary URLs
       #       run: |
       #         echo "$CONSUMER_CHAIN_V400_BINARY runs off $CONSUMER_CHAIN_V400_BINARY_URL"

@@ -13,7 +13,6 @@ $CHAIN_BINARY q ibc channel channels --home $HOME_1 -o json | jq '.'
 
 echo "Consumer home: $CONSUMER_HOME_1"
 echo "Consumer config:"
-cat $CONSUMER_HOME_1/config/client.toml
 
 $CONSUMER_CHAIN_BINARY version --long
 $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $RECIPIENT --node http://localhost:$CON1_RPC_PORT
