@@ -518,6 +518,43 @@
             env:
               CON1_RPC_PORT: 52121
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+          - name: Establish CCV channel for v520-one
+            env:
+              CONSUMER_CHAIN_ID: v520-one
+            run: |
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              if [ $RELAYER == "hermes" ]; then
+                echo "Creating channel with Hermes..."
+                hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+                hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              elif [ $RELAYER == "rly" ]; then
+                echo "Creating channel with Go relayer..."
+                jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
+                jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v520-1.json > v520-2.json
+                rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v520-1 --file v520-2.json
+                rly transact connection v520-1
+                rly transact channel v520-1 --src-port consumer --dst-port provider --order ordered --version 1
+              fi
+              sudo systemctl restart $RELAYER
+              sleep 10
+          - name: _Pre-upgrade CCV channel verified> ICS v5.2.0 chain 1
+            env:
+              CONSUMER_HOME_1: /home/runner/.v520-1-1
+              CON1_RPC_PORT: 52121
+            run: |
+              tests/test_ccv_key_assignment.sh
+              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+          - name: _Pre-upgrade IBC transfer successful> ICS v5.2.0 chain 1
+            env:
+              CONSUMER_CHAIN_ID: v520-one
+              CONSUMER_HOME_1: /home/runner/.v520-1-1
+              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+            run: |
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V520_BINARY
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
 
           - name: Add consumer chain with ICS v6.3.0
             env:
