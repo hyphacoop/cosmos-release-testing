@@ -510,7 +510,7 @@
               CONSUMER_SERVICE_3: v520-1-3.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_1 --now
-              sleep 30
+              sleep 60
               journalctl -u $CONSUMER_SERVICE_1
           - name: _Pre-upgrade consumer chain produces blocks> ICS v5.2.0 chain 1
             env:
