@@ -26,6 +26,7 @@ if [ $RELAYER == "hermes" ]; then
     hermes keys add --chain v450-one --mnemonic-file mnemonic.txt
     hermes keys add --chain v450-two --mnemonic-file mnemonic.txt
     hermes keys add --chain v630-one --mnemonic-file mnemonic.txt
+    hermes keys add --chain v630-two --mnemonic-file mnemonic.txt
     hermes keys add --chain v640-one --mnemonic-file mnemonic.txt
     hermes keys add --chain stride-test --mnemonic-file mnemonic.txt
     hermes keys add --chain neutron-test --mnemonic-file mnemonic.txt
