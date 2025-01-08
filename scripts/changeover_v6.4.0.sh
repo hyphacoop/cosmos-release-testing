@@ -37,6 +37,8 @@ cp consumer.json create-spawn.json
 
 jq -r '.initialization_parameters.distribution_transmission_channel |= "channel-0"' create-spawn.json > channel.json
 cp channel.json create-spawn.json
+jq -r '.initialization_parameters.connection_id |= "connection-0"' create-spawn.json > connection.json
+cp connection.json create-spawn.json
 
 sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" create-spawn.json > create-$CONSUMER_CHAIN_ID.json
 rm create-spawn.json
