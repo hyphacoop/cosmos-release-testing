@@ -560,6 +560,7 @@ jobs:
       - name: Check block hashes on both consumer nodes
         run: |
           set -e
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status
           latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
