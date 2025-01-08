@@ -552,7 +552,7 @@ jobs:
           CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
           PSS_ENABLED: true
           TOPN: 0
-        run: scripts/stateful/launch_consumer_2_vals_optin.sh v4.x
+        run: scripts/stateful/launch_consumer_2_vals_optin.sh "<v4.5.x"
       - name: _Opt-in consumer chain produces blocks val1> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
       - name: _Opt-in consumer chain produces blocks val2> ICS v4.0.0
