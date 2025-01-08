@@ -522,6 +522,44 @@
             env:
               CON1_RPC_PORT: 40121
             run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+          - name: Establish CCV channel for v400-one
+            env:
+              CONSUMER_CHAIN_ID: v400-one
+            run: |
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              if [ $RELAYER == "hermes" ]; then
+                echo "Creating channel with Hermes..."
+                hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+                hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              elif [ $RELAYER == "rly" ]; then
+                echo "Creating channel with Go relayer..."
+                jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
+                jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v400-1.json > v400-2.json
+                rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v400-2.json
+                rly transact connection v400-1
+                rly transact channel v400-1 --src-port consumer --dst-port provider --order ordered --version 1
+              fi
+              sudo systemctl restart $RELAYER
+              sleep 10
+          - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
+            env:
+              CONSUMER_HOME_1: /home/runner/.v400-1-1
+              CON1_RPC_PORT: 40121
+            run: |
+              tests/test_ccv_key_assignment.sh
+              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+          - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
+            env:
+              CONSUMER_CHAIN_ID: v400-one
+              CONSUMER_HOME_1: /home/runner/.v400-1-1
+              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+              CON1_RPC_PORT: 40121
+            run: |
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer_node.sh $channel_id
 
           - name: Add consumer chain with ICS v5.2.0
             env:
@@ -3426,7 +3464,8 @@
               CON3_PPROF_PORT: 64143
             run: |
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
-              scripts/changeover.sh
+              export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
+              scripts/changeover_v6.4.0.sh
               journalctl -u $CONSUMER_SERVICE_1
     
           - name: Establish CCV channel for v640-one
@@ -3461,7 +3500,7 @@
               CONSUMER_HOME_1: /home/runner/.v640-1-1
               RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             run: |
-              export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
+              export CONSUMER_CHAIN_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
               # echo "> List consumer chains:"
               # $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
               # client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -3477,7 +3516,7 @@
               CON1_RPC_PORT: 64121
               CON1_P2P_PORT: 64131
             run: |
-              export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
+              export CONSUMER_CHAIN_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
               echo "> Consumer rewards pool balances:"
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
               echo "> Val1 outstanding rewards:"
