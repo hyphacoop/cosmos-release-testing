@@ -125,7 +125,7 @@ elif [ "$CONSUMER_CHAIN_BINARY" == "neutrond" ]; then
     jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $CONSUMER_HOME_1/config/genesis.json > ./feemarket-min-base.json
     mv feemarket-min-base.json $CONSUMER_HOME_1/config/genesis.json
     jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $CONSUMER_HOME_1/config/genesis.json > ./feemarket-base.json
-    mv feemarket-base.json $HOMCONSUMER_HOME_1E_1/config/genesis.json
+    mv feemarket-base.json $CONSUMER_HOME_1/config/genesis.json
 fi
 
 echo "Patching config files..."
