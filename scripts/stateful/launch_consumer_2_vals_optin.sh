@@ -98,6 +98,7 @@ jq '.' ccv.json
 if [ ! -z $transform ]
 then
     echo "[INFO] Patching CCV for backwards compatibility"
+    $CONSUMER_CHAIN_BINARY version --long
     # wget https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd -O ics-transform
     # chmod +x ics-transform
     # ./ics-transform genesis transform --to $transform ccv.json > ccv-transform.json
