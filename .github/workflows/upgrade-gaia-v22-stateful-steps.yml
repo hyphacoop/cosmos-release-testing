@@ -672,11 +672,17 @@ jobs:
           jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
           echo "[INFO]: Update consumer json:"
           cat $CONSUMER_CHAIN_ID-register-denoms.json
-          echo "[INFO]: Create and submit update-consumer proposal"
+          echo "[INFO]: Create and submit update-consumer"
           $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
           echo "[INFO]: Query consumer-chain consumera"
           $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
