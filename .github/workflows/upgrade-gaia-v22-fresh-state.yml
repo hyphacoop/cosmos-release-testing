@@ -136,7 +136,7 @@
       NEUTRON_DENOM: untrn
       # Relayer variables
       RELAYER: hermes
-      HERMES_VERSION: v1.10.2
+      HERMES_VERSION: v1.10.4
       RLY_VERSION: "2.5.0"
     jobs:
       set-version-matrix:
@@ -4015,8 +4015,8 @@
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
               export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
               scripts/changeover_v6.4.0_new_connection.sh
-              sleep 30
-              journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
+              sleep 60
+              journalctl -u $CONSUMER_SERVICE_1 | tail -n 50
 
     
           - name: Establish CCV channel for v640-one
