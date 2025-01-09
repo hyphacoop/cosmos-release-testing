@@ -29,7 +29,7 @@ revision_height=$(($upgrade_height+3))
 echo "> Revision height is set to $revision_height."
 
 echo "Patching add template with spawn time..."
-spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 10 seconds in the future: not enough time to opt in
+spawn_time=$(date -u --iso-8601=ns -d '60 secs' | sed s/+00:00/Z/ | sed s/,/./) # 10 seconds in the future: not enough time to opt in
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' templates/create-consumer.json > create-spawn.json
 
 jq -r --argjson HEIGHT $revision_height '.initialization_parameters.initial_height.revision_height |= $HEIGHT' create-spawn.json > consumer.json
@@ -64,7 +64,7 @@ CON2_PUBKEY=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $CONSUMER_
 $CHAIN_BINARY tx provider opt-in 0 $CON1_PUBKEY --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
 $CHAIN_BINARY tx provider opt-in 0 $CON2_PUBKEY --from $MONIKER_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
 
-sleep 40
+sleep 65
 $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
 echo "> Collect the CCV state."
 $CHAIN_BINARY q provider consumer-genesis 0 -o json --home $HOME_1 > ccv.json
