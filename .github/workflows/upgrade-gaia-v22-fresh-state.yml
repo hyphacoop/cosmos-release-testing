@@ -1191,7 +1191,7 @@
               $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
           - name: Unjail validator
             env:
-              CONSUMER_SERVICE_2: v640-2-2.service
+              CONSUMER_SERVICE_2: v640-1-2.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_2 --now
               sleep $(($COMMIT_TIMEOUT*10))
