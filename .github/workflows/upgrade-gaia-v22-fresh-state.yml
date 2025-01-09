@@ -1086,58 +1086,60 @@
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
           
-          # - name: Trigger consumer rewards distribution> ICS v4.5.0
-          #   env:
-          #     CONSUMER_HOME_1: /home/runner/.v450-2-1
-          #     CON1_RPC_PORT: 40221
-          #     CON1_P2P_PORT: 40231
-          #   run: |
-          #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
-          #     echo "> Consumer rewards pool balances:"
-          #     $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
-          #     echo "> Val1 outstanding rewards:"
-          #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
-          #     echo "> Send tx with high fees in consumer chain."
-          #     $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
-          #     --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
-          #     --gas auto --gas-prices $CONSUMER_GAS_PRICE$CONSUMER_DENOM --gas-adjustment 2 \
-          #     --home $CONSUMER_HOME_1 -o json -y | jq '.'
-          #     sleep 30
-          #     echo "> Balance in consumer chain recipient:"
-          #     $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
-          #     echo "> Val1 outstanding rewards:"
-          #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+          - name: Trigger consumer rewards distribution> ICS v6.4.0
+            env:
+              CONSUMER_HOME_1: /home/runner/.v640-1-1
+              CON1_RPC_PORT: 64121
+              CON1_P2P_PORT: 64131
+            run: |
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V640_BINARY
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --gas-prices $CONSUMER_GAS_PRICE$CONSUMER_DENOM --gas-adjustment 2 \
+              --home $CONSUMER_HOME_1 -o json -y | jq '.'
+              sleep 30
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
-          # - name: Register consumer reward denoms
-          #   env:
-          #     CONSUMER_DENOM: ucon
-          #   run: |
-          #     last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-          #     echo "> Last channel: $last_channel"
-          #     denom_450=$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-          #     echo "> Denom: $denom_450"
-          #     scripts/change_denoms.sh $denom_450
-          #     $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.'
+          - name: Register consumer reward denoms
+            env:
+              CONSUMER_ID: 4
+              CONSUMER_DENOM: ucon
+            run: |
+              $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r '.'
+              last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
+              echo "> Last channel: $last_channel"
+              denom_640=$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              echo "> Denom: $denom_640"
+              scripts/change_denoms_allowlist.sh $denom_640
+              $CHAIN_BINARY q provider consumer-chain $CONSUMER_ID --home $HOME_1 -o json | jq '.'
 
-          # - name: _Consumer rewards distribution> ICS v4.5.0
-          #   run: |
-          #     last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-          #     ibc_denom=ibc/$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-          #     echo "> Denom: $ibc_denom"
-          #     echo "> Consumer rewards pool balances:"
-          #     $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
-          #     echo "> Val1 outstanding rewards:"
-          #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
-          #     val1_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
-          #     echo "> val1_rewards: $val1_rewards"
-          #     val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
-          #     echo "> val1_consumer_rewards: $val1_consumer_rewards"
-          #     if [ -z "$val1_consumer_rewards" ]; then
-          #       echo "FAIL: No consumer rewards distributed to val1."
-          #       exit 1
-          #     else
-          #       echo "PASS: Consumer rewards distributed to val1."
-          #     fi
+          - name: _Consumer rewards distribution> ICS v6.4.0
+            run: |
+              last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
+              ibc_denom=ibc/$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
+              echo "> Denom: $ibc_denom"
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+              val1_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+              echo "> val1_rewards: $val1_rewards"
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              echo "> val1_consumer_rewards: $val1_consumer_rewards"
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
+              else
+                echo "PASS: Consumer rewards distributed to val1."
+              fi
 
           - name: _Downtime test> val3 must not be jailed 
             run: |
