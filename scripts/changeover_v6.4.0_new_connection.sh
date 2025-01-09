@@ -86,7 +86,7 @@ cp consumer-genesis.json $CONSUMER_HOME_1/.sovereign/config/genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_2/.sovereign/config/genesis.json
 cp consumer-genesis.json $CONSUMER_HOME_3/.sovereign/config/genesis.json
 
-systemctl daemon-reload
+sudo systemctl daemon-reload
 echo "> Start consumer chain."
 sudo systemctl stop $CONSUMER_SERVICE_1
 sudo systemctl stop $CONSUMER_SERVICE_2
