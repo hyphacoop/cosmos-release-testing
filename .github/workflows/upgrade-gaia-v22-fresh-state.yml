@@ -1166,7 +1166,7 @@
               tests/test_validator_jailed.sh $VALOPER_3 null
           - name: Unjail validator
             env:
-              CONSUMER_SERVICE_2: v640-2-2.service
+              CONSUMER_SERVICE_2: v640-1-2.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_2 --now
               sleep $(($COMMIT_TIMEOUT*10))
@@ -1180,7 +1180,7 @@
               scripts/update_consumer.sh
           - name: Stop validator services
             env:
-              CONSUMER_SERVICE_2: v640-2-2.service
+              CONSUMER_SERVICE_2: v640-1-2.service
             run: |
               $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
               sudo systemctl disable $CONSUMER_SERVICE_2 --now
