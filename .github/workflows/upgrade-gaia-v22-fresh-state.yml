@@ -3495,7 +3495,8 @@
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
               export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
               scripts/changeover_v6.4.0_reuse_connection.sh
-              journalctl -u $CONSUMER_SERVICE_1
+              sleep 30
+              journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
     
           - name: Establish CCV channel for v640-one
             env:
@@ -4014,7 +4015,9 @@
               export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
               export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
               scripts/changeover_v6.4.0_new_connection.sh
-              journalctl -u $CONSUMER_SERVICE_1
+              sleep 30
+              journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
+
     
           - name: Establish CCV channel for v640-one
             env:
