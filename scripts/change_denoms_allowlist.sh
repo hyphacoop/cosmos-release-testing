@@ -6,7 +6,7 @@ echo "Patching template with consumer denom..."
 jq -r --arg DENOMTOADD "ibc/$denom_hash" '.allowlisted_reward_denoms.denoms |= [$DENOMTOADD]' templates/update-consumer-allowlisted-denoms.json > update-denoms.json
 cp update-denoms.json update.json
 
-jq -r --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMER_ID' update.json > update-consumer.json
+jq -r --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update.json > update-consumer.json
 cp update-consumer.json update.json
 
 echo "> Submit update-consumer transaction."
