@@ -65,16 +65,16 @@ if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
         cp ccv-consumer.json ccv.json
         jq '.' ccv.json
     fi
-    # elif [ "$PROVIDER_ICS" == "v4.1.0" ]; then
-    #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
-    #     $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-    #     cp ccv-330-1.json ccv.json
-    # fi
-    # elif [ "$PROVIDER_ICS" == "v4.1.1" ]; then
-    #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
-    #     $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-    #     cp ccv-330-1.json ccv.json
-    # fi
+fi
+
+if [ "$CONSUMER_ICS" == "v4.5.0" ]; then
+    if [ "$PROVIDER_ICS" == "v6.4.0" ]; then
+        echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
+        $ICS_TRANSFORM_BINARY genesis transform --to "v4.5.x" ccv.json > ccv-consumer.json
+        # jq 'del(.params.consumer_id)' ccv.json > ccv-consumer.json
+        cp ccv-consumer.json ccv.json
+        jq '.' ccv.json
+    fi
 fi
 
 if [ "$CONSUMER_ICS" == "v5.2.0" ]; then
@@ -87,16 +87,6 @@ if [ "$CONSUMER_ICS" == "v5.2.0" ]; then
         cp ccv-consumer.json ccv.json
         jq '.' ccv.json
     fi
-    # elif [ "$PROVIDER_ICS" == "v4.1.0" ]; then
-    #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
-    #     $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-    #     cp ccv-330-1.json ccv.json
-    # fi
-    # elif [ "$PROVIDER_ICS" == "v4.1.1" ]; then
-    #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
-    #     $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-    #     cp ccv-330-1.json ccv.json
-    # fi
 fi
 
 if [ "$CONSUMER_ICS" == "v6.3.0" ]; then
@@ -105,16 +95,6 @@ if [ "$CONSUMER_ICS" == "v6.3.0" ]; then
         $ICS_TRANSFORM_BINARY genesis transform --to "<v6.4.x" ccv.json > ccv-630-1.json
         cp ccv-630-1.json ccv.json
     fi
-    # elif [ "$PROVIDER_ICS" == "v4.1.0" ]; then
-    #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
-    #     $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-    #     cp ccv-330-1.json ccv.json
-    # fi
-    # elif [ "$PROVIDER_ICS" == "v4.1.1" ]; then
-    #     echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
-    #     $ICS_TRANSFORM_BINARY genesis transform --to v3.3.x ccv.json > ccv-330-1.json
-    #     cp ccv-330-1.json ccv.json
-    # fi
 fi
 
 
