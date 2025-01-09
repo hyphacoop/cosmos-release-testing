@@ -75,6 +75,7 @@ cp ccv-denom.json ccv.json
 jq '.params.provider_reward_denoms |= ["uatom"]' ccv.json > ccv-provider-denom.json
 cp ccv-provider-denom.json ccv.json
 
+jq '.' ccv.json
 # cd-transform genesis transform --to v3.2.x temp/ccv.json > temp/ccv-transform.json
 
 echo "> Patch the consumer genesis file."
