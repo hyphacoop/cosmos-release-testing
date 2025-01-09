@@ -676,7 +676,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
           echo "[INFO]: Query consumer-chain consumera"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_CHAIN_ID -o json | jq
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
