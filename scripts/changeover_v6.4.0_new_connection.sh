@@ -64,7 +64,7 @@ CON2_PUBKEY=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $CONSUMER_
 $CHAIN_BINARY tx provider opt-in 0 $CON1_PUBKEY --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
 $CHAIN_BINARY tx provider opt-in 0 $CON2_PUBKEY --from $MONIKER_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
 
-sleep 30
+sleep 40
 $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
 echo "> Collect the CCV state."
 $CHAIN_BINARY q provider consumer-genesis 0 -o json --home $HOME_1 > ccv.json
