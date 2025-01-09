@@ -1176,6 +1176,8 @@
             run: |
               tests/test_validator_jailed.sh $VALOPER_2 null
           - name: Change infraction parameter
+            env:
+              CONSUMER_ID: 4
             run: |
               scripts/update_consumer.sh
           - name: Stop validator services

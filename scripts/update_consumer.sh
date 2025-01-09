@@ -1,8 +1,7 @@
 #!/bin/bash
 
 echo "Patching update template with consumer id..."
-consumer_id=$1
-jq -r --arg CONSUMERID "$consumer_id" '.consumer_id |= $CONSUMERID' templates/update-consumer-infraction.json > update.json
+jq -r --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' templates/update-consumer-infraction.json > update.json
 jq '.' update.json
 
 echo "Submitting transaction..."
