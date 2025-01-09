@@ -632,16 +632,16 @@ jobs:
           denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
           echo "consumera denom: $denom"
           echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
-      # - name: Send tx on consumer with huge gas (not needed keep commented out)
-      #   run: |
-      #     json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
-      #     echo "[INFO]: Transection Result..."
-      #     echo "$json"
-      #     echo "[INFO]: Wait for 1 block to pass..."
-      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
-      #     txhash=$(echo "$json" | jq -r .txhash)
-      #     echo "[INFO]: TX result..."
-      #     $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      - name: Send tx on consumer with huge gas (not needed keep commented out)
+        run: |
+          json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
+          echo "[INFO]: Transection Result..."
+          echo "$json"
+          echo "[INFO]: Wait for 1 block to pass..."
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "[INFO]: TX result..."
+          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
       - name: _Check consumera rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
@@ -649,8 +649,6 @@ jobs:
           echo "[INFO]: Rewards pool balances:"
           ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
-          echo "[INFO]: val1 balances:"
-          ~/go/bin/gaiad --home ~/.val1 q bank balances $WALLET_1 -o json | jq
           echo "[INFO]: Looking for denom: $denom"
           if [ "$denom" != "$CONSUMERA_DENOM" ]
           then
@@ -678,10 +676,12 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
           echo "[INFO]: Query consumer-chain consumera"
-          $CHAIN_BINARY --home $HOME_1 provider consumer-chain $CONSUMER_CHAIN_ID -o json | jq
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_CHAIN_ID -o json | jq
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
+          echo "[INFO]: val1 balances:"
+          $CHAIN_BINARY --home ~/.val1 q bank balances $WALLET_1 -o json | jq
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
