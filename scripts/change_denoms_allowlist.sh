@@ -12,6 +12,6 @@ cp update-consumer.json update.json
 echo "> Submit update-consumer transaction."
 jq '.' update.json
 
-txhash=$($CHAIN_BINARY tx provider update-consumer update.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1)
+txhash=$($CHAIN_BINARY tx provider update-consumer update.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $HOME_1
