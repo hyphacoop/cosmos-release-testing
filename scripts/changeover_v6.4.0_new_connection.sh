@@ -25,7 +25,7 @@ sleep $VOTING_PERIOD
 
 $CONSUMER_CHAIN_BINARY q gov proposal $proposal_id --home $CONSUMER_HOME_1
 
-revision_height=$(($upgrade_height+3))
+revision_height=$(($upgrade_height+5))
 echo "> Revision height is set to $revision_height."
 
 echo "Patching add template with spawn time..."

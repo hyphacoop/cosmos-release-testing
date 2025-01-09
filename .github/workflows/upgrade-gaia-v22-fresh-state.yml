@@ -4023,7 +4023,7 @@
             env:
               CONSUMER_CHAIN_ID: v640-one
             run: |
-              # sed -i -e "s\ccv_consumer_chain = false\ccv_consumer_chain = true\g" ~/.hermes/config.toml
+              sed -i -e "s\ccv_consumer_chain = false\ccv_consumer_chain = true\g" ~/.hermes/config.toml
               echo "> Hermes config:"
               cat ~/.hermes/config.toml
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -4037,7 +4037,7 @@
                 echo "Creating channel with Go relayer..."
                 jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v640-1.json
                 jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v640-1.json > v640-2.json
-                rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v640-2.json
+                rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v640-1 --file v640-2.json
                 rly transact connection v640-1
                 rly transact channel v640-1 --src-port consumer --dst-port provider --order ordered --version 1
               fi
