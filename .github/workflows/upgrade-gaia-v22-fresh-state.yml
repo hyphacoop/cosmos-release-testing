@@ -22,8 +22,8 @@
       DOWNTIME_BLOCKS: 10000
       # Provider chain variables
       CHAIN_BINARY: gaiad
-      BINARY_SOURCE: BUILD
-      # BINARY_SOURCE: DOWNLOAD
+      # BINARY_SOURCE: BUILD
+      BINARY_SOURCE: DOWNLOAD
       BUILD_TAG: main
       CHAIN_ID: testnet
       DENOM: uatom
@@ -104,15 +104,15 @@
       CONSUMER_CHAIN_V520_BINARY: consumerd_v5.2.0
       CONSUMER_CHAIN_V630_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.3.0/interchain-security-cd-linux
       CONSUMER_CHAIN_V630_BINARY: consumerd_v6.3.0
-      CONSUMER_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0-rc0/interchain-security-cd-linux
+      CONSUMER_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-cd-linux
       CONSUMER_CHAIN_V640_BINARY: consumerd_v6.4.0
       SOVEREIGN_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-sd-linux
       SOVEREIGN_CHAIN_V450_BINARY: consumersd_v4.5.0
       CHANGEOVER_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-cdd-linux
       CHANGEOVER_CHAIN_V450_BINARY: consumerdd_v4.5.0
-      SOVEREIGN_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0-rc0/interchain-security-sd-linux
+      SOVEREIGN_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-sd-linux
       SOVEREIGN_CHAIN_V640_BINARY: consumersd_v6.4.0
-      CHANGEOVER_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0-rc0/interchain-security-cdd-linux
+      CHANGEOVER_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-cdd-linux
       CHANGEOVER_CHAIN_V640_BINARY: consumerdd_v6.4.0
       ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
       ICS_TRANSFORM_BINARY: cd-transform
