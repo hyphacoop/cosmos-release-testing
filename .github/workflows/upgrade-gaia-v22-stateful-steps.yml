@@ -684,12 +684,12 @@ jobs:
           sleep 30
           echo "[INFO]: Rewards trigger tx"
           $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
-      - name: DEBUG
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
           echo "[INFO]: Rewards pool balances:"
