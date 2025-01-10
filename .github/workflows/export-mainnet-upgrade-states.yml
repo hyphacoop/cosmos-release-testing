@@ -190,6 +190,11 @@ jobs:
           screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Get min_deposit
+        run: |
+          gaiad q gov params -o json
+          min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
+          echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
         run: |
           echo "Restoring validator key"
@@ -204,7 +209,7 @@ jobs:
           echo "Submitting the upgrade proposal..."
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
-          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
           proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000000uatom --from val --yes"
           $proposal
           txhash=$($proposal | jq -r .txhash)
