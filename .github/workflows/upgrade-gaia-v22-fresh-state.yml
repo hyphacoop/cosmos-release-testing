@@ -1150,11 +1150,11 @@
           - name: _Downtime test> val2 must not be jailed 
             run: |
               tests/test_validator_jailed.sh $VALOPER_2 null
-          - name: Change infraction parameter
-            env:
-              CONSUMER_ID: 0
-            run: |
-              scripts/update_consumer.sh
+          # - name: Change infraction parameter
+          #   env:
+          #     CONSUMER_ID: 0
+          #   run: |
+          #     scripts/update_consumer.sh
           - name: Stop validator services
             env:
               CONSUMER_SERVICE_2: v640-1-2.service
