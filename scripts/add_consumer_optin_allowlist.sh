@@ -10,6 +10,11 @@ rm create-spawn.json
 echo "> Add denoms to allowlist."
 jq -r --arg denom1 "$IBC_DENOM_1" --arg denom2 "$IBC_DENOM_2" '.allowlisted_reward_denoms.denoms |= [$denom1,$denom2]' create-$CONSUMER_CHAIN_ID.json > create-denoms.json
 mv create-denoms.json create-$CONSUMER_CHAIN_ID.json
+
+echo "> Add infraction parameters"
+jq '.infraction_parameters.downtime.slash_fraction |= "0.1"' create-$CONSUMER_CHAIN_ID.json > create-infraction.json
+mv create-infraction.json create-$CONSUMER_CHAIN_ID.json
+
 jq '.' create-$CONSUMER_CHAIN_ID.json
 
 echo "Submitting transaction..."
