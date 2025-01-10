@@ -766,7 +766,7 @@ jobs:
           sleep 6
           hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           echo "[INFO]: conb1 $hash_val1"
-          echo "[INFO]: conb2 $hash_val1"
+          echo "[INFO]: conb2 $hash_val2"
           if [ $hash_val1 != $hash_val2 ]
           then
             echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
