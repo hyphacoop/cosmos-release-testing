@@ -92,7 +92,7 @@ $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 > 
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 >  ~/artifact/$CONSUMER_CHAIN_ID-ccv-pre.txt
 jq '.params |= . + {"soft_opt_out_threshold": "0.05"}' ccv-pre.json > ccv.json
 jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv.json > ccv-denom.json
-jq --arg DENOM "$CONSUMER_DENOM" '.params.provider_reward_denoms |= [$DENOM]' ccv-denom.json > ccv-provider-denom.json
+jq --arg DENOM "$DENOM" '.params.provider_reward_denoms |= [$DENOM]' ccv-denom.json > ccv-provider-denom.json
 mv ccv-provider-denom.json ccv.json
 jq '.' ccv.json
 
