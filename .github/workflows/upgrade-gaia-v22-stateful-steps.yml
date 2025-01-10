@@ -692,13 +692,17 @@ jobs:
       #     done
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
+          ls $HOME/artifact
           echo "[INFO]: Hermes log"
           tail -n 100 $HOME/artifact/hermes.service.log
-          ls $HOME/artifact
+          echo "[INFO]: Gaia log"
+          tail -n 100 $HOME/artifact/gaia1.service.log
           echo "[INFO]: Rewards pool balances:"
           $CHAIN_BINARY --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
           echo "[INFO]: Rewards for val1 self-delegation wallet:"
           $CHAIN_BINARY --home $HOME_1 q distribution rewards $WALLET_1 -o json | jq
+          echo "[INFO]: Rewards for val2 self-delegation wallet:"
+          $CHAIN_BINARY --home $HOME_1 q distribution rewards ${{ env.VAL2_SELF_DELEGATION }} -o json | jq
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
           echo "[INFO]: val1 balances:"
           $CHAIN_BINARY --home ~/.val1 q bank balances $WALLET_1 -o json | jq
