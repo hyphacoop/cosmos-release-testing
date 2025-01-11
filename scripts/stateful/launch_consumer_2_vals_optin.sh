@@ -92,15 +92,18 @@ $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 > 
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 >  ~/artifact/$CONSUMER_CHAIN_ID-ccv-pre.txt
 jq '.params |= . + {"soft_opt_out_threshold": "0.05"}' ccv-pre.json > ccv.json
 jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv.json > ccv-denom.json
-mv ccv-denom.json ccv.json
+jq --arg DENOM "$DENOM" '.params.provider_reward_denoms |= [$DENOM]' ccv-denom.json > ccv-provider-denom.json
+mv ccv-provider-denom.json ccv.json
 jq '.' ccv.json
 
 if [ ! -z $transform ]
 then
     echo "[INFO] Patching CCV for backwards compatibility"
-    wget https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd -O ics-transform
-    chmod +x ics-transform
-    ./ics-transform genesis transform --to $transform ccv.json > ccv-transform.json
+    $CONSUMER_CHAIN_BINARY version --long
+    # wget https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd -O ics-transform
+    # chmod +x ics-transform
+    # ./ics-transform genesis transform --to $transform ccv.json > ccv-transform.json
+    $CONSUMER_CHAIN_BINARY genesis transform --to $transform ccv.json > ccv-transform.json
     cp ccv-transform.json ccv.json
 fi
 

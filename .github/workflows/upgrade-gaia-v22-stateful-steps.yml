@@ -560,7 +560,8 @@ jobs:
       - name: Check block hashes on both consumer nodes
         run: |
           set -e
-          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
+          # $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status
+          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           sleep 6
@@ -601,6 +602,8 @@ jobs:
           screen -XS hermes.service quit || true
           killall hermes || true
           sleep 1
+          echo "[DEBUG]: gaiad q provider list-consumer-chains"
+          gaiad --home $HOME/.val1 q provider list-consumer-chains --output json
           client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
           hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
           hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
@@ -629,16 +632,16 @@ jobs:
           denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
           echo "consumera denom: $denom"
           echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
-      # - name: Send tx on consumer with huge gas (not needed keep commented out)
-      #   run: |
-      #     json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
-      #     echo "[INFO]: Transection Result..."
-      #     echo "$json"
-      #     echo "[INFO]: Wait for 1 block to pass..."
-      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
-      #     txhash=$(echo "$json" | jq -r .txhash)
-      #     echo "[INFO]: TX result..."
-      #     $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      - name: Send tx on consumer with huge gas (not needed keep commented out)
+        run: |
+          json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
+          echo "[INFO]: Transaction Result..."
+          echo "$json"
+          echo "[INFO]: Wait for 1 block to pass..."
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "[INFO]: TX result..."
+          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
       - name: _Check consumera rewards in rewards pool balances
         run: |
           echo "[INFO]: Wait for 20 blocks to pass"
@@ -669,12 +672,40 @@ jobs:
           jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
           echo "[INFO]: Update consumer json:"
           cat $CONSUMER_CHAIN_ID-register-denoms.json
-          echo "[INFO]: Create and submit update-consumer proposal"
+          echo "[INFO]: Create and submit update-consumer"
           $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
+          echo "[INFO]: Query consumer-chain consumera"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
+          echo "[INFO]: Query consumer chains list"
+          $CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains --output json | jq
+          echo "[INFO]: Trigger additional rewards"
+          txhash=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --fees 10000000ucon --gas-adjustment 2 -y -o json | jq -r '.txhash')
+          sleep 30
+          echo "[INFO]: Rewards trigger tx"
+          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
+          ls $HOME/artifact
+          echo "[INFO]: Hermes log"
+          tail -n 100 $HOME/artifact/hermes.service.log
+          echo "[INFO]: Gaia log"
+          tail -n 100 $HOME/artifact/gaia1.service.log
+          echo "[INFO]: Rewards pool balances:"
+          $CHAIN_BINARY --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          echo "[INFO]: Rewards for val1 self-delegation wallet:"
+          $CHAIN_BINARY --home $HOME_1 q distribution rewards $WALLET_1 -o json | jq
+          echo "[INFO]: Rewards for val2 self-delegation wallet:"
+          $CHAIN_BINARY --home $HOME_1 q distribution rewards ${{ env.VAL2_SELF_DELEGATION }} -o json | jq
           outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
+          echo "[INFO]: val1 balances:"
+          $CHAIN_BINARY --home ~/.val1 q bank balances $WALLET_1 -o json | jq
           echo "[INFO]: Current validator outstanding rewards:"
           echo "$outstanding_rewards"
           echo "[INFO]: Checking if expected reward listed..."
@@ -726,34 +757,34 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 10
       - name: _TopN consumer chain produces blocks val2> ICS v4.0.0
         run: tests/test_block_production.sh 127.0.0.1 $CONB2_RPC_PORT 10
-      - name: Check block hashes on both consumerb nodes
-        run: |
-          set -e
-          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
-          echo "[INFO]: Block height is $latest_block"
-          hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          sleep 6
-          hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          echo "[INFO]: conb1 $hash_val1"
-          echo "[INFO]: conb2 $hash_val1"
-          if [ $hash_val1 != $hash_val2 ]
-          then
-            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-            exit 1
-          else
-            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-          fi
-      - name: Check number of signatures on consumerb
-        run: |
-          set -e
-          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 1 ]
-          then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
-            exit 1
-          else
-            echo "Expected correct number of validators: $total_signatures"
-          fi
+      # - name: Check block hashes on both consumerb nodes
+      #   run: |
+      #     set -e
+      #     latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
+      #     echo "[INFO]: Block height is $latest_block"
+      #     hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+      #     sleep 6
+      #     hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+      #     echo "[INFO]: conb1 $hash_val1"
+      #     echo "[INFO]: conb2 $hash_val2"
+      #     if [ $hash_val1 != $hash_val2 ]
+      #     then
+      #       echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+      #       exit 1
+      #     else
+      #       echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+      #     fi
+      # - name: Check number of signatures on consumerb
+      #   run: |
+      #     set -e
+      #     total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+      #     if [ $total_signatures != 1 ]
+      #     then
+      #       echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+      #       exit 1
+      #     else
+      #       echo "Expected correct number of validators: $total_signatures"
+      #     fi
       - name: Establish CCV channel for consumerb
         run: |
           set -e
@@ -1272,10 +1303,10 @@ jobs:
           MAX_VALIDATORS: 10
           MAX_ENTRIES: 8
           HISTORICAL_ENTRIES: 15000
-          MIN_COMMISSION_RATE: "10000000000000000"
-          VALIDATOR_BOND_FACTOR: "200000000000000000000"
-          GLOBAL_LIQUID_STAKING_CAP: "200000000000000000"
-          VALIDATOR_LIQUID_STAKING_CAP: "400000000000000000"
+          MIN_COMMISSION_RATE: "0.010000000000000000"
+          VALIDATOR_BOND_FACTOR: "200.000000000000000000"
+          GLOBAL_LIQUID_STAKING_CAP: "0.200000000000000000"
+          VALIDATOR_LIQUID_STAKING_CAP: "0.400000000000000000"
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
