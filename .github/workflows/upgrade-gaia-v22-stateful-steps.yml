@@ -160,7 +160,10 @@ jobs:
           sudo /usr/sbin/sshd
       - name: Setup SSH auth
         run: |
-          mkdir -m 700 ~/.ssh
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
           echo "$SSH_KEYS" > ~/.ssh/authorized_keys
       - name: start-version
         run: echo ${{inputs.gaia_version}}
