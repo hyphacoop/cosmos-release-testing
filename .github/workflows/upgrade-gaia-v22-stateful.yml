@@ -80,7 +80,7 @@ jobs:
           cd ansible
           ansible-playbook provision-runner.yml
   test-upgrade-mainnet:
-    needs: provision-test-upgrade-mainnet
+    needs: [provision-test-upgrade-mainnet, set-version-matrix]
     strategy:
       matrix:
         ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
