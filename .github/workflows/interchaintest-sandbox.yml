@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   run-gaia:
-    runs-on: ubuntu-22.04
+    runs-on: cosmos-runner-set
     steps:
       # Get system info
       - run: ifconfig
