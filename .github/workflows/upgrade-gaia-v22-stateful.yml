@@ -1,6 +1,6 @@
 ---
 
-name: Test Gaia Stateful Upgrade - v22
+name: Test Gaia Stateful Upgrade VM Test - v22
 on:
   repository_dispatch:
     types: [new_main_build]
@@ -8,7 +8,7 @@ on:
   schedule:
     # Once a day at 13:15
     - cron: '15 13 * * 1'
-  # push:
+  push:
 concurrency:
   group: self-hosted-runners
 jobs:
@@ -54,15 +54,40 @@ jobs:
     outputs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
 
-  test-upgrade-mainnet:
+  provision-test-upgrade-mainnet:
     needs: set-version-matrix
+    environment:  github-runner-vm
+    runs-on: cosmos-runner-set
+    steps:
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils python3-venv python3-pip git
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install ansible proxmoxer requests
+      - name: Provision runner VM
+        env:
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
+        run: |
+          source ~/env/bin/activate
+          cd ansible
+          ansible-playbook provision-runner.yml
+  test-upgrade-mainnet:
+    needs: provision-test-upgrade-mainnet
     strategy:
       matrix:
         ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
       fail-fast: false
       #max-parallel: 3
     with:
-      runs-on-os: cosmos-runner-set
+      runs-on-os: cosmos-ubuntu2404-vm-set
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
@@ -76,7 +101,7 @@ jobs:
   #     fail-fast: false
   #     #max-parallel: 3
   #   with:
-  #     runs-on-os: cosmos-runner-set
+  #     runs-on-os: cosmos-ubuntu2404-vm-set
   #     gaia_version: ${{ matrix.gaia_version }}
   #     upgrade_version: ${{ matrix.upgrade_version }}
   #     env_name: major-upgrade-theta-stateful-workflow
@@ -90,7 +115,7 @@ jobs:
   #     fail-fast: false
   #     #max-parallel: 3
   #   with:
-  #     runs-on-os: cosmos-runner-set
+  #     runs-on-os: cosmos-ubuntu2404-vm-set
   #     gaia_version: ${{ matrix.gaia_version }}
   #     upgrade_version: ${{ matrix.upgrade_version }}
   #     env_name: major-upgrade-ics-stateful-workflow
