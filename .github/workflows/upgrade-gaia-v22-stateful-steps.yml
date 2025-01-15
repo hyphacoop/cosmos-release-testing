@@ -146,6 +146,7 @@ jobs:
       - run: lsb_release -a
       - run: echo "GitHub branch is ${{ github.ref }}"
       - run: whoami
+      - run: uptime
       - run: pwd
       - name: mkdir ~/artifact
         run: mkdir ~/artifact
@@ -213,6 +214,12 @@ jobs:
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
       - name: Set up memory monitor for provider
         run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
+      - name: DEBUG
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Start chain val1 and link val2 node
         env:
           START_VERSION: ${{inputs.gaia_version}}
