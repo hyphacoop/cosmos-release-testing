@@ -133,6 +133,7 @@ jobs:
       CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
       # Get system info
+      - run: uptime
       - name: Install required packages
         run: |
           sudo apt update
@@ -146,7 +147,6 @@ jobs:
       - run: lsb_release -a
       - run: echo "GitHub branch is ${{ github.ref }}"
       - run: whoami
-      - run: uptime
       - run: pwd
       - name: mkdir ~/artifact
         run: mkdir ~/artifact
