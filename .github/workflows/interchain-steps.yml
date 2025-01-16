@@ -13,8 +13,7 @@ jobs:
     runs-on: ${{ inputs.runs-on-os }}
     steps:
       # Get system info
-      - run: ifconfig
-      - run: arp -a
+      - run: ip addr
       - run: sudo dmidecode
       - run: df -h
       - run: free -m
@@ -25,6 +24,8 @@ jobs:
       - run: pwd
       - name: Check out repository code
         uses: actions/checkout@v3
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
       - name: Start chain
         run: |
           cd interchaintests
