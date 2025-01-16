@@ -9,8 +9,8 @@ on:
     # Once a day at 13:15
     - cron: '15 13 * * 1'
   push:
-concurrency:
-  group: self-hosted-runners
+# concurrency:
+#   group: self-hosted-runners
 jobs:
   set-version-matrix:
     runs-on: ubuntu-22.04
