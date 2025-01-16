@@ -12,26 +12,56 @@ concurrency:
 
 
 jobs:
-  run-gaia:
+  provision-test-upgrade-mainnet:
+    environment:  github-runner-vm
     runs-on: cosmos-runner-set
     steps:
-      # Get system info
-      - run: ifconfig
-      - run: arp -a
-      - run: sudo dmidecode
-      - run: df -h
-      - run: free -m
-      - run: uname -a
-      - run: lsb_release -a
-      - run: echo "GitHub branch is ${{ github.ref }}"
-      - run: whoami
-      - run: pwd
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils python3-venv python3-pip git
       - name: Check out repository code
         uses: actions/checkout@v3
-      - name: Start chain
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
         run: |
-          cd interchaintests
-          ./start_chain.sh gaia.json
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install ansible proxmoxer requests
+      - name: Provision runner VM
+        env:
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
+        run: |
+          source ~/env/bin/activate
+          cd ansible
+          ansible-playbook provision-runner.yml
+
+  run-gaia:
+    needs: [provision-test-upgrade-mainnet]
+    with:
+      runs-on-os: cosmos-ubuntu2404-vm-set
+    uses: ./.github/workflows/interchain-steps.yml
+    # steps:
+    #   # Get system info
+    #   - run: ifconfig
+    #   - run: arp -a
+    #   - run: sudo dmidecode
+    #   - run: df -h
+    #   - run: free -m
+    #   - run: uname -a
+    #   - run: lsb_release -a
+    #   - run: echo "GitHub branch is ${{ github.ref }}"
+    #   - run: whoami
+    #   - run: pwd
+    #   - name: Check out repository code
+    #     uses: actions/checkout@v3
+    #   - name: Start chain
+    #     run: |
+    #       cd interchaintests
+    #       ./start_chain.sh gaia.json
+
+
       # - name: Set up Python
       #   uses: actions/setup-python@v3
       # - name: Install dependencies
