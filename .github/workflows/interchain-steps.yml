@@ -29,6 +29,7 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
         with:
+          rootless: true
           daemon-config: |
             {
               "debug": true,
