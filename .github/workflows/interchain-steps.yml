@@ -24,10 +24,15 @@ jobs:
       - run: pwd
       - name: Check out repository code
         uses: actions/checkout@v3
+      
       - name: Install build-essential
         run: |
           sudo apt update
           sudo apt install -y build-essential
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.3
       - name: groupadd docker
         run: sudo groupadd -r -U runner docker
       - name: Install docker
@@ -52,6 +57,7 @@ jobs:
       #     do
       #       sleep 1
       #     done
+      
       - name: Start chain
         run: |
           cd interchaintests
