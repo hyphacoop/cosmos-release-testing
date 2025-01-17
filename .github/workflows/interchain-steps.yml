@@ -25,7 +25,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Set up Docker
-        uses: docker/setup-docker-action@master
+        uses: docker/setup-docker-action@v4
         with:
           daemon-config: |
             {
@@ -34,6 +34,13 @@ jobs:
                 "containerd-snapshotter": true
               }
             }
+      - name: DEBUG
+        if: always()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Start chain
         run: |
           cd interchaintests
