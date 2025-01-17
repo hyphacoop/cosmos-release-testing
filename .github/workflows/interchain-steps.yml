@@ -34,7 +34,9 @@ jobs:
         with:
           go-version: 1.23.0
       - name: groupadd docker
-        run: sudo groupadd -r -U runner docker
+        run: |
+          sudo groupadd -r -U runner docker
+          newgrp docker
       - name: Install docker
         run: |
           sudo apt update
