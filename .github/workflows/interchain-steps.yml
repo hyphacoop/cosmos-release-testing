@@ -57,6 +57,9 @@ jobs:
           echo $PATH
           echo "su PATH"
           sudo -E su runner -c "echo $PATH"
+          sudo -E su runner -c "whoami"
+          sudo -E su runner -c "pwd"
+          sudo -E su runner -c "ls -al"
           cd interchaintests
           sudo -E su runner -c "./start_chain.sh gaia.json"
       # - name: DEBUG
