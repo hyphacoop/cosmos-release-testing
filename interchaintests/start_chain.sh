@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 # Clone interchaintest
 if [[ ! -d interchaintest ]]; then
