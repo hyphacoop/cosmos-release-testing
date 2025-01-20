@@ -53,6 +53,10 @@ jobs:
       
       - name: Start chain
         run: |
+          echo "local PATH"
+          echo $PATH
+          echo "su PATH"
+          sudo -E su runner -c "echo $PATH"
           cd interchaintests
           sudo -E su runner -c "./start_chain.sh gaia.json"
       # - name: DEBUG
