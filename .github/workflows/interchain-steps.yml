@@ -54,7 +54,7 @@ jobs:
       - name: Start chain
         run: |
           cd interchaintests
-          sudo su runner -c "./start_chain.sh gaia.json"
+          sudo -E su runner -c "./start_chain.sh gaia.json"
       # - name: DEBUG
       #   if: always()
       #   run: |
