@@ -1,0 +1,104 @@
+---
+
+name: Gaia v22 Upgrade - Fresh State Interchain
+on:
+    # push:
+    # repository_dispatch:
+    #   types: [new_main_build]
+    # schedule:
+    #   - cron: '0 10 * * 1-6'
+    workflow_dispatch:
+    # push:
+    
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Versions
+  VERSION_CUTOFF: v21.0.0
+  TARGET_VERSION: v22
+
+jobs:
+  set-version-matrix:
+    runs-on: ubuntu-22.04
+    steps:
+      # Get system info
+      - run: ifconfig
+      - run: arp -a
+      - run: sudo dmidecode
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests
+      - name: Generate starting versions
+        id: generate-start
+        run: |
+          start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
+          echo $start
+          echo "start_versions=$start" >> $GITHUB_OUTPUT
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          cache-dependency-path: |
+            interchaintests/go.sum
+      - name: Generate the list of tests
+        id: generate-tests
+        run: |
+          cd interchaintests
+          test_names=$(go test -list=. ./fresh/... | grep '^Test' | jq -c --raw-input --slurp 'split("\n") | map(select(. != ""))')
+          echo "$test_names" | tee ../tests.json
+      - name: Generate upgrade versions
+        id: generate-upgrade
+        run: |
+          upgrade=$(scripts/generate_upgrade_matrix_fresh_interchaintest.py $VERSION_CUTOFF)
+          echo "upgrade_versions=$upgrade" | tee -a $GITHUB_OUTPUT
+    outputs:
+      upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
+  
+  test:
+    needs: set-version-matrix
+    runs-on: ubuntu-22.04
+    name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
+    strategy:
+      matrix:
+        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
+      fail-fast: false
+      max-parallel: 10
+    steps:
+      - name: start-version
+        run: echo ${{matrix.gaia_version}}
+      - name: target-version
+        run: echo ${{matrix.upgrade_version}}
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          cache-dependency-path: |
+            interchaintests/go.sum
+      - name: Test ${{ matrix.test_name }}
+        env:
+          TEST_START_VERSION: ${{ matrix.gaia_version }}
+          TEST_UPGRADE_VERSION: ${{ matrix.upgrade_version }}
+          TEST_TARGET_VERSION: ${{ env.TARGET_VERSION }}
+          CONTAINER_LOG_TAIL: "150"
+        run: |
+          # Horrid hack. It's not in the strangelove repo, and I haven't implemented making it configurable for genesis-transform.
+          docker pull ghcr.io/hyphacoop/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
+          docker pull ghcr.io/hyphacoop/ics:v4.3.0 && docker tag ghcr.io/hyphacoop/ics:v4.3.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.3.0
+          docker pull ghcr.io/hyphacoop/ics:v4.4.0 && docker tag ghcr.io/hyphacoop/ics:v4.4.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.4.0
+          cd interchaintests
+          go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
