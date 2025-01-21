@@ -29,6 +29,6 @@ if [ -z "$chain_config" ]; then
     exit 1
 fi
 
-$LOCAL_IC start $chain_config &
+sudo $LOCAL_IC start $chain_config &
 sleep 30s
 curl -s http://localhost:26657/status | jq '.'
