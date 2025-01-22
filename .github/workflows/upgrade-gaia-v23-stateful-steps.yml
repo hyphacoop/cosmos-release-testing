@@ -576,13 +576,13 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      - name: DEBUG
-        if: always()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   if: always()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _VSC successful> Interchain Security (Consumer) PSS
         run: tests/stateful/test_ccv.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
