@@ -565,8 +565,8 @@ jobs:
           killall hermes || true
           sleep 1
           echo "[DEBUG]: gaiad q provider list-consumer-chains"
-          gaiad --home $HOME/.val1 q provider list-consumer-chains --output json
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
           hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
           hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           echo "Starting Hermes"
@@ -590,7 +590,7 @@ jobs:
           CONSUMER_CHAIN_ID: consumera
         run: |
           set -e
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json --reverse | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
           echo "Client ID: $client_id"
           connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
           echo "Connection ID: $connection_id"
@@ -647,7 +647,7 @@ jobs:
           echo "[INFO]: Query consumer-chain consumera"
           $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
           echo "[INFO]: Query consumer chains list"
-          $CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains --output json | jq
+          $CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains --reverse --output json | jq
           echo "[INFO]: Trigger additional rewards"
           txhash=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --fees 10000000ucon --gas-adjustment 2 -y -o json | jq -r '.txhash')
           sleep 30
@@ -760,7 +760,7 @@ jobs:
           screen -XS hermes.service quit || true
           killall hermes || true
           sleep 1
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
           hermes create connection --a-chain consumerb --a-client 07-tendermint-0 --b-client $client_id
           hermes create channel --a-chain consumerb --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
           echo "Starting Hermes"
@@ -788,7 +788,7 @@ jobs:
           CONSUMER_SERVICE_2: conb2.service
         run: |
           set -e
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
           echo "Client ID: $client_id"
           connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
           echo "Connection ID: $connection_id"
