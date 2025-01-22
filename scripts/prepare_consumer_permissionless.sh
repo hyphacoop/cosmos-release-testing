@@ -63,6 +63,8 @@ if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
         # $ICS_TRANSFORM_BINARY genesis transform --to "v4.x" ccv.json > ccv-consumer.json
         jq 'del(.params.connection_id)' ccv.json > ccv-consumer.json
         cp ccv-consumer.json ccv.json
+        jq 'del(.params.consumer_id)' ccv.json > ccv-consumer.json
+        cp ccv-consumer.json ccv.json
         jq '.' ccv.json
     fi
 fi
