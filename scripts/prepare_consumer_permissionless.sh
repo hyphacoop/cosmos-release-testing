@@ -95,6 +95,8 @@ if [ "$CONSUMER_ICS" == "v5.2.0" ]; then
         # echo "> Transform binary version:"
         # $ICS_TRANSFORM_BINARY version
         # $ICS_TRANSFORM_BINARY genesis transform ccv.json > ccv-520-1.json
+        jq 'del(.connection_id)' ccv.json > ccv-consumer.json
+        cp ccv-consumer.json ccv.json
         jq 'del(.params.consumer_id)' ccv.json > ccv-consumer.json
         cp ccv-consumer.json ccv.json
         jq '.' ccv.json
