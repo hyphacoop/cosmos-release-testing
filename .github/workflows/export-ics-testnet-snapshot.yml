@@ -12,7 +12,7 @@ on:
 jobs:
   export-ics-testnet-provider:
     runs-on: cosmos-runner-set
-    environment: export-rs-testnet
+    environment: export-ics-testnet-snapshot
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       NODE_HOME: /home/runner/.gaia
@@ -72,17 +72,30 @@ jobs:
           source ~/env/bin/activate
           python -m pip install --upgrade pip
           python -m pip install toml-cli requests
-
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
       - name: Get current running gaiad version
         run: |
           RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.ics-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
-      - name: Download binary from cosmos/gaia repo
+      # - name: Download binary from cosmos/gaia repo
+      #   run: |
+      #     sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+      #     sudo chmod +x /usr/local/bin/gaiad
+      - name: Build gaia from source
         run: |
-          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
-          sudo chmod +x /usr/local/bin/gaiad
-      - name: Initializing chain to sync with RS Testnet
+          cd /home/runner
+          git clone https://github.com/cosmos/gaia.git
+          cd gaia
+          git checkout ${{ env.RUNNING_VERSION }}
+          git branch
+          make build
+          sudo cp build/gaiad /usr/local/bin/gaiad
+          gaiad version
+      - name: Initializing chain to sync with ICS Testnet
         env:
           NODE_MONIKER: provider
           SERVICE_NAME: provider
