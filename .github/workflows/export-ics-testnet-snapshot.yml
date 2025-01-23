@@ -90,10 +90,15 @@ jobs:
           cd /home/runner
           git clone https://github.com/cosmos/gaia.git
           cd gaia
+          echo "Checking out branch ${{ env.RUNNING_VERSION }}"
           git checkout ${{ env.RUNNING_VERSION }}
+          echo "git branch:"
           git branch
+          echo "make build..."
           make build
+          echo "Installing gaiad..."
           sudo cp build/gaiad /usr/local/bin/gaiad
+          echo "gaiad version:"
           gaiad version
       - name: Initializing chain to sync with ICS Testnet
         env:
