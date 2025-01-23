@@ -12,7 +12,7 @@ on:
 jobs:
   export-ics-testnet-provider:
     runs-on: cosmos-runner-set
-    environment: export-ics-testnet-snapshot
+    environment: export-ics-testnet-provider-snapshot
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       NODE_HOME: /home/runner/.gaia
