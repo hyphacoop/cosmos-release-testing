@@ -453,7 +453,7 @@
               PROVIDER_ICS: v6.4.0
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-              export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_V630_BINARY
+              export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_V640_BINARY
               scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain v400-one
             env:
@@ -556,7 +556,7 @@
               PROVIDER_ICS: v6.4.0
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V520_BINARY
-              export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_V630_BINARY
+              export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_V640_BINARY
               scripts/prepare_consumer_permissionless.sh
           - name: Start consumer chain v520-one
             env:
