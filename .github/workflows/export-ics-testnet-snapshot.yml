@@ -162,7 +162,7 @@ jobs:
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           ssh gh-actions@files.polypore.xyz rm /storage/snapshots/ics-testnet/provider/* || true
-          scp ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz gh-actions@files.polypore.xyz:/storage/snapshots/ics-testnet/provider
+          scp ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz gh-actions@files.polypore.xyz:/storage/snapshots/ics-testnet/provider/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/ics-testnet/provider/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz /storage/snapshots/ics-testnet/provider/latest.tar.gz
       - name: Upload artifacts
@@ -172,13 +172,13 @@ jobs:
           name: export-ics-testnet-provider
           path: ~/artifact/
 
-export-ics-testnet-pion-snapshot:
+  export-ics-testnet-pion-snapshot:
     runs-on: cosmos-runner-set
     environment: export-ics-testnet-pion-snapshot
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       NODE_HOME: /home/runner/.gaia
-      CHAIN_ID: provider
+      CHAIN_ID: pion-1
       CHAIN_BINARY: 'gaiad'
 
     steps:
@@ -275,7 +275,7 @@ export-ics-testnet-pion-snapshot:
           gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
       - name: Archive config files
-        run: mkdir -p /home/runner/artifact/config/provider && cp -rvp $NODE_HOME/config /home/runner/artifact/config/provider/
+        run: mkdir -p /home/runner/artifact/config/pion-1 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/pion-1/
       - name: Start Chain
         run: screen -L -Logfile /home/runner/artifact/neutrond_sync.log -S neutrond -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
       - name: Wait for neutrond to start and stabilize
