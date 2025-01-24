@@ -1,0 +1,95 @@
+---
+
+name: Interchaintest Test Workflow
+on:
+    workflow_dispatch:
+    push:
+    
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  provision-test-upgrade-mainnet:
+    environment:  github-runner-vm
+    runs-on: cosmos-runner-set
+    steps:
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils python3-venv python3-pip git
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install ansible proxmoxer requests
+      - name: Provision runner VM
+        env:
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
+        run: |
+          source ~/env/bin/activate
+          cd ansible
+          ansible-playbook provision-runner.yml
+
+  run-gaia:
+    needs: [provision-test-upgrade-mainnet]
+    with:
+      runs-on-os: cosmos-ubuntu2404-vm-set
+    uses: ./.github/workflows/interchain-steps.yml
+    # steps:
+    #   # Get system info
+    #   - run: ifconfig
+    #   - run: arp -a
+    #   - run: sudo dmidecode
+    #   - run: df -h
+    #   - run: free -m
+    #   - run: uname -a
+    #   - run: lsb_release -a
+    #   - run: echo "GitHub branch is ${{ github.ref }}"
+    #   - run: whoami
+    #   - run: pwd
+    #   - name: Check out repository code
+    #     uses: actions/checkout@v3
+    #   - name: Start chain
+    #     run: |
+    #       cd interchaintests
+    #       ./start_chain.sh gaia.json
+
+
+      # - name: Set up Python
+      #   uses: actions/setup-python@v3
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     python -m pip install requests
+    #   - name: Generate starting versions
+    #     id: generate-start
+    #     run: |
+    #       start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
+    #       echo $start
+    #       echo "start_versions=$start" >> $GITHUB_OUTPUT
+    #   - name: Setup go
+    #     uses: actions/setup-go@v5
+    #     with:
+    #       cache-dependency-path: |
+    #         interchaintests/go.sum
+    #   - name: Generate the list of tests
+    #     id: generate-tests
+    #     run: |
+    #       cd interchaintests
+    #       test_names=$(go test -list=. ./fresh/... | grep '^Test' | jq -c --raw-input --slurp 'split("\n") | map(select(. != ""))')
+    #       echo "$test_names" | tee ../tests.json
+    #   - name: Generate upgrade versions
+    #     id: generate-upgrade
+    #     run: |
+    #       upgrade=$(scripts/generate_upgrade_matrix_fresh_interchaintest.py $VERSION_CUTOFF)
+    #       echo "upgrade_versions=$upgrade" | tee -a $GITHUB_OUTPUT
+    # outputs:
+    #   upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
+  
