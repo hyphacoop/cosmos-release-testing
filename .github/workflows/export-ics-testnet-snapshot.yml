@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   schedule:
     # At 05:30 on Saturdays.
-    - cron: '30 5 * * 6'
-  push:
+    - cron: '30 5 * * *'
+  # push:
 # concurrency:
 #   group: self-hosted-runners
 
