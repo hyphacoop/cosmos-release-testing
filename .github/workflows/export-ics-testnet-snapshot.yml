@@ -15,7 +15,7 @@ jobs:
     environment: export-ics-testnet-provider-snapshot
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
-      NODE_HOME: /home/runner/.gaia
+      NODE_HOME: /home/runner/.neutron
       CHAIN_ID: provider
       CHAIN_BINARY: 'gaiad'
 
@@ -100,7 +100,7 @@ jobs:
           sudo cp build/gaiad /usr/local/bin/gaiad
           echo "gaiad version:"
           gaiad version
-      - name: Initializing chain to sync with ICS Testnet
+      - name: Initializing chain to sync with ICS Testnet pion-1
         env:
           NODE_MONIKER: provider
           SERVICE_NAME: provider
@@ -111,9 +111,9 @@ jobs:
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
