@@ -3,7 +3,7 @@ name: Export ICS Testnet Snapshot
 on:
   workflow_dispatch:
   schedule:
-    # At 05:30 on Saturdays.
+    # At 05:30 everyday.
     - cron: '30 5 * * *'
   # push:
 # concurrency:
