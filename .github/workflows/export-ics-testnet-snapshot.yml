@@ -179,7 +179,7 @@ jobs:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       NODE_HOME: /home/runner/.gaia
       CHAIN_ID: pion-1
-      CHAIN_BINARY: 'gaiad'
+      CHAIN_BINARY: 'neutrond'
 
     steps:
       # Get system info
