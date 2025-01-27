@@ -72,6 +72,11 @@ jobs:
     needs: set-version-matrix
     runs-on: ubuntu-22.04
     name: "provision-runner-${{ matrix.test_name }}"
+    strategy:
+      matrix:
+        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
+      fail-fast: false
+      max-parallel: 3
     steps:
       - name: Install required packages
         run: |
