@@ -9,6 +9,7 @@
     resource_pool: ci
     template_clone: git-runner-ubuntu-2404
     template_id: 9351
-    memory: 65536
+    # memory: 65536
+    memory: 1024
     cpu_cores: 8
     disk_size: 100G
