@@ -71,7 +71,7 @@ jobs:
   provision-runners:
     needs: set-version-matrix
     runs-on: ubuntu-22.04
-    name: "provision-runner-${{ matrix.test_name }}-(${{ matrix.gaia_version }}-${{ matrix.upgrade_version }}-${{ matrix.upgrade_mechanism}}-${{ matrix.cv_version }})"
+    name: "provision-runner-${{ matrix.test_name }}"
     steps:
       - name: Install required packages
         run: |
@@ -95,7 +95,7 @@ jobs:
           ansible-playbook provision-runner.yml
 
   test:
-    needs: [set-version-matrix, "provision-runner-${{ matrix.test_name }}-(${{ matrix.gaia_version }}-${{ matrix.upgrade_version }}-${{ matrix.upgrade_mechanism}}-${{ matrix.cv_version }})"]
+    needs: [set-version-matrix, provision-runner-${{ matrix.test_name }}]
     runs-on: cosmos-ubuntu2404-vm-set
     name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
     strategy:
