@@ -100,7 +100,8 @@ jobs:
 
   test:
     needs: [provision-runner, set-version-matrix]
-    runs-on: cosmos-ubuntu2404-vm-set
+    # runs-on: cosmos-ubuntu2404-vm-set
+    runs-on: ubuntu-22.04
     name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
     strategy:
       matrix:
