@@ -69,7 +69,7 @@ jobs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
   
   provision-runner:
-    needs: set-version-matrix
+    # needs: set-version-matrix
     if: ${{ false }} 
     runs-on: ubuntu-22.04
     name: "provision-runner"
