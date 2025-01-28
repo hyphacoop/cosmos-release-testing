@@ -99,7 +99,7 @@ jobs:
           ansible-playbook provision-runner.yml
 
   test:
-    needs: [provision-runner, set-version-matrix]
+    needs: [set-version-matrix]
     runs-on: cosmos-ubuntu2404-vm-set
     name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
     strategy:
