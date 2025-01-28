@@ -73,7 +73,7 @@ jobs:
     if: ${{ false }} 
     runs-on: cosmos-runner-set
     environment:  github-runner-vm
-    name: "provision-runner"
+    name: "provision-runner-vm"
     strategy:
       max-parallel: 1
     steps:
@@ -107,9 +107,9 @@ jobs:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: false
       max-parallel: 3
-    if: |
-      always() && 
-      (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
+    # if: |
+    #   always() && 
+    #   (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
     steps:
       - name: start-version
         run: echo ${{matrix.gaia_version}}
