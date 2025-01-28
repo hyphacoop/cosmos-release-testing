@@ -68,14 +68,12 @@ jobs:
     outputs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
   
-  provision-runners:
+  provision-runner:
     needs: set-version-matrix
+    if: ${{ false }} 
     runs-on: ubuntu-22.04
-    name: "provision-runner-${{ matrix.test_name }}"
+    name: "provision-runner"
     strategy:
-      matrix:
-        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-      fail-fast: false
       max-parallel: 1
     steps:
       - name: Install required packages
@@ -99,37 +97,37 @@ jobs:
           cd ansible
           ansible-playbook provision-runner.yml
 
-  # test:
-  #   needs: [set-version-matrix, provision-runner-${{ matrix.test_name }}]
-  #   runs-on: cosmos-ubuntu2404-vm-set
-  #   name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
-  #   strategy:
-  #     matrix:
-  #       ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-  #     fail-fast: false
-  #     max-parallel: 3
-  #   steps:
-  #     - name: start-version
-  #       run: echo ${{matrix.gaia_version}}
-  #     - name: target-version
-  #       run: echo ${{matrix.upgrade_version}}
-  #     - name: Check out repository code
-  #       uses: actions/checkout@v3
-  #     - name: Setup go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         cache-dependency-path: |
-  #           interchaintests/go.sum
-  #     - name: Test ${{ matrix.test_name }}
-  #       env:
-  #         TEST_START_VERSION: ${{ matrix.gaia_version }}
-  #         TEST_UPGRADE_VERSION: ${{ matrix.upgrade_version }}
-  #         TEST_TARGET_VERSION: ${{ env.TARGET_VERSION }}
-  #         CONTAINER_LOG_TAIL: "150"
-  #       run: |
-  #         # Horrid hack. It's not in the strangelove repo, and I haven't implemented making it configurable for genesis-transform.
-  #         docker pull ghcr.io/hyphacoop/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
-  #         docker pull ghcr.io/hyphacoop/ics:v4.3.0 && docker tag ghcr.io/hyphacoop/ics:v4.3.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.3.0
-  #         docker pull ghcr.io/hyphacoop/ics:v4.4.0 && docker tag ghcr.io/hyphacoop/ics:v4.4.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.4.0
-  #         cd interchaintests
-  #         go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
+  test:
+    needs: [set-version-matrix, provision-runner]
+    runs-on: cosmos-ubuntu2404-vm-set
+    name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
+    strategy:
+      matrix:
+        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
+      fail-fast: false
+      max-parallel: 3
+    steps:
+      - name: start-version
+        run: echo ${{matrix.gaia_version}}
+      - name: target-version
+        run: echo ${{matrix.upgrade_version}}
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          cache-dependency-path: |
+            interchaintests/go.sum
+      - name: Test ${{ matrix.test_name }}
+        env:
+          TEST_START_VERSION: ${{ matrix.gaia_version }}
+          TEST_UPGRADE_VERSION: ${{ matrix.upgrade_version }}
+          TEST_TARGET_VERSION: ${{ env.TARGET_VERSION }}
+          CONTAINER_LOG_TAIL: "150"
+        run: |
+          # Horrid hack. It's not in the strangelove repo, and I haven't implemented making it configurable for genesis-transform.
+          docker pull ghcr.io/hyphacoop/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
+          docker pull ghcr.io/hyphacoop/ics:v4.3.0 && docker tag ghcr.io/hyphacoop/ics:v4.3.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.3.0
+          docker pull ghcr.io/hyphacoop/ics:v4.4.0 && docker tag ghcr.io/hyphacoop/ics:v4.4.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.4.0
+          cd interchaintests
+          go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
