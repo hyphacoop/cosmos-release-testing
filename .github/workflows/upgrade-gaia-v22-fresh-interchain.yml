@@ -107,9 +107,9 @@ jobs:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: false
       max-parallel: 3
-    # if: |
-    #   always() && 
-    #   (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
+    if: |
+      always() && !cancelled() && 
+      (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
     steps:
       - name: Provision result
         run: echo ${{ needs.provision-runner.result }}
