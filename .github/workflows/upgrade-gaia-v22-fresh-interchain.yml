@@ -111,6 +111,8 @@ jobs:
     #   always() && 
     #   (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
     steps:
+      - name: Provision result
+        run: echo ${{ needs.provision-runner.result }}
       - name: start-version
         run: echo ${{matrix.gaia_version}}
       - name: target-version
