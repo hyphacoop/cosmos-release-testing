@@ -76,7 +76,7 @@ jobs:
     strategy:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-      max-parallel: 1
+      max-parallel: 10
     steps:
       - name: Install required packages
         run: |
