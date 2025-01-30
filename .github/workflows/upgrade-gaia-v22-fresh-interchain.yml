@@ -69,12 +69,13 @@ jobs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
   
   provision-runner:
-    # needs: set-version-matrix
-    if: ${{ false }} 
+    needs: set-version-matrix
     runs-on: cosmos-runner-set
     environment:  github-runner-vm
     name: "provision-runner-vm"
     strategy:
+      matrix:
+        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       max-parallel: 1
     steps:
       - name: Install required packages
@@ -108,9 +109,9 @@ jobs:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: false
       max-parallel: 3
-    if: |
-      always() && !cancelled() && 
-      (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
+    # if: |
+    #   always() && !cancelled() && 
+    #   (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
     steps:
       - name: Provision result
         run: echo ${{ needs.provision-runner.result }}
