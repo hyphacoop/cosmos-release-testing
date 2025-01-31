@@ -4,7 +4,10 @@ name: Provision VM Runner
 on:
     workflow_dispatch:
     workflow_call:
-    # push:
+      inputs:
+        PROXMOX_SECRET:
+          required: true
+          type: string
 
 concurrency:
   group: provision-vm-runner
@@ -29,7 +32,7 @@ jobs:
           python -m pip install ansible proxmoxer requests
       - name: Provision runner VM
         env:
-          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
+          PROXMOX_PASSWORD: ${{ inputs.PROXMOX_SECRET }}
         run: |
           source ~/env/bin/activate
           cd ansible
