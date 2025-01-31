@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   provision-vm-runner:
-    environment:  github-runner-vm
+    environment: github-runner-vm
     runs-on: cosmos-runner-set
     steps:
       - name: Install required packages
