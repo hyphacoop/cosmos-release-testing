@@ -4,7 +4,7 @@ name: Provision VM Runner
 on:
     workflow_dispatch:
     workflow_call:
-      inputs:
+      secrets:
         PROXMOX_SECRET:
           required: true
           type: string
