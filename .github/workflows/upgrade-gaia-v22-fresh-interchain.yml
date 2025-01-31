@@ -70,49 +70,23 @@ jobs:
   
   provision-runner:
     needs: set-version-matrix
-    runs-on: cosmos-runner-set
-    environment:  github-runner-vm
-    name: "provision-runner-vm"
     strategy:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-      max-parallel: 1
       fail-fast: true
-    steps:
-      - name: Install required packages
-        run: |
-          sudo apt update
-          sudo apt -y install python-is-python3 python3-distutils python3-venv python3-pip git
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Init Python venv
-        run: python -m venv ~/env
-      - name: Install dependencies
-        run: |
-          source ~/env/bin/activate
-          python -m pip install --upgrade pip
-          python -m pip install ansible proxmoxer requests
-      - name: Provision runner VM
-        env:
-          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
-        run: |
-          source ~/env/bin/activate
-          cd ansible
-          ansible-playbook provision-runner.yml
+      max-parallel: 1
+      uses: ./.github/workflows/provision-runner-vm.yml
 
   test:
     needs: [provision-runner, set-version-matrix]
     # runs-on: cosmos-ubuntu2404-vm-set
     runs-on: ubuntu-22.04
     name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
-    strategy:
-      matrix:
-        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-      fail-fast: false
-      max-parallel: 3
-    # if: |
-    #   always() && !cancelled() && 
-    #   (needs.provision-runner.result == 'skipped' || needs.provision-runner.result == 'success')
+    # strategy:
+    #   matrix:
+    #     ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
+    #   fail-fast: false
+    #   max-parallel: 3
     steps:
       - name: Provision result
         run: echo ${{ needs.provision-runner.result }}
