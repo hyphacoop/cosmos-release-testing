@@ -76,6 +76,7 @@ jobs:
       fail-fast: true
       max-parallel: 1
     uses: ./.github/workflows/provision-runner-vm.yml
+    secrets: inherit
     # with:
     #   PROXMOX_SECRET: ${{ secrets.PROXMOX_SECRET }}
 
