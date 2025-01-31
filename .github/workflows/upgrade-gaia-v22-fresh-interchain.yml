@@ -75,7 +75,7 @@ jobs:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: true
       max-parallel: 1
-      uses: ./.github/workflows/provision-runner-vm.yml
+    uses: ./.github/workflows/provision-runner-vm.yml
 
   test:
     needs: [provision-runner, set-version-matrix]
