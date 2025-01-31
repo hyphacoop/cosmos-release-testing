@@ -68,28 +68,18 @@ jobs:
     outputs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
   
-  provision-runner:
-    needs: set-version-matrix
+  test:
+    needs: [set-version-matrix]
+    runs-on: cosmos-ubuntu2404-vm-set
+    # runs-on: ubuntu-22.04
+    name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
     strategy:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-      fail-fast: true
-      max-parallel: 1
-    uses: ./.github/workflows/provision-runner-vm.yml
-    secrets: inherit
-    # with:
-    #   PROXMOX_SECRET: ${{ secrets.PROXMOX_SECRET }}
-
-  test:
-    needs: [provision-runner, set-version-matrix]
-    # runs-on: cosmos-ubuntu2404-vm-set
-    runs-on: ubuntu-22.04
-    name: "${{ matrix.test_name }} (${{ matrix.gaia_version }} -> ${{ matrix.upgrade_version }}, ${{ matrix.upgrade_mechanism}}, ${{ matrix.cv_version }})"
-    # strategy:
-    #   matrix:
-    #     ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
-    #   fail-fast: false
-    #   max-parallel: 3
+      fail-fast: false
+      max-parallel: 3
+    concurrency:
+      group: interchaintest-group
     steps:
       - name: Provision result
         run: echo ${{ needs.provision-runner.result }}
@@ -117,3 +107,15 @@ jobs:
           docker pull ghcr.io/hyphacoop/ics:v4.4.0 && docker tag ghcr.io/hyphacoop/ics:v4.4.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.4.0
           cd interchaintests
           go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
+
+  provision-runner:
+    needs: set-version-matrix
+    concurrency:
+      group: interchaintest-group
+    strategy:
+      matrix:
+        ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
+      fail-fast: true
+      max-parallel: 1
+    uses: ./.github/workflows/provision-runner-vm.yml
+    secrets: inherit
