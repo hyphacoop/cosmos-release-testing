@@ -70,7 +70,8 @@ jobs:
   
   provision-runner:
     needs: set-version-matrix
-    environment: github-runner-vm
+    environment:
+      name: github-runner-vm
     strategy:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
