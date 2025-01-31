@@ -80,6 +80,7 @@ jobs:
       max-parallel: 3
     concurrency:
       group: interchaintest-group
+      cancel-in-progress: false
     steps:
       - name: Provision result
         run: echo ${{ needs.provision-runner.result }}
@@ -112,6 +113,7 @@ jobs:
     needs: set-version-matrix
     concurrency:
       group: interchaintest-group
+      cancel-in-progress: false
     strategy:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
