@@ -76,8 +76,8 @@ jobs:
       fail-fast: true
       max-parallel: 1
     uses: ./.github/workflows/provision-runner-vm.yml
-    with:
-      PROXMOX_SECRET: ${{ secrets.PROXMOX_SECRET }}
+    # with:
+    #   PROXMOX_SECRET: ${{ secrets.PROXMOX_SECRET }}
 
   test:
     needs: [provision-runner, set-version-matrix]
