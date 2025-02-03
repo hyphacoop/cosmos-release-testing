@@ -77,7 +77,7 @@ jobs:
       matrix:
         ${{fromJson(needs.set-version-matrix.outputs.upgrade_versions)}}
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 10
     steps:
       - name: Provision result
         run: echo ${{ needs.provision-runner.result }}
