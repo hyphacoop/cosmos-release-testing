@@ -41,7 +41,7 @@ jobs:
           echo "[INFO]: VMs running: $running_vms"
           while [ $running_vms -gt 3 ]
           do
-            echo "[INFO]: There are 3 or more runner VMs running..."
+            echo "[INFO]: There are 3 or more runner VMs running... Waiting for slot..."
             echo "[INFO]: Query number of VMs running..."
             running_vms=$(curl -s -k -b "PVEAuthCookie=$ticket" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/nodes/cosmos-kvm4/qemu | jq -r '.data[] | select(.status=="running") | .uptime' | wc -l)
             echo "[INFO]: VMs running: $running_vms"
