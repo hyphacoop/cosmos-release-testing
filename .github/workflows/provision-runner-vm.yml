@@ -34,12 +34,15 @@ jobs:
         env:
           PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
         run: |
+          echo "[INFO]: Get API ticket..."
           ticket=$(curl -s -k -d 'username=ciuser@pve' --data-urlencode "password=$PROXMOX_PASSWORD" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/access/ticket | jq -r '.data.ticket')
-          running_vms=4
-          while [ running_vms -lt 4 ]
-            echo "Query number of VMs running..."
+          echo "[INFO]: Get running runner VMs..."
+          running_vms=$(curl -s -k -b "PVEAuthCookie=$ticket" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/nodes/cosmos-kvm4/qemu | jq -r '.data[] | select(.status=="running") | .uptime' | wc -l)
+          while [ $running_vms -gt 3 ]
+            echo "[INFO]: There are 3 or more runner VMs running..."
+            echo "[INFO]: Query number of VMs running..."
             running_vms=$(curl -s -k -b "PVEAuthCookie=$ticket" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/nodes/cosmos-kvm4/qemu | jq -r '.data[] | select(.status=="running") | .uptime' | wc -l)
-            echo "VMs running: $running_vms"
+            echo "[INFO]: VMs running: $running_vms"
             sleep 1
           done
 
