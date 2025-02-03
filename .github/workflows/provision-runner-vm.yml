@@ -4,10 +4,6 @@ name: Provision VM Runner
 on:
     workflow_dispatch:
     workflow_call:
-      # secrets:
-      #   PROXMOX_SECRET:
-      #     required: true
-      #     type: string
 
 concurrency:
   group: provision-vm-runner
@@ -42,10 +38,10 @@ jobs:
           while [ $running_vms -gt 4 ]
           do
             echo "[INFO]: There are 5 or more runner VMs running... Waiting for slot..."
+            sleep 10
             echo "[INFO]: Query number of VMs running..."
             running_vms=$(curl -s -k -b "PVEAuthCookie=$ticket" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/nodes/cosmos-kvm4/qemu | jq -r '.data[] | select(.status=="running") | .uptime' | wc -l)
             echo "[INFO]: VMs running: $running_vms"
-            sleep 10
           done
 
       - name: Provision runner VM
