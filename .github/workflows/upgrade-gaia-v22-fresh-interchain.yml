@@ -116,11 +116,11 @@ jobs:
           CONTAINER_LOG_TAIL: "150"
         run: |
           # Horrid hack. It's not in the strangelove repo, and I haven't implemented making it configurable for genesis-transform.
-          docker pull ghcr.io/hyphacoop/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
-          docker pull ghcr.io/hyphacoop/ics:v4.3.0 && docker tag ghcr.io/hyphacoop/ics:v4.3.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.3.0
-          docker pull ghcr.io/hyphacoop/ics:v4.4.0 && docker tag ghcr.io/hyphacoop/ics:v4.4.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.4.0
+          sudo docker pull ghcr.io/hyphacoop/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.2.0 && docker tag ghcr.io/hyphacoop/ics:v4.2.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.1.1
+          sudo docker pull ghcr.io/hyphacoop/ics:v4.3.0 && docker tag ghcr.io/hyphacoop/ics:v4.3.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.3.0
+          sudo docker pull ghcr.io/hyphacoop/ics:v4.4.0 && docker tag ghcr.io/hyphacoop/ics:v4.4.0 ghcr.io/strangelove-ventures/heighliner/ics:v4.4.0
           cd interchaintests
-          sudo go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
+          go test -failfast -p 1 -v -timeout 5h -run="^${{ matrix.test_name }}$" ./fresh/...
 
   provision-runner:
     needs: set-version-matrix
