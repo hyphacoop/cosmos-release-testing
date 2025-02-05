@@ -8,7 +8,7 @@ on:
     # schedule:
     #   - cron: '0 10 * * 1-6'
     workflow_dispatch:
-    push:
+    # push:
     
 
 concurrency:
@@ -79,8 +79,6 @@ jobs:
       fail-fast: false
       # max-parallel: 10
     steps:
-      - name: Provision result
-        run: echo ${{ needs.provision-runner.result }}
       - name: start-version
         run: echo ${{matrix.gaia_version}}
       - name: target-version
@@ -126,7 +124,7 @@ jobs:
   provision-runner:
     needs: set-version-matrix
     concurrency:
-      group: interchaintest-group
+      group: provision-vm-runner
       cancel-in-progress: false
     strategy:
       matrix:
