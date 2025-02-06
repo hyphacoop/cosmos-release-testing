@@ -1,0 +1,54 @@
+---
+
+name: Provision VM Runner
+on:
+    workflow_dispatch:
+    workflow_call:
+
+concurrency:
+  group: provision-vm-runner
+  cancel-in-progress: false
+
+jobs:
+  provision-vm-runner:
+    environment: github-runner-vm
+    runs-on: cosmos-runner-set
+    steps:
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt -y install python-is-python3 python3-distutils python3-venv python3-pip git
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install ansible proxmoxer requests
+      - name: Check number of Runner VMs running
+        env:
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
+        run: |
+          echo "[INFO]: Get API ticket..."
+          ticket=$(curl -s -k -d 'username=ciuser@pve' --data-urlencode "password=$PROXMOX_PASSWORD" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/access/ticket | jq -r '.data.ticket')
+          echo "[INFO]: Get running runner VMs..."
+          running_vms=$(curl -s -k -b "PVEAuthCookie=$ticket" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/nodes/cosmos-kvm4/qemu | jq -r '.data[] | select(.status=="running") | .uptime' | wc -l)
+          echo "[INFO]: VMs running: $running_vms"
+          while [ $running_vms -gt 9 ]
+          do
+            echo "[INFO]: There are 10 or more runner VMs running... Waiting for slot..."
+            sleep 10
+            echo "[INFO]: Query number of VMs running..."
+            running_vms=$(curl -s -k -b "PVEAuthCookie=$ticket" --insecure https://cosmos-kvm1.polypore.xyz:8006/api2/json/nodes/cosmos-kvm4/qemu | jq -r '.data[] | select(.status=="running") | .uptime' | wc -l)
+            echo "[INFO]: VMs running: $running_vms"
+          done
+
+      - name: Provision runner VM
+        env:
+          PROXMOX_PASSWORD: ${{ secrets.PROXMOX_SECRET }}
+        run: |
+          source ~/env/bin/activate
+          cd ansible
+          ansible-playbook provision-runner.yml
