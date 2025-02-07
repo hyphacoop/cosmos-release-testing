@@ -28,8 +28,6 @@ jobs:
             echo "tag_name=v22.0.0" | sed 's~/~-~g' | tee -a $GITHUB_OUTPUT
         - name: Check out repository code
           uses: actions/checkout@v4
-          with:
-            ref: ${{ steps.get-metadata.outputs.ref_name }}
         - name: Setup go
           uses: actions/setup-go@v5
         - name: Prepare matrix
