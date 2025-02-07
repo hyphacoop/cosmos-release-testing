@@ -33,6 +33,7 @@ jobs:
         - name: Prepare matrix
           id: generate-matrix
           run: |
+            go get github.com/google/go-github/v62/github
             cd ./interchaintests
             echo "matrix=$(go run ./matrix_tool/main.go ${{ steps.get-metadata.outputs.tag_name }})" | tee -a $GITHUB_OUTPUT
     outputs:
