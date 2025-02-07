@@ -1,4 +1,4 @@
 # cosmos-release-testing
 Test results for new Cosmos releases
 
-[![Test Gaia Stateful Upgrade - v22](https://github.com/hyphacoop/cosmos-release-testing/actions/workflows/upgrade-gaia-v22-stateful.yml/badge.svg)](https://github.com/hyphacoop/cosmos-release-testing/actions/workflows/upgrade-gaia-v22-stateful.yml)
+[![Test Gaia Stateful Upgrade - v23](https://github.com/hyphacoop/cosmos-release-testing/actions/workflows/upgrade-gaia-v23-stateful.yml/badge.svg?branch=main)](https://github.com/hyphacoop/cosmos-release-testing/actions/workflows/upgrade-gaia-v23-stateful.yml)
