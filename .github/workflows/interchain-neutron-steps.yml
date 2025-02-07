@@ -9,55 +9,110 @@ on:
         type: string
       
 jobs:
-  test-run:
-    runs-on: ${{ inputs.runs-on-os }}
+  prepare-matrix:
+    runs-on: ubuntu-latest
     steps:
-      # Get system info
-      - run: ip addr
-      - run: sudo dmidecode
-      - run: df -h
-      - run: free -m
-      - run: uname -a
-      - run: lsb_release -a
-      - run: echo "GitHub branch is ${{ github.ref }}"
-      - run: whoami
-      - run: pwd
-      - name: Check out repository code
-        uses: actions/checkout@v3
+        # We need to figure out a) a ref to clone based on a docker image, and b) which tag to test
+        # If the event is a registry_package, this comes from the pushed image; for a workflow_dispatch, it's the branch/tag that the user supplied
+        - name: Get metadata
+          id: get-metadata
+          run: |
+            if [[ "${{ github.event_name }}" == 'repository_dispatch' ]]; then
+              echo "ref_name=${{ github.event.client_payload.ref_name }}" | tee -a $GITHUB_OUTPUT
+              echo "tag_name=${{ github.event.client_payload.tag_name }}" | tee -a $GITHUB_OUTPUT
+            else
+              echo "ref_name=${{ github.ref_name }}" | tee -a $GITHUB_OUTPUT
+              echo "tag_name=${{ github.ref_name }}" | sed 's~/~-~g' | tee -a $GITHUB_OUTPUT
+            fi
+        - name: Check out repository code
+          uses: actions/checkout@v4
+          with:
+            ref: ${{ steps.get-metadata.outputs.ref_name }}
+        - name: Setup go
+          uses: actions/setup-go@v5
+        - name: Prepare matrix
+          id: generate-matrix
+          run: |
+            cd ./interchaintests
+            echo "matrix=$(go run ./matrix_tool/main.go ${{ steps.get-metadata.outputs.tag_name }})" | tee -a $GITHUB_OUTPUT
+    outputs:
+        matrix: ${{ steps.generate-matrix.outputs.matrix }}
+        ref_name: ${{ steps.get-metadata.outputs.ref_name }}
+
+  test:
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+    name: "${{ matrix.previous_version }} -> ${{ matrix.test_version }} test ${{ matrix.test_name }}"
+    strategy:
+        matrix:
+            ${{fromJson(needs.prepare-matrix.outputs.matrix)}}
+        fail-fast: false
+        max-parallel: 10
+    steps:
+        - name: Check out repository code
+          uses: actions/checkout@v4
+        - name: Setup go
+          uses: actions/setup-go@v5
+        - name: Run test
+          env:
+            TEST_DOCKER_REGISTRY: "ghcr.io/cosmos/gaia"
+            TEST_OLD_GAIA_IMAGE_VERSION: "v21.0.1"
+            TEST_NEW_GAIA_IMAGE_VERSION: "v22.0.0"
+            TEST_UPGRADE_NAME: "v23"
+          run: |
+            cd ./tests/interchain
+            go install github.com/mfridman/tparse@latest
+            set -o pipefail
+            go test -v ./... -failfast -p 1 -timeout 5h -run="^${{ matrix.test_name }}" -json | tee ../../output-${{ matrix.previous_version }}-${{ matrix.test_name }}.json | tparse -follow -all
+        - name: Upload output
+          uses: actions/upload-artifact@v4
+          if: always()
+          with:
+            name: output-${{ matrix.previous_version }}-${{ matrix.test_name }}
+            path: output-${{ matrix.previous_version }}-${{ matrix.test_name }}.json
+  # test-run:
+  #   runs-on: ${{ inputs.runs-on-os }}
+  #   steps:
+  #     # Get system info
+  #     - run: ip addr
+  #     - run: sudo dmidecode
+  #     - run: df -h
+  #     - run: free -m
+  #     - run: uname -a
+  #     - run: lsb_release -a
+  #     - run: echo "GitHub branch is ${{ github.ref }}"
+  #     - run: whoami
+  #     - run: pwd
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v3
       
-      - name: Install build-essential
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.23.0
-      # - name: groupadd docker
-        # run: sudo groupadd -r -U runner docker
-      - name: Install docker
-        run: |
-          sudo apt update
-          sudo apt install -y ca-certificates curl
-          sudo install -m 0755 -d /etc/apt/keyrings
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          sudo chmod a+r /etc/apt/keyrings/docker.asc
-          # Add the repository to Apt sources:
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-          sudo apt update
-          sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-          sudo chown runner:docker /var/run/docker.sock
-      - name: Start chain
-        run: |
-          cd interchaintests
-          ./start_neutron.sh cosmos_neutron.json
-      # - name: DEBUG
-      #   if: always()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
+  #     - name: Install build-essential
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install -y build-essential
+  #     - name: Install Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: 1.23.0
+  #     # - name: groupadd docker
+  #       # run: sudo groupadd -r -U runner docker
+  #     - name: Install docker
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install -y ca-certificates curl
+  #         sudo install -m 0755 -d /etc/apt/keyrings
+  #         sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  #         sudo chmod a+r /etc/apt/keyrings/docker.asc
+  #         # Add the repository to Apt sources:
+  #         echo \
+  #           "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  #           $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  #           sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  #         sudo apt update
+  #         sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  #         sudo chown runner:docker /var/run/docker.sock
+  #     - name: Start chain
+  #       run: |
+  #         cd interchaintests
+  #         ./start_neutron.sh cosmos_neutron.json
+
