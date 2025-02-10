@@ -9,7 +9,7 @@ expected=$3
 signatures=$(curl -s http://$host:$port/block | jq '.result.block.last_commit.signatures[]')
 signature_count=$(echo $signatures | jq '[select(.block_id_flag==2)] | length')
 echo "> Signature count: $signature_count"
-if (( "$signature_count" != "$3" )); then
+if [ "$signature_count" != "$3" ]; then
     echo "> Not all validators are signing blocks."
     echo "$signatures"
     exit 1

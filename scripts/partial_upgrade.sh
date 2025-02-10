@@ -44,3 +44,6 @@ curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
 printf "\n\n*** val3 ***\n\n"
 journalctl -u $PROVIDER_SERVICE_3 | tail -n 150
 curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
+
+echo "> Validators:"
+$CHAIN_BINARY q staking validators -o json --home $HOME_1 | jq '.'
