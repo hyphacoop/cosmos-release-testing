@@ -1255,6 +1255,8 @@
               CONSUMER_SERVICE_3: v450-2-3.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_1 --now
+              sudo systemctl enable $CONSUMER_SERVICE_2 --now
+              sudo systemctl enable $CONSUMER_SERVICE_3 --now
               sleep 5
               journalctl -u $CONSUMER_SERVICE_1
           - name: _Consumer chain produces blocks> ICS v4.5.0 chain 2
