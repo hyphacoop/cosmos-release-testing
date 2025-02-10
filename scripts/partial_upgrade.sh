@@ -22,10 +22,12 @@ echo "Attempting upgrade to $upgrade_name."
 sudo systemctl stop $PROVIDER_SERVICE_3
 
 echo "> Downloading new binary"
+echo "URL: $DOWNLOAD_URL" 
 wget $DOWNLOAD_URL -O ./upgraded -q
 chmod +x ./upgraded
 mv ./upgraded $HOME/go/bin/$CHAIN_BINARY_PARTIAL
 
+$CHAIN_BINARY_PARTIAL version --long
 sudo systemctl start $PROVIDER_SERVICE_3
 
 sleep 10
