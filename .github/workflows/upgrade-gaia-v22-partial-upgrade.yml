@@ -196,7 +196,6 @@
       Baseline-2-ics-optin:
         runs-on: ubuntu-22.04
         strategy:
-          matrix:
           fail-fast: false
         env:
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
