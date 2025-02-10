@@ -173,9 +173,8 @@
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
   
           - name: Test partial upgrade
-            env:
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/$TARGET_VERSION/gaiad-$TARGET_VERSION-linux-amd64
             run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/$TARGET_VERSION/gaiad-$TARGET_VERSION-linux-amd64
               scripts/partial_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
 
           - name: _Blocks produced after upgrade
