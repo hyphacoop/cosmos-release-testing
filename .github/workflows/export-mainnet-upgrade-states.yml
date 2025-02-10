@@ -195,10 +195,37 @@ jobs:
           gaiad q gov params -o json
           min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
           echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
-      - name: Submit and vote on the upgrade proposal
+      - name: Restore val key
         run: |
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Stop gaiad
+        run: |
+          echo "exiting gaia and screen"
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          echo "FORK_HEIGHT=$current_block" >> $GITHUB_ENV
+          killall gaiad screen
+          sleep 10s
+      - name: Make forked state archive and upload
+        run: |
+          echo "[INFO]: Compressing ~/.gaia ..."
+          cd /home/runner/
+          tar cfz ${{ env.RUNNING_VERSION }}_${{ env.FORK_HEIGHT }}-stateful-fork.tar.gz .gaia
+          echo "[INFO]: Remove old forked states"
+          ssh gh-actions@files.polypore.xyz rm /var/www/html/forked-state/cosmoshub-4/${{ env.RUNNING_VERSION }}_*-stateful-fork.tar.gz || true
+          echo "[INFO]: Uploading forked state to files.polypore.xyz"
+          scp ${{ env.RUNNING_VERSION }}_${{ env.FORK_HEIGHT }}-stateful-fork.tar.gz gh-actions@files.polypore.xyz:/var/www/html/forked-state/cosmoshub-4/
+          echo "[INFO]: Update latest file symlinks"
+          ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/forked-state/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.FORK_HEIGHT }}-stateful-fork.tar.gz /var/www/html/forked-state/cosmoshub-4/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
+          echo "[INFO]: Remove local fork archive"
+          rm ${{ env.RUNNING_VERSION }}_${{ env.FORK_HEIGHT }}-stateful-fork.tar.gz
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Submit and vote on the upgrade proposal
+        run: |
           echo "Delegate 10ATOM to validator."
           gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
           echo "Wait for the delegation to go on chain..."
