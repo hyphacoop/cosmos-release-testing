@@ -182,7 +182,7 @@
             run: |
               tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
           - name: Block signing check
-            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validator
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
           - name: Flush "migration successful" lines
             run: |
               $CHAIN_BINARY keys list --home $HOME_1
