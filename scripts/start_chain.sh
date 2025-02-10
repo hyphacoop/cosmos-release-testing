@@ -6,6 +6,7 @@
 echo "Installing Gaia..."
 wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY -q
 chmod +x $HOME/go/bin/$CHAIN_BINARY
+cp $HOME/go/bin/$CHAIN_BINARY $HOME/go/bin/$CHAIN_BINARY_PARTIAL
 
 # Printing Gaia binary checksum
 echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
@@ -335,7 +336,12 @@ if [ "$COSMOVISOR" = true ]; then
         echo "Environment=\"DAEMON_ALLOW_DOWNLOAD_BINARIES=true\"" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     fi
 else
-    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_PARTIAL start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+    if [ "$PARTIAL_UPGRADE" = true ]; then
+        echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_PARTIAL start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+    else
+        echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+    fi
+    
 fi
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
