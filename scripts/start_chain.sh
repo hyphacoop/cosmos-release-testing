@@ -335,7 +335,7 @@ if [ "$COSMOVISOR" = true ]; then
         echo "Environment=\"DAEMON_ALLOW_DOWNLOAD_BINARIES=true\"" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     fi
 else
-    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_PARTIAL start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
 fi
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
