@@ -1,6 +1,6 @@
 ---
 
-    name: Gaia Partial Upgrade - Fresh State
+    name: Gaia Minor Upgrade - Fresh State
     on:
       workflow_dispatch:
       push:
@@ -1864,8 +1864,6 @@
               echo "$NEUTRON_BINARY runs $($NEUTRON_BINARY version)"
               echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
           - name: Start chain
-            env:
-              START_VERSION: ${{matrix.gaia_version}}
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               scripts/start_chain.sh
