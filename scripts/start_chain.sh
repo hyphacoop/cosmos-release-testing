@@ -10,6 +10,7 @@ cp $HOME/go/bin/$CHAIN_BINARY $HOME/go/bin/$CHAIN_BINARY_PARTIAL
 
 # Printing Gaia binary checksum
 echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
+$CHAIN_BINARY version
 
 # Initialize home directories
 echo "Initializing node homes..."

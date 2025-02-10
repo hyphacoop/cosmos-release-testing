@@ -160,8 +160,6 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
           - name: Start chain
-            env:
-              START_VERSION: ${{matrix.gaia_version}}
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               scripts/start_chain.sh
