@@ -12,5 +12,5 @@ if (( "$signature_count" != "$3" )); then
     echo "> Not all validators are signing blocks."
     exit 1
 else
-    echo "> All validators are signing blocks.
+    echo "> All validators are signing blocks."
 fi
