@@ -1,5 +1,5 @@
 #!/bin/bash 
-# Test a gaia software upgrade via governance proposal.
+# Test a gaia software upgrade via binary swap.
 # It assumes gaia is running on the local host.
 
 gaia_host=$1
@@ -19,16 +19,26 @@ curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
 echo "Attempting upgrade to $upgrade_name."
 
 # Replace binary
+sudo systemctl stop $PROVIDER_SERVICE_1
+sudo systemctl stop $PROVIDER_SERVICE_2
 sudo systemctl stop $PROVIDER_SERVICE_3
 
 echo "> Downloading new binary"
 echo "URL: $DOWNLOAD_URL" 
 wget $DOWNLOAD_URL -O ./upgraded -q
 chmod +x ./upgraded
-mv ./upgraded $HOME/go/bin/$CHAIN_BINARY_PARTIAL
+./upgraded version --long
 
-$CHAIN_BINARY_PARTIAL version --long
+if [ "$PARTIAL_UPGRADE" = true ]; then
+    mv ./upgraded $HOME/go/bin/$CHAIN_BINARY_PARTIAL
+else
+    mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
+fi
+
+sudo systemctl start $PROVIDER_SERVICE_1
+sudo systemctl start $PROVIDER_SERVICE_2
 sudo systemctl start $PROVIDER_SERVICE_3
+
 
 sleep 10
 
