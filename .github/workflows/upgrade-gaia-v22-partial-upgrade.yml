@@ -62,9 +62,9 @@
       WALLET_5: cosmos17n3vkvg6lwf98p3kanlhlyjk6zkrfla9pgh8fk
       WALLET_6: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
       WALLET_RELAYER: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
-      VAL1_STAKE: 800000000
+      VAL1_STAKE: 400000000
       VAL2_STAKE: 200000000
-      VAL3_STAKE: 10000000
+      VAL3_STAKE: 200000000
       VAL_FUNDS: 11000000000
       VAL_STAKE: 1000000000
       VAL_STAKE_STEP: 1000000
