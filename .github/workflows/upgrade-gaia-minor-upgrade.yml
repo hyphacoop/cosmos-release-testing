@@ -151,7 +151,7 @@
               echo "$HOME/.relayer" >> $GITHUB_PATH
           - name: Set partial upgrade
             run: |
-              echo "PARTIAL_UPGRADE=${{ matrix.partial }} >> $GITHUB_ENV
+              echo "PARTIAL_UPGRADE=${{ matrix.partial }}" >> $GITHUB_ENV
           - name: Check partial upgrade
             run: |
               echo "Partial upgrade: $PARTIAL_UPGRADE"
