@@ -2008,7 +2008,7 @@
           - name: Start chain
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_chain_single_val.sh
+              scripts/start_chain.sh
           - name: Check Gaia log
             run: sudo journalctl -u $PROVIDER_SERVICE_1
           - name: Print Gaia version
@@ -2124,7 +2124,6 @@
             
           - name: Start chain
             env:
-              START_VERSION: ${{matrix.gaia_version}}
               GAS_PRICE: 0
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
