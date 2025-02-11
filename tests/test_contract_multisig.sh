@@ -57,6 +57,7 @@ echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 echo "> Fund contract"
 $CHAIN_BINARY tx bank send $WALLET_1 $contract_address 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+sleep $(($COMMIT_TIMEOUT+2))
 
 echo "> Execute multisig contract: propose transfer"
 $CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/propose.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
@@ -64,16 +65,12 @@ sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
 
 echo "> Execute multisig contract: vote on transfer proposal"
-jq -r '.vote.proposal_id |= 2' tests/contracts/propose.json > propose.json
-jq '.' propose.json
-$CHAIN_BINARY tx wasm execute $contract_address "$(cat vote.json)" --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+$CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/vote.json)" --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
 
 echo "> Execute multisig contract: execute transfer proposal"
-jq -r '.execute.proposal_id |= 2' tests/contracts/execute.json > execute.json
-jq '.' execute.json
-$CHAIN_BINARY tx wasm execute $contract_address "$(cat execute.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+$CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/execute.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
 
