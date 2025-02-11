@@ -44,6 +44,7 @@ sleep $VOTING_PERIOD
 code_id=$1
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "Contract address: $contract_address"
+echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 # Query
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')

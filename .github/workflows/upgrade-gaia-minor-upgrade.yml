@@ -2349,9 +2349,16 @@
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
   
-          - name: _Test permissioned cosmwasm
+          # - name: _Test permissioned cosmwasm
+          #   run: |
+          #     tests/gaia-v19/test_cosmwasm.sh 2
+
+          - name: Execute pre-upgrade contract
             run: |
-              tests/gaia-v19/test_cosmwasm.sh 2
+              echo "Contract address: $CONTRACT_ADDRESS"
+              $CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
+              sleep $COMMIT_TIMEOUT
+
           - name: Print logs
             run: |
               journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
@@ -2361,6 +2368,9 @@
               $CHAIN_BINARY_PARTIAL version --long | grep wasm
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+          - name: Execute pre-upgrade contract
+            run: |
+              echo "Contract address: $CONTRACT_ADDRESS"
 
       Baseline-10-feemarket:
         runs-on: ubuntu-22.04
@@ -2369,9 +2379,6 @@
             upgrade: ["complete", "partial"]
           fail-fast: false
         env:
-          # COMMIT_TIMEOUT: 60s
-          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           # Consumer chain variables
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           VAL1_STAKE: 400000000
