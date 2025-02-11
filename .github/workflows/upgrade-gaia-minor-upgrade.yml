@@ -727,6 +727,8 @@
               CONSUMER_SERVICE_3: v630-2-3.service
             run: |
               sudo systemctl enable $CONSUMER_SERVICE_1 --now
+              sudo systemctl enable $CONSUMER_SERVICE_2 --now
+              sudo systemctl enable $CONSUMER_SERVICE_3 --now
               sleep 5
               journalctl -u $CONSUMER_SERVICE_1
           - name: _Post-upgrade consumer chain produces blocks> ICS v6.3.0 chain 2
@@ -2136,8 +2138,6 @@
             run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
     
           - name: Installing secondary chain binaries
-            env:
-              START_VERSION: ${{matrix.gaia_version}}
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               echo "Chain binary URL: $CHAIN_BINARY_URL"
