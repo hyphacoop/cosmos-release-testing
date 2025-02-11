@@ -48,7 +48,8 @@ $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
 # Instantiate
 # exit 0
 $CHAIN_BINARY tx wasm instantiate 1 "$(cat tests/contracts/parameters.json)" --admin="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" --label=my-contract --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
-
+sleep $(($COMMIT_TIMEOUT+2))
+$CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
 exit 0
 # # Query
 # count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
