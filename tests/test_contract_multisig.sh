@@ -36,7 +36,7 @@ sleep $VOTING_PERIOD
 
 $CHAIN_BINARY q gov proposal 1 --home $HOME_1 -o json | jq '.'
 
-$CHAIN_BINARY q wasm list-contract-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
+$CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
 # Use code 1
 # Get contract address
 code_id=1
