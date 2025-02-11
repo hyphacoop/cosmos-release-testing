@@ -2398,6 +2398,7 @@
 
           - name: Execute pre-upgrade contract - execute
             run: |
+              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
               contract_address=$CONTRACT_ADDRESS
               echo "> Execute multisig contract: execute transfer proposal"
               jq -r '.execute.proposal_id |= 2' tests/contracts/execute.json > execute.json
