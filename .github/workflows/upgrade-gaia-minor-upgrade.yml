@@ -2295,6 +2295,8 @@
           - name: Print logs
             run: |
               journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+              curl -s http://localhost:$VAL1_RPC_PORT/abci_info
+              curl -s http://localhost:$VAL3_RPC_PORT/abci_info
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
 
