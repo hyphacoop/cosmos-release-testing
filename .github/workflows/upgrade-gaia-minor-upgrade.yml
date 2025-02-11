@@ -13,7 +13,7 @@
       # Versions
       START_VERSION: v22.0.0
       TARGET_VERSION: v22.1.0
-      PARTIAL_UPGRADE: true
+      PARTIAL_UPGRADE: false
       # All chain variables
       COMMIT_TIMEOUT: 5
       DOWNTIME_BLOCKS: 10000
@@ -1131,6 +1131,8 @@
       Baseline-3-ics-topn:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           # Consumer chain variables
@@ -1145,6 +1147,14 @@
           ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
           ICS_TRANSFORM_BINARY: cd-transform
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: start-version
             run: echo ${{matrix.gaia_version}}
           - name: target-version
@@ -1377,8 +1387,18 @@
       Baseline-4-pfm:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
@@ -1541,6 +1561,8 @@
       Baseline-5-mainnet-consumer-chains:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           # Consumer chain variables
@@ -1554,6 +1576,14 @@
           STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
           STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
@@ -1882,6 +1912,8 @@
       Baseline-6-vesting-liquid-staking:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           COMMIT_TIMEOUT: 6
@@ -1890,6 +1922,14 @@
           VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
           VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
@@ -2007,12 +2047,22 @@
       Baseline-7-ICA-controller:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           CHAIN_BINARY_SECONDARY: gaiad-ibc
           COMMIT_TIMEOUT: 1
           RELAYER: hermes
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
@@ -2124,12 +2174,22 @@
       Baseline-8-IBC-fee-middleware:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           CHAIN_BINARY_SECONDARY: gaiad-ibc
           COMMIT_TIMEOUT: 1
           RELAYER: hermes
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
@@ -2303,6 +2363,8 @@
       Baseline-10-feemarket:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           # COMMIT_TIMEOUT: 60s
@@ -2313,12 +2375,15 @@
           VAL1_STAKE: 400000000
           VAL2_STAKE: 400000000
           VAL3_STAKE: 400000000
-          # Reference ICS chain variables
-          CONSUMER_DENOM: ucon
-          CONSUMER_FEES: 500
-          ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-          ICS_TRANSFORM_BINARY: cd-transform
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
