@@ -20,6 +20,8 @@ txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
 echo "Tx hash: $txhash"
 sleep $(($COMMIT_TIMEOUT+2))
 
+$CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.'
+
 echo "Getting proposal ID from txhash..."
 proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "Proposal ID: $proposal_id"
