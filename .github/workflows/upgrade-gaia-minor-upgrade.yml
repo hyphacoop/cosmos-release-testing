@@ -2334,9 +2334,13 @@
             run: $CHAIN_BINARY version --long
           - name: Block production check
             run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks 
-          - name: _Test permissioned cosmwasm
+          # - name: _Test permissioned cosmwasm
+          #   run: |
+          #     tests/gaia-v19/test_cosmwasm.sh 1
+
+          - name: _Test multisig contract
             run: |
-              tests/gaia-v19/test_cosmwasm.sh 1
+              tests/test_contract_multisig.sh
 
           - name: Minor upgrade
             run: |
