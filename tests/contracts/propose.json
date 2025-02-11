@@ -1,22 +1,22 @@
 {
-    "propose": {
-      "title": "Send tokens",
-      "description": "Transfer 1000 uatom to recipient",
-      "msgs": [
-        {
-          "bank": {
-            "send": {
-              "to_address": "cosmos1v8zgdpzqfazvk6fgwhqqhzx0hfannrajezuc6t",
-              "amount": [
-                {
-                  "denom": "uatom",
-                  "amount": "1000"
-                }
-              ]
-            }
+  "propose": {
+    "title": "Send tokens",
+    "description": "Transfer 1000 uatom to recipient",
+    "msgs": [
+      {
+        "bank": {
+          "send": {
+            "to_address": "cosmos1v8zgdpzqfazvk6fgwhqqhzx0hfannrajezuc6t",
+            "amount": [
+              {
+                "denom": "uatom",
+                "amount": "1000"
+              }
+            ]
           }
         }
-      ],
-      "latest": null
-    }
+      }
+    ],
+    "latest": null
   }
+}

@@ -45,6 +45,7 @@ sleep $VOTING_PERIOD
 
 # Instantiate
 # exit 0
+echo "> Instantiating contract: code 1"
 $CHAIN_BINARY tx wasm instantiate 1 "$(cat tests/contracts/parameters.json)" --admin="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" --label=my-contract --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
@@ -54,9 +55,26 @@ echo "Contract count: $contract_count"
 echo "Contract address: $contract_address"
 echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
+echo "> Execute multisig contract: propose transfer"
 $CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/propose.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
+
+echo "> Execute multisig contract: vote on transfer proposal"
+jq -r '.vote.proposal_id |= 2' tests/contracts/propose.json > propose.json
+jq '.' propose.json
+$CHAIN_BINARY tx wasm execute $contract_address "$(cat vote.json)" --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+sleep $(($COMMIT_TIMEOUT+2))
+$CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
+
+echo "> Execute multisig contract: execute transfer proposal"
+jq -r '.execute.proposal_id |= 2' tests/contracts/execute.json > execute.json
+jq '.' execute.json
+$CHAIN_BINARY tx wasm execute $contract_address "$(cat execute.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+sleep $(($COMMIT_TIMEOUT+2))
+$CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
+
+
 # # Query
 # count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
 # echo "Count: $count"
