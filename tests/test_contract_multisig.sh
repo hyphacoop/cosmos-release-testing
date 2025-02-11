@@ -36,19 +36,20 @@ sleep $VOTING_PERIOD
 
 $CHAIN_BINARY q gov proposal 1 --home $HOME_1 -o json | jq '.'
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
-$CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
+# $CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
 # Use code 1
 # Get contract address
-code_id=1
-$CHAIN_BINARY q wasm list-contract-by-code 1 --home $HOME_1 -o json | jq -r '.'
-contract_address=$($CHAIN_BINARY q wasm list-contract-by-code 1 --home $HOME_1 -o json | jq -r '.contracts[0]')
-echo "Contract address: $contract_address"
-echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
+# code_id=1
+# $CHAIN_BINARY q wasm list-contract-by-code 1 --home $HOME_1 -o json | jq -r '.'
+# contract_address=$($CHAIN_BINARY q wasm list-contract-by-code 1 --home $HOME_1 -o json | jq -r '.code_infos[0].')
+# echo "Contract address: $contract_address"
+# echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 # Instantiate
-exit 0
+# exit 0
 $CHAIN_BINARY tx wasm instantiate 1 "$(cat tests/contracts/parameters.json)" --admin="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" --label=my-contract --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 
+exit 0
 # # Query
 # count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
 # echo "Count: $count"
