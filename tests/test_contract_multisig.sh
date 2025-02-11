@@ -27,9 +27,9 @@ proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.
 echo "Proposal ID: $proposal_id"
 
 echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json"
-$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
-$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json"
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 echo $vote
 txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
