@@ -13,7 +13,7 @@ txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
     --deposit 10000000$DENOM -y \
     --from $WALLET_1 \
     --chain-id $CHAIN_ID \
-    --gas 20000000 --gas-prices 0.005$DENOM \
+    --gas 30000000 --gas-prices 0.005$DENOM \
     --home $HOME_1 -o json | jq -r '.txhash')
 # echo $proposal
 # txhash=$($proposal | jq -r .txhash)
