@@ -2356,7 +2356,7 @@
           - name: Execute pre-upgrade contract
             run: |
               echo "Contract address: $CONTRACT_ADDRESS"
-              $CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
+              $CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash'
               sleep $COMMIT_TIMEOUT
 
           - name: Print logs
