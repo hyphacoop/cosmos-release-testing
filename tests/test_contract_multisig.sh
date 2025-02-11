@@ -37,7 +37,7 @@ sleep $VOTING_PERIOD
 $CHAIN_BINARY q gov proposal 1 --home $HOME_1 -o json | jq '.'
 # Use code 1
 # Get contract address
-code_id=$1
+code_id=1
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "Contract address: $contract_address"
 echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
