@@ -16,7 +16,7 @@ printf "\n\n*** val3 ***\n\n"
 journalctl -u $PROVIDER_SERVICE_3 | tail -n 20
 curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
 
-echo "Attempting upgrade to $upgrade_name."
+echo "Attempting upgrade to $TARGET_VERSION."
 
 # Replace binary
 sudo systemctl stop $PROVIDER_SERVICE_1
