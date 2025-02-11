@@ -2294,7 +2294,7 @@
               tests/gaia-v19/test_cosmwasm.sh 2
           - name: Print logs
             run: |
-              journalctl -u $SERVICE_3 | tail -n 100
+              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
 
