@@ -6,11 +6,9 @@ EXEC="{\"increment\": {}}"
 
 txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
     tests/contracts/cw3_fixed_multisig.wasm \
-    --label "my first contract" \
-    --no-admin \
-    --instantiate-nobody true \
     --title "Store and instantiate CW template" \
-    --summary "This proposal will store and instantiate the cw template contract" \
+    --summary "This proposal will store the cw template contract" \
+    --authority $WALLET_1 \
     --deposit 10000000$DENOM -y \
     --from $WALLET_1 \
     --chain-id $CHAIN_ID \
