@@ -150,11 +150,11 @@
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
           - name: Set complete upgrade
-            if: ${{ matrix.upgrade }} == "complete"
+            if: ${{ matrix.upgrade == 'complete' }} 
             run: |
               echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
           - name: Set partial upgrade
-            if: ${{ matrix.upgrade }} == "partial"
+            if: ${{ matrix.upgrade == 'partial' }}
             run: |
               echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
           - name: Check upgrade type
