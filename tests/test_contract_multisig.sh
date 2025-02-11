@@ -55,6 +55,9 @@ echo "Contract count: $contract_count"
 echo "Contract address: $contract_address"
 echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
+echo "> Fund contract"
+$CHAIN_BINARY tx bank send $WALLET_1 $contract_address 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+
 echo "> Execute multisig contract: propose transfer"
 $CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/propose.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
