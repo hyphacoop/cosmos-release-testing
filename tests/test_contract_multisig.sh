@@ -4,6 +4,7 @@ INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
+echo "Submitting the store proposal..."
 txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
     tests/contracts/cw3_fixed_multisig.wasm \
     --title "Store and instantiate CW template" \
@@ -14,9 +15,9 @@ txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
     --chain-id $CHAIN_ID \
     --gas 20000000 --gas-prices 0.005$DENOM \
     --home $HOME_1 -o json | jq -r '.txhash')
-echo "Submitting the store-instantiate proposal..."
 # echo $proposal
 # txhash=$($proposal | jq -r .txhash)
+echo "Tx hash: $txhash"
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "Getting proposal ID from txhash..."
