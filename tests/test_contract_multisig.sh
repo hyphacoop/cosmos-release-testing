@@ -40,6 +40,7 @@ $CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 
 # Use code 1
 # Get contract address
 code_id=1
+$CHAIN_BINARY q wasm list-contract-by-code 1 --home $HOME_1 -o json | jq -r '.'
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code 1 --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "Contract address: $contract_address"
 echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
