@@ -2360,8 +2360,10 @@
           - name: Execute pre-upgrade contract
             run: |
               echo "Contract address: $CONTRACT_ADDRESS"
-              $CHAIN_BINARY tx wasm execute $CONTRACT_ADDRESS '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.'
-              sleep $((COMMIT_TIMEOUT*2))
+              $CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/propose.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+              sleep $(($COMMIT_TIMEOUT+2))
+              $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
+
 
           - name: Print logs
             run: |
