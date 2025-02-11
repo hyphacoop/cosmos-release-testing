@@ -139,16 +139,6 @@
             upgrade: ["complete", "partial"]
           fail-fast: false
         steps:
-          - name: start-version
-            run: echo $START_VERSION
-          - name: target-version
-            run: echo $TARGET_VERSION
-          - name: Update PATH
-            run: |
-              mkdir -p $HOME/go/bin
-              echo "$HOME/go/bin" >> $GITHUB_PATH
-              echo "$HOME/.hermes" >> $GITHUB_PATH
-              echo "$HOME/.relayer" >> $GITHUB_PATH
           - name: Set complete upgrade
             if: ${{ matrix.upgrade == 'complete' }} 
             run: |
@@ -160,6 +150,16 @@
           - name: Check upgrade type
             run: |
               echo "Partial upgrade: $PARTIAL_UPGRADE"
+          - name: start-version
+            run: echo $START_VERSION
+          - name: target-version
+            run: echo $TARGET_VERSION
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -209,6 +209,8 @@
       Baseline-2-ics-optin:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
           # Consumer chain variables
@@ -219,6 +221,17 @@
           ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
           ICS_TRANSFORM_BINARY: cd-transform
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
+          - name: Check upgrade type
+            run: |
+              echo "Partial upgrade: $PARTIAL_UPGRADE"
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
@@ -1871,6 +1884,7 @@
         strategy:
           fail-fast: false
         env:
+          COMMIT_TIMEOUT: 6
           VESTING_AMOUNT: 110000000
           VESTING_DELEGATED_AMOUNT: 100000000
           VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
@@ -2208,10 +2222,10 @@
       Baseline-9-cosmwasm:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            upgrade: ["complete", "partial"]
           fail-fast: false
         env:
-          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           # Consumer chain variables
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           VAL1_STAKE: 400000000
@@ -2221,6 +2235,17 @@
           CONSUMER_DENOM: ucon
           CONSUMER_FEES: 500
         steps:
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade == 'complete' }} 
+            run: |
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade == 'partial' }}
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
+          - name: Check upgrade type
+            run: |
+              echo "Partial upgrade: $PARTIAL_UPGRADE"
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
