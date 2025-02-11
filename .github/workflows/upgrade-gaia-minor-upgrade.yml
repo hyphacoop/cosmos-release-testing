@@ -136,7 +136,7 @@
         runs-on: ubuntu-22.04
         strategy:
           matrix:
-            partial: ["true", "false"]
+            upgrade: ["complete", "partial"]
           fail-fast: false
         steps:
           - name: start-version
@@ -149,10 +149,15 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
-          - name: Set partial upgrade
+          - name: Set complete upgrade
+            if: ${{ matrix.upgrade }} == "complete"
             run: |
-              echo "PARTIAL_UPGRADE=${{ matrix.partial }}" >> $GITHUB_ENV
-          - name: Check partial upgrade
+              echo "PARTIAL_UPGRADE=false" >> $GITHUB_ENV
+          - name: Set partial upgrade
+            if: ${{ matrix.upgrade }} == "partial"
+            run: |
+              echo "PARTIAL_UPGRADE=true" >> $GITHUB_ENV
+          - name: Check upgrade type
             run: |
               echo "Partial upgrade: $PARTIAL_UPGRADE"
           - name: Bypass the grub-efi-amd64-signed package
