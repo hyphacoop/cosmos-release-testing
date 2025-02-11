@@ -2357,7 +2357,7 @@
           #   run: |
           #     tests/gaia-v19/test_cosmwasm.sh 2
 
-          - name: Execute pre-upgrade contract
+          - name: Execute pre-upgrade contract - propose
             run: |
               echo "Contract address: $CONTRACT_ADDRESS"
               contract_address=$CONTRACT_ADDRESS
@@ -2366,13 +2366,37 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
 
+          - name: Print logs
+            run: |
+              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+              curl -s http://localhost:$VAL1_RPC_PORT/abci_info
+              curl -s http://localhost:$VAL3_RPC_PORT/abci_info
+              $CHAIN_BINARY_PARTIAL q wasm libwasmvm-version
+              $CHAIN_BINARY_PARTIAL version --long | grep wasm
+          - name: Block signing check
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
+          - name: Execute pre-upgrade contract - vote
+            run: |
               echo "> Execute multisig contract: vote on transfer proposal"
               jq -r '.vote.proposal_id |= 2' tests/contracts/vote.json > vote.json
               jq '.' vote.json
               $CHAIN_BINARY tx wasm execute $contract_address "$(cat vote.json)" --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
+          
+          - name: Print logs
+            run: |
+              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+              curl -s http://localhost:$VAL1_RPC_PORT/abci_info
+              curl -s http://localhost:$VAL3_RPC_PORT/abci_info
+              $CHAIN_BINARY_PARTIAL q wasm libwasmvm-version
+              $CHAIN_BINARY_PARTIAL version --long | grep wasm
+          - name: Block signing check
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
 
+          - name: Execute pre-upgrade contract - execute
+            run: |
               echo "> Execute multisig contract: execute transfer proposal"
               jq -r '.execute.proposal_id |= 2' tests/contracts/execute.json > execute.json
               jq '.' execute.json
