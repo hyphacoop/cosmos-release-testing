@@ -521,6 +521,8 @@
               sudo systemctl enable $CONSUMER_SERVICE_3 --now
               sleep 5
               journalctl -u $CONSUMER_SERVICE_1
+              journalctl -u $CONSUMER_SERVICE_2
+              journalctl -u $CONSUMER_SERVICE_3
           - name: _Pre-upgrade consumer chain produces blocks> ICS v6.3.0 chain 1
             env:
               CON1_RPC_PORT: 63121
