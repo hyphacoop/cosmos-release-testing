@@ -2,7 +2,7 @@
 
 echo "Submitting the store proposal..."
 txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
-    tests/contracts/cw3_fixed_multisig-2.wasm \
+    tests/contracts/cw3_fixed_multisig.wasm \
     --title "Store and instantiate CW template" \
     --summary "This proposal will store the cw template contract" \
     --authority cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn \
