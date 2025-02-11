@@ -29,12 +29,14 @@ $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend te
 echo $vote
 txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
-$CHAIN_BINARY q tx $txhash --home $HOME_1
+# $CHAIN_BINARY q tx $txhash --home $HOME_1
 
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
 $CHAIN_BINARY q gov proposal 1 --home $HOME_1 -o json | jq '.'
+
+$CHAIN_BINARY q wasm list-contract-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
 # Use code 1
 # Get contract address
 code_id=1
