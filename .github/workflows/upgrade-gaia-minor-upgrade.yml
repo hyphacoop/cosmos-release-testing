@@ -131,10 +131,12 @@
       HERMES_VERSION: v1.10.4
       RLY_VERSION: "2.5.0"
     jobs:
-    
+
       Baseline-1-upgrade:
         runs-on: ubuntu-22.04
         strategy:
+          matrix:
+            partial: ["true", "false"]
           fail-fast: false
         steps:
           - name: start-version
@@ -147,6 +149,12 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Set partial upgrade
+            run: |
+              echo "PARTIAL_UPGRADE=${{ matrix.partial }} >> $GITHUB_ENV
+          - name: Check partial upgrade
+            run: |
+              echo "Partial upgrade: $PARTIAL_UPGRADE"
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -2129,7 +2137,7 @@
               GAS_PRICE: 0
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_chain_single_val.sh
+              scripts/start_chain.sh
           - name: Check Gaia log
             run: sudo journalctl -u $PROVIDER_SERVICE_1
           - name: Print Gaia version
