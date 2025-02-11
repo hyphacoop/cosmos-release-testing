@@ -1,9 +1,5 @@
 #!/bin/bash
 
-INIT='{"count":100}'
-QUERY='{"get_count":{}}'
-EXEC="{\"increment\": {}}"
-
 echo "Submitting the store proposal..."
 txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
     tests/contracts/cw3_fixed_multisig.wasm \
@@ -39,7 +35,6 @@ echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
 $CHAIN_BINARY q gov proposal 1 --home $HOME_1 -o json | jq '.'
-exit 0
 # Use code 1
 # Get contract address
 code_id=$1
@@ -47,28 +42,32 @@ contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $H
 echo "Contract address: $contract_address"
 echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
-# Query
-count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
-echo "Count: $count"
+# Instantiate
 
-if [[ "$count" == "100" ]]; then
-    echo "PASS: Contract was instantiated."
-else
-    echo "FAIL: Contract was not instantiated."
-    exit 1
-fi
+$CHAIN_BINARY tx wasm instantiate 1 "$(cat tests/contracts/parameters.json)" --admin="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" --label=my-contract --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 
-txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
-echo "Execute tx hash: $txhash"
-sleep $(($COMMIT_TIMEOUT*2))
-$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+# # Query
+# count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
+# echo "Count: $count"
 
-# Query
-count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
-echo "Count: $count"
-if [[ "$count" == "101" ]]; then
-    echo "PASS: Contract was executed."
-else
-    echo "FAIL: Contract was not executed."
-    exit 1
-fi
+# if [[ "$count" == "100" ]]; then
+#     echo "PASS: Contract was instantiated."
+# else
+#     echo "FAIL: Contract was not instantiated."
+#     exit 1
+# fi
+
+# txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
+# echo "Execute tx hash: $txhash"
+# sleep $(($COMMIT_TIMEOUT*2))
+# $CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
+
+# # Query
+# count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
+# echo "Count: $count"
+# if [[ "$count" == "101" ]]; then
+#     echo "PASS: Contract was executed."
+# else
+#     echo "FAIL: Contract was not executed."
+#     exit 1
+# fi

@@ -1,0 +1,20 @@
+{
+    "voters": [
+      {
+        "addr": "cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl",
+        "weight": 1
+      },
+      {
+        "addr": "cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq", 
+        "weight": 1
+      }
+    ],
+    "threshold": {
+      "absolute_count": {
+        "weight": 2
+      }
+    },
+    "max_voting_period": {
+      "time": 3600
+    }
+  }
