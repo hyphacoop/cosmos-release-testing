@@ -46,6 +46,8 @@ echo "> list-code:"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
 echo "> list-contract-by-code:"
 $CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq '.'
+echo "> list-contract-by-creator:"
+$CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq '.'
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "Contract address: $contract_address"
 echo "COUNTER_CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
