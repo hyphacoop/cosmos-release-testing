@@ -64,7 +64,7 @@
       WALLET_RELAYER: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
       VAL1_STAKE: 400000000
       VAL2_STAKE: 400000000
-      VAL3_STAKE: 200000000
+      VAL3_STAKE: 400000000
       VAL_FUNDS: 11000000000
       VAL_STAKE: 1000000000
       VAL_STAKE_STEP: 1000000
@@ -2290,7 +2290,7 @@
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           VAL1_STAKE: 400000000
           VAL2_STAKE: 400000000
-          VAL3_STAKE: 200000000
+          VAL3_STAKE: 400000000
           # Reference ICS chain variables
           CONSUMER_DENOM: ucon
           CONSUMER_FEES: 500
@@ -2472,7 +2472,7 @@
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           VAL1_STAKE: 400000000
           VAL2_STAKE: 400000000
-          VAL3_STAKE: 200000000
+          VAL3_STAKE: 400000000
         steps:
           - name: Set complete upgrade
             if: ${{ matrix.upgrade == 'complete' }} 
