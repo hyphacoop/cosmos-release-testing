@@ -203,6 +203,13 @@
             run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
           - name: _RPC endpoints check
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
+          - name: Block signing check
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
   
       Baseline-2-ics-optin:
         runs-on: ubuntu-22.04
@@ -981,8 +988,12 @@
                 echo "PASS: Consumer rewards distributed to val1."
               fi
 
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
 
           # - name: _Downtime test> val3 must not be jailed 
           #   run: |
@@ -1382,6 +1393,12 @@
           #     sleep $(($COMMIT_TIMEOUT*30))
           # - name: _Downtime test> val2 must be jailed - 2
           #   run: tests/test_validator_jailed.sh $VALOPER_2 true
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
+          - name: Block signing check
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
   
       Baseline-4-pfm:
         runs-on: ubuntu-22.04
@@ -1554,8 +1571,12 @@
             run: |
               tests/test_pfm_transfers.sh
 
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
-            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators    
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
 
       Baseline-5-mainnet-consumer-chains:
         runs-on: ubuntu-22.04
@@ -1905,8 +1926,12 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
           
       Baseline-6-vesting-liquid-staking:
         runs-on: ubuntu-22.04
@@ -2040,8 +2065,12 @@
                 exit 0
               fi
 
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
 
       Baseline-7-ICA-controller:
         runs-on: ubuntu-22.04
@@ -2167,8 +2196,12 @@
               export CONTROLLER_ACCT=$WALLET_1
               export RECIPIENT=$WALLET_6
               tests/test_ica_send.sh
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
 
       Baseline-8-IBC-fee-middleware:
         runs-on: ubuntu-22.04
@@ -2262,21 +2295,19 @@
               tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
-          
-          # - name: Restart Hermes with dynamic gas prices
-          #   run: |
-          #     cp templates/gaia-v18/hermes-config-ibc-fee.toml ~/.hermes/config.toml
-          #     sudo systemctl restart $RELAYER
-          #     sleep 1m
-  
+
           - name: _Test IBC fee middleware
             env:
               HOME_IBC: /home/runner/.two
             run: |
               tests/gaia-v16/test_ibc_fee.sh
   
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
 
       Baseline-9-cosmwasm:
         runs-on: ubuntu-22.04
@@ -2350,9 +2381,16 @@
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
   
-          # - name: _Test permissioned cosmwasm
-          #   run: |
-          #     tests/gaia-v19/test_cosmwasm.sh 2
+          - name: Execute counter contract - increment
+            run: |
+              QUERY='{"get_count":{}}'
+              $CHAIN_BINARY tx wasm execute $COUNTER_CONTRACT_ADDRESS '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.'
+              count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
+              echo "Count: $count"
+
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
 
           - name: Execute multisig contract - propose
             run: |
@@ -2405,6 +2443,20 @@
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
           
+          - name: _Test counter contract
+            run: |
+              tests/test_contract_counter.sh
+
+          - name: _Test multisig contract
+            run: |
+              tests/test_contract_multisig.sh
+
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
+          - name: Block signing check
+            run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
       Baseline-10-feemarket:
         runs-on: ubuntu-22.04
         strategy:
@@ -2503,8 +2555,13 @@
               $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
               echo "> feemarket params:"
               $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+
 
       # Baseline-12-ics-sovereign-reuse-connection:
       #   runs-on: ubuntu-22.04

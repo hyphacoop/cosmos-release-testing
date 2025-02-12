@@ -4,8 +4,6 @@ INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
-# $CHAIN_BINARY tx wasm store tests/conta/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1
-
 txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     tests/contracts/counter.wasm $INIT \
     --label "my first contract" \
@@ -19,8 +17,7 @@ txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     --gas 20000000 --gas-prices 0.005$DENOM \
     --home $HOME_1 -o json | jq -r '.txhash')
 echo "Submitting the store-instantiate proposal..."
-# echo $proposal
-# txhash=$($proposal | jq -r .txhash)
+
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "Getting proposal ID from txhash..."
@@ -34,25 +31,17 @@ $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend te
 echo $vote
 txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
-$CHAIN_BINARY q tx $txhash --home $HOME_1
 
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
-# Use code 1
 # Get contract address
-code_id=$1
 echo "> list-code:"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
 latest_code=$($CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq -r '.code_infos[-1].code_id')
 echo "> Latest code: $latest_code"
-echo "> list-contract-by-creator:"
-$CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq '.'
-
-
-# contract_address=$($CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq -r '.contract_addresses[-1]')
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $latest_code --home $HOME_1 -o json | jq -r '.contracts[-1]')
-echo "Contract address: $contract_address"
+echo "> Contract address: $contract_address"
 echo "COUNTER_CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 # Query
@@ -66,6 +55,7 @@ else
     exit 1
 fi
 
+# Increment
 txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
 echo "Execute tx hash: $txhash"
 sleep $(($COMMIT_TIMEOUT*2))
