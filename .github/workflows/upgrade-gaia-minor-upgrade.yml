@@ -2366,6 +2366,15 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
+          - name: Check consensus
+            run: |
+              echo "> val1:"
+              journalctl -u $PROVIDER_SERVICE_1 | grep AppHash
+              echo "> val2:"
+              journalctl -u $PROVIDER_SERVICE_2 | grep AppHash
+              echo "> val3:"
+              journalctl -u $PROVIDER_SERVICE_3 | grep AppHash
+              
           - name: Print logs
             run: |
               journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
@@ -2386,6 +2395,15 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
+
+          - name: Check consensus
+            run: |
+              echo "> val1:"
+              journalctl -u $PROVIDER_SERVICE_1 | grep AppHash
+              echo "> val2:"
+              journalctl -u $PROVIDER_SERVICE_2 | grep AppHash
+              echo "> val3:"
+              journalctl -u $PROVIDER_SERVICE_3 | grep AppHash
           - name: Print logs
             run: |
               journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
@@ -2406,7 +2424,15 @@
               $CHAIN_BINARY tx wasm execute $contract_address "$(cat execute.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
-
+          
+          - name: Check consensus
+            run: |
+              echo "> val1:"
+              journalctl -u $PROVIDER_SERVICE_1 | grep AppHash
+              echo "> val2:"
+              journalctl -u $PROVIDER_SERVICE_2 | grep AppHash
+              echo "> val3:"
+              journalctl -u $PROVIDER_SERVICE_3 | grep AppHash
           - name: Print logs
             run: |
               journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
