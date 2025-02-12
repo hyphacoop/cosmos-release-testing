@@ -2290,7 +2290,7 @@
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           VAL1_STAKE: 400000000
           VAL2_STAKE: 400000000
-          VAL3_STAKE: 400000000
+          VAL3_STAKE: 200000000
           # Reference ICS chain variables
           CONSUMER_DENOM: ucon
           CONSUMER_FEES: 500
@@ -2369,11 +2369,11 @@
           - name: Check consensus
             run: |
               echo "> val1:"
-              apphash=$(journalctl -u $PROVIDER_SERVICE_1 | grep AppHash)
+              apphash=$(journalctl -u $PROVIDER_SERVICE_1 | grep -c AppHash || true)
               echo "> val1 apphash? $apphash"
-              apphash=$(journalctl -u $PROVIDER_SERVICE_2 | grep AppHash)
+              apphash=$(journalctl -u $PROVIDER_SERVICE_2 | grep -c AppHash || true)
               echo "> val2 apphash? $apphash"
-              apphash=$(journalctl -u $PROVIDER_SERVICE_3 | grep AppHash)
+              apphash=$(journalctl -u $PROVIDER_SERVICE_3 | grep -c AppHash || true)
               echo "> val3 apphash? $apphash"
 
           - name: Print logs
