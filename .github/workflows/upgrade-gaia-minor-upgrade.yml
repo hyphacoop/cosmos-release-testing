@@ -2402,6 +2402,7 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $MULTISIG_CONTRACT_ADDRESS --home $HOME_1 -o json | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
+              journalctl -u $PROVIDER_SERVICE_3 | tail -n 50
           - name: Check for AppHash errors
             run: |
               tests/test_consensus_errors.sh
@@ -2438,7 +2439,7 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $MULTISIG_CONTRACT_ADDRESS --home $HOME_1 -o json | jq '.'
               $CHAIN_BINARY q bank balances $WALLET_3 --home $HOME_1 -o json | jq '.'
-              
+
           - name: Check for AppHash errors
             run: |
               tests/test_consensus_errors.sh
