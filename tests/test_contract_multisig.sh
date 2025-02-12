@@ -38,7 +38,7 @@ sleep $VOTING_PERIOD
 echo "> List code"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
 echo "> List by creator"
-$CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
+$CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS -o json --home $HOME_1 | jq '.'
 # Use code 1
 # Get contract address
 # code_id=1
