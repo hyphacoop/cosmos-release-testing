@@ -156,14 +156,15 @@ jobs:
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
-          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
+          tar --use-compress-program="pigz -k " -cf ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
       - name: Upload snapshot
         run: |
-          echo "Compressing ~/.gaia ..."
+          echo "Clear directory on server..."
           cd /home/runner/
           ssh gh-actions@files.polypore.xyz rm /storage/snapshots/ics-testnet/provider/* || true
+          echo "Uploading ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz..."
           scp ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz gh-actions@files.polypore.xyz:/storage/snapshots/ics-testnet/provider/
-          # Update latest file symlinks
+          echo "Update latest file symlinks..."
           ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/ics-testnet/provider/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz /storage/snapshots/ics-testnet/provider/latest.tar.gz
       - name: Upload artifacts
         if: always()
@@ -187,7 +188,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools pigz
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -300,14 +301,15 @@ jobs:
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
-          tar cfvz ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
+          tar --use-compress-program="pigz -k " -cf ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
       - name: Upload snapshot
         run: |
-          echo "Compressing ~/.neutron ..."
+          echo "Clear directory on server..."
           cd /home/runner/
           ssh gh-actions@files.polypore.xyz rm /storage/snapshots/ics-testnet/pion-1/* || true
+          echo "Uploading ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz..."
           scp ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz gh-actions@files.polypore.xyz:/storage/snapshots/ics-testnet/pion-1
-          # Update latest file symlinks
+          echo "Update latest file symlinks..."
           ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/ics-testnet/pion-1/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz /storage/snapshots/ics-testnet/pion-1/latest.tar.gz
       - name: Upload artifacts
         if: always()
