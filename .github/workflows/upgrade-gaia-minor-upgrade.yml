@@ -92,8 +92,6 @@
       CONSUMER_DENOM: ucon
       CONSUMER_GAS_PRICE: 0.005
       CONSUMER_FEES: 500
-      CONSUMER_CHAIN_V330_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v3.3.0/interchain-security-cd-linux
-      CONSUMER_CHAIN_V330_BINARY: consumerd_v4.0.0
       CONSUMER_CHAIN_V400_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v4.0.0/interchain-security-cd-linux
       CONSUMER_CHAIN_V400_BINARY: consumerd_v4.0.0
       CONSUMER_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-cd-linux
@@ -131,7 +129,6 @@
       HERMES_VERSION: v1.10.4
       RLY_VERSION: "2.5.0"
     jobs:
-
       Baseline-1-upgrade:
         runs-on: ubuntu-22.04
         strategy:
@@ -1367,6 +1364,7 @@
 
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
+            
           # - name: _Downtime test> val2 must not be jailed
           #   run: tests/test_validator_jailed.sh $VALOPER_2 null
           
@@ -2288,9 +2286,6 @@
         env:
           # Consumer chain variables
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-          VAL1_STAKE: 400000000
-          VAL2_STAKE: 400000000
-          VAL3_STAKE: 400000000
           # Reference ICS chain variables
           CONSUMER_DENOM: ucon
           CONSUMER_FEES: 500
@@ -2408,7 +2403,6 @@
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
           
-
       Baseline-10-feemarket:
         runs-on: ubuntu-22.04
         strategy:
@@ -2418,9 +2412,6 @@
         env:
           # Consumer chain variables
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-          VAL1_STAKE: 400000000
-          VAL2_STAKE: 400000000
-          VAL3_STAKE: 400000000
         steps:
           - name: Set complete upgrade
             if: ${{ matrix.upgrade == 'complete' }} 
