@@ -7,7 +7,7 @@ expected=$3
 
 # Check how many validators are signing blocks
 signatures=$(curl -s http://$host:$port/block | jq '.result.block.last_commit.signatures')
-signature_count=$(echo $signatures | jq '[.[] | select(.block_id_flag==2)] | length')
+signature_count=$(echo $signatures | jq '[.[] | select((.block_id_flag==2) or (.block_id_flag==3))] | length')
 echo "> Signature count: $signature_count"
 if [ "$signature_count" != "$3" ]; then
     echo "> Not all validators are signing blocks."
