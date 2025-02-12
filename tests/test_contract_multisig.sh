@@ -1,4 +1,6 @@
 #!/bin/bash
+$CHAIN_BINARY q bank balances $WALLET_3 --home $HOME_1 -o json | jq '.'
+
 echo "Submitting the store proposal..."
 txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
     tests/contracts/cw3_fixed_multisig.wasm \
@@ -61,3 +63,5 @@ echo "> Execute multisig contract: execute transfer proposal"
 $CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/execute.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
+
+$CHAIN_BINARY q bank balances $WALLET_3 --home $HOME_1 -o json | jq '.'

@@ -2429,7 +2429,7 @@
 
           - name: Execute pre-upgrade contract - execute
             run: |
-              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+              $CHAIN_BINARY q bank balances $WALLET_3 --home $HOME_1 -o json | jq '.'
               MULTISIG_CONTRACT_ADDRESS=$MULTISIG_CONTRACT_ADDRESS
               echo "> Execute multisig contract: execute transfer proposal"
               jq -r '.execute.proposal_id |= 2' tests/contracts/execute.json > execute.json
@@ -2437,7 +2437,8 @@
               $CHAIN_BINARY tx wasm execute $MULTISIG_CONTRACT_ADDRESS "$(cat execute.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $MULTISIG_CONTRACT_ADDRESS --home $HOME_1 -o json | jq '.'
-          
+              $CHAIN_BINARY q bank balances $WALLET_3 --home $HOME_1 -o json | jq '.'
+              
           - name: Check for AppHash errors
             run: |
               tests/test_consensus_errors.sh
