@@ -1,6 +1,6 @@
 #!/bin/bash 
 # Check the logs are clear of wrong apphash errors.
-APPHASH_ERROR='wrong Block.Header.AppHash'
+APPHASH_ERROR='consensus deems this block invalid'
 LOOKBACK=50
 apphash=$(journalctl -u $PROVIDER_SERVICE_1 | grep -c "$APPHASH_ERROR" || true)
 if [ $apphash != "0" ]; then
