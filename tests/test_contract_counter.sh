@@ -4,10 +4,10 @@ INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
-$CHAIN_BINARY tx wasm store tests/gaia-v18/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1
+# $CHAIN_BINARY tx wasm store tests/conta/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1
 
 txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
-    tests/gaia-v18/contract.wasm $INIT \
+    tests/contracts/counter.wasm $INIT \
     --label "my first contract" \
     --no-admin \
     --instantiate-nobody true \
@@ -42,9 +42,13 @@ sleep $VOTING_PERIOD
 # Use code 1
 # Get contract address
 code_id=$1
+echo "> list-code:"
+$CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
+echo "> list-contract-by-code:"
+$CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq '.'
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "Contract address: $contract_address"
-echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
+echo "COUNTER_CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 # Query
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')

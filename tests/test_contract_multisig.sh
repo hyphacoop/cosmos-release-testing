@@ -53,7 +53,7 @@ contract_count=$($CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 --home
 contract_address=$($CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 --home $HOME_1 -o json | jq -r '.contract_addresses[0]')
 echo "Contract count: $contract_count"
 echo "Contract address: $contract_address"
-echo "CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
+echo "MULTISIG_CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 echo "> Fund contract"
 $CHAIN_BINARY tx bank send $WALLET_1 $contract_address 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
