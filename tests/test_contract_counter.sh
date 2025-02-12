@@ -44,7 +44,7 @@ sleep $VOTING_PERIOD
 code_id=$1
 echo "> list-code:"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
-latest_code=$($CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq -r '.code_infos[-1].code_id'
+latest_code=$($CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq -r '.code_infos[-1].code_id')
 echo "> Latest code: $latest_code"
 echo "> list-contract-by-creator:"
 $CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq '.'
