@@ -2381,17 +2381,17 @@
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
   
-          # - name: Execute counter contract - increment
-          #   run: |
-          #     QUERY='{"get_count":{}}'
-          #     $CHAIN_BINARY tx wasm execute $COUNTER_CONTRACT_ADDRESS '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.'
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          #     count=$($CHAIN_BINARY q wasm contract-state smart $COUNTER_CONTRACT_ADDRESS $QUERY --home $HOME_1 -o json | jq '.data.count')
-          #     echo "Count: $count"
+          - name: Execute counter contract - increment
+            run: |
+              QUERY='{"get_count":{}}'
+              $CHAIN_BINARY tx wasm execute $COUNTER_CONTRACT_ADDRESS '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.'
+              sleep $(($COMMIT_TIMEOUT*2))
+              count=$($CHAIN_BINARY q wasm contract-state smart $COUNTER_CONTRACT_ADDRESS $QUERY --home $HOME_1 -o json | jq '.data.count')
+              echo "Count: $count"
 
-          # - name: Check for AppHash errors
-          #   run: |
-          #     tests/test_consensus_errors.sh
+          - name: Check for AppHash errors
+            run: |
+              tests/test_consensus_errors.sh
 
           - name: Execute multisig contract - propose
             run: |
