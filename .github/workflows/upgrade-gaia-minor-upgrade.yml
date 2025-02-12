@@ -64,7 +64,7 @@
       WALLET_RELAYER: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
       VAL1_STAKE: 400000000
       VAL2_STAKE: 400000000
-      VAL3_STAKE: 400000000
+      VAL3_STAKE: 200000000
       VAL_FUNDS: 11000000000
       VAL_STAKE: 1000000000
       VAL_STAKE_STEP: 1000000
@@ -2366,26 +2366,30 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
-          - name: Check consensus
+          - name: Check for AppHash errors
             run: |
               echo "> val1:"
               apphash=$(journalctl -u $PROVIDER_SERVICE_1 | grep -c AppHash || true)
-              echo "> val1 apphash? $apphash"
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
+                exit 1
+              fi
               apphash=$(journalctl -u $PROVIDER_SERVICE_2 | grep -c AppHash || true)
-              echo "> val2 apphash? $apphash"
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_2 | tail -n 100
+                exit 1
+              fi
               apphash=$(journalctl -u $PROVIDER_SERVICE_3 | grep -c AppHash || true)
-              echo "> val3 apphash? $apphash"
-
-          - name: Print logs
-            run: |
-              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
-              curl -s http://localhost:$VAL1_RPC_PORT/abci_info
-              curl -s http://localhost:$VAL3_RPC_PORT/abci_info
-              $CHAIN_BINARY_PARTIAL q wasm libwasmvm-version
-              $CHAIN_BINARY_PARTIAL version --long | grep wasm
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+                exit 1
+              fi
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
-
+          
           - name: Execute pre-upgrade contract - vote
             run: |
               contract_address=$CONTRACT_ADDRESS
@@ -2397,21 +2401,27 @@
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
 
-          # - name: Check consensus
-          #   run: |
-          #     echo "> val1:"
-          #     journalctl -u $PROVIDER_SERVICE_1 | grep AppHash
-          #     echo "> val2:"
-          #     journalctl -u $PROVIDER_SERVICE_2 | grep AppHash
-          #     echo "> val3:"
-          #     journalctl -u $PROVIDER_SERVICE_3 | grep AppHash
-          - name: Print logs
+          - name: Check for AppHash errors
             run: |
-              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
-              curl -s http://localhost:$VAL1_RPC_PORT/abci_info
-              curl -s http://localhost:$VAL3_RPC_PORT/abci_info
-              $CHAIN_BINARY_PARTIAL q wasm libwasmvm-version
-              $CHAIN_BINARY_PARTIAL version --long | grep wasm
+              echo "> val1:"
+              apphash=$(journalctl -u $PROVIDER_SERVICE_1 | grep -c AppHash || true)
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
+                exit 1
+              fi
+              apphash=$(journalctl -u $PROVIDER_SERVICE_2 | grep -c AppHash || true)
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_2 | tail -n 100
+                exit 1
+              fi
+              apphash=$(journalctl -u $PROVIDER_SERVICE_3 | grep -c AppHash || true)
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+                exit 1
+              fi
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
 
@@ -2426,21 +2436,27 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q wasm contract-state all $contract_address --home $HOME_1 -o json | jq '.'
           
-          # - name: Check consensus
-          #   run: |
-          #     echo "> val1:"
-          #     journalctl -u $PROVIDER_SERVICE_1 | grep AppHash
-          #     echo "> val2:"
-          #     journalctl -u $PROVIDER_SERVICE_2 | grep AppHash
-          #     echo "> val3:"
-          #     journalctl -u $PROVIDER_SERVICE_3 | grep AppHash
-          - name: Print logs
+          - name: Check for AppHash errors
             run: |
-              journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
-              curl -s http://localhost:$VAL1_RPC_PORT/abci_info
-              curl -s http://localhost:$VAL3_RPC_PORT/abci_info
-              $CHAIN_BINARY_PARTIAL q wasm libwasmvm-version
-              $CHAIN_BINARY_PARTIAL version --long | grep wasm
+              echo "> val1:"
+              apphash=$(journalctl -u $PROVIDER_SERVICE_1 | grep -c AppHash || true)
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_1 | tail -n 100
+                exit 1
+              fi
+              apphash=$(journalctl -u $PROVIDER_SERVICE_2 | grep -c AppHash || true)
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_2 | tail -n 100
+                exit 1
+              fi
+              apphash=$(journalctl -u $PROVIDER_SERVICE_3 | grep -c AppHash || true)
+              if [ $apphash != "0" ]; then
+                echo "AppHash error found!"
+                journalctl -u $PROVIDER_SERVICE_3 | tail -n 100
+                exit 1
+              fi
           - name: Block signing check
             run: tests/test_block_signatures.sh 127.0.0.1 $VAL1_RPC_PORT 3 # 3 validators
           
@@ -2456,7 +2472,7 @@
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           VAL1_STAKE: 400000000
           VAL2_STAKE: 400000000
-          VAL3_STAKE: 400000000
+          VAL3_STAKE: 200000000
         steps:
           - name: Set complete upgrade
             if: ${{ matrix.upgrade == 'complete' }} 
