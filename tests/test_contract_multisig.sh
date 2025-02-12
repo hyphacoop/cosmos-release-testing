@@ -35,8 +35,10 @@ echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
 # $CHAIN_BINARY q gov proposal 1 --home $HOME_1 -o json | jq '.'
+echo "> List code"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
-# $CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
+echo "> List by creator"
+$CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
 # Use code 1
 # Get contract address
 # code_id=1
@@ -45,8 +47,8 @@ $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
 
 # Instantiate
 # exit 0
-echo "> Instantiating contract: code 1"
-$CHAIN_BINARY tx wasm instantiate 1 "$(cat tests/contracts/parameters.json)" --admin="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" --label=my-contract --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+echo "> Instantiating contract: code 2"
+$CHAIN_BINARY tx wasm instantiate 2 "$(cat tests/contracts/parameters.json)" --admin="cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl" --label=my-contract --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 -o json --home $HOME_1 | jq '.'
 contract_count=$($CHAIN_BINARY q wasm list-contracts-by-creator $WALLET_1 --home $HOME_1 -o json | jq -r '.contract_addresses | length')
