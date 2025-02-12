@@ -44,12 +44,14 @@ sleep $VOTING_PERIOD
 code_id=$1
 echo "> list-code:"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
-echo "> list-contract-by-code:"
-$CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq '.'
+latest_code=$($CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq -r '.code_infos[-1].code_id'
+echo "> Latest code: $latest_code"
 echo "> list-contract-by-creator:"
 $CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq '.'
-contract_address=$($CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq -r '.contract_addresses[-1]')
-# contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
+
+
+# contract_address=$($CHAIN_BINARY q wasm list-contracts-by-creator $GOV_ADDRESS --home $HOME_1 -o json | jq -r '.contract_addresses[-1]')
+contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $latest_code --home $HOME_1 -o json | jq -r '.contracts[-1]')
 echo "Contract address: $contract_address"
 echo "COUNTER_CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
