@@ -161,13 +161,13 @@
         - name: Generate starting versions
           id: generate-start
           run: |
-            start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
+            start=$(scripts/generate_version_matrix.py $START_VERSION)
             echo $start
             echo "start_versions=$start" >> $GITHUB_OUTPUT
         - name: Generate upgrade versions
           id: generate-upgrade
           run: |
-            upgrade=$(scripts/generate_upgrade_matrix_fresh.py $VERSION_CUTOFF)
+            upgrade=$(scripts/generate_upgrade_matrix_fresh.py $START_VERSION)
             echo $upgrade
             echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
       outputs:
@@ -200,13 +200,13 @@
         - name: Generate starting versions
           id: generate-start
           run: |
-            start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
+            start=$(scripts/generate_version_matrix.py $START_VERSION)
             echo $start
             echo "start_versions=$start" >> $GITHUB_OUTPUT
         - name: Generate upgrade versions
           id: generate-upgrade
           run: |
-            upgrade=$(scripts/generate_upgrade_matrix_fresh.py $VERSION_CUTOFF -c)
+            upgrade=$(scripts/generate_upgrade_matrix_fresh.py $START_VERSION -c)
             echo $upgrade
             echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
       outputs:
