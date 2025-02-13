@@ -49,7 +49,7 @@ jobs:
         id: generate-upgrade
         run: |
           # upgrade=$(scripts/stateful/generate_upgrade_matrix_v22_minor.py $GAIA_LATEST)
-          echo '{"include": [{"gaia_version": "v22.1.0", "upgrade_version": "v22.2.0"}]}''
+          echo '{"include": [{"gaia_version": "v22.1.0", "upgrade_version": "v22.2.0"}]}'
           echo $upgrade
           echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:
