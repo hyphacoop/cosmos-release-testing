@@ -52,7 +52,7 @@ jobs:
           # echo $upgrade
           # echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
           echo '{"include": [{"gaia_version": "v22.1.0", "upgrade_version": "v22.2.0"}]}'
-          echo '{"include": [{"gaia_version": "v22.1.0", "upgrade_version": "v22.2.0"}]}' >> $GITHUB_OUTPUT
+          echo 'upgrade_versions={"include": [{"gaia_version": "v22.1.0", "upgrade_version": "v22.2.0"}]}' >> $GITHUB_OUTPUT
     outputs:
       upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
 
