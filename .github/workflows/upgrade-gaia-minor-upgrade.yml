@@ -11,8 +11,8 @@
     
     env:
       # Versions
-      START_VERSION: v22.0.0
-      TARGET_VERSION: v22.1.0
+      START_VERSION: v22.1.0
+      TARGET_VERSION: v22.2.0
       PARTIAL_UPGRADE: false
       # All chain variables
       COMMIT_TIMEOUT: 5
