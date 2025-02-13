@@ -4,10 +4,8 @@ INIT='{"count":100}'
 QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
-$CHAIN_BINARY tx wasm store tests/gaia-v18/contract.wasm --from $WALLET_1 --chain-id $CHAIN_ID --gas 20000000 --gas-prices 0.005$DENOM --home $HOME_1
-
 txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
-    tests/gaia-v18/contract.wasm $INIT \
+    tests/contracts/counter.wasm $INIT \
     --label "my first contract" \
     --no-admin \
     --instantiate-nobody true \
@@ -19,8 +17,7 @@ txhash=$($CHAIN_BINARY tx wasm submit-proposal store-instantiate \
     --gas 20000000 --gas-prices 0.005$DENOM \
     --home $HOME_1 -o json | jq -r '.txhash')
 echo "Submitting the store-instantiate proposal..."
-# echo $proposal
-# txhash=$($proposal | jq -r .txhash)
+
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "Getting proposal ID from txhash..."
@@ -29,19 +26,23 @@ echo "Proposal ID: $proposal_id"
 
 echo "Submitting the \"yes\" vote to proposal $proposal_id..."
 vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json
 echo $vote
 txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
-$CHAIN_BINARY q tx $txhash --home $HOME_1
 
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
-# Use code 1
 # Get contract address
-code_id=1
-contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
-echo "Contract address: $contract_address"
+echo "> list-code:"
+$CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq '.'
+latest_code=$($CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq -r '.code_infos[-1].code_id')
+echo "> Latest code: $latest_code"
+contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $latest_code --home $HOME_1 -o json | jq -r '.contracts[-1]')
+echo "> Contract address: $contract_address"
+echo "COUNTER_CONTRACT_ADDRESS=$contract_address" >> $GITHUB_ENV
 
 # Query
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
@@ -54,6 +55,7 @@ else
     exit 1
 fi
 
+# Increment
 txhash=$($CHAIN_BINARY tx wasm execute $contract_address '{"increment":{}}' --from $WALLET_1 --chain-id $CHAIN_ID --gas auto --gas-adjustment 5 --gas-prices 0.005$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
 echo "Execute tx hash: $txhash"
 sleep $(($COMMIT_TIMEOUT*2))
