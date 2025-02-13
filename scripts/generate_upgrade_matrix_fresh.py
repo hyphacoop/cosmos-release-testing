@@ -64,7 +64,7 @@ RELAYER = args.relayer
 #         release
 #         for release in releases
 #         if int(release.split('.')[0][1:]) > int(start_version.split('.')[0][1:])]
-matrix = {'v22.1.0': 'v22.2.0'}
+matrix = {'v22.1.0': ['v22.2.0']}
 
 # Assemble matrix include section:
 includes = []

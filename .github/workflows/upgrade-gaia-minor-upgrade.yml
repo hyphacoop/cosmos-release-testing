@@ -3,7 +3,7 @@
     name: Gaia Minor Upgrade - Fresh State
     on:
       workflow_dispatch:
-      push:
+      # push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}

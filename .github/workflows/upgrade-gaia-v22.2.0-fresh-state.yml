@@ -1,6 +1,6 @@
 ---
 
-  name: Gaia v22 Upgrade - Fresh State
+  name: Gaia v22.2.0 Upgrade - Fresh State
   on:
     # repository_dispatch:
       # types: [new_main_build]
