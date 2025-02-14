@@ -2373,9 +2373,10 @@
             CONSUMER_HOME_2: /home/runner/.stride-2
             CONSUMER_HOME_3: /home/runner/.stride-3
             CONSUMER_ICS: v4.0.0
-            PROVIDER_ICS: v6.3.0
+            PROVIDER_ICS: v6.4.0
           run: |
             export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+            export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_V640_BINARY
             scripts/prepare_consumer_permissionless.sh
         - name: Start consumer chain stride-test
           env:
