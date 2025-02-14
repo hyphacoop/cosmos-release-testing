@@ -126,7 +126,7 @@ jobs:
       - name: Download snapshot
         run: |
           cd ~/.gaia
-          curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
+          curl -o - -L http://[2604:a880:cad:d0::985d:9001]/2025-02-14_cosmos_24406843.tar.lz4 | lz4 -d | tar vx -C .
       - name: Get addrbook
         run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
