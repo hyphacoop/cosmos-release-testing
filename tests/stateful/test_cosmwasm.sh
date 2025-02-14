@@ -53,10 +53,14 @@ proposal_results=$($CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id -o j
 echo $proposal_results | jq -r
 
 # Get contract address
+echo "[DEBUG]: $CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json"
+$CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json
 contract_address=$($CHAIN_BINARY q wasm list-contract-by-code $code_id --home $HOME_1 -o json | jq -r '.contracts[0]')
 echo "[INFO]: Contract address: $contract_address"
 
 # Query
+echo "[DEBUG]: $CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json"
+$CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json
 count=$($CHAIN_BINARY q wasm contract-state smart $contract_address $QUERY --home $HOME_1 -o json | jq '.data.count')
 echo "[INFO]: Count: $count"
 
