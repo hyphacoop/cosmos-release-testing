@@ -282,10 +282,11 @@ jobs:
           screen -L -Logfile /home/runner/artifact/neutrond_sync.log -S neutrond -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
           screen -r neutrond -p0 -X logfile flush 0
       - name: Wait for neutrond to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
-      - name: Syncing Chain
         run: |
           tail -f /home/runner/artifact/neutrond_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Syncing Chain
+        run: |
           catching_up="true"
           while [ $catching_up == "true" ]
           do
