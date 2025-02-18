@@ -253,8 +253,8 @@ jobs:
           NODE_MONIKER: pion
           SERVICE_NAME: pion
           GENESIS_URL: https://github.com/cosmos/testnets/raw/refs/heads/master/interchain-security/pion-1/pion-1-genesis-with-ccv.json.gz
-          # SEEDS: "4dbb91a22ec4222751aec7f682ea20c2c907f09d@p2p-palvus.pion-1.ntrn.tech:26656"
-          SEEDS: "11e12130fc9ef91a49201fc1f5f08b339059aaac@pion-seed.stg.earthball.xyz:26656"
+          SEEDS: "4dbb91a22ec4222751aec7f682ea20c2c907f09d@p2p-palvus.pion-1.ntrn.tech:26656"
+          # SEEDS: "11e12130fc9ef91a49201fc1f5f08b339059aaac@pion-seed.stg.earthball.xyz:26656"
           SYNC_RPC_1: https://rpc.pion.ics-testnet.polypore.xyz:443
           SYNC_RPC_2: https://rpc.pion.ics-testnet.polypore.xyz:443
           GAS_PRICES: "0.0025uatom"
