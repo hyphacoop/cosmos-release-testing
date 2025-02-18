@@ -133,9 +133,13 @@ jobs:
       - name: Archive config files
         run: mkdir -p /home/runner/artifact/config/provider && cp -rvp $NODE_HOME/config /home/runner/artifact/config/provider/
       - name: Start Chain
-        run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+          screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+        run: |
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Syncing Chain
         run: |
           catching_up="true"
