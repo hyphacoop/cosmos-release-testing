@@ -6,8 +6,8 @@ on:
     # At 05:30 everyday.
     - cron: '0 3 * * *'
   # push:
-# concurrency:
-#   group: self-hosted-runners
+concurrency:
+  group: export-ics-snapshot
 
 jobs:
   export-ics-testnet-provider-snapshot:
