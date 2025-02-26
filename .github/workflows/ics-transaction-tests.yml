@@ -20,12 +20,14 @@ jobs:
       BANANA_ADDR: cosmos1apac0g5s88pfjvlgjqjnr0kdpkpmhx8pkdp0r5
       CHERRY_ADDR: cosmos1e5yfpc8l6g4808fclmlyd38tjgxuwshn7xzkvf
       FAUCET_ADDR: cosmos19mkwu6ne284ufqgdqnv4k6cp0qqy9x0742p3d2
+      RPC_NODE: rpc.provider-sentry-01.ics-testnet.polypore.xyz
+      RPC_PORT: 26657
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Get current running gaiad version
         run: |
-          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.ics-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          RUNNING_VERSION=$(curl -s https://$RPC_NODE/abci_info | jq -r '.result.response.version')
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Download binary from cosmos/gaia repo
@@ -37,7 +39,7 @@ jobs:
         run: |
           gaiad config set client chain-id provider
           gaiad config set client keyring-backend test
-          gaiad config set client node "https://rpc.provider-sentry-01.ics-testnet.polypore.xyz"
+          gaiad config set client node "https://$RPC_NODE"
       - name: Create test wallet
         run: gaiad keys add test-wallet
       - name: List all wallets
@@ -55,7 +57,7 @@ jobs:
             echo "Failed to request finds from faucet"
             exit 1
           fi
-          tests/test_block_production.sh https://rpc.provider-sentry-01.ics-testnet.polypore.xyz 443 1
+          tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
       - name: Query bank balances
         run: gaiad q bank balances $TEST_WALLET
       
@@ -69,7 +71,7 @@ jobs:
           let refund=$amount-10000
           echo "[INFO] Refund amount is: $refund"
           gaiad tx bank send $TEST_WALLET $FAUCET_ADDR ${refund}uatom --fees 10000uatom -y -o json | jq -r '.'
-          tests/test_block_production.sh https://rpc.provider-sentry-01.ics-testnet.polypore.xyz 443 1
+          tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           json=$(gaiad q bank balances $TEST_WALLET -o json)
           echo $json | jq -r '.' 
           
