@@ -20,6 +20,7 @@ jobs:
       BANANA_ADDR: cosmos1apac0g5s88pfjvlgjqjnr0kdpkpmhx8pkdp0r5
       CHERRY_ADDR: cosmos1e5yfpc8l6g4808fclmlyd38tjgxuwshn7xzkvf
       FAUCET_ADDR: cosmos19mkwu6ne284ufqgdqnv4k6cp0qqy9x0742p3d2
+      WASM_CONTRACT: cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr
       RPC_NODE: rpc.provider-sentry-01.ics-testnet.polypore.xyz
       RPC_PORT: 26657
     steps:
@@ -62,7 +63,7 @@ jobs:
         run: gaiad q bank balances $TEST_WALLET
       - name: Test bank send
         run: |
-          json=$(gaiad tx bank send $TEST_WALLET $FAUCET_ADDR 10000uatom --fees 10000uatom -y -o json)
+          json=$(gaiad tx bank send $TEST_WALLET $FAUCET_ADDR 1000000uatom --fees 10000uatom -y -o json)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
@@ -80,7 +81,7 @@ jobs:
           fi
       - name: Test bank multi-send
         run: |
-          json=$(gaiad tx bank multi-send $TEST_WALLET $APPLE_ADDR $BANANA_ADDR $CHERRY_ADDR 10000uatom --fees 10000uatom -y -o json)
+          json=$(gaiad tx bank multi-send $TEST_WALLET $APPLE_ADDR $BANANA_ADDR $CHERRY_ADDR 1000000uatom --fees 10000uatom -y -o json)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
@@ -96,6 +97,25 @@ jobs:
             echo "TX code is not 0"
             exit 1
           fi
+      - name: Test WASM execute
+        run: |
+          json=$(gaiad tx wasm execute $WASM_CONTRACT '{"increment":{}}' --from test-wallet --gas auto --gas-adjustment 1.5 --gas-prices 0.005uatom -y -o json)
+          tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
+          echo "[INFO] JSON output:"
+          echo $json
+          txhash=$(echo $json | jq -r '.txhash')
+          echo "[INFO] txhash: $txhash"
+          tx_json=$(gaiad q tx $txhash -o json)
+          echo "[INFO] TX results:"
+          echo $tx_json | jq -r '.'
+          code=$(echo $tx_json | jq -r '.code')
+          echo "[INFO] Code: $code"
+          if [ $code -ne 0 ]
+          then
+            echo "TX code is not 0"
+            exit 1
+          fi
+
       - name: Refund leftover funds to faucet
         if: always()
         run: |
