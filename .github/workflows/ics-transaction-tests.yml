@@ -62,14 +62,32 @@ jobs:
         run: gaiad q bank balances $TEST_WALLET
       - name: Test bank send
         run: |
-          json=$(gaiad tx bank send $TEST_WALLET cosmos19mkwu6ne284ufqgdqnv4k6cp0qqy9x0742p3d2 10000uatom --fees 10000uatom -y -o json)
+          json=$(gaiad tx bank send $TEST_WALLET $FAUCET_ADDR 10000uatom --fees 10000uatom -y -o json)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
           txhash=$(echo $json | jq -r '.txhash')
           echo "[INFO] txhash: $txhash"
           tx_json=$(gaiad q tx $txhash -o json)
-          echo "[INFO] TX:"
+          echo "[INFO] TX results:"
+          echo $tx_json | jq -r '.'
+          code=$(echo $tx_json | jq -r '.code')
+          echo "[INFO] Code: $code"
+          if [ $code -ne 0 ]
+          then
+            echo "TX code is not 0"
+            exit 1
+          fi
+      - name: Test bank multi-send
+        run: |
+          json=$(gaiad tx bank send $TEST_WALLET $APPLE_ADDR $BANANA_ADDR $CHERRY_ADDR 10000uatom --fees 10000uatom -y -o json)
+          tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
+          echo "[INFO] JSON output:"
+          echo $json
+          txhash=$(echo $json | jq -r '.txhash')
+          echo "[INFO] txhash: $txhash"
+          tx_json=$(gaiad q tx $txhash -o json)
+          echo "[INFO] TX results:"
           echo $tx_json | jq -r '.'
           code=$(echo $tx_json | jq -r '.code')
           echo "[INFO] Code: $code"
