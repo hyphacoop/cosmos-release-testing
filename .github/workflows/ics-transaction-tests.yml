@@ -31,6 +31,11 @@ jobs:
           sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
           gaiad version
+      - name: Configure gaiad
+        run: |
+          gaiad config set client chain-id provider
+          gaiad config set client keyring-backend test
+          gaiad config set client node "https://rpc.provider-sentry-01.ics-testnet.polypore.xyz"
       - name: Create test wallet
         run: gaiad keys add test-wallet
       - name: List all wallets
