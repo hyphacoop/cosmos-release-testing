@@ -21,6 +21,8 @@ jobs:
       CHERRY_ADDR: cosmos1e5yfpc8l6g4808fclmlyd38tjgxuwshn7xzkvf
       FAUCET_ADDR: cosmos19mkwu6ne284ufqgdqnv4k6cp0qqy9x0742p3d2
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
       - name: Get current running gaiad version
         run: |
           RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.ics-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
