@@ -55,7 +55,7 @@ jobs:
             echo "Failed to request finds from faucet"
             exit 1
           fi
-          tests/test_block_production.sh 127.0.0.1 $26657 1
+          tests/test_block_production.sh 127.0.0.1 26657 1
       - name: Query bank balances
         run: gaiad q bank balances $TEST_WALLET
       
@@ -69,7 +69,7 @@ jobs:
           let refund=$amount-10000
           echo "[INFO] Refund amount is: $refund"
           gaiad tx bank send $TEST_WALLET $FAUCET_ADDR ${refund}uatom --fees 10000uatom -y -o json | jq -r '.'
-          tests/test_block_production.sh 127.0.0.1 $26657 1
+          tests/test_block_production.sh 127.0.0.1 26657 1
           json=$(gaiad q bank balances $TEST_WALLET -o json)
           echo $json | jq -r '.' 
           
