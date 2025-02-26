@@ -19,6 +19,7 @@ jobs:
       APPLE_ADDR: cosmos1arjwkww79m65csulawqngr7ngs4uqu5hx9ak2a
       BANANA_ADDR: cosmos1apac0g5s88pfjvlgjqjnr0kdpkpmhx8pkdp0r5
       CHERRY_ADDR: cosmos1e5yfpc8l6g4808fclmlyd38tjgxuwshn7xzkvf
+      FAUCET_ADDR: cosmos19mkwu6ne284ufqgdqnv4k6cp0qqy9x0742p3d2
     steps:
       - name: Get current running gaiad version
         run: |
@@ -30,4 +31,38 @@ jobs:
           sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
           gaiad version
+      - name: Create test wallet
+        run: gaiad keys add test-wallet
+      - name: List all wallets
+        run: |
+          gaiad keys list
+          wallet=$(gaiad keys list --output json | jq -r '.[] | select(.name == "test-wallet") | .address')
+          echo "TEST_WALLET=$wallet" >> $GITHUB_ENV
+      - name: Fund the wallet
+        run: |
+          json=$(curl "https://faucet.polypore.xyz/request?address=$TEST_WALLET&chain=provider" | jq -r '.')
+          echo $json | jq -r '.'
+          status=$(echo $json | jq -r '.status')
+          if [ $status != "success" ]
+          then
+            echo "Failed to request finds from faucet"
+            exit 1
+          fi
+          tests/test_block_production.sh 127.0.0.1 $26657 1
+      - name: Query bank balances
+        run: gaiad q bank balances $TEST_WALLET
       
+      - name: Refund leftover funds to faucet
+        if: always()
+        run: |
+          json=$(gaiad q bank balances $TEST_WALLET -o json)
+          echo $json | jq -r '.'
+          amount=$(echo $json | jq -r ".balances[] | select(.denom==\"uatom\").amount")
+          echo "[INFO] Amount is: $amount"
+          let refund=$amount-10000
+          echo "[INFO] Refund amount is: $refund"
+          gaiad tx bank send $TEST_WALLET $FAUCET_ADDR ${refund}uatom --fees 10000uatom -y -o json | jq -r '.'
+          tests/test_block_production.sh 127.0.0.1 $26657 1
+          json=$(gaiad q bank balances $TEST_WALLET -o json)
+          echo $json | jq -r '.' 
+          
