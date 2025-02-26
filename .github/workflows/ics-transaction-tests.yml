@@ -1,0 +1,33 @@
+---
+name: ICS Transection Tests
+on:
+  workflow_dispatch:
+  schedule:
+    # At 05:30 everyday.
+    - cron: '0 3 * * *'
+  push:
+
+jobs:
+  test-transactions:
+    runs-on: ubuntu-24.04
+    env:
+      PION_CLIENT_ID: 07-tendermint-28
+      PION_CONNECTION_ID: connection-19
+      PION_CHANNEL_ID: channel-32
+      PION_APPLE_ADDR: neutron1arjwkww79m65csulawqngr7ngs4uqu5hz655s6
+      APPLE_VALOPER: cosmosvaloper1arjwkww79m65csulawqngr7ngs4uqu5hr3frxw
+      APPLE_ADDR: cosmos1arjwkww79m65csulawqngr7ngs4uqu5hx9ak2a
+      BANANA_ADDR: cosmos1apac0g5s88pfjvlgjqjnr0kdpkpmhx8pkdp0r5
+      CHERRY_ADDR: cosmos1e5yfpc8l6g4808fclmlyd38tjgxuwshn7xzkvf
+    steps:
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.ics-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+          gaiad version
+      
