@@ -7,6 +7,7 @@ if [ $RELAYER == "hermes" ]; then
     wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
     tar -xzvf hermes-$HERMES_VERSION.tar.gz
     mkdir -p ~/.hermes
+    hermes version
     cp hermes ~/.hermes/hermes
     export PATH="$PATH:~/.hermes"
 

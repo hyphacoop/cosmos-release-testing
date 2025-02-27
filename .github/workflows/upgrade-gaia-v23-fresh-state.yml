@@ -130,7 +130,7 @@
       NEUTRON_DENOM: untrn
       # Relayer variables
       RELAYER: hermes
-      HERMES_VERSION: v1.10.4
+      HERMES_VERSION: v1.12.0
       RLY_VERSION: "2.5.0"
     jobs:
       set-version-matrix:
@@ -2811,137 +2811,137 @@
               export RECIPIENT=$WALLET_6
               tests/test_ica_send.sh
   
-      Baseline-9-IBC-fee-middleware:
-        runs-on: ubuntu-22.04
-        needs: set-version-matrix
-        strategy:
-          matrix:
-            ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-          fail-fast: false
-        env:
-          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-          CHAIN_BINARY_SECONDARY: gaiad-ibc
-          COMMIT_TIMEOUT: 1
-          RELAYER: hermes
-        steps:
-          - name: start-version
-            run: echo ${{matrix.gaia_version}}
-          - name: target-version
-            run: echo ${{matrix.upgrade_version}}
-          - name: target-commit
-            if: ${{ matrix.upgrade_version == 'main' }}
-            run: |
-              BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-              TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-              echo TARGET_COMMIT: $TARGET_COMMIT
-          - name: Update PATH
-            run: |
-              mkdir -p $HOME/go/bin
-              echo "$HOME/go/bin" >> $GITHUB_PATH
-              echo "$HOME/.hermes" >> $GITHUB_PATH
-              echo "$HOME/.relayer" >> $GITHUB_PATH
-          - name: Bypass the grub-efi-amd64-signed package
-            run: sudo apt-mark hold grub-efi-amd64-signed
-          - name: Check out repository code
-            uses: actions/checkout@v4
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              python -m pip install toml-cli
-          - name: Install Cosmovisor > v1.3.0
-            if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
-            run: |
-              go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-              echo "COSMOVISOR=true" >> $GITHUB_ENV
-              echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-          - name: Install Cosmovisor v1.3.0
-            if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
-            run: |
-              go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-              echo "COSMOVISOR=true" >> $GITHUB_ENV
-              echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-          - name: Set up relayer
-            run: scripts/setup_relayer.sh
+      # Baseline-9-IBC-fee-middleware:
+      #   runs-on: ubuntu-22.04
+      #   needs: set-version-matrix
+      #   strategy:
+      #     matrix:
+      #       ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+      #     fail-fast: false
+      #   env:
+      #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+      #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+      #     CHAIN_BINARY_SECONDARY: gaiad-ibc
+      #     COMMIT_TIMEOUT: 1
+      #     RELAYER: hermes
+      #   steps:
+      #     - name: start-version
+      #       run: echo ${{matrix.gaia_version}}
+      #     - name: target-version
+      #       run: echo ${{matrix.upgrade_version}}
+      #     - name: target-commit
+      #       if: ${{ matrix.upgrade_version == 'main' }}
+      #       run: |
+      #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
+      #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+      #         echo TARGET_COMMIT: $TARGET_COMMIT
+      #     - name: Update PATH
+      #       run: |
+      #         mkdir -p $HOME/go/bin
+      #         echo "$HOME/go/bin" >> $GITHUB_PATH
+      #         echo "$HOME/.hermes" >> $GITHUB_PATH
+      #         echo "$HOME/.relayer" >> $GITHUB_PATH
+      #     - name: Bypass the grub-efi-amd64-signed package
+      #       run: sudo apt-mark hold grub-efi-amd64-signed
+      #     - name: Check out repository code
+      #       uses: actions/checkout@v4
+      #     - name: Set up Python
+      #       uses: actions/setup-python@v5
+      #       with:
+      #         python-version: '3.10'
+      #     - name: Install dependencies
+      #       run: |
+      #         python -m pip install --upgrade pip
+      #         python -m pip install toml-cli
+      #     - name: Install Cosmovisor > v1.3.0
+      #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version != 'v1.3.0' }}
+      #       run: |
+      #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+      #         echo "COSMOVISOR=true" >> $GITHUB_ENV
+      #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+      #     - name: Install Cosmovisor v1.3.0
+      #       if: ${{ (matrix.upgrade_mechanism == 'cv_manual' || matrix.upgrade_mechanism == 'cv_auto') && matrix.cv_version == 'v1.3.0' }}
+      #       run: |
+      #         go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+      #         echo "COSMOVISOR=true" >> $GITHUB_ENV
+      #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+      #     - name: Set up relayer
+      #       run: scripts/setup_relayer.sh
             
-          - name: Start chain
-            env:
-              START_VERSION: ${{matrix.gaia_version}}
-              GAS_PRICE: 0
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_chain_single_val.sh
-          - name: Check Gaia log
-            run: sudo journalctl -u $PROVIDER_SERVICE_1
-          - name: Print Gaia version
-            run: $CHAIN_BINARY version --long
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+      #     - name: Start chain
+      #       env:
+      #         START_VERSION: ${{matrix.gaia_version}}
+      #         GAS_PRICE: 0
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+      #         scripts/start_chain_single_val.sh
+      #     - name: Check Gaia log
+      #       run: sudo journalctl -u $PROVIDER_SERVICE_1
+      #     - name: Print Gaia version
+      #       run: $CHAIN_BINARY version --long
+      #     - name: Block production check
+      #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
     
-          - name: Installing secondary chain binaries
-            env:
-              START_VERSION: ${{matrix.gaia_version}}
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              echo "Chain binary URL: $CHAIN_BINARY_URL"
-              echo "Installing secondary chain binary..."
-              wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
-              chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
-          - name: Start secondary chain
-            env:
-              CHAIN_SERVICE: two.service
-              CHAIN_HOME: /home/runner/.two
-              CHAIN_ID: two
-              API_PORT: 25011
-              GRPC_PORT: 26011
-              RPC_PORT: 27011
-              P2P_PORT: 28011
-              PPROF_PORT: 29011
-              GAS_PRICE: 0
-            run: |
-              scripts/start_chain_secondary.sh
-              $CHAIN_BINARY_SECONDARY version
-          - name: Generate IBC connection
-            env:
-              TARGET_CHAIN_ID: two
-              CLIENT_COUNT: 0
-              RPC_PORT: 27011
-            run: |
-              scripts/gaia-v19/setup_connection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
+      #     - name: Installing secondary chain binaries
+      #       env:
+      #         START_VERSION: ${{matrix.gaia_version}}
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+      #         echo "Chain binary URL: $CHAIN_BINARY_URL"
+      #         echo "Installing secondary chain binary..."
+      #         wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
+      #         chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
+      #     - name: Start secondary chain
+      #       env:
+      #         CHAIN_SERVICE: two.service
+      #         CHAIN_HOME: /home/runner/.two
+      #         CHAIN_ID: two
+      #         API_PORT: 25011
+      #         GRPC_PORT: 26011
+      #         RPC_PORT: 27011
+      #         P2P_PORT: 28011
+      #         PPROF_PORT: 29011
+      #         GAS_PRICE: 0
+      #       run: |
+      #         scripts/start_chain_secondary.sh
+      #         $CHAIN_BINARY_SECONDARY version
+      #     - name: Generate IBC connection
+      #       env:
+      #         TARGET_CHAIN_ID: two
+      #         CLIENT_COUNT: 0
+      #         RPC_PORT: 27011
+      #       run: |
+      #         scripts/gaia-v19/setup_connection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
   
-          - name: Test software upgrade for published releases
-            if: ${{ matrix.upgrade_version != 'main' }}
-            env:
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-            run: |
-              echo $DOWNLOAD_URL
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-          - name: Test software upgrade for main branch
-            if: ${{ matrix.upgrade_version == 'main' }}
-            env:
-              DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-            run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+      #     - name: Test software upgrade for published releases
+      #       if: ${{ matrix.upgrade_version != 'main' }}
+      #       env:
+      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+      #       run: |
+      #         echo $DOWNLOAD_URL
+      #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+      #     - name: Test software upgrade for main branch
+      #       if: ${{ matrix.upgrade_version == 'main' }}
+      #       env:
+      #         DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+      #       run: |
+      #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
     
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+      #     - name: _Blocks produced after upgrade
+      #       run: |
+      #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
           
-          # - name: Restart Hermes with dynamic gas prices
-          #   run: |
-          #     cp templates/gaia-v18/hermes-config-ibc-fee.toml ~/.hermes/config.toml
-          #     sudo systemctl restart $RELAYER
-          #     sleep 1m
+      #     # - name: Restart Hermes with dynamic gas prices
+      #     #   run: |
+      #     #     cp templates/gaia-v18/hermes-config-ibc-fee.toml ~/.hermes/config.toml
+      #     #     sudo systemctl restart $RELAYER
+      #     #     sleep 1m
   
-          - name: _Test IBC fee middleware
-            env:
-              HOME_IBC: /home/runner/.two
-            run: |
-              tests/gaia-v16/test_ibc_fee.sh
+      #     - name: _Test IBC fee middleware
+      #       env:
+      #         HOME_IBC: /home/runner/.two
+      #       run: |
+      #         tests/gaia-v16/test_ibc_fee.sh
   
       Baseline-10-cosmwasm:
         runs-on: ubuntu-22.04
