@@ -15,7 +15,7 @@
     
     env:
       # Versions
-      VERSION_CUTOFF: v22.0.0
+      VERSION_CUTOFF: v22.2.0
       TARGET_VERSION: v23
       # All chain variables
       COMMIT_TIMEOUT: 5
