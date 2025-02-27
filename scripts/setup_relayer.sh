@@ -5,7 +5,7 @@ if [ $RELAYER == "hermes" ]; then
 
     echo "> Installing Hermes"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    cargo install ibc-relayer-cli --bin hermes --locked --version $HERMES_VERSION
+    cargo install ibc-relayer-cli --bin hermes --locked --version ${HERMES_VERSION:1}
     hermes version
 
     # echo "Downloading Hermes..."
