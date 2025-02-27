@@ -7,6 +7,7 @@ if [ $RELAYER == "hermes" ]; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y
     cargo install ibc-relayer-cli --bin hermes --locked --version ${HERMES_VERSION:1}
     hermes version
+    mkdir -p ~/.hermes
 
     # echo "Downloading Hermes..."
     # wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
