@@ -50,7 +50,7 @@ version_patch = int(starting_version[2])
 # filtered_releases = [release for release in releases if
 #                      release not in SKIP_VERSIONS ]
 
-filtered_releases = ['v22.1.0']
+filtered_releases = ['v22.2.0']
 start_json = json.dumps(
     {'gaia_version': list(filtered_releases)})
 print(start_json)
