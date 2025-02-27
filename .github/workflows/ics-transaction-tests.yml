@@ -135,7 +135,7 @@ jobs:
           fi
       - name: Delegate to Apple
         run: |
-          json=$(staking delegate cosmosvaloper1arjwkww79m65csulawqngr7ngs4uqu5hr3frxw 10000uatom --from $TEST_WALLET --fees 10000uatom -o json -y)
+          json=$(gaiad tx staking delegate $APPLE_VALOPER 10000uatom --from $TEST_WALLET --fees 10000uatom -o json -y)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
@@ -153,7 +153,7 @@ jobs:
           fi
       - name: Unbond from Apple
         run: |
-          json=$(staking unbond cosmosvaloper1arjwkww79m65csulawqngr7ngs4uqu5hr3frxw --from $TEST_WALLET --fees 10000uatom -o json -y)
+          json=$(gaiad tx staking unbond $APPLE_VALOPER --from $TEST_WALLET --fees 10000uatom -o json -y)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
