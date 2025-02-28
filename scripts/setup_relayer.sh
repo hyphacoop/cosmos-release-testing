@@ -186,7 +186,8 @@ echo "[Service]"                            | sudo tee /etc/systemd/system/$RELA
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
 if [ $RELAYER == "hermes" ]; then
-    echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    # echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    echo "ExecStart=$HOME/.cargo/bin/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
 elif [ $RELAYER == "rly" ]; then
     echo "ExecStart=$HOME/.relayer/$RELAYER start"   | sudo tee /etc/systemd/system/$RELAYER.service -a
 fi
@@ -205,7 +206,8 @@ echo ""                                     | sudo tee /etc/systemd/system/herme
 echo "[Service]"                            | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
 
-echo "ExecStart=$HOME/.hermes/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
+# echo "ExecStart=$HOME/.hermes/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "ExecStart=$HOME/.cargo/bin/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo ""                                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
@@ -215,3 +217,5 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/herme
 sudo systemctl daemon-reload
 sudo systemctl enable $RELAYER
 sudo systemctl enable hermes-evidence
+sleep 10
+journalctl -fu $RELAYER

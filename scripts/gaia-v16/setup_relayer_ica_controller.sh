@@ -35,7 +35,8 @@ echo "[Service]"                            | sudo tee /etc/systemd/system/$RELA
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
 if [ $RELAYER == "hermes" ]; then
-    echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    # echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    echo "ExecStart=$HOME/.cargo/bin/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
 elif [ $RELAYER == "rly" ]; then
     echo "ExecStart=$HOME/.relayer/$RELAYER start"   | sudo tee /etc/systemd/system/$RELAYER.service -a
 fi
