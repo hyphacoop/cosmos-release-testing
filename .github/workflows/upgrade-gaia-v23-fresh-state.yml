@@ -24,7 +24,7 @@
       CHAIN_BINARY: gaiad
       BINARY_SOURCE: BUILD
       # BINARY_SOURCE: DOWNLOAD
-      BUILD_TAG: chore/ibc-v10-bump
+      BUILD_TAG: main
       CHAIN_ID: testnet
       DENOM: uatom
       BASE_FEES: 2000
@@ -1521,7 +1521,7 @@
             run: |
               export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V450_BINARY
               scripts/init_consumer_permissionless.sh
-              sleep 60
+              sleep 90
           - name: Prepare consumer chain v450-two
             env:
               CONSUMER_CHAIN_ID: v450-two
