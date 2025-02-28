@@ -33,5 +33,6 @@ if [ $recipient_balance == "5555555" ]; then
     echo "PASS: Account in host chain received funds from ICA."
 else
     echo "FAIL: Account in host chain did not receive funds from ICA."
+    journalctl -u $RELAYER.service | tail -n 100
     exit 1
 fi
