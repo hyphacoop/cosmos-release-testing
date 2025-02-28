@@ -41,6 +41,7 @@ jobs:
           gaiad config set client chain-id provider
           gaiad config set client keyring-backend test
           gaiad config set client node "https://$RPC_NODE"
+          gaiad config set app minimum-gas-prices "0.0025uatom"
       - name: Create test wallet
         run: gaiad keys add test-wallet
       - name: List all wallets
