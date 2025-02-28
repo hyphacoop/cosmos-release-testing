@@ -184,4 +184,3 @@ jobs:
           json=$(gaiad q bank balances $TEST_WALLET -o json)
           echo "[INFO] Current balances"
           echo $json | jq -r '.' 
-          
