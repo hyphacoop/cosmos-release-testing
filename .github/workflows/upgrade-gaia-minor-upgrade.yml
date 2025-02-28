@@ -3,7 +3,7 @@
     name: Gaia v22.3.0 Minor Upgrade - Fresh State
     on:
       workflow_dispatch:
-      # push:
+      push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
