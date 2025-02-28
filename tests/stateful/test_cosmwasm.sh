@@ -6,7 +6,7 @@ QUERY='{"get_count":{}}'
 EXEC="{\"increment\": {}}"
 
 # Get last code_id
-last_code_id=$($CHAIN_BINARY --home $HOME_1 q wasm list-code -o json | jq -r '.code_infos[-1].code_id')
+last_code_id=$($CHAIN_BINARY --home $HOME_1 q wasm list-code -o json --reverse | jq -r '.code_infos[0].code_id')
 let code_id=$last_code_id+1
 echo "[INFO]: last code ID is: $last_code_id, code_id set to: $code_id"
 
