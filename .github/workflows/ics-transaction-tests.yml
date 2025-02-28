@@ -3,9 +3,9 @@ name: ICS Transection Tests
 on:
   workflow_dispatch:
   schedule:
-    # At 05:30 everyday.
-    - cron: '0 3 * * *'
-  push:
+    # At 16:00 on Monday.
+    - cron: '0 16 * * 1'
+  # push:
 
 jobs:
   test-transactions:
