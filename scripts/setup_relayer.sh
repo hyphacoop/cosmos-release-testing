@@ -3,12 +3,20 @@
 
 if [ $RELAYER == "hermes" ]; then
 
-    echo "Downloading Hermes..."
-    wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
-    tar -xzvf hermes-$HERMES_VERSION.tar.gz
+    echo "> Installing Hermes"
+    sudo apt-get install protobuf-compiler
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y
+    cargo install ibc-relayer-cli --bin hermes --locked --version ${HERMES_VERSION:1}
+    hermes version
     mkdir -p ~/.hermes
-    cp hermes ~/.hermes/hermes
-    export PATH="$PATH:~/.hermes"
+
+    # echo "Downloading Hermes..."
+    # wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
+    # tar -xzvf hermes-$HERMES_VERSION.tar.gz
+    # mkdir -p ~/.hermes
+    # hermes version
+    # cp hermes ~/.hermes/hermes
+    # export PATH="$PATH:~/.hermes"
 
     echo "Setting up Hermes config..."
     cp templates/hermes-config.toml ~/.hermes/config.toml
@@ -178,7 +186,8 @@ echo "[Service]"                            | sudo tee /etc/systemd/system/$RELA
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
 if [ $RELAYER == "hermes" ]; then
-    echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    # echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    echo "ExecStart=$HOME/.cargo/bin/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
 elif [ $RELAYER == "rly" ]; then
     echo "ExecStart=$HOME/.relayer/$RELAYER start"   | sudo tee /etc/systemd/system/$RELAYER.service -a
 fi
@@ -197,7 +206,8 @@ echo ""                                     | sudo tee /etc/systemd/system/herme
 echo "[Service]"                            | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
 
-echo "ExecStart=$HOME/.hermes/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
+# echo "ExecStart=$HOME/.hermes/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
+echo "ExecStart=$HOME/.cargo/bin/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
 echo ""                                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
@@ -207,3 +217,5 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/herme
 sudo systemctl daemon-reload
 sudo systemctl enable $RELAYER
 sudo systemctl enable hermes-evidence
+sleep 10
+journalctl -u $RELAYER | tail -n 100

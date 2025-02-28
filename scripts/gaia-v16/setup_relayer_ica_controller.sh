@@ -2,12 +2,19 @@
 # Set up a relayer
 
 if [ $RELAYER == "hermes" ]; then
-    echo "Downloading Hermes..."
-    wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
-    tar -xzvf hermes-$HERMES_VERSION.tar.gz
+    echo "> Installing Hermes"
+    sudo apt-get install protobuf-compiler
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y
+    cargo install ibc-relayer-cli --bin hermes --locked --version ${HERMES_VERSION:1}
+    hermes version
     mkdir -p ~/.hermes
-    cp hermes ~/.hermes/hermes
-    export PATH="$PATH:~/.hermes"
+
+    # echo "Downloading Hermes..."
+    # wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
+    # tar -xzvf hermes-$HERMES_VERSION.tar.gz
+    # mkdir -p ~/.hermes
+    # cp hermes ~/.hermes/hermes
+    # export PATH="$PATH:~/.hermes"
 
     echo "Setting up Hermes config..."
     cp templates/gaia-v16/hermes-config-ica-controller.toml ~/.hermes/config.toml
@@ -28,7 +35,8 @@ echo "[Service]"                            | sudo tee /etc/systemd/system/$RELA
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
 if [ $RELAYER == "hermes" ]; then
-    echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    # echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    echo "ExecStart=$HOME/.cargo/bin/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
 elif [ $RELAYER == "rly" ]; then
     echo "ExecStart=$HOME/.relayer/$RELAYER start"   | sudo tee /etc/systemd/system/$RELAYER.service -a
 fi

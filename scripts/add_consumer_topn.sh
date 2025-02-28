@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Patching add template with spawn time..."
-spawn_time=$(date -u --iso-8601=ns -d '60 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
+spawn_time=$(date -u --iso-8601=ns -d '80 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' templates/create-consumer.json > create-spawn.json
 
 # if [ $PSS_ENABLED == true ]; then

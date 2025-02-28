@@ -30,6 +30,7 @@ if [ $d_end_balance -gt $d_start_balance ]; then
   echo "Chain D balance has increased!"
 else
   echo "Chain D balance has not increased!"
+  journalctl -u $RELAYER.service | tail -n 100
   exit 1
 fi
 
@@ -53,5 +54,6 @@ if [ $a_end_balance -gt $a_start_balance ]; then
   echo "Chain A balance has increased!"
 else
   echo "Chain A balance has not increased!"
+  journalctl -u $RELAYER.service | tail -n 100
   exit 1
 fi
