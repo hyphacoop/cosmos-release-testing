@@ -1,6 +1,6 @@
 ---
 
-    name: Gaia Minor Upgrade - Fresh State
+    name: Gaia v22.3.0 Minor Upgrade - Fresh State
     on:
       workflow_dispatch:
       # push:
@@ -11,8 +11,8 @@
     
     env:
       # Versions
-      START_VERSION: v22.1.0
-      TARGET_VERSION: v22.2.0
+      START_VERSION: v22.2.0
+      TARGET_VERSION: v22.3.0
       # All chain variables
       COMMIT_TIMEOUT: 5
       DOWNTIME_BLOCKS: 10000
