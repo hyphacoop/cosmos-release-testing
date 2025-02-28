@@ -218,4 +218,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable $RELAYER
 sudo systemctl enable hermes-evidence
 sleep 10
-journalctl -fu $RELAYER
+journalctl -u $RELAYER | tail -n 100
