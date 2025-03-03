@@ -77,6 +77,7 @@ fi
 echo "> $GOV_PROPOSALS"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '. | keys[-1]')
 if [ "$RESPONSE" != "proposals" ]; then
+    curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '.'
     response_failed $RESPONSE
 fi
 
