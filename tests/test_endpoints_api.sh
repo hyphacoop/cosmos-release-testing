@@ -74,11 +74,11 @@ if [ "$RESPONSE" != "evidence" ]; then
     response_failed $RESPONSE
 fi
 
-# echo "> $GOV_PROPOSALS"
-# RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '. | keys[-1]')
-# if [ "$RESPONSE" != "proposals" ]; then
-#     response_failed $RESPONSE
-# fi
+echo "> $GOV_PROPOSALS"
+RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '. | keys[-1]')
+if [ "$RESPONSE" != "proposals" ]; then
+    response_failed $RESPONSE
+fi
 
 echo "> $GOV_DEPOSITS"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_DEPOSITS | jq -r '. | keys[0]')
