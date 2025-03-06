@@ -77,39 +77,38 @@ jobs:
           toml set --toml-path ~/.gaia/config/config.toml p2p.laddr "tcp://0.0.0.0:${{ vars.PROVIDER_P2P_PORT }}"
           toml set --toml-path ~/.gaia/config/config.toml rpc.pprof_laddr "localhost:${{ vars.PROVIDER_PPROF_PORT }}"
           toml set --toml-path ~/.gaia/config/config.toml instrumentation.prometheus_listen_addr ":${{ vars.PROVIDER_PROM_PORT }}"
-
-      - name: Restore node keys
+      - name: Initializing chain to sync with ICS Testnet provider
+        env:
+          NODE_MONIKER: test-val
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/interchain-security/provider/provider-genesis.json
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.ics-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.ics-testnet.polypore.xyz:26656"
+          SYNC_RPC_1: https://rpc.provider-state-sync-01.ics-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.provider-state-sync-02.ics-testnet.polypore.xyz:443
+          GAS_PRICES: "0.0025uatom"
+          CHAIN_ID: provider
+          CHAIN_BINARY: gaiad
+          $NODE_HOME: ~/.gaia/
         run: |
-          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode >> ~/.gaia/config/priv_validator_key.json
-          echo "${{ secrets.NODE_KEY }}" | base64 --decode >> ~/.gaia/config/node_key.json
-          echo "[INFO] Node ID:"
-          gaiad comet show-node-id
-          echo "[INFO] Validator pub key:"
-          gaiad comet show-validator
-          node_id=$(gaiad comet show-node-id)
-          val_pubkey=$(gaiad comet show-validator)
-          echo "PROVIDER_NODE_ID=$node_id" >> $GITHUB_ENV
-          echo "PROVIDER_VAL_PUBKEY=$val_pubkey" >> $GITHUB_ENV
-
-      - name: Restore validator wallet
-        run: echo "${{ secrets.VALIDATOR_MNEMONIC }}" | gaiad keys add validator --recover
-      - name: List all wallets
-        run: |
-          gaiad keys list
-          wallet=$(gaiad keys list --output json | jq -r '.[] | select(.name == ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} ) | .address')
-      # - name: Fund the wallet if less than 3atom
-      #   run: |
-      #     json=$(curl "https://faucet.polypore.xyz/request?address=$TEST_WALLET&chain=provider" | jq -r '.')
-      #     echo $json | jq -r '.'
-      #     status=$(echo $json | jq -r '.status')
-      #     if [ $status != "success" ]
-      #     then
-      #       echo "Failed to request finds from faucet"
-      #       exit 1
-      #     fi
-      #     tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
-      # - name: Query bank balances
-      #   run: gaiad q bank balances $TEST_WALLET
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
+          echo "Configuring state sync..."
+          CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
+          TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
+          TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
+          TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
+          sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json
+          mv genesis.json $NODE_HOME/config/genesis.json
       - name: Create provider service
         run: |
           sudo touch /etc/systemd/system/$PROVIDER_SERVICE_NAME.service
@@ -144,3 +143,37 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
+
+      # - name: Restore node keys
+      #   run: |
+      #     echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode >> ~/.gaia/config/priv_validator_key.json
+      #     echo "${{ secrets.NODE_KEY }}" | base64 --decode >> ~/.gaia/config/node_key.json
+      #     echo "[INFO] Node ID:"
+      #     gaiad comet show-node-id
+      #     echo "[INFO] Validator pub key:"
+      #     gaiad comet show-validator
+      #     node_id=$(gaiad comet show-node-id)
+      #     val_pubkey=$(gaiad comet show-validator)
+      #     echo "PROVIDER_NODE_ID=$node_id" >> $GITHUB_ENV
+      #     echo "PROVIDER_VAL_PUBKEY=$val_pubkey" >> $GITHUB_ENV
+
+      # - name: Restore validator wallet
+      #   run: echo "${{ secrets.VALIDATOR_MNEMONIC }}" | gaiad keys add validator --recover
+      # - name: List all wallets
+      #   run: |
+      #     gaiad keys list
+      #     wallet=$(gaiad keys list --output json | jq -r '.[] | select(.name == ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} ) | .address')
+      # - name: Fund the wallet if less than 3atom
+      #   run: |
+      #     json=$(curl "https://faucet.polypore.xyz/request?address=$TEST_WALLET&chain=provider" | jq -r '.')
+      #     echo $json | jq -r '.'
+      #     status=$(echo $json | jq -r '.status')
+      #     if [ $status != "success" ]
+      #     then
+      #       echo "Failed to request finds from faucet"
+      #       exit 1
+      #     fi
+      #     tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
+      # - name: Query bank balances
+      #   run: gaiad q bank balances $TEST_WALLET
+      
