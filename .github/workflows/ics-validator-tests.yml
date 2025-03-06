@@ -45,7 +45,7 @@ jobs:
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Install required packages
-        run: apt -y install python-is-python3 python3-venv
+        run: sudo apt -y install python-is-python3 python3-venv
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
