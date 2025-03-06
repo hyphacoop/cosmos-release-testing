@@ -37,6 +37,12 @@ jobs:
       CONSUMER_PPROF_PORT: 6062
       CONSUMER_PROM_PORT: 26662
     steps:
+      - name: IP addresses
+        run: |
+          ipv6_addr=$(ip -j addr  | jq -r '.[] | select(.ifname=="eth0")| .addr_info[] | select(.family=="inet6") | .local')
+          ipv4_addr=$(ip -j addr  | jq -r '.[] | select(.ifname=="eth0")| .addr_info[] | select((.family=="inet6") and .scope=="global") | .local')
+          echo "IPv6: $ipv6_addr"
+          echo "IPv4: $ipv4_addr"
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Get current running gaiad version
@@ -109,28 +115,30 @@ jobs:
           wget -nv $GENESIS_URL -O genesis.json
           mv genesis.json $NODE_HOME/config/genesis.json
       - name: Create provider service
+        env:
+          NODE_HOME: ~/.gaia/
         run: |
-          sudo touch /etc/systemd/system/$PROVIDER_SERVICE_NAME.service
-          echo "[Unit]"                               | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service
-          echo "Description=Gaia service"             | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "After=network-online.target"          | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo ""                                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "[Service]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "User=$USER"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "ExecStart=/usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo ""                                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "[Install]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
+          sudo touch /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service
+          echo "[Unit]"                               | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }}
+          echo "Description=Gaia service"             | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
+          echo "After=network-online.target"          | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
+          echo ""                                     | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service -a
+          echo "[Service]"                            | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
+          echo "User=$USER"                           | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
+          echo "ExecStart=/usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
+          echo "Restart=no"                           | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
+          echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
+          echo ""                                     | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
+          echo "[Install]"                            | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
+          echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
           sudo systemctl daemon-reload
       - name: Enable and start provider service
         run: |
-          sudo systemctl enable --now $PROVIDER_SERVICE_NAME.service
+          sudo systemctl enable --now ${{ vars.PROVIDER_SERVICE_NAME }}.service
           sudo systemctl restart systemd-journald
       - name: Wait for Provider service to start and stabilize
         run: |
-          journal -fu $PROVIDER_SERVICE_NAME.service &
+          journal -fu ${{ vars.PROVIDER_SERVICE_NAME }}.service &
           tests/test_block_production.sh 127.0.0.1 ${{ vars.PROVIDER_RPC_PORT }} 50 1000
       - name: Syncing Provider Chain
         run: |
