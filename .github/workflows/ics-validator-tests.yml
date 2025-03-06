@@ -72,7 +72,6 @@ jobs:
           gaiad config set client keyring-backend test
           # gaiad config set client node "https://$RPC_NODE"
           gaiad config set app minimum-gas-prices "0.0025uatom"
-          ls -al $HOME/
       - name: Initializing chain to sync with ICS Testnet provider
         env:
           NODE_MONIKER: test-val
@@ -83,7 +82,7 @@ jobs:
           GAS_PRICES: "0.0025uatom"
           CHAIN_ID: provider
           CHAIN_BINARY: gaiad
-          NODE_HOME: ~/.gaia/
+          NODE_HOME: /home/runner/.gaia/
         run: |
           source ~/env/bin/activate
           echo "Initializing $NODE_HOME..."
@@ -104,19 +103,19 @@ jobs:
           sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "Configuring ports..."
-          toml set --toml-path ~/.gaia/config/config.toml rpc.laddr "tcp://127.0.0.1:${{ vars.PROVIDER_RPC_PORT }}"
-          toml set --toml-path ~/.gaia/config/app.toml api.enable true
-          toml set --toml-path ~/.gaia/config/app.toml api.address "tcp://localhost:${{ vars.PROVIDER_API_PORT }}"
-          toml set --toml-path ~/.gaia/config/app.toml grpc.address "localhost:${{ vars.PROVIDER_GRPC_PORT }}"
-          toml set --toml-path ~/.gaia/config/config.toml p2p.laddr "tcp://0.0.0.0:${{ vars.PROVIDER_P2P_PORT }}"
-          toml set --toml-path ~/.gaia/config/config.toml rpc.pprof_laddr "localhost:${{ vars.PROVIDER_PPROF_PORT }}"
-          toml set --toml-path ~/.gaia/config/config.toml instrumentation.prometheus_listen_addr ":${{ vars.PROVIDER_PROM_PORT }}"
+          toml set --toml-path $NODE_HOME/config/config.toml rpc.laddr "tcp://127.0.0.1:${{ vars.PROVIDER_RPC_PORT }}"
+          toml set --toml-path $NODE_HOME/config/app.toml api.enable true
+          toml set --toml-path $NODE_HOME/config/app.toml api.address "tcp://localhost:${{ vars.PROVIDER_API_PORT }}"
+          toml set --toml-path $NODE_HOME/config/app.toml grpc.address "localhost:${{ vars.PROVIDER_GRPC_PORT }}"
+          toml set --toml-path $NODE_HOME/config/config.toml p2p.laddr "tcp://0.0.0.0:${{ vars.PROVIDER_P2P_PORT }}"
+          toml set --toml-path $NODE_HOME/config/config.toml rpc.pprof_laddr "localhost:${{ vars.PROVIDER_PPROF_PORT }}"
+          toml set --toml-path $NODE_HOME/config/config.toml instrumentation.prometheus_listen_addr ":${{ vars.PROVIDER_PROM_PORT }}"
           echo "Replaceing genesis..."
           wget -nv $GENESIS_URL -O genesis.json
           mv genesis.json $NODE_HOME/config/genesis.json
       - name: Create provider service
         env:
-          NODE_HOME: ~/.gaia/
+          NODE_HOME: /home/runner/.gaia/
         run: |
           sudo touch /etc/systemd/system/$PROVIDER_SERVICE_NAME.service
           echo "[Unit]"                               | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service
