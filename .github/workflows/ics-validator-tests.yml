@@ -64,6 +64,7 @@ jobs:
           # gaiad config set client node "https://$RPC_NODE"
           gaiad config set app minimum-gas-prices "0.0025uatom"
       - name: Configure gaiad ports
+        run: |
           source ~/env/bin/activate
           toml set --toml-path ~/.gaia/config/config.toml rpc.laddr "tcp://127.0.0.1:${{ vars.PROVIDER_RPC_PORT }}"
           toml set --toml-path ~/.gaia/config/app.toml api.enable true
