@@ -47,7 +47,6 @@ jobs:
       - name: Install required packages
         run: |
           sudo apt update
-          sudo apt -y dist-upgrade
           sudo apt -y install python-is-python3 python3-venv
       - name: Init Python venv
         run: python -m venv ~/env
@@ -67,6 +66,7 @@ jobs:
           gaiad config set client keyring-backend test
           # gaiad config set client node "https://$RPC_NODE"
           gaiad config set app minimum-gas-prices "0.0025uatom"
+          ls -al $HOME/
       - name: Configure gaiad ports
         run: |
           source ~/env/bin/activate
