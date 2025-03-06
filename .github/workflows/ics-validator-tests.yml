@@ -122,7 +122,7 @@ jobs:
           echo "[Unit]"                               | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }}
           echo "Description=Gaia service"             | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
           echo "After=network-online.target"          | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
-          echo ""                                     | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service -a
+          echo ""                                     | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
           echo "[Service]"                            | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
           echo "User=$USER"                           | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME.service }} -a
           echo "ExecStart=/usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/${{ vars.PROVIDER_SERVICE_NAME }}.service -a
