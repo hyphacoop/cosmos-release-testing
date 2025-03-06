@@ -12,6 +12,7 @@ jobs:
     concurrency:
       group: provision-vm-runner
       cancel-in-progress: false
+    strategy:
       fail-fast: true
       max-parallel: 1
     uses: ./.github/workflows/provision-runner-vm.yml
