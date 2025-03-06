@@ -103,13 +103,13 @@ jobs:
           sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           echo "Configuring ports..."
-          toml set --toml-path $NODE_HOME/config/config.toml rpc.laddr "tcp://127.0.0.1:${{ PROVIDER_RPC_PORT }}"
+          toml set --toml-path $NODE_HOME/config/config.toml rpc.laddr "tcp://127.0.0.1:$PROVIDER_RPC_PORT"
           toml set --toml-path $NODE_HOME/config/app.toml api.enable true
-          toml set --toml-path $NODE_HOME/config/app.toml api.address "tcp://localhost:${{ PROVIDER_API_PORT }}"
-          toml set --toml-path $NODE_HOME/config/app.toml grpc.address "localhost:${{ PROVIDER_GRPC_PORT }}"
-          toml set --toml-path $NODE_HOME/config/config.toml p2p.laddr "tcp://0.0.0.0:${{ PROVIDER_P2P_PORT }}"
-          toml set --toml-path $NODE_HOME/config/config.toml rpc.pprof_laddr "localhost:${{ PROVIDER_PPROF_PORT }}"
-          toml set --toml-path $NODE_HOME/config/config.toml instrumentation.prometheus_listen_addr ":${{ PROVIDER_PROM_PORT }}"
+          toml set --toml-path $NODE_HOME/config/app.toml api.address "tcp://localhost:$PROVIDER_API_PORT"
+          toml set --toml-path $NODE_HOME/config/app.toml grpc.address "localhost:$PROVIDER_GRPC_PORT"
+          toml set --toml-path $NODE_HOME/config/config.toml p2p.laddr "tcp://0.0.0.0:$PROVIDER_P2P_PORT"
+          toml set --toml-path $NODE_HOME/config/config.toml rpc.pprof_laddr "localhost:$PROVIDER_PPROF_PORT"
+          toml set --toml-path $NODE_HOME/config/config.toml instrumentation.prometheus_listen_addr ":$PROVIDER_PROM_PORT"
           echo "Replaceing genesis..."
           wget -nv $GENESIS_URL -O genesis.json
           mv genesis.json $NODE_HOME/config/genesis.json
@@ -138,13 +138,13 @@ jobs:
       - name: Wait for Provider service to start and stabilize
         run: |
           journalctl -fu $PROVIDER_SERVICE_NAME.service &
-          tests/test_block_production.sh 127.0.0.1 ${{ PROVIDER_RPC_PORT }} 50 1000
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 50 1000
       - name: Syncing Provider Chain
         run: |
           catching_up="true"
           while [ $catching_up == "true" ]
           do
-            catching_up=$(curl -s 127.0.0.1:${{ PROVIDER_RPC_PORT }}/status | jq -r .result.sync_info.catching_up)
+            catching_up=$(curl -s 127.0.0.1:$PROVIDER_RPC_PORT/status | jq -r .result.sync_info.catching_up)
             echo "Still Syncing: $catching_up"
             sleep 5
           done
