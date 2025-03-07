@@ -195,7 +195,7 @@ jobs:
           CHAIN_BINARY: gaiad
         run: |
           echo "[INFO] Balance of ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}:"
-          $CHAIN_BINARY q bank balance ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}
+          $CHAIN_BINARY q bank balances ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}
           json_bank=$($CHAIN_BINARY q bank balance ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} -o json)
           current_uatom_balance=$(echo $json | jq -r '.balances[] | select(.denom=="uatom") | .amount')
           echo "[INFO] Current amount of uatom: $current_uatom_balance"
