@@ -149,19 +149,39 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
-
-      # - name: Restore node keys
-      #   run: |
-      #     echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode >> ~/.gaia/config/priv_validator_key.json
-      #     echo "${{ secrets.NODE_KEY }}" | base64 --decode >> ~/.gaia/config/node_key.json
-      #     echo "[INFO] Node ID:"
-      #     gaiad comet show-node-id
-      #     echo "[INFO] Validator pub key:"
-      #     gaiad comet show-validator
-      #     node_id=$(gaiad comet show-node-id)
-      #     val_pubkey=$(gaiad comet show-validator)
-      #     echo "PROVIDER_NODE_ID=$node_id" >> $GITHUB_ENV
-      #     echo "PROVIDER_VAL_PUBKEY=$val_pubkey" >> $GITHUB_ENV
+      - name: Stop provider service
+        run: |
+          systemctl stop $PROVIDER_SERVICE_NAME.service
+          sleep 10
+      - name: Restore node keys
+        env:
+          NODE_HOME: /home/runner/.gaia/
+        run: |
+          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode >> $NODE_HOME/config/priv_validator_key.json
+          echo "${{ secrets.NODE_KEY }}" | base64 --decode >> $NODE_HOME/config/node_key.json
+          echo "[INFO] Node ID:"
+          gaiad comet show-node-id
+          echo "[INFO] Validator pub key:"
+          gaiad comet show-validator
+          node_id=$(gaiad comet show-node-id)
+          val_pubkey=$(gaiad comet show-validator)
+          echo "PROVIDER_NODE_ID=$node_id" >> $GITHUB_ENV
+          echo "PROVIDER_VAL_PUBKEY=$val_pubkey" >> $GITHUB_ENV
+      - name: Start provider service
+        run: |
+          sudo systemctl start $PROVIDER_SERVICE_NAME.service
+          journalctl -fu $PROVIDER_SERVICE_NAME.service &
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 50 1000
+      - name: Syncing Provider Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:$PROVIDER_RPC_PORT/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
 
       # - name: Restore validator wallet
       #   run: echo "${{ secrets.VALIDATOR_MNEMONIC }}" | gaiad keys add validator --recover
