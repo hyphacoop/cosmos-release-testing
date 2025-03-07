@@ -211,7 +211,7 @@ jobs:
               echo "Failed to request finds from faucet"
               exit 1
             fi
-            tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
+            tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1
           else
             echo "Funds more than 2000000uatom"
           fi
