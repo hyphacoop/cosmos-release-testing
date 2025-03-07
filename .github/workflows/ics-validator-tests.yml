@@ -151,7 +151,7 @@ jobs:
           echo "Done Syncing"
       - name: Stop provider service
         run: |
-          systemctl stop $PROVIDER_SERVICE_NAME.service
+          sudo systemctl stop $PROVIDER_SERVICE_NAME.service
           sleep 10
       - name: Restore node keys
         env:
