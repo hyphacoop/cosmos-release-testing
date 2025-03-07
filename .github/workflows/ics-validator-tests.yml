@@ -157,8 +157,8 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia/
         run: |
-          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode >> $NODE_HOME/config/priv_validator_key.json
-          echo "${{ secrets.NODE_KEY }}" | base64 --decode >> $NODE_HOME/config/node_key.json
+          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
+          echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           echo "[INFO] Node ID:"
           gaiad comet show-node-id
           echo "[INFO] Validator pub key:"
