@@ -1,5 +1,5 @@
 ---
-name: ICS Transection Tests
+name: ICS Validator Tests
 on:
   workflow_dispatch:
   schedule:
