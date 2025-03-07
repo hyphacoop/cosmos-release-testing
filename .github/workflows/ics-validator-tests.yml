@@ -190,20 +190,30 @@ jobs:
           CHAIN_BINARY: gaiad
         run: |
           $CHAIN_BINARY keys list
-          wallet=$(gaiad keys list --output json | jq -r '.[] | select(.name == ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} ) | .address')
+      - name: Fund the wallet if less than 2atom
+        env:
+          CHAIN_BINARY: gaiad
+        run: |
           echo "[INFO] Balance of ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}:"
           $CHAIN_BINARY q bank balance ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}
-      # - name: Fund the wallet if less than 3atom
-      #   run: |
-      #     json=$(curl "https://faucet.polypore.xyz/request?address=$TEST_WALLET&chain=provider" | jq -r '.')
-      #     echo $json | jq -r '.'
-      #     status=$(echo $json | jq -r '.status')
-      #     if [ $status != "success" ]
-      #     then
-      #       echo "Failed to request finds from faucet"
-      #       exit 1
-      #     fi
-      #     tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
-      # - name: Query bank balances
-      #   run: gaiad q bank balances $TEST_WALLET
+          json_bank=$($CHAIN_BINARY q bank balance ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} -o json)
+          current_uatom_balance=$(echo $json | jq -r '.balances[] | select(.denom=="uatom") | .amount')
+          echo "[INFO] Current amount of uatom: $current_uatom_balance"
+          if [ $current_uatom_balance -lt 2000000 ]
+          then
+            echo "Current amount less than 2000000 requesting funds from faucet..."
+            json=$(curl "https://faucet.polypore.xyz/request?address=${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}&chain=provider" | jq -r '.')
+            echo $json | jq -r '.'
+            status=$(echo $json | jq -r '.status')
+            if [ $status != "success" ]
+            then
+              echo "Failed to request finds from faucet"
+              exit 1
+            fi
+            tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
+          else
+            echo "Funds more than 2000000uatom"
+          fi
+      - name: Query bank balances
+        run: gaiad q bank balances $TEST_WALLET
       
