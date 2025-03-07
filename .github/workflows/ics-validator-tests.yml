@@ -195,6 +195,7 @@ jobs:
         env:
           CHAIN_BINARY: gaiad
         run: |
+          status="failed"
           echo "[INFO] Balance of ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}:"
           $CHAIN_BINARY q bank balances ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}
           json_bank=$($CHAIN_BINARY q bank balances ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} -o json)
@@ -202,7 +203,7 @@ jobs:
           echo "[INFO] Current amount of uatom: $current_uatom_balance"
           if [ $current_uatom_balance -lt 2000000 ]
           then
-            echo "Current amount less than 2000000 requesting funds from faucet..."
+            echo "Current amount less than 2000000uatom requesting funds from faucet..."
             json=$(curl "https://faucet.polypore.xyz/request?address=${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}&chain=provider" | jq -r '.')
             echo $json | jq -r '.'
             status=$(echo $json | jq -r '.status')
