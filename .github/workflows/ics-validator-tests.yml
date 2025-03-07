@@ -138,7 +138,7 @@ jobs:
       - name: Wait for Provider service to start and stabilize
         run: |
           journalctl -fu $PROVIDER_SERVICE_NAME.service &
-          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 50 1000
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 5 1000
       - name: Syncing Provider Chain
         run: |
           catching_up="true"
@@ -171,7 +171,7 @@ jobs:
         run: |
           sudo systemctl start $PROVIDER_SERVICE_NAME.service
           journalctl -fu $PROVIDER_SERVICE_NAME.service &
-          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 50 1000
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 5 1000
       - name: Syncing Provider Chain
         run: |
           catching_up="true"
@@ -183,12 +183,16 @@ jobs:
           done
           echo "Done Syncing"
 
-      # - name: Restore validator wallet
-      #   run: echo "${{ secrets.VALIDATOR_MNEMONIC }}" | gaiad keys add validator --recover
-      # - name: List all wallets
-      #   run: |
-      #     gaiad keys list
-      #     wallet=$(gaiad keys list --output json | jq -r '.[] | select(.name == ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} ) | .address')
+      - name: Restore validator wallet
+        run: echo "${{ secrets.VALIDATOR_MNEMONIC }}" | gaiad keys add validator --recover
+      - name: List all wallets
+        env:
+          CHAIN_BINARY: gaiad
+        run: |
+          $CHAIN_BINARY keys list
+          wallet=$(gaiad keys list --output json | jq -r '.[] | select(.name == ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }} ) | .address')
+          echo "[INFO] Balance of ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}:"
+          $CHAIN_BINARY q bank balance ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}
       # - name: Fund the wallet if less than 3atom
       #   run: |
       #     json=$(curl "https://faucet.polypore.xyz/request?address=$TEST_WALLET&chain=provider" | jq -r '.')
