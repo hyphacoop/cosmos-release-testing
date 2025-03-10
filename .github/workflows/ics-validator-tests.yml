@@ -30,12 +30,14 @@ jobs:
       PROVIDER_PPROF_PORT: 6061
       PROVIDER_PROM_PORT: 26660
       PROVIDER_SERVICE_NAME: gaiad
+      CONSUMER_RPC_NODE: rpc.pion.ics-testnet.polypore.xyz
       CONSUMER_RPC_PORT: 27002
       CONSUMER_API_PORT: 25002
       CONSUMER_GRPC_PORT: 26002
       CONSUMER_P2P_PORT: 28002
       CONSUMER_PPROF_PORT: 6062
       CONSUMER_PROM_PORT: 26662
+      CONSUMER_SERVICE_NAME: neutrond
     steps:
       - name: IP addresses
         run: |
@@ -219,3 +221,98 @@ jobs:
       - name: Query bank balances
         run: gaiad q bank balances ${{ vars.PROVIDER_SELF_DELEGATE_ADDRESS }}
       
+      # PION-1
+      - name: Get current running pion version
+        run: |
+          CONSUMER_RUNNING_VERSION=$(curl -s https://$CONSUMER_RPC_NODE/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $CONSUMER_RUNNING_VERSION"
+          echo "CONSUMER_RUNNING_VERSION=$CONSUMER_RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from neutron-org/neutron repo
+        run: |
+          sudo wget -nv https://github.com/neutron-org/neutron/releases/download/v${{ env.CONSUMER_RUNNING_VERSION }}/neutrond-linux-amd64 -O /usr/local/bin/neutrond
+          sudo chmod +x /usr/local/bin/neutrond
+          neutrond version
+      - name: Configure neutrond
+        run: |
+          neutrond config set client chain-id pion-1
+          neutrond config set client keyring-backend test
+          neutrond config set client node "tcp://localhost:$CONSUMER_RPC_PORT"
+          neutrond config set app minimum-gas-prices "0untrn"
+      - name: Initializing chain to sync with ICS Testnet pion-1
+        env:
+          NODE_MONIKER: test-val
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/interchain-security/pion-1/pion-1-genesis-with-ccv.json.gz
+          SEEDS: "4dbb91a22ec4222751aec7f682ea20c2c907f09d@p2p-palvus.pion-1.ntrn.tech:26656"
+          SYNC_RPC_1: https://rpc.pion.ics-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.pion-2.ics-testnet.polypore.xyz:443
+          GAS_PRICES: "0untrn"
+          CHAIN_ID: pion-1
+          CHAIN_BINARY: neutrond
+          NODE_HOME: /home/runner/.neutrond/
+        run: |
+          source ~/env/bin/activate
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
+          echo "Configuring state sync..."
+          CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
+          TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
+          TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
+          TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
+          sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "16h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          sed -i -e "/iavl-disable-fastnode =/ s^= true^= false^" $NODE_HOME/config/app.toml
+          echo "Configuring ports..."
+          toml set --toml-path $NODE_HOME/config/config.toml rpc.laddr "tcp://127.0.0.1:$CONSUMER_RPC_PORT"
+          toml set --toml-path $NODE_HOME/config/app.toml api.enable true
+          toml set --toml-path $NODE_HOME/config/app.toml api.address "tcp://localhost:$CONSUMER_API_PORT"
+          toml set --toml-path $NODE_HOME/config/app.toml grpc.address "localhost:$CONSUMER_GRPC_PORT"
+          toml set --toml-path $NODE_HOME/config/config.toml p2p.laddr "tcp://0.0.0.0:$CONSUMER_P2P_PORT"
+          toml set --toml-path $NODE_HOME/config/config.toml rpc.pprof_laddr "localhost:$CONSUMER_PPROF_PORT"
+          toml set --toml-path $NODE_HOME/config/config.toml instrumentation.prometheus_listen_addr ":$CONSUMER_PROM_PORT"
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json
+          mv genesis.json $NODE_HOME/config/genesis.json
+      - name: Create neutrond service
+        env:
+          NODE_HOME: /home/runner/.neutrond/
+        run: |
+          sudo touch /etc/systemd/system/$CONSUMER_SERVICE_NAME.service
+          echo "[Unit]"                               | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service
+          echo "Description=Gaia service"             | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "After=network-online.target"          | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "[Service]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "User=runner"                          | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "ExecStart=/usr/local/bin/neutrond start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "Restart=no"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "[Install]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+          sudo systemctl daemon-reload
+      - name: Enable and start neutrond service
+        run: |
+          sudo systemctl enable --now $CONSUMER_SERVICE_NAME.service
+          sudo systemctl restart systemd-journald
+      - name: Wait for neutrond service to start and stabilize
+        run: |
+          journalctl -fu $CONSUMER_SERVICE_NAME.service &
+          tests/test_block_production.sh 127.0.0.1 $CONSUMER_RPC_PORT 5 1000
+      - name: Syncing Consumer Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:$CONSUMER_RPC_PORT/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
