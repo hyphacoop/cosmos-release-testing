@@ -296,6 +296,15 @@ jobs:
           echo "[Install]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
           echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
           sudo systemctl daemon-reload
+      - name: Download pion snapshot
+        env:
+          NODE_HOME: /home/runner/.neutrond/
+        run: |
+          cd $NODE_HOME
+          echo "[INFO]: Downloading snapshot..."
+          curl https://snapshots.polypore.xyz/ics-testnet/pion-1/latest.tar.gz -o latest.tar.gz
+          echo "[INFO]: Extracting snapshot..."
+          tar xf latest.tar.gz
       - name: Enable and start neutrond service
         run: |
           sudo systemctl enable --now $CONSUMER_SERVICE_NAME.service
