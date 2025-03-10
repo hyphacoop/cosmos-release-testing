@@ -234,13 +234,10 @@ jobs:
           neutrond version
       - name: Configure neutrond
         run: |
-          neutrond config set client chain-id pion-1
-          neutrond config set client keyring-backend test
-          neutrond config set client node "tcp://localhost:$CONSUMER_RPC_PORT"
-          neutrond config set app minimum-gas-prices "0untrn"
+          neutrond config node "tcp://localhost:$CONSUMER_RPC_PORT"
       - name: Initializing chain to sync with ICS Testnet pion-1
         env:
-          NODE_MONIKER: test-val
+          NODE_MONIKER: test-val-pion
           GENESIS_URL: https://github.com/cosmos/testnets/raw/master/interchain-security/pion-1/pion-1-genesis-with-ccv.json.gz
           SEEDS: "4dbb91a22ec4222751aec7f682ea20c2c907f09d@p2p-palvus.pion-1.ntrn.tech:26656"
           SYNC_RPC_1: https://rpc.pion.ics-testnet.polypore.xyz:443
@@ -252,9 +249,9 @@ jobs:
         run: |
           source ~/env/bin/activate
           echo "Initializing $NODE_HOME..."
-          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
-          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
-          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY config chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config broadcast-mode sync --home $NODE_HOME
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
