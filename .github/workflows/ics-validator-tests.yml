@@ -275,7 +275,8 @@ jobs:
           toml set --toml-path $NODE_HOME/config/config.toml rpc.pprof_laddr "localhost:$CONSUMER_PPROF_PORT"
           toml set --toml-path $NODE_HOME/config/config.toml instrumentation.prometheus_listen_addr ":$CONSUMER_PROM_PORT"
           echo "Replaceing genesis..."
-          wget -nv $GENESIS_URL -O genesis.json
+          wget -nv $GENESIS_URL -O genesis.json.gz
+          gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
       - name: Create neutrond service
         env:
