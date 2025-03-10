@@ -147,8 +147,10 @@ jobs:
           catching_up="true"
           while [ $catching_up == "true" ]
           do
-            catching_up=$(curl -s 127.0.0.1:$PROVIDER_RPC_PORT/status | jq -r .result.sync_info.catching_up)
-            echo "Still Syncing: $catching_up"
+            json=$(curl -s 127.0.0.1:$PROVIDER_RPC_PORT/status)
+            catching_up=$(echo "$json" | jq -r .result.sync_info.catching_up)
+            current_height=$(echo "$json" | jq -r '.result.sync_info.latest_block_height')
+            echo "Still Syncing: $catching_up Height: $current_height"
             sleep 5
           done
           echo "Done Syncing"
@@ -180,8 +182,10 @@ jobs:
           catching_up="true"
           while [ $catching_up == "true" ]
           do
-            catching_up=$(curl -s 127.0.0.1:$PROVIDER_RPC_PORT/status | jq -r .result.sync_info.catching_up)
-            echo "Still Syncing: $catching_up"
+            json=$(curl -s 127.0.0.1:$PROVIDER_RPC_PORT/status)
+            catching_up=$(echo "$json" | jq -r .result.sync_info.catching_up)
+            current_height=$(echo "$json" | jq -r '.result.sync_info.latest_block_height')
+            echo "Still Syncing: $catching_up Height: $current_height"
             sleep 5
           done
           echo "Done Syncing"
@@ -305,6 +309,7 @@ jobs:
           curl https://snapshots.polypore.xyz/ics-testnet/pion-1/latest.tar.gz -o latest.tar.gz
           echo "[INFO]: Extracting snapshot..."
           tar xf latest.tar.gz
+          rm latest.tar.gz
       - name: Enable and start neutrond service
         run: |
           sudo systemctl enable --now $CONSUMER_SERVICE_NAME.service
@@ -313,13 +318,15 @@ jobs:
         run: |
           journalctl -fu $CONSUMER_SERVICE_NAME.service &
           tests/test_block_production.sh 127.0.0.1 $CONSUMER_RPC_PORT 5 1000
-      - name: Syncing Consumer Chain
+      - name: Syncing pion-1 Chain
         run: |
           catching_up="true"
           while [ $catching_up == "true" ]
           do
-            catching_up=$(curl -s 127.0.0.1:$CONSUMER_RPC_PORT/status | jq -r .result.sync_info.catching_up)
-            echo "Still Syncing: $catching_up"
+            json=$(curl -s 127.0.0.1:$CONSUMER_RPC_PORT/status)
+            catching_up=$(echo "$json" | jq -r .result.sync_info.catching_up)
+            current_height=$(echo "$json" | jq -r '.result.sync_info.latest_block_height')
+            echo "Still Syncing: $catching_up Height: $current_height"
             sleep 5
           done
           echo "Done Syncing"
