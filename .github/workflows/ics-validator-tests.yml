@@ -364,5 +364,6 @@ jobs:
           done
       - name: Validator cleanup
         if: always()
+        run: |
           gaiad tx provider opt-out 0 --from validator --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
           tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1
