@@ -330,3 +330,21 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
+
+      # Validator tasks
+      - name: Unjail validator
+        run: |
+          gaiad tx slashing unjail --from validator --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y || true
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1
+      - name: Optin to pion-1
+        run: |
+          echo "[INFO] validator public key:"
+          validator_key=$(neutrond tendermint show-validator)
+          echo "$validator_key"
+          echo "[INFO] opt-in..."
+          gaiad tx provider opt-in 0 "$validator_key" --from validator --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1
+      - name: Validator cleanup
+        if: always()
+          gaiad tx provider opt-out 0 --from validator --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+          tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1                  
