@@ -15,8 +15,8 @@ BANK_DENOMS_METADATA="$NODE_ADDRESS/cosmos/bank/v1beta1/denoms_metadata"
 BANK_SUPPLY="$NODE_ADDRESS/cosmos/bank/v1beta1/supply"
 DIST_SLASHES="$NODE_ADDRESS/cosmos/distribution/v1beta1/validators/$VAL_ACCOUNT/slashes"
 EVIDENCE="$NODE_ADDRESS/cosmos/evidence/v1beta1/evidence"
-GOV_PROPOSALS="$NODE_ADDRESS/cosmos/gov/v1beta1/proposals"
-GOV_DEPOSITS="$NODE_ADDRESS/cosmos/gov/v1beta1/proposals/$PROPOSAL_ID/deposits"
+GOV_PROPOSALS="$NODE_ADDRESS/cosmos/gov/v1/proposals"
+GOV_DEPOSITS="$NODE_ADDRESS/cosmos/gov/v1/proposals/$PROPOSAL_ID/deposits"
 GOV_VOTES="$NODE_ADDRESS/cosmos/gov/v1beta1/proposals/$PROPOSAL_ID/votes"
 SLASH_SIGNING_INFOS="$NODE_ADDRESS/cosmos/slashing/v1beta1/signing_infos"
 STAKING_DELEGATIONS="$NODE_ADDRESS/cosmos/staking/v1beta1/delegations/$TEST_ACCOUNT"
@@ -77,6 +77,8 @@ fi
 echo "> $GOV_PROPOSALS"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '. | keys[-1]')
 if [ "$RESPONSE" != "proposals" ]; then
+    curl -s $GOV_PROPOSALS | jq -r '.'
+    $CHAIN_BINARY q gov proposals --home $HOME_1 -o json | jq '.'
     response_failed $RESPONSE
 fi
 

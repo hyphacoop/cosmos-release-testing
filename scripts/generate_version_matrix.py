@@ -5,7 +5,7 @@ import sys
 import re
 import requests
 
-SKIP_VERSIONS = ['v20.0.1']
+SKIP_VERSIONS = ['v23.0.0-rc0']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 starting_version = sys.argv[1].split('.')

@@ -17,8 +17,8 @@ fi
 echo "Chain D starting balance in expected denom: $d_start_balance"
 
 $CHAIN_BINARY tx ibc-transfer transfer transfer $channel_provider "pfm" --memo "{\"forward\": {\"receiver\": \"pfm\",\"port\": \"transfer\",\"channel\": \"channel-1\",\"timeout\": \"10m\",\"next\": {\"forward\": {\"receiver\": \"$WALLET_1\",\"port\": \"transfer\",\"channel\":\"channel-1\",\"timeout\":\"10m\"}}}}" 1000000$DENOM --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1
-echo "Waiting for the transfer to reach chain d..."
-sleep $(($COMMIT_TIMEOUT*10))
+echo "Waiting for the transfer to reach chain D..."
+sleep $(($COMMIT_TIMEOUT*20))
 
 d_end_balance=$($CHAIN_BINARY --home $PFM_HOME q bank balances $WALLET_1 -o json | jq -r --arg DENOM "$target_denom_a_d" '.balances[] | select(.denom==$DENOM).amount')
 if [ -z "$d_end_balance" ]; then
@@ -41,8 +41,8 @@ fi
 echo "Chain A starting balance in expected denom: $a_start_balance"
 
 $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 "pfm" --memo "{\"forward\": {\"receiver\": \"pfm\",\"port\": \"transfer\",\"channel\": \"channel-0\",\"timeout\": \"10m\",\"next\": {\"forward\": {\"receiver\": \"$WALLET_1\",\"port\": \"transfer\",\"channel\":\"channel-0\",\"timeout\":\"10m\"}}}}" 1000000$DENOM --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $PFM_HOME
-echo "Waiting for the transfer to reach chain a..."
-sleep $(($COMMIT_TIMEOUT*10))
+echo "Waiting for the transfer to reach chain A..."
+sleep $(($COMMIT_TIMEOUT*20))
 
 a_end_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r --arg DENOM "$target_denom_d_a" '.balances[] | select(.denom==$DENOM).amount')
 if [ -z "$a_end_balance" ]; then
