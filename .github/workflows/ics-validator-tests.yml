@@ -353,12 +353,14 @@ jobs:
           tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1
       - name: Check if validators are signing blocks
         run: |
-          provider_signing="0"
-          consumer_signing="0"
+          provider_signing=""
+          consumer_signing=""
           while [ $provider_signing != "2" ] || [ $consumer_signing != "2" ]
           do
-            provider_signing=$(curl -s http://127.0.0.1:$PROVIDER_RPC_PORT/block | jq -r --arg ADDRESS "${{ env.PROVIDER_HEX_ADDR }}" '.result.block.last_commit.signatures[] | select(.validator_address==$ADDRESS).block_id_flag')
-            consumer_signing=$(curl -s http://127.0.0.1:$CONSUMER_RPC_PORT/block | jq -r --arg ADDRESS "${{ env.CONSUMER_HEX_ADDR }}" '.result.block.last_commit.signatures[] | select(.validator_address==$ADDRESS).block_id_flag')
+            provider_signing_status=$(curl -s http://127.0.0.1:$PROVIDER_RPC_PORT/block | jq -r --arg ADDRESS "${{ env.PROVIDER_HEX_ADDR }}" '.result.block.last_commit.signatures[] | select(.validator_address==$ADDRESS).block_id_flag')
+            consumer_signing_status=$(curl -s http://127.0.0.1:$CONSUMER_RPC_PORT/block | jq -r --arg ADDRESS "${{ env.CONSUMER_HEX_ADDR }}" '.result.block.last_commit.signatures[] | select(.validator_address==$ADDRESS).block_id_flag')
+            provider_signing="$provider_signing_status"
+            consumer_signing="$consumer_signing_status"
             echo "Provider block signing status: $provider_signing"
             echo "Consumer block signing status: $consumer_signing"
             sleep 5
