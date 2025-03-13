@@ -311,7 +311,7 @@ jobs:
         run: |
           mkdir $SLINKY_HOME
           wget https://github.com/skip-mev/connect/releases/download/v$SERVICE_VERSION/slinky-$SERVICE_VERSION-linux-amd64.tar.gz -O - | tar xvz --strip-components=1
-          cp slinky /usr/local/bin/
+          sudo cp slinky /usr/local/bin/
           echo "Creating $SLINKY_SERVICE_NAME.service..."
           sudo touch /etc/systemd/system/$SERVICE_NAME.service
 
