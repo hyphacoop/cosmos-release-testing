@@ -322,7 +322,7 @@ jobs:
           echo "[Service]"                                                                     | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
           echo "WorkingDirectory=$SLINKY_HOME"                                                 | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
           echo "User=runner"                                                                   | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
-          echo "ExecStart=$HOME/go/bin/slinky --market-map-endpoint=\"127.0.0.1:9090\""        | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "ExecStart=/usr/local/bin/slinky --market-map-endpoint=\"127.0.0.1:9090\""        | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
           echo "Restart=always"                                                                | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
           echo "RestartSec=3"                                                                  | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
           echo "LimitNOFILE=50000"                                                             | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
