@@ -303,6 +303,34 @@ jobs:
           echo "[Install]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
           echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
           sudo systemctl daemon-reload
+      - name: Install slinky service
+        env:
+          SLINKY_HOME: /home/runner/.slinky
+          SLINKY_SERVICE_NAME: slinky
+          SERVICE_VERSION: "1.2.0"
+        run: |
+          mkdir $SLINKY_HOME
+          wget https://github.com/skip-mev/connect/releases/download/v$SERVICE_VERSION/slinky-$SERVICE_VERSION-linux-amd64.tar.gz -O - | tar xvz --strip-components=1
+          cp slinky /usr/local/bin/
+          echo "Creating $SLINKY_SERVICE_NAME.service..."
+          sudo touch /etc/systemd/system/$SERVICE_NAME.service
+
+          echo "[Unit]"                                                                        | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service
+          echo "Description=Slinky service"                                                    | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "After=network-online.target"                                                   | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo ""                                                                              | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "[Service]"                                                                     | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "WorkingDirectory=$SLINKY_HOME"                                                 | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "User=runner"                                                                   | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "ExecStart=$HOME/go/bin/slinky --market-map-endpoint=\"127.0.0.1:9090\""        | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "Restart=always"                                                                | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "RestartSec=3"                                                                  | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "LimitNOFILE=50000"                                                             | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo ""                                                                              | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "[Install]"                                                                     | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          echo "WantedBy=multi-user.target"                                                    | sudo tee /etc/systemd/system/$SLINKY_SERVICE_NAME.service -a
+          sudo systemctl daemon-reload
+          sudo systemctl enable --now $SLINKY_SERVICE_NAME.service
       - name: Download pion snapshot
         env:
           NODE_HOME: /home/runner/.neutrond/
@@ -369,7 +397,7 @@ jobs:
             else
               count=0
             fi
-            if [ $count -gt 5 ]
+            if [ $count -gt 20 ]
             then
               status="true"
             fi
