@@ -365,6 +365,18 @@ jobs:
             echo "Consumer block signing status: $consumer_signing"
             sleep 5
           done
+      - name: Opt-out of pion
+        run: gaiad tx provider opt-out 0 --from validator --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+      - name: Check if opt-out successful
+        run: |
+          consumer_signing=""
+          while [ "$consumer_signing" = "2" ]
+          do
+            consumer_signing_status=$(curl -s http://127.0.0.1:$CONSUMER_RPC_PORT/block | jq -r --arg ADDRESS "${{ env.CONSUMER_HEX_ADDR }}" '.result.block.last_commit.signatures[] | select(.validator_address==$ADDRESS).block_id_flag')
+            consumer_signing="$consumer_signing_status"
+            echo "Consumer block signing status: $consumer_signing"
+            sleep 5
+          done
       - name: Validator cleanup
         if: always()
         run: |
