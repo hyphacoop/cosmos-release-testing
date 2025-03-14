@@ -3,8 +3,8 @@ name: ICS Validator Tests
 on:
   workflow_dispatch:
   schedule:
-    # At 16:00 on Monday.
-    - cron: '0 16 * * 1'
+    # At 6:00 on Monday.
+    - cron: '0 6 * * 1'
   # push:
 
 jobs:
