@@ -5,7 +5,7 @@ on:
   schedule:
     # At 16:00 on Monday.
     - cron: '0 16 * * 1'
-  push:
+  # push:
 
 jobs:
   provision-runner:
