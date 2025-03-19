@@ -76,8 +76,8 @@
           - name: Generate versions
             id: generate-versions
             run: | 
-              echo "\"matrix\"={\"previous_version\" : [\"$START_VERSION\"], \"test_version\" : [\"$TARGET_VERSION\""], \"upgrade_name\" : [\"$UPGRADE_PLAN_NAME\"]}"
-              echo "\"matrix\"={\"previous_version\" : [\"$START_VERSION\"], \"test_version\" : [\"$TARGET_VERSION\""], \"upgrade_name\" : [\"$UPGRADE_PLAN_NAME\"]}" >> $GITHUB_OUTPUT
+              echo "{matrix={\"previous_version\" : [$START_VERSION], \"test_version\" : [$TARGET_VERSION], \"upgrade_name\" : [$UPGRADE_PLAN_NAME]}}"
+              echo "{matrix={\"previous_version\" : [$START_VERSION], \"test_version\" : [$TARGET_VERSION], \"upgrade_name\" : [$UPGRADE_PLAN_NAME]}}" >> $GITHUB_OUTPUT
               
             #  matrix={"previous_version":["v22.3.1"],"test_name":["TestExport","TestUnbonding","TestAuthzModule","TestCosmWasm","TestGovModule","TestConfig","TestBank","TestMainnetConsumerChainsAfterUpgrade","TestChangeover","TestICS6ConsumerSomeKeysChainLaunch","TestLSM","TestEvidence","TestConsumerModification","TestFeegrant","TestICS6ConsumerNoKeysChainLaunch","TestStaking","TestAuthModule","TestPFM","TestFeemarket","TestInactiveValidators","TestDelegatorICA","TestICS6ConsumerAllKeysChainLaunch","TestEndpoints","TestMultisig","TestICS4ChainLaunch"],"test_version":["v23.0.0"],"upgrade_name":["v23"]}
         outputs:
