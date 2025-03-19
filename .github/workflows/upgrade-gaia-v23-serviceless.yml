@@ -7,16 +7,35 @@
       # schedule:
         # - cron: '0 6,14 * * 1-6'
       workflow_dispatch:
+        inputs:
+          from_version:
+            description: 'Version to upgrade from'
+            required: false
+            type: string
+          to_version:
+            description: 'Version to upgrade to (defaults to current branch/tag)'
+            required: false
+            type: string
+          upgrade_name:
+            description: 'Name of the upgrade'
+            required: false
+            type: string
       push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     
+    
+
     env:
       # Versions
-      VERSION_CUTOFF: v22.3.1
-      TARGET_VERSION: v22
+      START_VERSION: v22.3.1
+      TARGET_VERSION: v23.0.0
+      UPGRADE_PLAN_NAME: v23
+      FROM_VERSION: ${{ inputs.from_version }}
+      TO_VERSION: ${{ inputs.to_version }}
+      UPGRADE_NAME: ${{ inputs.upgrade_name }}
     jobs:
       set-version-matrix:
         runs-on: ubuntu-22.04
@@ -42,20 +61,28 @@
             run: |
               python -m pip install --upgrade pip
               python -m pip install requests
-          - name: Generate starting versions
-            id: generate-start
-            run: |
-              start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
-              echo $start
-              echo "start_versions=$start" >> $GITHUB_OUTPUT
-          - name: Generate upgrade versions
-            id: generate-upgrade
-            run: |
-              upgrade=$(scripts/generate_upgrade_matrix_fresh.py $VERSION_CUTOFF)
-              echo $upgrade
-              echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
+          # - name: Generate starting version
+          #   id: generate-start
+          #   run: |
+          #     start=$(scripts/generate_version_matrix.py $VERSION_CUTOFF)
+          #     echo $start
+          #     echo "start_versions=$start" >> $GITHUB_OUTPUT
+          # - name: Generate upgrade versions
+          #   id: generate-upgrade
+          #   run: |
+          #     upgrade=$(scripts/generate_upgrade_matrix_fresh.py $VERSION_CUTOFF)
+          #     echo $upgrade
+          #     echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
+          - name: Generate versions
+            id: generate-versions
+            run: | 
+              echo "matrix={\"previous_version\" : [$START_VERSION], \"test_version\" : [$TARGET_VERSION], \"upgrade_name\" : [$UPGRADE_PLAN_NAME]}"
+              echo "matrix={\"previous_version\" : [$START_VERSION], \"test_version\" : [$TARGET_VERSION], \"upgrade_name\" : [$UPGRADE_PLAN_NAME]}" >> $GITHUB_OUTPUT
+              
+            #  matrix={"previous_version":["v22.3.1"],"test_name":["TestExport","TestUnbonding","TestAuthzModule","TestCosmWasm","TestGovModule","TestConfig","TestBank","TestMainnetConsumerChainsAfterUpgrade","TestChangeover","TestICS6ConsumerSomeKeysChainLaunch","TestLSM","TestEvidence","TestConsumerModification","TestFeegrant","TestICS6ConsumerNoKeysChainLaunch","TestStaking","TestAuthModule","TestPFM","TestFeemarket","TestInactiveValidators","TestDelegatorICA","TestICS6ConsumerAllKeysChainLaunch","TestEndpoints","TestMultisig","TestICS4ChainLaunch"],"test_version":["v23.0.0"],"upgrade_name":["v23"]}
         outputs:
-          upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
+          upgrade_versions: ${{ steps.generate-versions.outputs.matrix }}
+          # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
     
       # set-version-matrix-cosmovisor:
       #   runs-on: ubuntu-22.04
