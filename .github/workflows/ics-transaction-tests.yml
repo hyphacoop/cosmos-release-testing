@@ -98,6 +98,25 @@ jobs:
             echo "TX code is not 0"
             exit 1
           fi
+      - name: Test bank multi-send to 100 addresses
+        run: |
+          addresses=$(gaiad q auth accounts -o json | jq -r '.accounts[].value.address' )
+          json=$(gaiad tx bank multi-send $TEST_WALLET $addresses 1uatom --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json)
+          tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
+          echo "[INFO] JSON output:"
+          echo $json
+          txhash=$(echo $json | jq -r '.txhash')
+          echo "[INFO] txhash: $txhash"
+          tx_json=$(gaiad q tx $txhash -o json)
+          echo "[INFO] TX results:"
+          echo $tx_json | jq -r '.'
+          code=$(echo $tx_json | jq -r '.code')
+          echo "[INFO] Code: $code"
+          if [ $code -ne 0 ]
+          then
+            echo "TX code is not 0"
+            exit 1
+          fi
       - name: Test WASM execute
         run: |
           json=$(gaiad tx wasm execute $WASM_CONTRACT '{"increment":{}}' --from test-wallet --gas auto --gas-adjustment 1.5 --gas-prices 0.005uatom -y -o json)
