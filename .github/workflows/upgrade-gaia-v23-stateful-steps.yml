@@ -414,7 +414,7 @@ jobs:
       - name: _Test commision rate
         run: |
           echo "[INFO]: Get current commision rate..."
-          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)s
+          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
           current_commision_rate=$(echo "$json" | jq -r '.validator.commision.commision_rates.rate')
           echo "[INFO]: Current commision rate is: $current_commision_rate"
           echo "[INFO]: Set commision to 0. higher"
