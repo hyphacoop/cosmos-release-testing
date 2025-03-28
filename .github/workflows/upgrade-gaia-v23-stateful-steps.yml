@@ -415,9 +415,10 @@ jobs:
         run: |
           echo "[INFO]: Get current commision rate..."
           json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+          echo "$json"
           current_commision_rate=$(echo "$json" | jq -r '.validator.commision.commision_rates.rate')
           echo "[INFO]: Current commision rate is: $current_commision_rate"
-          echo "[INFO]: Set commision to 0. higher"
+          echo "[INFO]: Set commision to 0.1 higher"
           set_commision_rate=$(echo "x=$current_commision_rate + 0.1; if(x<1) print 0; x" | bc)
           echo "[INFO]: Set commision to: $set_commision_rate"
           $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commision_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
@@ -428,7 +429,7 @@ jobs:
           then
             echo "[ERROR]: Commision rate not set!"
             echo "Expected $set_commision_rate got $modified_commision_rate"
-
+          fi
 
       - name: _Test permissioned cosmwasm
         run: tests/stateful/test_cosmwasm.sh
