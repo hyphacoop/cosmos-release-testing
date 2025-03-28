@@ -411,27 +411,27 @@ jobs:
           set -e
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
-      - name: _Test commision rate
+      - name: _Test commission rate
         run: |
-          echo "[INFO]: Get current commision rate..."
+          echo "[INFO]: Get current commission rate..."
           json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
           echo "$json"
-          current_commision_rate=$(echo "$json" | jq -r '.validator.commision.commision_rates.rate')
-          echo "[INFO]: Current commision rate is: $current_commision_rate"
-          echo "[INFO]: Set commision to 0.1 higher"
-          set_commision_rate=$(echo "x=$current_commision_rate + 0.1; if(x<1) print 0; x" | bc)
-          echo "[INFO]: Set commision to: $set_commision_rate"
-          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commision_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+          current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+          echo "[INFO]: Current commission rate is: $current_commission_rate"
+          echo "[INFO]: Set commission to 0.1 higher"
+          set_commission_rate=$(echo "x=$current_commission_rate + 0.1; if(x<1) print 0; x" | bc)
+          echo "[INFO]: Set commission to: $set_commission_rate"
+          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO]: Get latest comission rate..."
           json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
           echo "$json"
-          modified_commision_rate=$(echo "$json" | jq -r '.validator.commision.commision_rates.rate')
-          echo "[INFO]: Current commision rate is: $modified_commision_rate"
-          if [ "$modified_commision_rate" != "$set_commision_rate" ]
+          modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+          echo "[INFO]: Current commission rate is: $modified_commission_rate"
+          if [ "$modified_commission_rate" != "$set_commission_rate" ]
           then
-            echo "[ERROR]: Commision rate not set!"
-            echo "Expected $set_commision_rate got $modified_commision_rate"
+            echo "[ERROR]: commission rate not set!"
+            echo "Expected $set_commission_rate got $modified_commission_rate"
           fi
 
       - name: _Test permissioned cosmwasm
