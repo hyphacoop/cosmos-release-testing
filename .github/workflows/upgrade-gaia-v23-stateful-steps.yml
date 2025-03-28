@@ -423,9 +423,12 @@ jobs:
           echo "[INFO]: Set commision to: $set_commision_rate"
           $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commision_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Get latest comission rate..."
           json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+          echo "$json"
           modified_commision_rate=$(echo "$json" | jq -r '.validator.commision.commision_rates.rate')
-          if [ "$modified_commision_rate" != "$set_commision_rate"]
+          echo "[INFO]: Current commision rate is: $modified_commision_rate"
+          if [ "$modified_commision_rate" != "$set_commision_rate" ]
           then
             echo "[ERROR]: Commision rate not set!"
             echo "Expected $set_commision_rate got $modified_commision_rate"
