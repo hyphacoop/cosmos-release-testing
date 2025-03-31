@@ -19,6 +19,9 @@ jobs:
     secrets: inherit
 
   test-validator:
+    concurrency:
+      group: validator-tests
+      cancel-in-progress: false
     runs-on: cosmos-ubuntu2404-vm-set
     environment: validator-tests
     env:
