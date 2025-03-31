@@ -228,6 +228,13 @@ jobs:
         run: |
           gaiad tx slashing unjail --from validator --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y || true
           tests/test_block_production.sh 127.0.0.1 $PROVIDER_RPC_PORT 1
+      
+      # Validator tasks
+      - name: Get validator hex addresses
+        run: |
+          PROVIDER_HEX_ADDR=$(jq -r  '.address' ~/.gaia/config/priv_validator_key.json)
+          echo "PROVIDER_HEX_ADDR=$PROVIDER_HEX_ADDR" >> $GITHUB_ENV
+          echo "Provider hex address: $PROVIDER_HEX_ADDR"
       - name: Check if validator is signing blocks
         run: |
           status="false"
