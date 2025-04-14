@@ -12,7 +12,7 @@
     env:
       # Versions
       START_VERSION: v23.0.1
-      TARGET_VERSION: v23.1.0
+      TARGET_VERSION: v23.1.1
       # All chain variables
       COMMIT_TIMEOUT: 5
       DOWNTIME_BLOCKS: 10000
