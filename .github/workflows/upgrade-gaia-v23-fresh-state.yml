@@ -2489,7 +2489,7 @@
               echo "Voting on consumer removal proposal $proposal_id."
               $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment 3 --yes --home $HOME_1
               sleep $(($COMMIT_TIMEOUT*2))
-              sleep $VOTING_PERIOD*2
+              sleep $VOTING_PERIOD
               echo "Consumer chains:"
               $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq '.'
           - name: _IBC transfer successful> Neutron chain
