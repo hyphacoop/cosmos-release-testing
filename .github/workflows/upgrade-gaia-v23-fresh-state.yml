@@ -2484,7 +2484,7 @@
               jq -r '.messages[0].consumer_id |= "0"' templates/proposal-remove-consumer.json > remove-consumer.json
               jq '.' remove-consumer.json
               txhash=$($CHAIN_BINARY tx gov submit-proposal remove-consumer.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1 -o json | jq -r '.txhash')
-              sleep $(($COMMIT_TIMEOUT*2))
+              sleep $(($COMMIT_TIMEOUT))
               proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
               echo "Voting on consumer removal proposal $proposal_id."
               $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --gas auto --gas-prices 0.005$DENOM --gas-adjustment 3 --yes --home $HOME_1
