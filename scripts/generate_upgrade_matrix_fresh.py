@@ -14,7 +14,7 @@ args = parser.parse_args()
 COSMOVISOR = args.cosmovisor
 RELAYER = args.relayer
 
-SKIP_TARGET_VERSIONS = ['v23.0.0-rc0','v23.0.0-rc1','v23.0.0-rc2','v23.0.0-rc3','v23.0.0-rc4','v23.0.0','v23.0.1','v23.1.0']
+SKIP_TARGET_VERSIONS = ['v23.1.0']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 starting_version = args.starting_version.split('.')
@@ -90,9 +90,11 @@ for version, upgrades in matrix.items():
 
     else: # Add main branch build
         if RELAYER:
-            includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
+            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
+            includes.append({'gaia_version': version, 'upgrade_version': 'v23.2.0', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
         else:
-            includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary'})
+            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary'})
+            includes.append({'gaia_version': version, 'upgrade_version': 'v23.2.0', 'upgrade_mechanism': 'binary'})
 
 
 upgrade_json = json.dumps({'include': includes})
