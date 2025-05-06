@@ -1,6 +1,6 @@
 ---
 
-name: Test Gaia Stateful Upgrade - v23.2.0
+name: Test Gaia Stateful Upgrade - v23.3.0
 on:
   # repository_dispatch:
   #   types: [new_main_build]
@@ -8,7 +8,7 @@ on:
   # schedule:
   #   # Once a day at 13:15
   #   - cron: '15 13 * * 1'
-  # push:
+  push:
 concurrency:
   group: self-hosted-runners
 jobs:
@@ -43,14 +43,14 @@ jobs:
         id: generate-start
         run: |
           # start=$(scripts/generate_version_matrix.py $GAIA_LATEST)
-          start='{"gaia_version": ["v23.1.1"]}'
+          start='{"gaia_version": ["v23.2.0"]}'
           echo $start
           echo "start_versions=$start" >> $GITHUB_OUTPUT
       - name: Generate upgrade versions
         id: generate-upgrade
         run: |
           # upgrade=$(scripts/stateful/generate_upgrade_matrix_v23.py $GAIA_LATEST)
-          upgrade='{"include": [{"gaia_version": "v23.1.1", "upgrade_version": "v23.2.0"}]}'
+          upgrade='{"include": [{"gaia_version": "v23.2.0", "upgrade_version": "v23.3.0"}]}'
           echo $upgrade
           echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:
