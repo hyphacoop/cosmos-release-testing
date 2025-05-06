@@ -14,6 +14,7 @@ args = parser.parse_args()
 COSMOVISOR = args.cosmovisor
 RELAYER = args.relayer
 
+SKIP_START_VERSIONS = ['v23.3.0']
 SKIP_TARGET_VERSIONS = ['v23.2.0']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
@@ -64,6 +65,10 @@ for start_version, _ in matrix.items():
         release
         for release in releases
         if int(release.split('.')[0][1:]) > int(start_version.split('.')[0][1:])]
+
+for release in SKIP_START_VERSIONS:
+    if release in matrix:
+        del matrix[release]
 
 # Assemble matrix include section:
 includes = []
