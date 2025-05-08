@@ -4,8 +4,8 @@ import json
 import sys
 import re
 
-SKIP_STARTING_VERSIONS = ['v21.0.1', 'v22.0.0', 'v22.0.2', 'v22.1.0', 'v22.2.0', 'v23.0.0-rc0','v23.0.0-rc1','v23.0.0-rc2','v23.0.0-rc3','v23.0.0-alpha0']
-SKIP_TARGET_VERSIONS = ['v23.0.0-rc0','v23.0.0-rc1','v23.0.0-rc2']
+SKIP_STARTING_VERSIONS = ['v22.0.2','v23.0.0-rc0','v23.0.0-rc1','v23.0.0-rc2','v23.0.0-rc3','v23.0.0-alpha0','v23.0.0','v23.0.1']
+SKIP_TARGET_VERSIONS = ['v23.0.0-rc0','v23.0.0-rc1','v23.0.0-rc2','v23.0.0-rc3','v23.0.0-rc4','v23.0.0']
 
 # Must provide a cutoff version, e.g. 'v6.0.4'
 starting_version = sys.argv[1].split('.')

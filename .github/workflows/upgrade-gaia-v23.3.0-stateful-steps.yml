@@ -1,6 +1,6 @@
 ---
 
-name: Test Gaia Stateful Upgrade Steps - v23
+name: Test Gaia Stateful Upgrade Steps - v23.3.0
 on:
   workflow_call:
     inputs:
