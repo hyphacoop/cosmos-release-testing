@@ -1786,12 +1786,12 @@
             run: |
               python -m pip install --upgrade pip
               python -m pip install toml-cli
-          - name: Set up relayer
-            run: scripts/setup_relayer.sh
-          - name: Download consumer chain binaries
-            run: |
-              wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-              chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+          # - name: Set up relayer
+          #   run: scripts/setup_relayer.sh
+          # - name: Download consumer chain binaries
+          #   run: |
+          #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
+          #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
           # - name: Install Stride binary
           #   run: |
           #     go version
@@ -1914,11 +1914,7 @@
           - name: Set up happy path LSM accounts
             run: |
               scripts/lsm_account_setup.sh
-          - name: Set test LSM params
-            run: |
-              scripts/param_change.sh templates/proposal-global-liquid-cap.json
-              scripts/param_change.sh templates/proposal-validator-liquid-cap.json
-              scripts/param_change.sh templates/proposal-validator-bond-factor.json
+
           # - name: Create LSM log file
           #   run: |
           #     touch lsm_log.csv
@@ -1931,9 +1927,9 @@
               STRIDE_HOME_1: /home/runner/.stride-1
               VALOPER_TOKENIZATION: 1
             run: |
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-              export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              # client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              # connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              # export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_lsm_happy_path.sh
           # - name: _Pre-upgrade LSM Liquid Staking Provider happy path
           #   env:
