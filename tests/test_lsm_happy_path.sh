@@ -98,14 +98,15 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
 
     liquid_shares_pre_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.liquid_shares')
     # Remove the last 18 zeroes
-    liquid_shares_pre_tokenize=$(echo "$liquid_shares_pre_tokenize" | cut -c $((${#liquid_shares_pre_tokenize} - 18)))
+    liquid_shares_pre_tokenize=${liquid_shares_pre_tokenize:0:${#liquid_shares_pre_tokenize}-18}
     echo "Tokenizing shares with $happy_liquid_1..."
     # tests/v12_upgrade/log_lsm_data.sh happy pre-tokenize-1 $happy_liquid_1 $tokenize
     submit_tx "tx staking tokenize-share $VALOPER_1 $tokenize$DENOM $happy_liquid_1 --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     # tests/v12_upgrade/log_lsm_data.sh happy post-tokenize-1 $happy_liquid_1 $tokenize
 
     liquid_shares_post_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.liquid_shares')
-    liquid_shares_post_tokenize=$(echo "$liquid_shares_post_tokenize" | cut -c $((${#liquid_shares_post_tokenize} - 18)))
+    # Remove the last 18 zeroes
+    liquid_shares_post_tokenize=${liquid_shares_post_tokenize:0:${#liquid_shares_post_tokenize}-18}
     echo "> Liquid shares post-tokenize: $liquid_shares_post_tokenize"
     echo "> Liquid shares pre-tokenize: $liquid_shares_pre_tokenize"
     liquid_shares_diff=$(echo "$liquid_shares_post_tokenize-$liquid_shares_pre_tokenize" | bc -l)
