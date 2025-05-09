@@ -91,11 +91,11 @@ for version, upgrades in matrix.items():
 
     else: # Add main branch build
         if RELAYER:
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
-            includes.append({'gaia_version': version, 'upgrade_version': 'v23.3.0', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
+            includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
+            # includes.append({'gaia_version': version, 'upgrade_version': 'v23.3.0', 'upgrade_mechanism': 'binary', 'relayer': 'hermes'})
         else:
-            # includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary'})
-            includes.append({'gaia_version': version, 'upgrade_version': 'v23.3.0', 'upgrade_mechanism': 'binary'})
+            includes.append({'gaia_version': version, 'upgrade_version': 'main', 'upgrade_mechanism': 'binary'})
+            # includes.append({'gaia_version': version, 'upgrade_version': 'v23.3.0', 'upgrade_mechanism': 'binary'})
 
 
 upgrade_json = json.dumps({'include': includes})
