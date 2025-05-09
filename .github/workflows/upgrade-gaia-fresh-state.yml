@@ -185,6 +185,7 @@
           - name: Set binary source
             id: binary
             run: |
+              echo "inputs.to_version is ${{ inputs.to_version }}"
               if [[ "${{ inputs.to_version }}" == "main" ]]; then
                 echo "BUILD!"
                 echo "source=BUILD" >> $GITHUB_OUTPUT
@@ -213,7 +214,6 @@
                 upgrade_mechanism: cv_auto
           fail-fast: false
         env:
-          START_VERSION: ${{ matrix.start_version  }}
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
