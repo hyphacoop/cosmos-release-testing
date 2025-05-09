@@ -171,25 +171,20 @@
             id: start
             run: |
               echo "version=$START" >> $GITHUB_OUTPUT
-              # echo "version=${{ inputs.from_version }}" >> $GITHUB_OUTPUT
           - name: Set target version
             id: target
             run: |
               echo "version=$TARGET" >> $GITHUB_OUTPUT
-              # echo "version=${{ inputs.to_version }}" >> $GITHUB_OUTPUT
           - name: Set upgrade name
             id: upgrade
             run: |
               echo "name=$NAME" >> $GITHUB_OUTPUT
-              # echo "name=${{ inputs.upgrade_name }}" >> $GITHUB_OUTPUT
           - name: Set binary source
             id: binary
             run: |
               if [[ "$TARGET" == "main" ]]; then
-                echo "BUILD!"
                 echo "source=BUILD" >> $GITHUB_OUTPUT
               else
-                echo "DOWNLOAD!"
                 echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
               fi
               
@@ -241,9 +236,8 @@
               echo "COSMOVISOR=true" >> $GITHUB_ENV
               echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Start chain
-
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-$START_VERSION-linux-amd64
               scripts/start_chain.sh
           # - name: Check Gaia log
           #   run: sudo journalctl -u $PROVIDER_SERVICE_1
