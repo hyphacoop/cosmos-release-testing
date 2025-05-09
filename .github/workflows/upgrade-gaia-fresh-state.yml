@@ -208,6 +208,7 @@
                 upgrade_mechanism: cv_auto
           fail-fast: false
         env:
+          COSMOVISOR: true
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
@@ -233,7 +234,6 @@
           - name: Install Cosmovisor
             run: |
               go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-              echo "COSMOVISOR=true" >> $GITHUB_ENV
               echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Start chain
             run: |
@@ -1620,10 +1620,8 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
           - name: Start chain
-            env:
-              START_VERSION: ${{matrix.start_version}}
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
               scripts/start_chain.sh
           - name: Check Gaia log
             run: sudo journalctl -u $PROVIDER_SERVICE_1
@@ -1767,7 +1765,7 @@
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-            upgrade_mechanism: [binary]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
           fail-fast: false
         env:
           COSMOVISOR: false
@@ -1817,10 +1815,8 @@
           #   run: |
           #     echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
           - name: Start chain
-            env:
-              START_VERSION: ${{matrix.start_version}}
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
               scripts/start_chain.sh
           - name: Block production check
             run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
