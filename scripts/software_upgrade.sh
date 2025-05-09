@@ -121,37 +121,15 @@ current_height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r '.result.blo
 blocks_delta=$(($upgrade_height-$current_height))
 
 # Wait until the right height is reached
+echo "Waiting for the upgrade to take place at block height $upgrade_height..."
+tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
+echo "The upgrade height was reached."
 if [ "$COSMOVISOR" = true ]; then
-    # if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
-    #     mkdir -p $HOME_1/cosmovisor/upgrades/$upgrade_name/bin
-    #     mkdir -p $HOME_2/cosmovisor/upgrades/$upgrade_name/bin
-    #     mkdir -p $HOME_3/cosmovisor/upgrades/$upgrade_name/bin
-    #     if [ "$BINARY_SOURCE" = "BUILD" ]; then
-    #         # Build
-    #         sudo apt install build-essential -y
-    #         wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
-    #         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
-    #         rm -rf gaia
-    #         git clone https://github.com/cosmos/gaia.git
-    #         cd gaia
-    #         git checkout $TARGET_VERSION
-    #         make install
-    #         cd ..
-    #     else
-    #         wget $DOWNLOAD_URL -O ./upgraded -q
-    #         chmod +x ./upgraded
-    #         cp ./upgraded $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
-    #         cp ./upgraded $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
-    #         cp ./upgraded $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
-    # fi
-    echo "Waiting for the upgrade to take place at block height $upgrade_height..."
-    tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
-    echo "The upgrade height was reached."
-
+    echo "> Cosmovisor-run upgrade."
 else
     echo "Waiting for the upgrade to take place at block height $upgrade_height..."
     tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
-    echo "The upgrade height was reached."
+    
     sleep $(($COMMIT_TIMEOUT*3))
     # Replace binary
     sudo systemctl stop $PROVIDER_SERVICE_1
