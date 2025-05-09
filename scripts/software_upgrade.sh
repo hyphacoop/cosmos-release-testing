@@ -18,12 +18,14 @@ journalctl -u $PROVIDER_SERVICE_3 | tail -n 20
 curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
 
 if [ "$COSMOVISOR" = true ]; then
+    echo "> Using Cosmovisor"
     if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
+        echo "> Using manual upgrade mechanism"
         mkdir -p $HOME_1/cosmovisor/upgrades/$upgrade_name/bin
         mkdir -p $HOME_2/cosmovisor/upgrades/$upgrade_name/bin
         mkdir -p $HOME_3/cosmovisor/upgrades/$upgrade_name/bin
         if [ "$BINARY_SOURCE" = "BUILD" ]; then
-            # Build
+            echo "Building new binary."
             sudo apt install build-essential -y
             wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
             sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
@@ -38,6 +40,7 @@ if [ "$COSMOVISOR" = true ]; then
             cp $HOME/go/bin/gaiad $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
 
         else
+            echo "Downloading new binary."
             wget $DOWNLOAD_URL -O ./upgraded -q
             chmod +x ./upgraded
             cp ./upgraded $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
