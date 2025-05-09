@@ -152,6 +152,11 @@
           NAME: ${{ github.event_name == 'push' && 'v24' || inputs.upgrade_name }}
         runs-on: ubuntu-22.04
         steps:
+          - name: Debug env vars
+            run: |
+              echo "START: $START"
+              echo "TARGET: $TARGET"
+              echo "NAME: $NAME"
           - name: Check out repository code
             uses: actions/checkout@v4
           - name: Set up Python
