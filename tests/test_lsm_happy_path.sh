@@ -105,7 +105,7 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
     # tests/v12_upgrade/log_lsm_data.sh happy post-tokenize-1 $happy_liquid_1 $tokenize
 
     liquid_shares_post_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.liquid_shares')
-    liquid_shares_post_tokenize=$(echo "$liquid_shares_ppost_tokenize" | cut -c $((${#liquid_shares_post_tokenize} - 18)))
+    liquid_shares_post_tokenize=$(echo "$liquid_shares_post_tokenize" | cut -c $((${#liquid_shares_post_tokenize} - 18)))
     echo "> Liquid shares post-tokenize: $liquid_shares_post_tokenize"
     echo "> Liquid shares pre-tokenize: $liquid_shares_pre_tokenize"
     liquid_shares_diff=$(echo "$liquid_shares_post_tokenize-$liquid_shares_pre_tokenize" | bc -l)
