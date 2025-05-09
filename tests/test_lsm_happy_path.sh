@@ -58,13 +58,12 @@ echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
     
     shares_diff=$((${delegator_shares_2%.*}-${delegator_shares_1%.*})) # remove decimal portion
     echo "Delegator shares difference: $shares_diff"
-    echo "Delegation: $shares_diff"
+    echo "Delegation: $delegation"
     if [[ $shares_diff -ne $delegation ]]; then
         echo "Delegation unsuccessful."
         exit 1
     fi
 
-    exit 0
     echo "Validator bond with happy_bonding..."
     # tests/v12_upgrade/log_lsm_data.sh happy pre-bond-1 $happy_bonding -
     $CHAIN_BINARY q staking validator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --home $HOME_1
@@ -79,6 +78,7 @@ echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
     fi
     bond_shares_diff=$((${validator_bond_shares_2%.*}-${validator_bond_shares_1%.*})) # remove decimal portion
     echo "Bond shares difference: $bond_shares_diff"
+    echo "Delegation: $delegation"
     if [[ $shares_diff -ne $delegation  ]]; then
         echo "Validator bond unsuccessful."
         exit 1
@@ -98,6 +98,7 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
     delegator_shares_2=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.delegator_shares')
     shares_diff=$((${delegator_shares_2%.*}-${delegator_shares_1%.*})) # remove decimal portion
     echo "Delegator shares difference: $shares_diff"
+    echo "Delegation: $delegation"
     if [[ $shares_diff -ne $delegation ]]; then
         echo "Delegation unsuccessful."
         exit 1
@@ -112,7 +113,8 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
     liquid_shares_post_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.liquid_shares')
     liquid_shares_diff=$(echo "$liquid_shares_post_tokenize-$liquid_shares_pre_tokenize" | bc -l)
     liquid_shares_diff=${liquid_shares_diff%.*}
-    
+    echo "> Liquid shares difference: $liquid_shares_diff"
+    echo "> Tokenize amount: $tokenize"
     if [[ $liquid_shares_diff -eq $tokenize  ]]; then
         echo "Tokenization successful."
     elif [[ $(($liquid_shares_diff-$tokenize)) -eq 1 ]]; then
