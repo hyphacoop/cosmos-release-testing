@@ -22,7 +22,7 @@
             required: false
             type: string
             default: v24
-      # push:
+      push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -146,6 +146,10 @@
       RLY_VERSION: "2.5.0"
     jobs:
       set-versions:
+        env:
+          START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
+          TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
+          NAME: ${{ github.event_name == 'push' && 'v24' || inputs.upgrade_name }}
         runs-on: ubuntu-22.04
         steps:
           - name: Check out repository code
@@ -161,11 +165,18 @@
           - name: Set starting version
             id: start
             run: |
-              echo "version=${{ inputs.from_version }}" >> $GITHUB_OUTPUT
+              echo "version=$START" >> $GITHUB_OUTPUT
+              # echo "version=${{ inputs.from_version }}" >> $GITHUB_OUTPUT
           - name: Set target version
             id: target
             run: |
-              echo "version=${{ inputs.to_version }}" >> $GITHUB_OUTPUT
+              echo "version=$TARGET" >> $GITHUB_OUTPUT
+              # echo "version=${{ inputs.to_version }}" >> $GITHUB_OUTPUT
+          - name: Set upgrade name
+            id: upgrade
+            run: |
+              echo "name=$NAME" >> $GITHUB_OUTPUT
+              # echo "name=${{ inputs.upgrade_name }}" >> $GITHUB_OUTPUT
           - name: Set binary source
             id: binary
             run: |
@@ -176,10 +187,6 @@
                 echo "DOWNLOAD!"
                 echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
               fi
-          - name: Set upgrade name
-            id: upgrade
-            run: |
-              echo "name=${{ inputs.upgrade_name }}" >> $GITHUB_OUTPUT
               
         outputs:
          start_version: ${{ steps.start.outputs.version }}
@@ -1813,7 +1820,7 @@
           #     echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
           - name: Start chain
             env:
-              START_VERSION: ${{matrix.gaia_version}}
+              START_VERSION: ${{matrix.start_version}}
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               scripts/start_chain.sh
