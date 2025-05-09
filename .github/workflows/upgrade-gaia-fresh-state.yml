@@ -274,9 +274,9 @@
         strategy:
           matrix:
             cv_version: [v1.6.0, v1.7.0, v1.7.1]
-            upgrade_mechanism: [cv_manual]
+            upgrade_mechanism: [cv_auto, cv_manual]
             # target_version: ${{ needs.set-versions.outputs.target_version }}
-            include:
+            exclude:
               - ${{ needs.set-versions.outputs.target_version }}: main
                 upgrade_mechanism: cv_auto
           fail-fast: false
