@@ -175,11 +175,12 @@
             id: binary
             run: |
               if [[ "${{ inputs.to_version }}" == "main" ]]; then
+                echo "BUILD!"
                 echo "source=BUILD" >> $GITHUB_OUTPUT
               else
+                echo "DOWNLOAD!"
                 echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
               fi
-              echo "source=${{ inputs.binary_source }}" >> $GITHUB_OUTPUT
           - name: Set upgrade name
             id: upgrade
             run: |
