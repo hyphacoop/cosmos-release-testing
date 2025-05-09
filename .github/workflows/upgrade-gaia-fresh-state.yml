@@ -287,6 +287,9 @@
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
         steps:
+          - name: Print binary source
+            run: |
+              echo "BINARY_SOURCE: $BINARY_SOURCE"
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
