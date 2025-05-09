@@ -185,8 +185,7 @@
           - name: Set binary source
             id: binary
             run: |
-              echo "inputs.to_version is ${{ inputs.to_version }}"
-              if [[ "${{ inputs.to_version }}" == "main" ]]; then
+              if [[ "$TARGET" == "main" ]]; then
                 echo "BUILD!"
                 echo "source=BUILD" >> $GITHUB_OUTPUT
               else
