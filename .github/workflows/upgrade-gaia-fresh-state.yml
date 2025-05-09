@@ -201,6 +201,7 @@
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
             cv_version: [v1.6.0, v1.7.0, v1.7.1]
             upgrade_mechanism: [cv_auto, cv_manual]
             exclude:
@@ -256,7 +257,7 @@
               TARGET_VERSION: ${{ matrix.target_version }}
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
             run: |
@@ -1596,6 +1597,7 @@
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
           COSMOVISOR: false
@@ -1744,7 +1746,7 @@
               TARGET_VERSION: "${{ matrix.target_version }}"
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
           - name: _Blocks produced after upgrade
             run: |
               tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
@@ -1766,6 +1768,7 @@
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
           COSMOVISOR: false
@@ -1959,7 +1962,7 @@
               TARGET_VERSION: "${{ matrix.target_version }}"
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}    
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
           - name: _Blocks produced after upgrade
             run: |
               tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
