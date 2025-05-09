@@ -30,6 +30,7 @@
     
     env:
       # Versions
+      GO_VERSION: 1.23.8
       VERSION_CUTOFF: v23.2.0
       TARGET_VERSION: v23.3.0
       UPGRADE_NAME: v23.3.0
@@ -39,7 +40,7 @@
       # Provider chain variables
       CHAIN_BINARY: gaiad
       # BINARY_SOURCE: BUILD
-      BINARY_SOURCE: DOWNLOAD
+      # BINARY_SOURCE: DOWNLOAD
       BUILD_TAG: main
       CHAIN_ID: testnet
       DENOM: uatom
@@ -284,6 +285,7 @@
         env:
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
         steps:
           - name: Update PATH
             run: |
@@ -326,38 +328,27 @@
           #     $CHAIN_BINARY q feemarket params --home $HOME_1
           #     $CHAIN_BINARY q feemarket gas-prices --home $HOME_1
   
-          # - name: Test software upgrade for published releases
-          #   if: ${{ matrix.upgrade_version != 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
-          #   run: |
-          #     echo $DOWNLOAD_URL
-          #     wget $DOWNLOAD_URL -O gaiad-test
-          #     chmod +x gaiad-test
-          #     ./gaiad-test version
-          #     rm gaiad-test
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-          # - name: Test software upgrade for main branch
-          #   if: ${{ matrix.upgrade_version == 'main' }}
-          #   env:
-          #     DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
-          #   run: |
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
-    
-          # - name: _Blocks produced after upgrade
-          #   run: |
-          #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+            run: |
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+          
+          - name: _Blocks produced after upgrade
+            run: |
+              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
               
           # - name: Flush "migration successful" lines
           #   run: |
           #     $CHAIN_BINARY keys list --home $HOME_1
     
-          # - name: _Transactions verified> bank send, delegate, and withdraw rewards
-          #   run: tests/test_tx_fresh.sh
-          # - name: _API endpoints check
-          #   run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-          # - name: _RPC endpoints check
-          #   run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: tests/test_tx_fresh.sh
+          - name: _API endpoints check
+            run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+          - name: _RPC endpoints check
+            run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
       # Baseline-2-ics-optin:
       #   runs-on: ubuntu-22.04
