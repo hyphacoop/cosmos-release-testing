@@ -17,6 +17,35 @@ printf "\n\n*** val3 ***\n\n"
 journalctl -u $PROVIDER_SERVICE_3 | tail -n 20
 curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
 
+if [ "$COSMOVISOR" = true ]; then
+    if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
+        mkdir -p $HOME_1/cosmovisor/upgrades/$upgrade_name/bin
+        mkdir -p $HOME_2/cosmovisor/upgrades/$upgrade_name/bin
+        mkdir -p $HOME_3/cosmovisor/upgrades/$upgrade_name/bin
+        if [ "$BINARY_SOURCE" = "BUILD" ]; then
+            # Build
+            sudo apt install build-essential -y
+            wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
+            sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
+            rm -rf gaia
+            git clone https://github.com/cosmos/gaia.git
+            cd gaia
+            git checkout $TARGET_VERSION
+            make install
+            cd ..
+            cp $HOME/go/bin/gaiad $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+            cp $HOME/go/bin/gaiad $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+            cp $HOME/go/bin/gaiad $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+
+        else
+            wget $DOWNLOAD_URL -O ./upgraded -q
+            chmod +x ./upgraded
+            cp ./upgraded $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+            cp ./upgraded $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+            cp ./upgraded $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+    fi
+fi
+
 echo "Attempting upgrade to $upgrade_name."
 
 # Set time to wait for proposal to pass
@@ -89,16 +118,28 @@ blocks_delta=$(($upgrade_height-$current_height))
 
 # Wait until the right height is reached
 if [ "$COSMOVISOR" = true ]; then
-    if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
-        mkdir -p $HOME_1/cosmovisor/upgrades/$upgrade_name/bin
-        mkdir -p $HOME_2/cosmovisor/upgrades/$upgrade_name/bin
-        mkdir -p $HOME_3/cosmovisor/upgrades/$upgrade_name/bin
-        wget $DOWNLOAD_URL -O ./upgraded -q
-        chmod +x ./upgraded
-        cp ./upgraded $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
-        cp ./upgraded $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
-        cp ./upgraded $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
-    fi
+    # if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
+    #     mkdir -p $HOME_1/cosmovisor/upgrades/$upgrade_name/bin
+    #     mkdir -p $HOME_2/cosmovisor/upgrades/$upgrade_name/bin
+    #     mkdir -p $HOME_3/cosmovisor/upgrades/$upgrade_name/bin
+    #     if [ "$BINARY_SOURCE" = "BUILD" ]; then
+    #         # Build
+    #         sudo apt install build-essential -y
+    #         wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
+    #         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
+    #         rm -rf gaia
+    #         git clone https://github.com/cosmos/gaia.git
+    #         cd gaia
+    #         git checkout $TARGET_VERSION
+    #         make install
+    #         cd ..
+    #     else
+    #         wget $DOWNLOAD_URL -O ./upgraded -q
+    #         chmod +x ./upgraded
+    #         cp ./upgraded $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+    #         cp ./upgraded $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+    #         cp ./upgraded $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
+    # fi
     echo "Waiting for the upgrade to take place at block height $upgrade_height..."
     tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
     echo "The upgrade height was reached."
