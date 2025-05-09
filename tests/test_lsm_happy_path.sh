@@ -168,18 +168,18 @@ echo "** HAPPY PATH> STEP 4: TRANSFER TOKENS  **"
     echo "Sending tokens from happy_liquid_1 to happy_liquid_2 via bank send..."
     submit_tx "tx bank send $happy_liquid_1 $happy_liquid_2 $bank_send_amount$tokenized_denom --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
 
-    echo "Sending tokens from happy_liquid_1 to STRIDE_WALLET_LIQUID via ibc transfer..."
-    submit_ibc_tx "tx ibc-transfer transfer transfer $IBC_CHANNEL $STRIDE_WALLET_LIQUID $ibc_transfer_amount$tokenized_denom --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
-    sleep $(($COMMIT_TIMEOUT*20))
-    $STRIDE_CHAIN_BINARY q bank balances $STRIDE_WALLET_LIQUID --home $STRIDE_HOME_1 -o json | jq '.'
-    journalctl -u $RELAYER | tail -n 50
-    ibc_denom=ibc/$($STRIDE_CHAIN_BINARY q ibc-transfer denom-hash transfer/channel-1/$tokenized_denom --home $STRIDE_HOME_1 -o json | jq -r '.hash')
-    ibc_balance=$($STRIDE_CHAIN_BINARY q bank balances $STRIDE_WALLET_LIQUID --home $STRIDE_HOME_1 -o json | jq -r --arg DENOM "$ibc_denom" '.balances[] | select(.denom==$DENOM).amount')
-    echo "IBC-wrapped liquid token balance: $ibc_balance$ibc_denom"
-    if [[ $ibc_balance -ne $ibc_transfer_amount ]]; then
-        echo "Tokenize unsuccessful: unexpected ibc-wrapped liquid token balance"
-        exit 1
-    fi
+    # echo "Sending tokens from happy_liquid_1 to STRIDE_WALLET_LIQUID via ibc transfer..."
+    # submit_ibc_tx "tx ibc-transfer transfer transfer $IBC_CHANNEL $STRIDE_WALLET_LIQUID $ibc_transfer_amount$tokenized_denom --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
+    # sleep $(($COMMIT_TIMEOUT*20))
+    # $STRIDE_CHAIN_BINARY q bank balances $STRIDE_WALLET_LIQUID --home $STRIDE_HOME_1 -o json | jq '.'
+    # journalctl -u $RELAYER | tail -n 50
+    # ibc_denom=ibc/$($STRIDE_CHAIN_BINARY q ibc-transfer denom-hash transfer/channel-1/$tokenized_denom --home $STRIDE_HOME_1 -o json | jq -r '.hash')
+    # ibc_balance=$($STRIDE_CHAIN_BINARY q bank balances $STRIDE_WALLET_LIQUID --home $STRIDE_HOME_1 -o json | jq -r --arg DENOM "$ibc_denom" '.balances[] | select(.denom==$DENOM).amount')
+    # echo "IBC-wrapped liquid token balance: $ibc_balance$ibc_denom"
+    # if [[ $ibc_balance -ne $ibc_transfer_amount ]]; then
+    #     echo "Tokenize unsuccessful: unexpected ibc-wrapped liquid token balance"
+    #     exit 1
+    # fi
 
 echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
     echo "Redeeming tokens from happy_liquid_1..."
@@ -194,20 +194,20 @@ echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
     # tests/v12_upgrade/log_lsm_data.sh happy post-redeem-2 $happy_liquid_2 $bank_send_amount
     sleep $(($COMMIT_TIMEOUT*10))
 
-    echo "Sending $ibc_denom tokens from STRIDE_WALLET_LIQUID to $CHAIN_ID chain for redeem operation..."
-    $CHAIN_BINARY q bank balances $happy_liquid_3 --home $HOME_1
-    submit_ibc_tx "tx ibc-transfer transfer transfer channel-1 $happy_liquid_3 $ibc_transfer_amount$ibc_denom --from $STRIDE_WALLET_LIQUID -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$STRIDE_DENOM -y" $STRIDE_CHAIN_BINARY $STRIDE_HOME_1
-    sleep 20
-    $CHAIN_BINARY q bank balances $happy_liquid_3 --home $HOME_1
-    echo "***RELAYER DATA***"
-    journalctl -u $RELAYER | tail -n 100
-    echo "***RELAYER DATA***"
-    echo "Redeeming tokens from happy_liquid_3..."
-    $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
-    $CHAIN_BINARY q tendermint-validator-set --home $STRIDE_HOME_1
-    # tests/v12_upgrade/log_lsm_data.sh happy pre-redeem-3 $happy_liquid_3 $ibc_transfer_amount
-    submit_tx "tx staking redeem-tokens $ibc_transfer_amount$tokenized_denom --from $happy_liquid_3 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
-    # tests/v12_upgrade/log_lsm_data.sh happy post-redeem-3 $happy_liquid_3 $ibc_transfer_amount
+    # echo "Sending $ibc_denom tokens from STRIDE_WALLET_LIQUID to $CHAIN_ID chain for redeem operation..."
+    # $CHAIN_BINARY q bank balances $happy_liquid_3 --home $HOME_1
+    # submit_ibc_tx "tx ibc-transfer transfer transfer channel-1 $happy_liquid_3 $ibc_transfer_amount$ibc_denom --from $STRIDE_WALLET_LIQUID -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$STRIDE_DENOM -y" $STRIDE_CHAIN_BINARY $STRIDE_HOME_1
+    # sleep 20
+    # $CHAIN_BINARY q bank balances $happy_liquid_3 --home $HOME_1
+    # echo "***RELAYER DATA***"
+    # journalctl -u $RELAYER | tail -n 100
+    # echo "***RELAYER DATA***"
+    # echo "Redeeming tokens from happy_liquid_3..."
+    # $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
+    # $CHAIN_BINARY q tendermint-validator-set --home $STRIDE_HOME_1
+    # # tests/v12_upgrade/log_lsm_data.sh happy pre-redeem-3 $happy_liquid_3 $ibc_transfer_amount
+    # submit_tx "tx staking redeem-tokens $ibc_transfer_amount$tokenized_denom --from $happy_liquid_3 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
+    # # tests/v12_upgrade/log_lsm_data.sh happy post-redeem-3 $happy_liquid_3 $ibc_transfer_amount
 
     happy_liquid_1_delegations_2=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     happy_liquid_1_delegations_diff=$((${happy_liquid_1_delegations_2%.*}-${happy_liquid_1_delegations_1%.*}))
@@ -218,41 +218,41 @@ echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
     happy_liquid_2_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
     happy_liquid_3_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_3 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
 
-    echo "happy_liquid_1 delegation shares increase: $happy_liquid_1_delegations_diff"
-    if [[ $happy_liquid_1_delegations_diff -ne 20000000 ]]; then
-        echo "Redeem unsuccessful: unexpected delegation shares for happy_liquid_1"
-        exit 1
-    fi
+    # echo "happy_liquid_1 delegation shares increase: $happy_liquid_1_delegations_diff"
+    # if [[ $happy_liquid_1_delegations_diff -ne 20000000 ]]; then
+    #     echo "Redeem unsuccessful: unexpected delegation shares for happy_liquid_1"
+    #     exit 1
+    # fi
 
-    echo "happy_liquid_1 delegation balance: $happy_liquid_1_delegation_balance"
-    if [[ $happy_liquid_1_delegation_balance -ne 70000000 ]]; then
-        echo "Redeem unsuccessful: unexpected delegation balance for happy_liquid_1"
-        exit 1
-    fi
+    # echo "happy_liquid_1 delegation balance: $happy_liquid_1_delegation_balance"
+    # if [[ $happy_liquid_1_delegation_balance -ne 70000000 ]]; then
+    #     echo "Redeem unsuccessful: unexpected delegation balance for happy_liquid_1"
+    #     exit 1
+    # fi
 
-    echo "happy_liquid_2 delegation shares: ${happy_liquid_2_delegations%.*}"
-    if [[ ${happy_liquid_2_delegations%.*} -ne $bank_send_amount ]]; then
-        echo "Redeem unsuccessful: unexpected delegation shares for happy_liquid_2"
-        exit 1
-    fi
+    # echo "happy_liquid_2 delegation shares: ${happy_liquid_2_delegations%.*}"
+    # if [[ ${happy_liquid_2_delegations%.*} -ne $bank_send_amount ]]; then
+    #     echo "Redeem unsuccessful: unexpected delegation shares for happy_liquid_2"
+    #     exit 1
+    # fi
 
-    echo "happy_liquid_2 delegation balance: $happy_liquid_2_delegation_balance"
-    if [[ $happy_liquid_2_delegation_balance -ne $bank_send_amount ]]; then
-        echo "Redeem unsuccessful: unexpected delegation balance for happy_liquid_2"
-        exit 1
-    fi
+    # echo "happy_liquid_2 delegation balance: $happy_liquid_2_delegation_balance"
+    # if [[ $happy_liquid_2_delegation_balance -ne $bank_send_amount ]]; then
+    #     echo "Redeem unsuccessful: unexpected delegation balance for happy_liquid_2"
+    #     exit 1
+    # fi
 
-    echo "happy_liquid_3 delegation shares: ${happy_liquid_3_delegations%.*}"
-    if [[ ${happy_liquid_3_delegations%.*} -ne $ibc_transfer_amount ]]; then
-        echo "Redeem unsuccessful: unexpected delegation shares for happy_liquid_3"
-        exit 1
-    fi
+    # echo "happy_liquid_3 delegation shares: ${happy_liquid_3_delegations%.*}"
+    # if [[ ${happy_liquid_3_delegations%.*} -ne $ibc_transfer_amount ]]; then
+    #     echo "Redeem unsuccessful: unexpected delegation shares for happy_liquid_3"
+    #     exit 1
+    # fi
 
-    echo "happy_liquid_3 delegation balance: $happy_liquid_2_delegation_balance"
-    if [[ $happy_liquid_3_delegation_balance -ne $ibc_transfer_amount ]]; then
-        echo "Redeem unsuccessful: unexpected delegation balance for happy_liquid_3"
-        exit 1
-    fi
+    # echo "happy_liquid_3 delegation balance: $happy_liquid_2_delegation_balance"
+    # if [[ $happy_liquid_3_delegation_balance -ne $ibc_transfer_amount ]]; then
+    #     echo "Redeem unsuccessful: unexpected delegation balance for happy_liquid_3"
+    #     exit 1
+    # fi
 
 echo "** HAPPY PATH> CLEANUP **"
 

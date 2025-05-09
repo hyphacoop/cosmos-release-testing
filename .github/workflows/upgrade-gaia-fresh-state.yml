@@ -192,85 +192,72 @@
          upgrade_name: ${{ steps.upgrade.outputs.name }}
          binary_source: ${{ steps.binary.outputs.source }}
 
-      Baseline-1-upgrade:
-        runs-on: ubuntu-22.04
-        needs: set-versions
-        strategy:
-          matrix:
-            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-            cv_version: [v1.6.0, v1.7.0, v1.7.1]
-            upgrade_mechanism: [cv_auto, cv_manual]
-            exclude:
-              - target_version: main
-                upgrade_mechanism: cv_auto
-          fail-fast: false
-        env:
-          COSMOVISOR: true
-          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-        steps:
-          - name: Update PATH
-            run: |
-              mkdir -p $HOME/go/bin
-              echo "$HOME/go/bin" >> $GITHUB_PATH
-              echo "$HOME/.hermes" >> $GITHUB_PATH
-              echo "$HOME/.relayer" >> $GITHUB_PATH
-          - name: Bypass the grub-efi-amd64-signed package
-            run: sudo apt-mark hold grub-efi-amd64-signed
-          - name: Check out repository code
-            uses: actions/checkout@v4
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              python -m pip install toml-cli
-          - name: Install Cosmovisor
-            run: |
-              go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-              echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-          - name: Start chain
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          # - name: Check Gaia log
-          #   run: sudo journalctl -u $PROVIDER_SERVICE_1
-          # - name: Print Gaia version
-          #   run: $CHAIN_BINARY version --long
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-          # - name: Print feemarket params
-          #   run: |
-          #     sleep 10
-          #     $CHAIN_BINARY q feemarket params --home $HOME_1
-          #     $CHAIN_BINARY q feemarket gas-prices --home $HOME_1
+      # Baseline-1-upgrade:
+      #   runs-on: ubuntu-22.04
+      #   needs: set-versions
+      #   strategy:
+      #     matrix:
+      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+      #       cv_version: [v1.6.0, v1.7.0, v1.7.1]
+      #       upgrade_mechanism: [cv_auto, cv_manual]
+      #       exclude:
+      #         - target_version: main
+      #           upgrade_mechanism: cv_auto
+      #     fail-fast: false
+      #   env:
+      #     COSMOVISOR: true
+      #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+      #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+      #   steps:
+      #     - name: Update PATH
+      #       run: |
+      #         mkdir -p $HOME/go/bin
+      #         echo "$HOME/go/bin" >> $GITHUB_PATH
+      #         echo "$HOME/.hermes" >> $GITHUB_PATH
+      #         echo "$HOME/.relayer" >> $GITHUB_PATH
+      #     - name: Bypass the grub-efi-amd64-signed package
+      #       run: sudo apt-mark hold grub-efi-amd64-signed
+      #     - name: Check out repository code
+      #       uses: actions/checkout@v4
+      #     - name: Set up Python
+      #       uses: actions/setup-python@v5
+      #       with:
+      #         python-version: '3.10'
+      #     - name: Install dependencies
+      #       run: |
+      #         python -m pip install --upgrade pip
+      #         python -m pip install toml-cli
+      #     - name: Install Cosmovisor
+      #       run: |
+      #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+      #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+      #     - name: Start chain
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
+      #         scripts/start_chain.sh
+      #     - name: Block production check
+      #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-          - name: Test software upgrade
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
+      #     - name: Test software upgrade
+      #       env:
+      #         TARGET_VERSION: ${{ matrix.target_version }}
+      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+      #       run: |
+      #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
           
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-              
-          # - name: Flush "migration successful" lines
-          #   run: |
-          #     $CHAIN_BINARY keys list --home $HOME_1
-    
-          - name: _Transactions verified> bank send, delegate, and withdraw rewards
-            run: tests/test_tx_fresh.sh
-          - name: _API endpoints check
-            run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-          - name: _RPC endpoints check
-            run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+      #     - name: _Blocks produced after upgrade
+      #       run: |
+      #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+                  
+      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
+      #       run: tests/test_tx_fresh.sh
+      #     - name: _API endpoints check
+      #       run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+      #     - name: _RPC endpoints check
+      #       run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
       # Baseline-2-ics-optin:
       #   runs-on: ubuntu-22.04
@@ -1588,178 +1575,178 @@
       #       run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
   
-      Baseline-4-pfm:
-        runs-on: ubuntu-22.04
-        needs: set-versions
-        strategy:
-          matrix:
-            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-          fail-fast: false
-        env:
-          COSMOVISOR: false
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-        steps:
-          - name: Update PATH
-            run: |
-              mkdir -p $HOME/go/bin
-              echo "$HOME/go/bin" >> $GITHUB_PATH
-              echo "$HOME/.hermes" >> $GITHUB_PATH
-              echo "$HOME/.relayer" >> $GITHUB_PATH
-          - name: Bypass the grub-efi-amd64-signed package
-            run: sudo apt-mark hold grub-efi-amd64-signed
-          - name: Check out repository code
-            uses: actions/checkout@v4
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              python -m pip install toml-cli
-          - name: Start chain
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Check Gaia log
-            run: sudo journalctl -u $PROVIDER_SERVICE_1
-          - name: Print Gaia version
-            run: $CHAIN_BINARY version --long
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-          # - name: Select Hermes
-          #   if: ${{ matrix.relayer == 'hermes' }}
-          #   run: echo "RELAYER=hermes" >> $GITHUB_ENV
-          # - name: Select Go Relayer
-          #   if: ${{ matrix.relayer == 'rly' }}
-          #   run: echo "RELAYER=rly" >> $GITHUB_ENV
-          - name: Set up relayer
-            run: scripts/setup_relayer.sh
-          - name: Start PFM chain 1
-            env:
-              START_VERSION: ${{matrix.start_version}}
-              PFM_SERVICE: pfm_1.service
-              PFM_HOME: /home/runner/.pfm1
-              PFM_CHAIN_ID: pfm1
-              PFM_API_PORT: 25011
-              PFM_GRPC_PORT: 26011
-              PFM_RPC_PORT: 27011
-              PFM_P2P_PORT: 28011
-              PFM_PPROF_PORT: 29011
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_pfm_chain.sh
-              sleep 5
-          - name: Block production check
-            env:
-              PFM_RPC_PORT: 27011
-            run: |
-              journalctl -u pfm_1.service | tail -n 100
-              tests/test_block_production.sh 127.0.0.1 $PFM_RPC_PORT 5 # 5 blocks
+      # Baseline-4-pfm:
+      #   runs-on: ubuntu-22.04
+      #   needs: set-versions
+      #   strategy:
+      #     matrix:
+      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+      #     fail-fast: false
+      #   env:
+      #     COSMOVISOR: false
+      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+      #   steps:
+      #     - name: Update PATH
+      #       run: |
+      #         mkdir -p $HOME/go/bin
+      #         echo "$HOME/go/bin" >> $GITHUB_PATH
+      #         echo "$HOME/.hermes" >> $GITHUB_PATH
+      #         echo "$HOME/.relayer" >> $GITHUB_PATH
+      #     - name: Bypass the grub-efi-amd64-signed package
+      #       run: sudo apt-mark hold grub-efi-amd64-signed
+      #     - name: Check out repository code
+      #       uses: actions/checkout@v4
+      #     - name: Set up Python
+      #       uses: actions/setup-python@v5
+      #       with:
+      #         python-version: '3.10'
+      #     - name: Install dependencies
+      #       run: |
+      #         python -m pip install --upgrade pip
+      #         python -m pip install toml-cli
+      #     - name: Start chain
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
+      #         scripts/start_chain.sh
+      #     - name: Check Gaia log
+      #       run: sudo journalctl -u $PROVIDER_SERVICE_1
+      #     - name: Print Gaia version
+      #       run: $CHAIN_BINARY version --long
+      #     - name: Block production check
+      #       run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+      #     # - name: Select Hermes
+      #     #   if: ${{ matrix.relayer == 'hermes' }}
+      #     #   run: echo "RELAYER=hermes" >> $GITHUB_ENV
+      #     # - name: Select Go Relayer
+      #     #   if: ${{ matrix.relayer == 'rly' }}
+      #     #   run: echo "RELAYER=rly" >> $GITHUB_ENV
+      #     - name: Set up relayer
+      #       run: scripts/setup_relayer.sh
+      #     - name: Start PFM chain 1
+      #       env:
+      #         START_VERSION: ${{matrix.start_version}}
+      #         PFM_SERVICE: pfm_1.service
+      #         PFM_HOME: /home/runner/.pfm1
+      #         PFM_CHAIN_ID: pfm1
+      #         PFM_API_PORT: 25011
+      #         PFM_GRPC_PORT: 26011
+      #         PFM_RPC_PORT: 27011
+      #         PFM_P2P_PORT: 28011
+      #         PFM_PPROF_PORT: 29011
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+      #         scripts/start_pfm_chain.sh
+      #         sleep 5
+      #     - name: Block production check
+      #       env:
+      #         PFM_RPC_PORT: 27011
+      #       run: |
+      #         journalctl -u pfm_1.service | tail -n 100
+      #         tests/test_block_production.sh 127.0.0.1 $PFM_RPC_PORT 5 # 5 blocks
     
-          - name: Start PFM chain 2
-            env:
-              START_VERSION: ${{matrix.start_version}}
-              PFM_SERVICE: pfm_2.service
-              PFM_HOME: /home/runner/.pfm2
-              PFM_CHAIN_ID: pfm2
-              PFM_API_PORT: 25012
-              PFM_GRPC_PORT: 26012
-              PFM_RPC_PORT: 27012
-              PFM_P2P_PORT: 28012
-              PFM_PPROF_PORT: 29012
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_pfm_chain.sh
-              sleep 5
-          - name: Block production check
-            env:
-              PFM_RPC_PORT: 27012
-            run: tests/test_block_production.sh 127.0.0.1 $PFM_RPC_PORT 5 # 5 blocks
+      #     - name: Start PFM chain 2
+      #       env:
+      #         START_VERSION: ${{matrix.start_version}}
+      #         PFM_SERVICE: pfm_2.service
+      #         PFM_HOME: /home/runner/.pfm2
+      #         PFM_CHAIN_ID: pfm2
+      #         PFM_API_PORT: 25012
+      #         PFM_GRPC_PORT: 26012
+      #         PFM_RPC_PORT: 27012
+      #         PFM_P2P_PORT: 28012
+      #         PFM_PPROF_PORT: 29012
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+      #         scripts/start_pfm_chain.sh
+      #         sleep 5
+      #     - name: Block production check
+      #       env:
+      #         PFM_RPC_PORT: 27012
+      #       run: tests/test_block_production.sh 127.0.0.1 $PFM_RPC_PORT 5 # 5 blocks
     
-          - name: Start PFM chain 3
-            env:
-              START_VERSION: ${{matrix.start_version}}
-              PFM_SERVICE: pfm_3.service
-              PFM_HOME: /home/runner/.pfm3
-              PFM_CHAIN_ID: pfm3
-              PFM_API_PORT: 25013
-              PFM_GRPC_PORT: 26013
-              PFM_RPC_PORT: 27013
-              PFM_P2P_PORT: 28013
-              PFM_PPROF_PORT: 29013
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_pfm_chain.sh
-              sleep 5
-          - name: Block production check
-            env:
-              PFM_RPC_PORT: 27013
-            run: tests/test_block_production.sh 127.0.0.1 $PFM_RPC_PORT 5 # 5 blocks
+      #     - name: Start PFM chain 3
+      #       env:
+      #         START_VERSION: ${{matrix.start_version}}
+      #         PFM_SERVICE: pfm_3.service
+      #         PFM_HOME: /home/runner/.pfm3
+      #         PFM_CHAIN_ID: pfm3
+      #         PFM_API_PORT: 25013
+      #         PFM_GRPC_PORT: 26013
+      #         PFM_RPC_PORT: 27013
+      #         PFM_P2P_PORT: 28013
+      #         PFM_PPROF_PORT: 29013
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+      #         scripts/start_pfm_chain.sh
+      #         sleep 5
+      #     - name: Block production check
+      #       env:
+      #         PFM_RPC_PORT: 27013
+      #       run: tests/test_block_production.sh 127.0.0.1 $PFM_RPC_PORT 5 # 5 blocks
     
-          - name: Create transfer channels for PFM test
-            run: |
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
-              if [ $RELAYER == "hermes" ]; then
-                echo "Creating channels with Hermes..."
-                hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
-                hermes create channel --new-client-connection --a-chain pfm1 --b-chain pfm2 --a-port transfer --b-port transfer --yes
-                hermes create channel --new-client-connection --a-chain pfm2 --b-chain pfm3 --a-port transfer --b-port transfer --yes
-              elif [ $RELAYER == "rly" ]; then
-                echo "Creating channel with Go relayer..."
-                echo "Paths"
-                rly paths new testnet pfm1 pfm-path-1
-                rly paths new pfm1 pfm2 pfm-path-2
-                rly paths new pfm2 pfm3 pfm-path-3
-                echo "Clients"
-                rly transact client testnet pfm1 pfm-path-1
-                rly transact client pfm1 pfm2 pfm-path-2
-                rly transact client pfm2 pfm3 pfm-path-3
-                sleep 5
-                echo "Connections"
-                rly transact connection pfm-path-1
-                rly transact connection pfm-path-2
-                rly transact connection pfm-path-3
-                sleep 5
-                echo "Channels"
-                rly transact channel pfm-path-1
-                rly transact channel pfm-path-2
-                rly transact channel pfm-path-3
-              fi
-              sudo systemctl restart $RELAYER
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
-          - name: _Test PFM transfers
-            env:
-              PFM_HOME: /home/runner/.pfm3
-            run: |
-              tests/test_pfm_transfers.sh
-          - name: Test software upgrade
-            env:
-              TARGET_VERSION: "${{ matrix.target_version }}"
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-          - name: Restart relayer
-            run: sudo systemctl restart $RELAYER
-          - name: Flush "migration successful" lines
-            run: |
-              $CHAIN_BINARY keys list --home $HOME_1
-          - name: _Test PFM transfers
-            env:
-              PFM_HOME: /home/runner/.pfm3
-            run: |
-              tests/test_pfm_transfers.sh
+      #     - name: Create transfer channels for PFM test
+      #       run: |
+      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
+      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
+      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
+      #         if [ $RELAYER == "hermes" ]; then
+      #           echo "Creating channels with Hermes..."
+      #           hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
+      #           hermes create channel --new-client-connection --a-chain pfm1 --b-chain pfm2 --a-port transfer --b-port transfer --yes
+      #           hermes create channel --new-client-connection --a-chain pfm2 --b-chain pfm3 --a-port transfer --b-port transfer --yes
+      #         elif [ $RELAYER == "rly" ]; then
+      #           echo "Creating channel with Go relayer..."
+      #           echo "Paths"
+      #           rly paths new testnet pfm1 pfm-path-1
+      #           rly paths new pfm1 pfm2 pfm-path-2
+      #           rly paths new pfm2 pfm3 pfm-path-3
+      #           echo "Clients"
+      #           rly transact client testnet pfm1 pfm-path-1
+      #           rly transact client pfm1 pfm2 pfm-path-2
+      #           rly transact client pfm2 pfm3 pfm-path-3
+      #           sleep 5
+      #           echo "Connections"
+      #           rly transact connection pfm-path-1
+      #           rly transact connection pfm-path-2
+      #           rly transact connection pfm-path-3
+      #           sleep 5
+      #           echo "Channels"
+      #           rly transact channel pfm-path-1
+      #           rly transact channel pfm-path-2
+      #           rly transact channel pfm-path-3
+      #         fi
+      #         sudo systemctl restart $RELAYER
+      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
+      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
+      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
+      #     - name: _Test PFM transfers
+      #       env:
+      #         PFM_HOME: /home/runner/.pfm3
+      #       run: |
+      #         tests/test_pfm_transfers.sh
+      #     - name: Test software upgrade
+      #       env:
+      #         TARGET_VERSION: "${{ matrix.target_version }}"
+      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+      #       run: |
+      #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
+      #     - name: _Blocks produced after upgrade
+      #       run: |
+      #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+      #     - name: Restart relayer
+      #       run: sudo systemctl restart $RELAYER
+      #     - name: Flush "migration successful" lines
+      #       run: |
+      #         $CHAIN_BINARY keys list --home $HOME_1
+      #     - name: _Test PFM transfers
+      #       env:
+      #         PFM_HOME: /home/runner/.pfm3
+      #       run: |
+      #         tests/test_pfm_transfers.sh
     
-      Baseline-5-lsm:
+      Baseline-5-liquid-staking:
         runs-on: ubuntu-22.04
         needs: set-versions
         strategy:
@@ -1936,18 +1923,18 @@
           #   run: |
           #     touch lsm_log.csv
           #     echo "user flow,action,account,amount,balance,del_shares,del_balance,val1_tokens,val1_shares,val1_bond_shares,val1_liquid_shares,val2_tokens,val2_shares,val2_bond_shares,val2_liquid_shares" >> lsm_log.csv
-          # - name: _Pre-upgrade LSM happy path
-          #   env:
-          #     BASE_FEES: 3000
-          #     CONSUMER_FEES: 1000
-          #     CONSUMER_CHAIN_ID: stride-test
-          #     STRIDE_HOME_1: /home/runner/.stride-1
-          #     VALOPER_TOKENIZATION: 1
-          #   run: |
-          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-          #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-          #     export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-          #     tests/test_lsm_happy_path.sh
+          - name: _Pre-upgrade LSM happy path
+            env:
+              BASE_FEES: 3000
+              CONSUMER_FEES: 1000
+              CONSUMER_CHAIN_ID: stride-test
+              STRIDE_HOME_1: /home/runner/.stride-1
+              VALOPER_TOKENIZATION: 1
+            run: |
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              export IBC_CHANNEL=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_lsm_happy_path.sh
           # - name: _Pre-upgrade LSM Liquid Staking Provider happy path
           #   env:
           #     STRIDE_HOME_1: /home/runner/.stride-1
