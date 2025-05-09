@@ -333,7 +333,7 @@
               TARGET_VERSION: ${{ matrix.target_version }}
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT $TARGET_VERSION
+              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}
           
           - name: _Blocks produced after upgrade
             run: |
