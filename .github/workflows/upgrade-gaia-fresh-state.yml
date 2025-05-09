@@ -199,7 +199,7 @@
         needs: set-versions
         strategy:
           matrix:
-            # start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             cv_version: [v1.6.0, v1.7.0, v1.7.1]
             upgrade_mechanism: [cv_auto, cv_manual]
@@ -208,7 +208,7 @@
                 upgrade_mechanism: cv_auto
           fail-fast: false
         env:
-          START_VERSION: ${{ needs.set-versions.outputs.start_version  }}
+          START_VERSION: ${{ matrix.start_version  }}
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
@@ -237,8 +237,7 @@
               echo "COSMOVISOR=true" >> $GITHUB_ENV
               echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Start chain
-            # env:
-            #   START_VERSION: ${{matrix.start_version}}
+
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
               scripts/start_chain.sh
@@ -1598,7 +1597,7 @@
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-            upgrade_mechanism: [binary]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
           fail-fast: false
         env:
           COSMOVISOR: false
