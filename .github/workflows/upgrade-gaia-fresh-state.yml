@@ -254,7 +254,7 @@
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}
           
@@ -1741,8 +1741,8 @@
               tests/test_pfm_transfers.sh
           - name: Test software upgrade
             env:
-              TARGET_VERSION: "${{ needs.set-versions.outputs.target_version }}"
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+              TARGET_VERSION: "${{ matrix.target_version }}"
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}
           - name: _Blocks produced after upgrade
@@ -1956,8 +1956,8 @@
     
           - name: Test software upgrade
             env:
-              TARGET_VERSION: "${{ needs.set-versions.outputs.target_version }}"
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.upgrade_version }}/gaiad-${{ matrix.upgrade_version }}-linux-amd64
+              TARGET_VERSION: "${{ matrix.target_version }}"
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ needs.set-versions.outputs.upgrade_name }}    
           - name: _Blocks produced after upgrade
