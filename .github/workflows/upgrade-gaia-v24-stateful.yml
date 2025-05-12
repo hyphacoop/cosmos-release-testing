@@ -47,10 +47,10 @@ jobs:
       - run: pwd
       # Debug
       - name: Debug env vars
-          run: |
-            echo "START: $START"
-            echo "TARGET: $TARGET"
-            echo "NAME: $NAME"
+        run: |
+          echo "START: $START"
+          echo "TARGET: $TARGET"
+          echo "NAME: $NAME"
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Set up Python
