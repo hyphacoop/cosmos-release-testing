@@ -85,7 +85,7 @@ jobs:
       #max-parallel: 3
     with:
       runs-on-os: cosmos-runner-set
-      gaia_version: ${{ matrix.gaia_version }}
+      from_version: ${{ matrix.from_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
       archive_url: https://files.polypore.xyz/archived-state/latest_v23.tar.gz
