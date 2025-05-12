@@ -15,11 +15,7 @@ on:
         description: 'Gaia version to upgrade to'
         required: true
         default: main
-      upgrade_name:
-        description: 'Name of the upgrade'
-        required: false
-        type: string
-        default: v24
+
   # schedule:
   #   # Once a day at 13:15
   #   - cron: '15 13 * * 1'
@@ -31,7 +27,6 @@ jobs:
     env:
       START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
-      NAME: ${{ github.event_name == 'push' && 'v24' || inputs.upgrade_name }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
@@ -69,7 +64,7 @@ jobs:
       #   run: |
       #     start=$(scripts/generate_version_matrix.py $GAIA_LATEST)
       #     echo $start
-      #     echo "start_versions=$start" >> $GITHUB_OUTPUT
+      #     echo "from_versions=$start" >> $GITHUB_OUTPUT
       # - name: Generate upgrade versions
       #   id: generate-upgrade
       #   run: |
@@ -78,10 +73,8 @@ jobs:
       #     echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
-      start_version: ${{ steps.start.outputs.version }}
+      from_version: ${{ steps.start.outputs.version }}
       target_version: ${{ steps.target.outputs.version }}
-      upgrade_name: ${{ steps.upgrade.outputs.name }}
-      binary_source: ${{ steps.binary.outputs.source }}
 
   test-upgrade-mainnet:
     needs: set-version-matrix

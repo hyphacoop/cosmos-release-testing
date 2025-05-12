@@ -7,7 +7,7 @@ on:
       runs-on-os:
         required: true
         type: string
-      start_version:
+      from_version:
         required: true
         type: string
       target_version:
@@ -163,7 +163,7 @@ jobs:
           mkdir -m 700 ~/.ssh
           echo "$SSH_KEYS" > ~/.ssh/authorized_keys
       - name: start-version
-        run: echo ${{inputs.start_version}}
+        run: echo ${{inputs.from_version}}
       - name: target-version
         run: echo ${{inputs.target_version}}
       - name: target-commit
@@ -212,7 +212,7 @@ jobs:
         run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
       - name: Start chain val1 and link val2 node
         env:
-          START_VERSION: ${{inputs.start_version}}
+          from_version: ${{inputs.from_version}}
           ARCHIVE_URL: ${{ inputs.archive_url }}
         run: scripts/stateful/start_chain_val1.sh
       - name: _Blocks produced after upgrade to v23
@@ -455,10 +455,10 @@ jobs:
 
       - name: Installing secondary chain binaries
         env:
-          START_VERSION: ${{ vars.ICA_CHAIN_start_version }}
+          from_version: ${{ vars.ICA_CHAIN_from_version }}
         run: |
           set -e
-          export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+          export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$from_version/gaiad-$from_version-linux-amd64
           echo "Chain binary URL: $CHAIN_BINARY_URL"
           echo "Installing secondary chain binary..."
           wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
@@ -1549,7 +1549,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.target_version }}
           path: ~/artifact/
           include-hidden-files: true
       # Upload states to artifats
@@ -1557,27 +1557,27 @@ jobs:
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-provider-val1-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.target_version }}-provider-val1-state
       #     path: ~/.val1/
       #     include-hidden-files: true
       # - name: Upload provider chain state val2
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-provider-val2-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.target_version }}-provider-val2-state
       #     path: ~/.val2/
       #     include-hidden-files: true
       # - name: Upload cona1 chain state
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-cona1-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.target_version }}-cona1-state
       #     path: ~/.cona1/
       #     include-hidden-files: true
       # - name: Upload cona2 chain state
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-cona2-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.target_version }}-cona2-state
       #     path: ~/.cona2/
       #     include-hidden-files: true
