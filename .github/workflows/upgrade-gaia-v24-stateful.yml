@@ -11,7 +11,7 @@ on:
         required: true
         type: string
         default: v23.3.0
-      to_version:
+      target_version:
         description: 'Gaia version to upgrade to'
         required: true
         default: main
@@ -26,7 +26,7 @@ jobs:
   set-version-matrix:
     env:
       START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
-      TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
+      TARGET: ${{ github.event_name == 'push' && 'main' || inputs.target_version }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
@@ -74,7 +74,7 @@ jobs:
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
       from_version: ${{ steps.start.outputs.version }}
-      to_version: ${{ steps.target.outputs.version }}
+      target_version: ${{ steps.target.outputs.version }}
 
   test-upgrade-mainnet:
     needs: set-version-matrix
