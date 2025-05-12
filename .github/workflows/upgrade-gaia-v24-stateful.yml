@@ -6,12 +6,12 @@ on:
     types: [new_main_build]
   workflow_dispatch:
     inputs:
-      start_version:
+      from_version:
         description: 'Gaia version to upgrade from'
         required: true
         type: string
         default: v23.3.0
-      target_version:
+      to_version:
         description: 'Gaia version to upgrade to'
         required: true
         default: main
@@ -25,8 +25,8 @@ concurrency:
 jobs:
   set-version-matrix:
     env:
-      START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.start_version }}
-      TARGET: ${{ github.event_name == 'push' && 'main' || inputs.target_version }}
+      START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
+      TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
@@ -64,7 +64,7 @@ jobs:
       #   run: |
       #     start=$(scripts/generate_version_matrix.py $GAIA_LATEST)
       #     echo $start
-      #     echo "start_versions=$start" >> $GITHUB_OUTPUT
+      #     echo "from_versions=$start" >> $GITHUB_OUTPUT
       # - name: Generate upgrade versions
       #   id: generate-upgrade
       #   run: |
@@ -73,8 +73,8 @@ jobs:
       #     echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
-      start_version: ${{ steps.start.outputs.version }}
-      target_version: ${{ steps.target.outputs.version }}
+      from_version: ${{ steps.start.outputs.version }}
+      to_version: ${{ steps.target.outputs.version }}
 
   test-upgrade-mainnet:
     needs: set-version-matrix
@@ -85,7 +85,7 @@ jobs:
       #max-parallel: 3
     with:
       runs-on-os: cosmos-runner-set
-      start_version: ${{ matrix.start_version }}
+      from_version: ${{ matrix.from_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
       archive_url: https://files.polypore.xyz/archived-state/latest_v23.tar.gz

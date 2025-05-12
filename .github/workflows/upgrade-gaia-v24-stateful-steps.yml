@@ -7,10 +7,10 @@ on:
       runs-on-os:
         required: true
         type: string
-      start_version:
+      from_version:
         required: true
         type: string
-      target_version:
+      to_version:
         required: true
         type: string
       env_name:
@@ -127,8 +127,8 @@ jobs:
       COMMIT_TIMEOUT: 5
       CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
       VESTING_TARGET: "1772414007"
-      target_version: ${{ inputs.target_version }}
-      # target_version: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
+      to_version: ${{ inputs.to_version }}
+      # to_version: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
       HERMES_VERSION: ${{ vars.HERMES_VERSION }}
       CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
@@ -163,13 +163,13 @@ jobs:
           mkdir -m 700 ~/.ssh
           echo "$SSH_KEYS" > ~/.ssh/authorized_keys
       - name: start-version
-        run: echo ${{inputs.start_version}}
+        run: echo ${{inputs.from_version}}
       - name: target-version
-        run: echo ${{inputs.target_version}}
+        run: echo ${{inputs.to_version}}
       - name: target-commit
-        if: ${{ inputs.target_version == 'main' }}
+        if: ${{ inputs.to_version == 'main' }}
         run: |
-          BUILD_TAG=gaiad-linux-${{inputs.target_version}}
+          BUILD_TAG=gaiad-linux-${{inputs.to_version}}
           TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
           echo TARGET_COMMIT: $TARGET_COMMIT
       - name: Install Go
@@ -195,14 +195,14 @@ jobs:
       - name: Print RPC port
         run: echo $VAL1_RPC_PORT
       - name: Test software upgrade for published releases
-        if: ${{ inputs.target_version != 'main' }}
+        if: ${{ inputs.to_version != 'main' }}
         env:
-          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ inputs.target_version }}/gaiad-${{ inputs.target_version }}-linux-amd64
+          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ inputs.to_version }}/gaiad-${{ inputs.to_version }}-linux-amd64
         run: |
           echo "$DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
       - name: Test software upgrade for main branch
-        if: ${{ inputs.target_version == 'main' }}
+        if: ${{ inputs.to_version == 'main' }}
         env:
           DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
         run: |
@@ -212,7 +212,7 @@ jobs:
         run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
       - name: Start chain val1 and link val2 node
         env:
-          start_version: ${{inputs.start_version}}
+          from_version: ${{inputs.from_version}}
           ARCHIVE_URL: ${{ inputs.archive_url }}
         run: scripts/stateful/start_chain_val1.sh
       - name: _Blocks produced after upgrade to v23
@@ -455,10 +455,10 @@ jobs:
 
       - name: Installing secondary chain binaries
         env:
-          start_version: ${{ vars.ICA_CHAIN_start_version }}
+          from_version: ${{ vars.ICA_CHAIN_from_version }}
         run: |
           set -e
-          export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$start_version/gaiad-$start_version-linux-amd64
+          export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$from_version/gaiad-$from_version-linux-amd64
           echo "Chain binary URL: $CHAIN_BINARY_URL"
           echo "Installing secondary chain binary..."
           wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
@@ -1549,7 +1549,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.to_version }}
           path: ~/artifact/
           include-hidden-files: true
       # Upload states to artifats
@@ -1557,27 +1557,27 @@ jobs:
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-provider-val1-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.to_version }}-provider-val1-state
       #     path: ~/.val1/
       #     include-hidden-files: true
       # - name: Upload provider chain state val2
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-provider-val2-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.to_version }}-provider-val2-state
       #     path: ~/.val2/
       #     include-hidden-files: true
       # - name: Upload cona1 chain state
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-cona1-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.to_version }}-cona1-state
       #     path: ~/.cona1/
       #     include-hidden-files: true
       # - name: Upload cona2 chain state
       #   if: always()
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.start_version }}-${{ inputs.target_version }}-cona2-state
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.from_version }}-${{ inputs.to_version }}-cona2-state
       #     path: ~/.cona2/
       #     include-hidden-files: true
