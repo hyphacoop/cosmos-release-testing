@@ -60,31 +60,31 @@ jobs:
         run: |
           echo "version=$TARGET" >> $GITHUB_OUTPUT
       - name: Set archive URL
-        id: archive_url
+        id: archive
         run: |
           echo "url=$ARCHIVE_URL" >> $GITHUB_OUTPUT
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
       gaia_version: ${{ steps.start.outputs.version }}
       upgrade_version: ${{ steps.target.outputs.version }}
-      archive_url: ${{ steps.archive_url.outputs.url }}
+      archive_url: ${{ steps.archive.outputs.url }}
 
-  # test-upgrade-mainnet:
-  #   needs: set-version-matrix
-  #   strategy:
-  #     matrix:
-  #       # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-  #       gaia_version: [ "${{ needs.set-version-matrix.outputs.gaia_version }}" ]
-  #       upgrade_version: [ "${{ needs.set-version-matrix.outputs.upgrade_version }}" ]
-  #       archive_url: [ "${{ needs.set-version-matrix.outputs.archive_url }}" ]
-  #     fail-fast: false
-  #     #max-parallel: 3
-  #   with:
-  #     runs-on-os: cosmos-runner-set
-  #     gaia_version: ${{ matrix.gaia_version }}
-  #     upgrade_version: ${{ matrix.upgrade_version }}
-  #     env_name: major-upgrade-stateful-workflow
-  #   uses: ./.github/workflows/upgrade-gaia-v24-stateful-steps.yml
+  test-upgrade-mainnet:
+    needs: set-version-matrix
+    strategy:
+      matrix:
+        # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+        gaia_version: [ "${{ needs.set-version-matrix.outputs.gaia_version }}" ]
+        upgrade_version: [ "${{ needs.set-version-matrix.outputs.upgrade_version }}" ]
+        archive_url: [ "${{ needs.set-version-matrix.outputs.archive_url }}" ]
+      fail-fast: false
+      #max-parallel: 3
+    with:
+      runs-on-os: cosmos-runner-set
+      gaia_version: ${{ matrix.gaia_version }}
+      upgrade_version: ${{ matrix.upgrade_version }}
+      env_name: major-upgrade-stateful-workflow
+    uses: ./.github/workflows/upgrade-gaia-v24-stateful-steps.yml
 
   # test-upgrade-release-testnet:
   #   needs: set-version-matrix
