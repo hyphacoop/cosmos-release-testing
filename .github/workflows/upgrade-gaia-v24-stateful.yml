@@ -15,6 +15,10 @@ on:
         description: 'Gaia version to upgrade to'
         required: true
         default: main
+      archive_url:
+        description: 'URL for archive file'
+        required: true
+        default: https://files.polypore.xyz/archived-state/latest_v23.tar.gz
 
   # schedule:
   #   # Once a day at 13:15
@@ -27,6 +31,7 @@ jobs:
     env:
       START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
+      ARCHIVE_URL: ${{ github.event_name == 'push' && 'main' || inputs.archive_url }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
@@ -45,6 +50,7 @@ jobs:
         run: |
           echo "START: $START"
           echo "TARGET: $TARGET"
+          echo "ARCHIVE_URL: $ARCHIVE_URL"
       - name: Set starting version
         id: start
         run: |
@@ -53,6 +59,10 @@ jobs:
         id: target
         run: |
           echo "version=$TARGET" >> $GITHUB_OUTPUT
+      - name: Set archive URL
+        id: archive_url
+        run: |
+          echo "archive_url=$ARCHIVE_URL" >> $GITHUB_OUTPUT
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
       gaia_version: ${{ steps.start.outputs.version }}
@@ -65,6 +75,7 @@ jobs:
         # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
         gaia_version: [ "${{ needs.set-version-matrix.outputs.gaia_version }}" ]
         upgrade_version: [ "${{ needs.set-version-matrix.outputs.upgrade_version }}" ]
+        archive_url: [ "${{ needs.set-version-matrix.outputs.archive_url }}" ]
       fail-fast: false
       #max-parallel: 3
     with:
@@ -72,7 +83,6 @@ jobs:
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
-      archive_url: https://files.polypore.xyz/archived-state/latest_v23.tar.gz
     uses: ./.github/workflows/upgrade-gaia-v24-stateful-steps.yml
 
   # test-upgrade-release-testnet:
