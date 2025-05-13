@@ -31,7 +31,7 @@ jobs:
     env:
       START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
-      ARCHIVE_URL: ${{ github.event_name == 'push' && 'main' || inputs.archive_url }}
+      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
