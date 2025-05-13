@@ -45,7 +45,6 @@ jobs:
         run: |
           echo "START: $START"
           echo "TARGET: $TARGET"
-          echo "NAME: $NAME"
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Set up Python
@@ -76,22 +75,22 @@ jobs:
       gaia_version: ${{ steps.start.outputs.version }}
       upgrade_version: ${{ steps.target.outputs.version }}
 
-  # test-upgrade-mainnet:
-  #   needs: set-version-matrix
-  #   strategy:
-  #     matrix:
-  #       # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-  #       gaia_version: [ "${{ needs.set-versions-matrix.outputs.gaia_version }}" ]
-  #       upgrade_version: [ "${{ needs.set-versions.outputs.upgrade_version }}" ]
-  #     fail-fast: false
-  #     #max-parallel: 3
-  #   with:
-  #     runs-on-os: cosmos-runner-set
-  #     from_version: ${{ matrix.from_version }}
-  #     upgrade_version: ${{ matrix.upgrade_version }}
-  #     env_name: major-upgrade-stateful-workflow
-  #     archive_url: https://files.polypore.xyz/archived-state/latest_v23.tar.gz
-  #   uses: ./.github/workflows/upgrade-gaia-v24-stateful-steps.yml
+  test-upgrade-mainnet:
+    needs: set-version-matrix
+    strategy:
+      matrix:
+        # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+        gaia_version: [ "${{ needs.set-versions-matrix.outputs.gaia_version }}" ]
+        upgrade_version: [ "${{ needs.set-versions.outputs.upgrade_version }}" ]
+      fail-fast: false
+      #max-parallel: 3
+    with:
+      runs-on-os: cosmos-runner-set
+      from_version: ${{ matrix.from_version }}
+      upgrade_version: ${{ matrix.upgrade_version }}
+      env_name: major-upgrade-stateful-workflow
+      archive_url: https://files.polypore.xyz/archived-state/latest_v23.tar.gz
+    uses: ./.github/workflows/upgrade-gaia-v24-stateful-steps.yml
 
   # test-upgrade-release-testnet:
   #   needs: set-version-matrix
