@@ -73,14 +73,16 @@ jobs:
       #     echo "upgrade_versions=$upgrade" >> $GITHUB_OUTPUT
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
-      from_version: ${{ steps.start.outputs.version }}
-      to_version: ${{ steps.target.outputs.version }}
+      start_version: ${{ steps.start.outputs.version }}
+      target_version: ${{ steps.target.outputs.version }}
 
   test-upgrade-mainnet:
     needs: set-version-matrix
     strategy:
       matrix:
-        ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+        # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
+        gaia_version: [ "${{ needs.set-versions-matrix.outputs.start_version }}" ]
+        upgrade_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
       fail-fast: false
       #max-parallel: 3
     with:
