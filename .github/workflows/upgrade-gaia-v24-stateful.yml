@@ -80,7 +80,7 @@ jobs:
     strategy:
       matrix:
         # ${{ fromJSON(needs.set-version-matrix.outputs.upgrade_versions) }}
-        gaia_version: [ "${{ needs.set-versions-matrix.outputs.gaia_version }}" ]
+        # gaia_version: [ "${{ needs.set-versions-matrix.outputs.gaia_version }}" ]
         upgrade_version: [ "${{ needs.set-versions.outputs.upgrade_version }}" ]
       fail-fast: false
       #max-parallel: 3
