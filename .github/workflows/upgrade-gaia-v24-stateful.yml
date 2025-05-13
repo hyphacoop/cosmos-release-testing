@@ -69,7 +69,6 @@ jobs:
       #max-parallel: 3
     with:
       runs-on-os: cosmos-runner-set
-      from_version: ${{ matrix.from_version }}
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
       env_name: major-upgrade-stateful-workflow
