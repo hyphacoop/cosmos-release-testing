@@ -62,11 +62,12 @@ jobs:
       - name: Set archive URL
         id: archive_url
         run: |
-          echo "archive_url=$ARCHIVE_URL" >> $GITHUB_OUTPUT
+          echo "url=$ARCHIVE_URL" >> $GITHUB_OUTPUT
     outputs:
       # upgrade_versions: ${{ steps.generate-upgrade.outputs.upgrade_versions }}
       gaia_version: ${{ steps.start.outputs.version }}
       upgrade_version: ${{ steps.target.outputs.version }}
+      archive_url: ${{ steps.archive_url.outputs.url }}
 
   test-upgrade-mainnet:
     needs: set-version-matrix
