@@ -48,7 +48,7 @@ jobs:
       - name: Set starting version
         id: start
         run: |
-          echo "version=$TARGET" >> $GITHUB_OUTPUT
+          echo "version=$START" >> $GITHUB_OUTPUT
       - name: Set target version
         id: target
         run: |
