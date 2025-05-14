@@ -18,7 +18,8 @@ on:
       archive_url:
         description: 'URL for archive file'
         required: true
-        default: test
+        # default: 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz'
+        default: 'https://files.polypore.xyz/archived-state/v23.3.0_25706750-stateful-upgrade.tar.gz'
 
   # schedule:
   #   # Once a day at 13:15
@@ -31,7 +32,8 @@ jobs:
     env:
       START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
-      ARCHIVE_URL: ${{ github.event_name == 'push' && 'test' || inputs.archive_url }}
+      # ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz' || inputs.archive_url }}
+      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/v23.3.0_25706750-stateful-upgrade.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
@@ -82,6 +84,7 @@ jobs:
       runs-on-os: cosmos-runner-set
       gaia_version: ${{ matrix.gaia_version }}
       upgrade_version: ${{ matrix.upgrade_version }}
+      archive_url: ${{ matrix.archive_url }}
       env_name: major-upgrade-stateful-workflow
     uses: ./.github/workflows/upgrade-gaia-v24-stateful-steps.yml
 
