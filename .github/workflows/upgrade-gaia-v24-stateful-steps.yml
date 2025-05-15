@@ -292,7 +292,7 @@ jobs:
           fi
       - name: Set slashing values
         run: |
-          jq -r '.messages[0] | .params.signed_blocks_window="20"' templates/proposal-slashing-params.json > templates/proposal-slashing-params_signed_blocks_window.json
+          jq -r '.messages[0].params.signed_blocks_window="20"' templates/proposal-slashing-params.json > templates/proposal-slashing-params_signed_blocks_window.json
           mv templates/proposal-slashing-params_signed_blocks_window.json templates/proposal-slashing-params.json
           echo "[DEBUG]: Slashing proposal file:"
           jq -r '.' templates/proposal-slashing-params.json
