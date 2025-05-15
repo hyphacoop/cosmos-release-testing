@@ -290,11 +290,21 @@ jobs:
             echo "BlocksPerEpoch is not 1"
             exit 1
           fi
+      - name: Set slashing values
+        run: |
+          jq -r '.messages[0] | .params.signed_blocks_window="20"' templates/proposal-slashing-params.json > templates/proposal-slashing-params_signed_blocks_window.json
+          mv templates/proposal-slashing-params_signed_blocks_window.json templates/proposal-slashing-params.json
+          echo "[DEBUG]: Slashing proposal file:"
+          jq -r '.' templates/proposal-slashing-params.json
+      - name: Query slashing params
+        run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
+      - name: Submit proposal to update slashing params
+        run: scripts/submit_proposal.sh templates/proposal-slashing-params.json
       - name: Create val2 validator
         run: |
           set -e
           echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 1000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 2000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           echo "[INFO]: Wait for one block to pass"
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO]: Check val2 address balances"
@@ -560,23 +570,30 @@ jobs:
           else
             echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
           fi
-      - name: Print opt-in consumer tendermint validators
+      - name: Get consumer consumer_id
         env:
           CONSUMER_CHAIN_ID: consumera
+          STORE_ENV_VAR_NAME: CONSUMERA_CONSUMER_ID
+        run: |
+          consumer_id=$($CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains -o json | jq -r ".chains[] | select(.chain_id==\"$CONSUMER_CHAIN_ID\") | .consumer_id")
+          echo "$STORE_ENV_VAR_NAME=$consumer_id" >> $GITHUB_ENV
+      - name: Print opt-in consumer tendermint validators
+        env:
+          CONSUMER_ID: ${{ env.CONSUMERA_CONSUMER_ID }}
         run: |
           echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
           $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
           # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
           # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_CHAIN_ID -o json | jq -r '.'
-      - name: DEBUG
-        if: always()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_ID"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_ID -o json | jq -r '.'
+      # - name: DEBUG
+      #   if: always()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: Check number of signatures on consumera
         run: |
           set -e
