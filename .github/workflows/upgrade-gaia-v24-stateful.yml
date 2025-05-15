@@ -14,7 +14,7 @@ on:
       to_version:
         description: 'Gaia version to upgrade to'
         required: true
-        default: main
+        default: v24.0.0-rc0
       archive_url:
         description: 'URL for archive file'
         required: true
@@ -31,7 +31,7 @@ jobs:
   set-version-matrix:
     env:
       START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
-      TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
+      TARGET: ${{ github.event_name == 'push' && 'v24.0.0-rc0' || inputs.to_version }}
       # ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz' || inputs.archive_url }}
       ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/v23.3.0_25706750-stateful-upgrade.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-22.04
