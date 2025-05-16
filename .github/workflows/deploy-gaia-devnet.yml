@@ -4,7 +4,7 @@ concurrency:
   group: gaia-devnet-deploy
 on:
   workflow_dispatch:
-  # push:
+  push:
 
 jobs:
   gaia-devnet-deploy:
@@ -14,7 +14,7 @@ jobs:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       RPC_NODE: ${{ vars.RPC_NODE }}
       # RUNNING_VERSION: ${{ vars.RUNNING_VERSION }}
-      DEVNET_BRANCH: v21.0.0
+      DEVNET_BRANCH: v24.0.0-rc0
     steps:
       # Get system info
       - name: Install required packages
