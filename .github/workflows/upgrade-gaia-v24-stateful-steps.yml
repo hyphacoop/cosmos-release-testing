@@ -304,7 +304,7 @@ jobs:
         run: |
           set -e
           echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
-          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 2000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} 2000000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
           echo "[INFO]: Wait for one block to pass"
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO]: Check val2 address balances"
@@ -319,7 +319,7 @@ jobs:
           echo "[INFO]: templates/create-validator.json"
           jq -r '.' templates/create-validator.json
           echo "[INFO]: tx staking create-validator..."
-          $CHAIN_BINARY --home $HOME_2 tx staking create-validator templates/create-validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+          $CHAIN_BINARY --home $HOME_2 tx staking create-validator templates/create-validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
           echo "[INFO]: Wait for one block to pass"
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO]: Query staking validators"
@@ -349,7 +349,7 @@ jobs:
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 4
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       # - name: Generate wallets for fee market
@@ -433,7 +433,7 @@ jobs:
           echo "[INFO]: Set commission to 0.05 higher"
           set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
           echo "[INFO]: Set commission to: $set_commission_rate"
-          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y
+          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO]: Get latest comission rate..."
           json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
@@ -501,7 +501,7 @@ jobs:
           CHAIN_SERVICE: ica-chain.service
           CHAIN_HOME: /home/runner/.ica-chain
         run: |
-          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
           sleep 60
           $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
       - name: Establish Connection to ICA chain
@@ -691,7 +691,7 @@ jobs:
           echo "[INFO]: Update consumer json:"
           cat $CONSUMER_CHAIN_ID-register-denoms.json
           echo "[INFO]: Create and submit update-consumer"
-          $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
+          $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 -y
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
           echo "[INFO]: Query consumer-chain consumera"
           $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
@@ -866,7 +866,7 @@ jobs:
           set -e
           echo "[INFO] Optin second validator"
           node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_2 tendermint show-validator)
-          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
           txhash=$(echo "$json" | jq -r .txhash)
           echo "$json" | jq -r '.'
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
@@ -937,7 +937,7 @@ jobs:
         run: |
           set -e
           echo "[INFO] Opt-out second validator"
-          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID_TOPN }} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID_TOPN }} --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
           txhash=$(echo "$json" | jq -r .txhash)
           echo "$json" | jq -r '.'
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
@@ -973,7 +973,7 @@ jobs:
         run: |
           set -e
           echo "[INFO] Opt-out second validator"
-          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID }} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID }} --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from val2 -y -o json)
           txhash=$(echo "$json" | jq -r .txhash)
           echo "$json" | jq -r '.'
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
@@ -1160,7 +1160,7 @@ jobs:
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and not voting"
-          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
           echo "[INFO]: Wait for voting period to end..."
           sleep $VOTING_PERIOD
           sleep $VOTING_PERIOD
@@ -1188,7 +1188,7 @@ jobs:
       - name: _Pre-proposal test current consensus and feemarket params
         run: |
           echo "[INFO]: Submit large proposal..."
-          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
           if [ $? -eq 0 ]
           then
             echo "[DEBUG]: json output:"
@@ -1467,7 +1467,7 @@ jobs:
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and not voting"
-          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
           echo "[INFO]: Wait for voting period to end..."
           sleep $VOTING_PERIOD
           sleep $VOTING_PERIOD
@@ -1496,7 +1496,7 @@ jobs:
         run: |
           set +e
           echo "[INFO]: Submit large proposal..."
-          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
           if [ $? -eq 0 ]
           then
             echo "[DEBUG]: json output:"
@@ -1522,7 +1522,7 @@ jobs:
         run: |
           set +e
           echo "[INFO]: Submit large proposal..."
-          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
           echo "[DEBUG]: json output:"
           echo "$json"
           echo $json | jq -r '.raw_log' | grep "insufficient fee"
