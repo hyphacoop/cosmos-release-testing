@@ -22,7 +22,20 @@ echo "$gaiadout"
 
 txhash=$(echo "$gaiadout" | jq -r .txhash)
 # Wait for the proposal to go on chain
-sleep 6
+cur_height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header.height)
+let to_height=$cur_height+1
+echo "[INFO] Current height: $cur_height"
+
+until [[ "${cur_height}" -gt "${to_height}" ]]
+do
+    cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+    if [ $echo_height -ne $cur_height ]
+    then
+        echo "[INFO] Current height: $cur_height"
+        echo_height=$cur_height
+    fi
+    sleep 1
+done
 
 # Get proposal ID from txhash
 echo "[INFO] Getting proposal ID from txhash..."
