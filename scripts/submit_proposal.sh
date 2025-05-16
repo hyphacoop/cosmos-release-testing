@@ -24,6 +24,7 @@ txhash=$(echo "$gaiadout" | jq -r .txhash)
 # Wait for the proposal to go on chain
 cur_height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r .result.block.header.height)
 let to_height=$cur_height+1
+echo_height=1
 echo "[INFO] Current height: $cur_height"
 
 until [[ "${cur_height}" -gt "${to_height}" ]]
