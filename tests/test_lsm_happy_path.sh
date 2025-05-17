@@ -43,6 +43,8 @@ echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
     # $CHAIN_BINARY q staking validator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --home $HOME_1
 
     validator_bond_shares_2=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.validator_bond_shares')
+    echo "> Validator bond shares 1: $validator_bond_shares_1"
+    echo "> Validator bond shares 2: $validator_bond_shares_2"
     bond_shares_diff=$((${validator_bond_shares_2%.*}-${validator_bond_shares_1%.*})) # remove decimal portion
     echo "Bond shares difference: $bond_shares_diff"
     echo "Delegation: $delegation"
