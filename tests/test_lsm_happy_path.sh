@@ -5,7 +5,6 @@ source scripts/process_tx.sh
 delegation=100000000
 tokenize=50000000
 bank_send_amount=20000000
-ibc_transfer_amount=10000000
 liquid_1_redeem=20000000
 tokenized_denom=$VALOPER_1/$VALOPER_TOKENIZATION
 
@@ -121,7 +120,7 @@ echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
     fi
 
     echo "Transferring token ownership record back to happy_liquid_1..."
-    submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_liquid_1 --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
+    submit_tx "tx staking transfer-tokenize-share-record $record_id $liquid_denom --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
     owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
     if [[ "$owner" == "$happy_liquid_1" ]]; then
@@ -136,7 +135,7 @@ echo "** HAPPY PATH> STEP 4: TRANSFER TOKENS  **"
     echo "happy_liquid_1 delegations: $happy_liquid_1_delegations_1"
 
     echo "Sending tokens from happy_liquid_1 to happy_liquid_2 via bank send..."
-    submit_tx "tx bank send $happy_liquid_1 $happy_liquid_2 $bank_send_amount$tokenized_denom --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
+    submit_tx "tx bank send $happy_liquid_1 $happy_liquid_2 $bank_send_amount$liquid_denom --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
 
 echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
     echo "Redeeming tokens from happy_liquid_1..."
