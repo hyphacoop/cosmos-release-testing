@@ -94,11 +94,7 @@ sleep $(($COMMIT_TIMEOUT+2))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
-if [ $COSMOS_SDK != "v50" ]; then
-    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.logs[]events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-else
-    proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-fi
+proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "Proposal ID: $proposal_id"
 
@@ -115,6 +111,7 @@ echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
 echo "Upgrade proposal $proposal_id status:"
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $HOME_1 
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $HOME_1 | jq '.status'
 
 current_height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r '.result.block.header.height')
