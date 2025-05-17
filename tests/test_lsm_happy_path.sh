@@ -13,8 +13,7 @@ tokenized_denom=$VALOPER_1/$VALOPER_TOKENIZATION
 
 happy_liquid_1=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_liquid_1").address')
 happy_liquid_2=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_liquid_2").address')
-# appy_liquid_3=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_liquid_3").address')
-# happy_owner=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_owner").address')
+happy_owner=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_owner").address')
 
 echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
 
@@ -111,7 +110,7 @@ echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
     record_id=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.id')
     owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "> $owner owns record $record_id."
-    echo "Transferring token ownership record to new_owner..."
+    echo "> Transferring token ownership record to new_owner."
     submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_owner --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
     owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
