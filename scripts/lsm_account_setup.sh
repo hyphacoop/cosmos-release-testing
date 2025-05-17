@@ -2,7 +2,7 @@
 # set -x
 source scripts/process_tx.sh
 
-funding=5000000000
+funding=200000000
 
 $CHAIN_BINARY keys add happy_bonding --home $HOME_1
 $CHAIN_BINARY keys add happy_liquid_1 --home $HOME_1
