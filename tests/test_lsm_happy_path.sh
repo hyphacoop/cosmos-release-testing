@@ -108,12 +108,12 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
 
 echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
 
-    record_id=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $tokenized_denom --home $HOME_1 -o json | jq -r '.record.id')
-    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $tokenized_denom --home $HOME_1 -o json | jq -r '.record.owner')
+    record_id=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.id')
+    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "> $owner owns record $record_id."
     echo "Transferring token ownership record to new_owner..."
     submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_owner --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
-    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $tokenized_denom --home $HOME_1 -o json | jq -r '.record.owner')
+    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
     if [[ "$owner" == "$happy_owner" ]]; then
         echo "Token ownership transfer succeeded."
@@ -123,7 +123,7 @@ echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
 
     echo "Transferring token ownership record back to happy_liquid_1..."
     submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_liquid_1 --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
-    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $tokenized_denom --home $HOME_1 -o json | jq -r '.record.owner')
+    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
     if [[ "$owner" == "$happy_liquid_1" ]]; then
         echo "Token ownership transfer succeeded."
