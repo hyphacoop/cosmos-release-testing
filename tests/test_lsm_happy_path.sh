@@ -39,7 +39,7 @@ echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
 
     echo "> Validator bond with val1."
     # $CHAIN_BINARY q staking validator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --home $HOME_1
-    submit_tx "tx staking validator-bond $VALOPER_1 --from $happy_bonding -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
+    submit_tx "tx staking validator-bond $VALOPER_1 --from $WALLET_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
     # $CHAIN_BINARY q staking validator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv --home $HOME_1
 
     validator_bond_shares_2=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.validator_bond_shares')
