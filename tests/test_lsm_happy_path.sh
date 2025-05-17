@@ -43,6 +43,7 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
         exit 1
     fi
 
+    $CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.'
     liquid_shares_pre_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.liquid_shares')
     # Remove the last 18 zeroes
     liquid_shares_pre_tokenize=${liquid_shares_pre_tokenize:0:${#liquid_shares_pre_tokenize}-18}
@@ -178,10 +179,18 @@ echo "** HAPPY PATH> CLEANUP **"
     echo "Validator unbond from happy_liquid_2..."
     submit_tx "tx staking unbond $VALOPER_1 $happy_liquid_2_delegations$DENOM --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
 
+    echo "> Delegations:"
+    $CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r '.'
+    $CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r '.'
+    echo "> Balances:"
+    $CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r '.'
+    $CHAIN_BINARY q bank balances $happy_liquid_2 --home $HOME_1 -o json | jq -r '.'
+
+
     happy_liquid_1_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     happy_liquid_2_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
-    echo "happy_liquid_1 delegation shares: ${happy_liquid_1_delegations%.*}"
-    echo "happy_liquid_2 delegation shares: ${happy_liquid_2_delegations%.*}"
+    echo "happy_liquid_1 delegation shares: $happy_liquid_1_delegations"
+    echo "happy_liquid_2 delegation shares: $happy_liquid_2_delegations"
 
     validator_bond_shares=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.validator_bond_shares')
     echo "> Validator bond shares: $validator_bond_shares"
