@@ -120,7 +120,7 @@ echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
     fi
 
     echo "Transferring token ownership record back to happy_liquid_1..."
-    submit_tx "tx staking transfer-tokenize-share-record $record_id $liquid_denom --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
+    submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_liquid_1 --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
     owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
     if [[ "$owner" == "$happy_liquid_1" ]]; then
