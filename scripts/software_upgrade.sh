@@ -112,7 +112,7 @@ sleep $VOTING_PERIOD
 
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $HOME_1 
-$CHAIN_BINARY q gov proposal $proposal_id --output json --home $HOME_1 | jq '.status'
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $HOME_1 | jq '.proposal.status'
 
 current_height=$(curl -s http://$gaia_host:$gaia_port/block | jq -r '.result.block.header.height')
 blocks_delta=$(($upgrade_height-$current_height))

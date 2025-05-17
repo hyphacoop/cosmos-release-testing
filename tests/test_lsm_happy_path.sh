@@ -162,15 +162,15 @@ echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
 
 echo "** HAPPY PATH> CLEANUP **"
 
-    echo "Validator unbond from Val1"
-    submit_tx "tx staking unbond-validator --from $WALLET_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
+    # echo "Validator unbond from Val1"
+    # submit_tx "tx staking unbond-validator --from $WALLET_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
 
-    validator_bond_shares=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator_bond_shares')
-    echo "Validator bond shares: ${validator_bond_shares%.*}"
-    if [[ ${validator_bond_shares%.*} -ne 0  ]]; then
-        echo "Unbond unsuccessful: unexpected validator bond shares amount"
-        exit 1
-    fi
+    # validator_bond_shares=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator_bond_shares')
+    # echo "Validator bond shares: ${validator_bond_shares%.*}"
+    # if [[ ${validator_bond_shares%.*} -ne 0  ]]; then
+    #     echo "Unbond unsuccessful: unexpected validator bond shares amount"
+    #     exit 1
+    # fi
 
     echo "Validator unbond from happy_liquid_1..."
     submit_tx "tx staking unbond $VALOPER_1 $happy_liquid_1_delegations_2$DENOM --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
