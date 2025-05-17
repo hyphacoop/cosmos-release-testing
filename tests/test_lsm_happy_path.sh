@@ -98,7 +98,8 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
     fi
 
     $CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1
-    liquid_balance=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg DENOM "$tokenized_denom" '.balances[] | select(.denom==$DENOM).amount')
+    liquid_denom=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r '.balances[-2].denom')
+    liquid_balance=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg DENOM "$liquid_denom" '.balances[] | select(.denom==$DENOM).amount')
     echo "Liquid balance: ${liquid_balance%.*}"
     if [[ ${liquid_balance%.*} -ne $tokenize ]]; then
         echo "Tokenize unsuccessful: unexpected liquid token balance"
