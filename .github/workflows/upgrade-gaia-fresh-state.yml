@@ -20,7 +20,7 @@
             required: false
             type: string
             default: v24
-      push:
+      # push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -1231,7 +1231,7 @@
               scripts/start_chain.sh
           - name: Block production check
             run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-            
+
           # - name: Add consumer chain with ICS v4.0.0
           #   env:
           #     CONSUMER_CHAIN_ID: v400-one
