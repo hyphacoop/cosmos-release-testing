@@ -1228,13 +1228,10 @@
           - name: Start chain
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-          - name: Check Gaia log
-            run: sudo journalctl -u $PROVIDER_SERVICE_1
-          - name: Print Gaia version
-            run: $CHAIN_BINARY version --long
+              scripts/start_chain.sh
           - name: Block production check
             run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-    
+            
           # - name: Add consumer chain with ICS v4.0.0
           #   env:
           #     CONSUMER_CHAIN_ID: v400-one
@@ -2496,7 +2493,8 @@
             run: |
               python -m pip install --upgrade pip
               python -m pip install toml-cli
-
+          - name: Set up relayer
+            run: scripts/gaia-v16/setup_relayer_ica_controller.sh
           - name: Start chain
             env:
               START_VERSION: ${{matrix.start_version}}
