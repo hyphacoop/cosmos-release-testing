@@ -255,7 +255,7 @@ jobs:
           # echo "UNBONDING_TIME=$unbonding" >> $GITHUB_ENV
       - name: Set staking params
         run: |
-          scripts/submit_proposal.sh templates/proposal-stateful-staking-params.json
+          source scripts/submit_proposal.sh templates/proposal-stateful-staking-params.json
           echo "[DEBUG] PROPOSAL_TX_JSON:"
           echo "$PROPOSAL_TX_JSON" | jq
           echo "[DEBUG] VOTE_TX_JSON:"
