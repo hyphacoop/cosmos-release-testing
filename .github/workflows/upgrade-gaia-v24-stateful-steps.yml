@@ -254,14 +254,7 @@ jobs:
           # unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
           # echo "UNBONDING_TIME=$unbonding" >> $GITHUB_ENV
       - name: Set staking params
-        run: |
-          source scripts/submit_proposal.sh templates/proposal-stateful-staking-params.json
-          echo "[DEBUG] PROPOSAL_TX_JSON:"
-          echo "$PROPOSAL_TX_JSON" | jq
-          echo "[DEBUG] VOTE_TX_JSON:"
-          echo "$VOTE_TX_JSON" | jq
-          echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount'
-          echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount'
+        run: scripts/submit_proposal.sh templates/proposal-stateful-staking-params.json
       - name: Query staking params after prop passed
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
@@ -1123,11 +1116,15 @@ jobs:
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and voting no"
-          scripts/submit_proposal.sh templates/proposal-text.json no
+          source scripts/submit_proposal.sh templates/proposal-text.json no
+          fees_proposal_tx=$(echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          fees_vote_tx=$(echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          echo "[INFO]: Gas used during proposal tx: $fees_proposal_tx"
+          echo "[INFO]: Gas used during vote tx: $fees_vote_tx"
           current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Balance after no vote: $current_balance"
           echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES" | bc)
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx - $fees_vote_tx" | bc)
           echo "[DEBUG]: expected_balance: $expected_balance"
           if [ $expected_balance -ne $current_balance ]
           then
@@ -1143,11 +1140,15 @@ jobs:
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and voting no"
-          scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          source scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          fees_proposal_tx=$(echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          fees_vote_tx=$(echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          echo "[INFO]: Gas used during proposal tx: $fees_proposal_tx"
+          echo "[INFO]: Gas used during vote tx: $fees_vote_tx"
           current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Balance after no vote: $current_balance"
           echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - $BASE_FEES - 100000000" | bc)
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx - $fees_vote_tx - 100000000" | bc)
           echo "[DEBUG]: expected_balance: $expected_balance"
           if [ $expected_balance -ne $current_balance ]
           then
