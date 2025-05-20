@@ -42,7 +42,7 @@ done
 echo "[INFO] Getting proposal ID from txhash..."
 $CHAIN_BINARY q tx $txhash --home $HOME_1
 proposal_tx_json=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json)
-export PROPOSAL_TX_JSON=$proposal_id_json
+export PROPOSAL_TX_JSON=$proposal_tx_json
 proposal_id=$(echo $proposal_tx_json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "[INFO] Voting on proposal $proposal_id..."
