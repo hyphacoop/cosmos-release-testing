@@ -260,6 +260,8 @@ jobs:
           echo "$PROPOSAL_TX_JSON" | jq
           echo "[DEBUG] VOTE_TX_JSON:"
           echo "$VOTE_TX_JSON" | jq
+          echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount'
+          echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount'
       - name: Query staking params after prop passed
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
