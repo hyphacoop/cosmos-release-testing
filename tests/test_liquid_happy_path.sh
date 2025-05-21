@@ -14,20 +14,7 @@ happy_liquid_1=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.
 happy_liquid_2=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_liquid_2").address')
 happy_owner=$($CHAIN_BINARY keys list --home $HOME_1 --output json | jq -r '.[] | select(.name=="happy_owner").address')
 
-echo "** HAPPY PATH> STEP 1: VALIDATOR BOND **"
-
-    validator_bond_shares_1=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.validator_bond_shares')
-    echo "> Validator bond with val1."
-    submit_tx "tx staking validator-bond $VALOPER_1 --from $WALLET_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
-
-    validator_bond_shares_2=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.validator_bond_shares')
-    echo "> Validator bond shares 1: $validator_bond_shares_1"
-    echo "> Validator bond shares 2: $validator_bond_shares_2"
-    bond_shares_diff=$(echo "$validator_bond_shares_2-$validator_bond_shares_1" | bc -l)
-    echo "Bond shares difference: $bond_shares_diff"
-
-
-echo "** HAPPY PATH> STEP 2: TOKENIZE **"
+echo "** HAPPY PATH> STEP 1: TOKENIZE **"
 
     delegator_shares_1=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.delegator_shares')
     echo "> Delegator shares 1: $delegator_shares_1"
@@ -43,14 +30,13 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
         exit 1
     fi
 
-    $CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.'
-    liquid_shares_pre_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.liquid_shares')
+    liquid_shares_pre_tokenize=$($CHAIN_BINARY q liquid liquid-validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.liquid_validator.liquid_shares')
     # Remove the last 18 zeroes
     liquid_shares_pre_tokenize=${liquid_shares_pre_tokenize:0:${#liquid_shares_pre_tokenize}-18}
     echo "Tokenizing shares with $happy_liquid_1..."
-    submit_tx "tx staking tokenize-share $VALOPER_1 $tokenize$DENOM $happy_liquid_1 --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
+    submit_tx "tx liquid tokenize-share $VALOPER_1 $tokenize$DENOM $happy_liquid_1 --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     
-    liquid_shares_post_tokenize=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.liquid_shares')
+    liquid_shares_post_tokenize=$($CHAIN_BINARY q liquid liquid-validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.liquid_validator.liquid_shares')
     # Remove the last 18 zeroes
     liquid_shares_post_tokenize=${liquid_shares_post_tokenize:0:${#liquid_shares_post_tokenize}-18}
     echo "> Liquid shares post-tokenize: $liquid_shares_post_tokenize"
@@ -80,14 +66,14 @@ echo "** HAPPY PATH> STEP 2: TOKENIZE **"
         exit 1
     fi
 
-echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
+echo "** HAPPY PATH> STEP 2: TRANSFER OWNERSHIP **"
 
-    record_id=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.id')
-    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
+    record_id=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.id')
+    owner=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "> $owner owns record $record_id."
     echo "> Transferring token ownership record to new_owner."
-    submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_owner --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
-    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
+    submit_tx "tx liquid transfer-tokenize-share-record $record_id $happy_owner --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
+    owner=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
     if [[ "$owner" == "$happy_owner" ]]; then
         echo "Token ownership transfer succeeded."
@@ -96,8 +82,8 @@ echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
     fi
 
     echo "Transferring token ownership record back to happy_liquid_1..."
-    submit_tx "tx staking transfer-tokenize-share-record $record_id $happy_liquid_1 --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
-    owner=$($CHAIN_BINARY q staking tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
+    submit_tx "tx liquid transfer-tokenize-share-record $record_id $happy_liquid_1 --from $owner --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y" $CHAIN_BINARY $HOME_1
+    owner=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom $liquid_denom --home $HOME_1 -o json | jq -r '.record.owner')
     echo "$owner owns record $record_id."
     if [[ "$owner" == "$happy_liquid_1" ]]; then
         echo "Token ownership transfer succeeded."
@@ -105,7 +91,7 @@ echo "** HAPPY PATH> STEP 3: TRANSFER OWNERSHIP **"
         echo "Token ownership transfer failed."
     fi
 
-echo "** HAPPY PATH> STEP 4: TRANSFER TOKENS  **"
+echo "** HAPPY PATH> STEP 3: TRANSFER TOKENS  **"
 
     happy_liquid_1_delegations_1=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     echo "happy_liquid_1 delegations: $happy_liquid_1_delegations_1"
@@ -113,14 +99,14 @@ echo "** HAPPY PATH> STEP 4: TRANSFER TOKENS  **"
     echo "Sending tokens from happy_liquid_1 to happy_liquid_2 via bank send..."
     submit_tx "tx bank send $happy_liquid_1 $happy_liquid_2 $bank_send_amount$liquid_denom --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
 
-echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
+echo "** HAPPY PATH> STEP 4: REDEEM TOKENS **"
     echo "Redeeming tokens from happy_liquid_1..."
     $CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq '.'
     liquid_denom_1=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r '.balances[-2].denom')
     liquid_balance_1=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r '.balances[-2].amount')
     echo "> Liquid denom 1: $liquid_denom"
     echo "> Liquid balance 1: $liquid_balance_1"
-    submit_tx "tx staking redeem-tokens $liquid_balance_1$liquid_denom_1 --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
+    submit_tx "tx liquid redeem-tokens $liquid_balance_1$liquid_denom_1 --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     sleep $(($COMMIT_TIMEOUT*2))
     echo "Redeeming tokens from happy_liquid_2..."
     $CHAIN_BINARY q bank balances $happy_liquid_2 --home $HOME_1 -o json | jq '.'
@@ -128,7 +114,7 @@ echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
     liquid_balance_2=$($CHAIN_BINARY q bank balances $happy_liquid_2 --home $HOME_1 -o json | jq -r '.balances[-2].amount')
     echo "> Liquid denom 2: $liquid_denom_2"
     echo "> Liquid balance 2: $liquid_balance_2"
-    submit_tx "tx staking redeem-tokens $liquid_balance_2$liquid_denom_2 --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
+    submit_tx "tx liquid redeem-tokens $liquid_balance_2$liquid_denom_2 --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     sleep $(($COMMIT_TIMEOUT*2))
 
     # echo "Sending $ibc_denom tokens from STRIDE_WALLET_LIQUID to $CHAIN_ID chain for redeem operation..."
@@ -157,21 +143,11 @@ echo "** HAPPY PATH> STEP 5: REDEEM TOKENS **"
 
     echo "happy_liquid_1 delegation shares: ${happy_liquid_1_delegations_2%.*}"
     echo "happy_liquid_1 delegation shares increase: $happy_liquid_1_delegations_diff"
+
     echo "happy_liquid_1 delegation balance: $happy_liquid_1_delegation_balance"
     echo "happy_liquid_2 delegation shares: ${happy_liquid_2_delegations%.*}"
-
-
+    
 echo "** HAPPY PATH> CLEANUP **"
-
-    # echo "Validator unbond from Val1"
-    # submit_tx "tx staking unbond-validator --from $WALLET_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
-
-    # validator_bond_shares=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator_bond_shares')
-    # echo "Validator bond shares: ${validator_bond_shares%.*}"
-    # if [[ ${validator_bond_shares%.*} -ne 0  ]]; then
-    #     echo "Unbond unsuccessful: unexpected validator bond shares amount"
-    #     exit 1
-    # fi
 
     echo "Validator unbond from happy_liquid_1..."
     submit_tx "tx staking unbond $VALOPER_1 $happy_liquid_1_delegations_2$DENOM --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
@@ -179,18 +155,11 @@ echo "** HAPPY PATH> CLEANUP **"
     echo "Validator unbond from happy_liquid_2..."
     submit_tx "tx staking unbond $VALOPER_1 $happy_liquid_2_delegations$DENOM --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
 
-    echo "> Delegations:"
-    $CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r '.'
-    $CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r '.'
-    echo "> Balances:"
-    $CHAIN_BINARY q bank balances $happy_liquid_1 --home $HOME_1 -o json | jq -r '.'
-    $CHAIN_BINARY q bank balances $happy_liquid_2 --home $HOME_1 -o json | jq -r '.'
-
-
+    # echo "Validator unbond from happy_liquid_3..."
+    # # tests/v12_upgrade/log_lsm_data.sh happy pre-unbond-4 $happy_liquid_3 $ibc_transfer_amount
+    # submit_tx "tx staking unbond $VALOPER_1 $ibc_transfer_amount$DENOM --from $happy_liquid_3 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
+    # # tests/v12_upgrade/log_lsm_data.sh happy post-unbond-4 $happy_liquid_3 $ibc_transfer_amount
     happy_liquid_1_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     happy_liquid_2_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
-    echo "happy_liquid_1 delegation shares: $happy_liquid_1_delegations"
-    echo "happy_liquid_2 delegation shares: $happy_liquid_2_delegations"
-
-    validator_bond_shares=$($CHAIN_BINARY q staking validator $VALOPER_1 --home $HOME_1 -o json | jq -r '.validator.validator_bond_shares')
-    echo "> Validator bond shares: $validator_bond_shares"
+    echo "happy_liquid_1 delegation shares: ${happy_liquid_1_delegations%.*}"
+    echo "happy_liquid_2 delegation shares: ${happy_liquid_2_delegations%.*}"
