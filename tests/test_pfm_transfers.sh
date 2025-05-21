@@ -20,6 +20,8 @@ $CHAIN_BINARY tx ibc-transfer transfer transfer $channel_provider "pfm" --memo "
 echo "Waiting for the transfer to reach chain D..."
 sleep $(($COMMIT_TIMEOUT*20))
 
+$CHAIN_BINARY --home $PFM_HOME q bank balances $WALLET_1 -o json | jq -r -'.'
+
 d_end_balance=$($CHAIN_BINARY --home $PFM_HOME q bank balances $WALLET_1 -o json | jq -r --arg DENOM "$target_denom_a_d" '.balances[] | select(.denom==$DENOM).amount')
 if [ -z "$d_end_balance" ]; then
   d_end_balance=0

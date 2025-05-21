@@ -2413,7 +2413,7 @@
           - name: _RPC endpoints check
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
-      Test-12-ics-sovereign-reuse-connection:
+      Test-11-ics-sovereign-reuse-connection:
         runs-on: ubuntu-22.04
         needs: set-versions
         strategy:
