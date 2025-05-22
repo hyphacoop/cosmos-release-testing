@@ -123,10 +123,6 @@ echo "The upgrade height was reached."
 if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
 else
-    echo "Waiting for the upgrade to take place at block height $upgrade_height..."
-    tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
-    
-    sleep $(($COMMIT_TIMEOUT*3))
     # Replace binary
     sudo systemctl stop $PROVIDER_SERVICE_1
     sudo systemctl stop $PROVIDER_SERVICE_2
