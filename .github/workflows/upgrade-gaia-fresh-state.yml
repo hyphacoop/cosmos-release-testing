@@ -3303,6 +3303,10 @@
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
               scripts/start_chain.sh
+          - name: Print log
+            run: |
+              sleep 10
+              journalctl -u $PROVIDER_SERVICE_1
           - name: Block production check
             run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
 
