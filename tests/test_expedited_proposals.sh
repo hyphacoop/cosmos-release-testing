@@ -2,7 +2,7 @@
 
 
 echo "> Staking params:"
-$CHAIN_BINARY q staking params --output json | jq '.'
+$CHAIN_BINARY q staking params --output json --home $HOME_1 | jq '.'
 echo "> Updating staking params via expedited proposal."
 
 max_validators=50
@@ -15,4 +15,4 @@ jq '.' expedited.json
 echo "> Passing proposal."
 scripts/param_change.sh expedited.json
 echo "> Staking params:"
-$CHAIN_BINARY q staking params --output json | jq '.'
+$CHAIN_BINARY q staking params --output json --home $HOME_1 | jq '.'

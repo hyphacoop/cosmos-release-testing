@@ -2,7 +2,7 @@
 
 proposal_json=$1
 
-proposal="$CHAIN_BINARY tx gov submit-proposal param-change $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
+proposal="$CHAIN_BINARY tx gov submit-proposal $proposal_json --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -o json -y"
 
 echo $proposal
 # response=$($proposal)
