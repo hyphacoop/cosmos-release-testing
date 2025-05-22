@@ -130,6 +130,7 @@ cp voting.json $HOME_1/config/genesis.json
 
 jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" $HOME_1/config/genesis.json > ./gov.json
 cp gov.json $HOME_1/config/genesis.json
+fi
 
 # echo "Setting slashing window to 10..."
 jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' $HOME_1/config/genesis.json > ./slashing.json
