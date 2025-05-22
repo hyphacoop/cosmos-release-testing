@@ -122,10 +122,13 @@ $CHAIN_BINARY genesis gentx $MONIKER_3 $VAL3_STAKE$DENOM --pubkey "$($CHAIN_BINA
 $CHAIN_BINARY genesis collect-gentxs --home $HOME_1
 
 echo "Patching genesis file for fast governance..."
-jq -r ".app_state.gov.params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
-jq -r ".app_state.gov.params.min_deposit[0].amount = \"1\"" ./voting.json > ./gov.json
-fi
+jq -r ".app_state.gov.voting_params.expedited_voting_period = \"$EXPEDITED_VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+cp voting.json $HOME_1/config/genesis.json
 
+jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+cp voting.json $HOME_1/config/genesis.json
+
+jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" $HOME_1/config/genesis.json > ./gov.json
 cp gov.json $HOME_1/config/genesis.json
 
 # echo "Setting slashing window to 10..."
