@@ -67,8 +67,8 @@ cp voting.json $HOME_1/config/genesis.json
 jq -r --arg PERIOD "$VOTING_PERIOD" '.app_state.gov.params.voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
 cp voting.json $HOME_1/config/genesis.json
 
-jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" $HOME_1/config/genesis.json > ./gov.json
-cp gov.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.min_deposit[0].amount = "5000000"' $HOME_1/config/genesis.json > ./amount.json
+mv amount.json $HOME_1/config/genesis.json
 
 # echo "Setting slashing window to 10..."
 jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' $HOME_1/config/genesis.json > ./slashing.json
@@ -113,7 +113,7 @@ jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $HOME
 mv voting.json $HOME_1/config/genesis.json
 jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis.json > ./denom.json
 mv denom.json $HOME_1/config/genesis.json
-jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "1"' $HOME_1/config/genesis.json > ./amount.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "10000000"' $HOME_1/config/genesis.json > ./amount.json
 mv amount.json $HOME_1/config/genesis.json
 
 echo "GENESIS FILE:"
