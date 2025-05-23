@@ -43,7 +43,7 @@
       GAS_ADJUSTMENT: 2
       GAS_PRICE: 0.005
       EXPEDITED_VOTING_PERIOD: 10s
-      VOTING_PERIOD: 20s
+      VOTING_PERIOD: 30s
       COSMOS_SDK: v50
       COSMOVISOR: false
       # Provider nodes variables

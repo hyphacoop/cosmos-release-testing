@@ -61,10 +61,10 @@ $CHAIN_BINARY genesis gentx $MONIKER_3 $VAL3_STAKE$DENOM --pubkey "$($CHAIN_BINA
 $CHAIN_BINARY genesis collect-gentxs --home $HOME_1
 
 echo "Patching genesis file for fast governance..."
-jq -r ".app_state.gov.params.expedited_voting_period = \"$EXPEDITED_VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+jq -r --arg PERIOD "$EXPEDITED_VOTING_PERIOD" '.app_state.gov.params.expedited_voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
 cp voting.json $HOME_1/config/genesis.json
 
-jq -r ".app_state.gov.params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
+jq -r --arg PERIOD "$VOTING_PERIOD" '.app_state.gov.params.voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
 cp voting.json $HOME_1/config/genesis.json
 
 jq -r ".app_state.gov.deposit_params.min_deposit[0].amount = \"1\"" $HOME_1/config/genesis.json > ./gov.json
