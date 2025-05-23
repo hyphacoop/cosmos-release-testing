@@ -60,17 +60,7 @@ $CHAIN_BINARY genesis gentx $MONIKER_2 $VAL2_STAKE$DENOM --pubkey "$($CHAIN_BINA
 $CHAIN_BINARY genesis gentx $MONIKER_3 $VAL3_STAKE$DENOM --pubkey "$($CHAIN_BINARY tendermint show-validator --home $HOME_3)" --node-id $VAL3_NODE_ID --moniker $MONIKER_3 --chain-id $CHAIN_ID --home $HOME_1 --output-document $HOME_1/config/gentx/$MONIKER_3-gentx.json
 $CHAIN_BINARY genesis collect-gentxs --home $HOME_1
 
-echo "Patching genesis file for fast governance..."
-jq -r --arg PERIOD "$EXPEDITED_VOTING_PERIOD" '.app_state.gov.params.expedited_voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
-cp voting.json $HOME_1/config/genesis.json
-
-jq -r --arg PERIOD "$VOTING_PERIOD" '.app_state.gov.params.voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
-cp voting.json $HOME_1/config/genesis.json
-
-jq -r '.app_state.gov.params.min_deposit[0].amount = "5000000"' $HOME_1/config/genesis.json > ./amount.json
-mv amount.json $HOME_1/config/genesis.json
-
-# echo "Setting slashing window to 10..."
+echo "> Setting slashing window to 10"
 jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLASH' $HOME_1/config/genesis.json > ./slashing.json
 jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json > slashing-2.json
 mv slashing-2.json $HOME_1/config/genesis.json
@@ -109,12 +99,16 @@ jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $HOME_1/config/gene
 mv feemarket-base.json $HOME_1/config/genesis.json
 
 echo "Patching genesis for expedited proposals..."
-jq -r ".app_state.gov.params.expedited_voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
-mv voting.json $HOME_1/config/genesis.json
-jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis.json > ./denom.json
-mv denom.json $HOME_1/config/genesis.json
+jq -r --arg PERIOD "$VOTING_PERIOD" '.app_state.gov.params.voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
+cp voting.json $HOME_1/config/genesis.json
+jq -r --arg PERIOD "$EXPEDITED_VOTING_PERIOD" '.app_state.gov.params.expedited_voting_period = $PERIOD' $HOME_1/config/genesis.json  > ./voting.json
+cp voting.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.min_deposit[0].amount = "5000000"' $HOME_1/config/genesis.json > ./amount.json
+mv amount.json $HOME_1/config/genesis.json
 jq -r '.app_state.gov.params.expedited_min_deposit[0].amount = "10000000"' $HOME_1/config/genesis.json > ./amount.json
 mv amount.json $HOME_1/config/genesis.json
+jq -r '.app_state.gov.params.expedited_min_deposit[0].denom = "uatom"' $HOME_1/config/genesis.json > ./denom.json
+mv denom.json $HOME_1/config/genesis.json
 
 echo "GENESIS FILE:"
 jq '.' $HOME_1/config/genesis.json
