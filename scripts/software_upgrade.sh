@@ -118,7 +118,7 @@ blocks_delta=$(($upgrade_height-$current_height))
 
 # Wait until the right height is reached
 echo "Waiting for the upgrade to take place at block height $upgrade_height..."
-tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta
+tests/test_block_production.sh $gaia_host $gaia_port $blocks_delta 100
 echo "The upgrade height was reached."
 if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
