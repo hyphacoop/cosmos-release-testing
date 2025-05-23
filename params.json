@@ -1,0 +1,25 @@
+{
+  "min_deposit": [
+    {
+      "denom": "uatom",
+      "amount": "500000000"
+    }
+  ],
+  "max_deposit_period": "168h0m0s",
+  "voting_period": "1h0m0s",
+  "quorum": "0.334000000000000000",
+  "threshold": "0.500000000000000000",
+  "veto_threshold": "0.334000000000000000",
+  "min_initial_deposit_ratio": "0.100000000000000000",
+  "proposal_cancel_ratio": "0.500000000000000000",
+  "expedited_voting_period": "30m0s",
+  "expedited_threshold": "0.667000000000000000",
+  "expedited_min_deposit": [
+    {
+      "denom": "uatom",
+      "amount": "1500000000"
+    }
+  ],
+  "burn_vote_veto": true,
+  "min_deposit_ratio": "0.010000000000000000"
+}
