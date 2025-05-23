@@ -13,8 +13,13 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 echo "> Proposal JSON:"
 jq '.' proposal.json
 echo "> Submitting proposal."
-$CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-sleep $(($COMMIT_TIMEOUT+1))
+txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq '.txhash')
+txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq '.txhash')
+sleep $(($COMMIT_TIMEOUT+2))
+
+echo "> Proposal hashes:"
+$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -y -o json | jq '.'
+$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -y -o json | jq '.'
 
 current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
 echo "Current gas price: $current_price$DENOM"
