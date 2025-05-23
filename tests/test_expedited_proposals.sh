@@ -31,9 +31,15 @@ $CHAIN_BINARY q gov params --output json --home $HOME_1 | jq '.'
 value_pre_change=$($CHAIN_BINARY q gov params --output json --home $HOME_1 | jq -r '.params.quorum')
 new_quorum=0.4
 
-params=$($CHAIN_BINARY q gov params --output json --home $HOME_1 | jq -r '.params')
-jq --argjson PARAMS $params '.messages[0].params = $PARAMS' templates/proposal-gov-params.json > gov-params.json
+$CHAIN_BINARY q gov params --output json --home $HOME_1 > params.json
+jq --rawfile PARAMS params.json '.messages[0].params = $PARAMS' templates/proposal-gov-params.json > gov-params.json
 jq '.' gov-params.json
+
+# params=$($CHAIN_BINARY q gov params --output json --home $HOME_1 | jq '.params')
+# echo "params: $params"
+# jq --argjson PARAMS $params '.messages[0].params = $PARAMS' templates/proposal-gov-params.json > gov-params.json
+# jq '.' gov-params.json
+
 jq --arg QUORUM "$new_quorum" '.messages[0].params.quorum=$QUORUM' gov-params.json > gov-params-quorum.json
 jq '.' gov-params-quorum.json
 jq '.expedited=true' gov-params-quorum.json > expedited.json
