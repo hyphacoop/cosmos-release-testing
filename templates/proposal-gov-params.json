@@ -1,0 +1,31 @@
+{
+ "messages": [
+  {
+   "@type": "/cosmos.gov.v1.MsgUpdateParams",
+   "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "params": {
+    "min_deposit": [],
+    "max_deposit_period": null,
+    "voting_period": null,
+    "quorum": "",
+    "threshold": "",
+    "veto_threshold": "",
+    "min_initial_deposit_ratio": "",
+    "proposal_cancel_ratio": "",
+    "proposal_cancel_dest": "",
+    "expedited_voting_period": null,
+    "expedited_threshold": "",
+    "expedited_min_deposit": [],
+    "burn_vote_quorum": false,
+    "burn_proposal_deposit_prevote": false,
+    "burn_vote_veto": false,
+    "min_deposit_ratio": ""
+   }
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "Set gov params",
+ "summary": "Setting gov params",
+ "expedited": false
+}
