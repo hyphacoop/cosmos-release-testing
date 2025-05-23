@@ -18,8 +18,8 @@ txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 -
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "> Proposal hashes:"
-$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -y -o json | jq '.'
-$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -y -o json | jq '.'
+$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq '.'
+$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq '.'
 
 current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
 echo "Current gas price: $current_price$DENOM"
