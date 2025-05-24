@@ -14,7 +14,7 @@
           to_version:
             description: 'Gaia version to upgrade to'
             required: true
-            default: v24.0.0-rc0
+            default: v24.0.0-rc1
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
@@ -147,7 +147,7 @@
       set-versions:
         env:
           START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'v24.0.0-rc0' || inputs.to_version }}
+          TARGET: ${{ github.event_name == 'push' && 'v24.0.0-rc1' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v24' || inputs.upgrade_name }}
         runs-on: ubuntu-22.04
         steps:
