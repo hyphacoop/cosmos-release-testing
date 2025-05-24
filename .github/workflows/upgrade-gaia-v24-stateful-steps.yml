@@ -1528,7 +1528,7 @@ jobs:
             echo "$json"
             echo "[PASS]: Proposal did not go through"
           fi
-      - name: Submit feearket prams
+      - name: Submit feemarket params
         run: scripts/submit_proposal.sh templates/proposal-feemarket-stateful.json
       - name: _Verify feemarket params
         run: |
