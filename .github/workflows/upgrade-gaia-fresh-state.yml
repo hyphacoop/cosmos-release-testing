@@ -1732,6 +1732,17 @@
             run: |
               tests/test_lsm_happy_path.sh
     
+          - name: Tokenize with wallet 5
+            run: |
+              echo "> Delegating."
+              $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000uatom --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+              sleep $(($COMMIT_TIMEOUT+2))
+              echo "> Tokenizing."
+              echo "> Command: $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
+              $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+              sleep $(($COMMIT_TIMEOUT+2))
+              $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
+          
           - name: Test software upgrade
             env:
               TARGET_VERSION: "${{ matrix.target_version }}"
@@ -1742,6 +1753,26 @@
             run: |
               tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
     
+          - name: Redeem tokens with wallet 5
+            run: |
+              $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
+              liquid_denom=$($CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq -r '.balances[-2].denom')
+              $CHAIN_BINARY q staking delegations $WALLET_5 --home $HOME_1 -o json | jq '.'
+              echo "> Denom: $liquid_denom"
+              echo "> Command: $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
+              $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+              sleep $(($COMMIT_TIMEOUT+2))
+              $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q staking delegations $WALLET_5 --home $HOME_1 -o json | jq '.'
+              delegation_amount=$($CHAIN_BINARY q staking delegations $WALLET_5 --home $HOME_1 -o json | jq -r '.delegation_responses[0].balance.amount')
+              echo "> Delegation_amount: $delegation_amount"
+              if [[ "$delegation_amount" == "1000000" ]]; then
+                  echo "Token redemption succeeded."
+              else
+                  echo "Token redemption failed."
+                  exit 0
+              fi
+
           - name: _Test x/liquid happy path
             env:
               BASE_FEES: 3000
