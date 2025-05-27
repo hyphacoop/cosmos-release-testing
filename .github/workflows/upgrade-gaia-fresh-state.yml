@@ -1759,6 +1759,8 @@
               $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
               liquid_denom="$CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq -r '.balances[-2].denom'"
               $CHAIN_BINARY q staking delegations $WALLET_5 --home $HOME_1 -o json | jq '.'
+              echo "> Denom: $liquid_denom"
+              echo "> Command: $CHAIN_BINARY tx liquid redeem-tokens $VALOPER_1 1000000$liquid_denom $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
               $CHAIN_BINARY tx liquid redeem-tokens $VALOPER_1 1000000$liquid_denom $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
