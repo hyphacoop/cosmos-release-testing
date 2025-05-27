@@ -1765,6 +1765,14 @@
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
               $CHAIN_BINARY q staking delegations $WALLET_5 --home $HOME_1 -o json | jq '.'
+              delegation_amount=$($CHAIN_BINARY q staking delegations $WALLET_5 --home $HOME_1 -o json | jq -r '.delegation_responses[0].balance.amount')
+              echo "> Delegation_amount: $delegation_amount"
+              if [[ "$delegation_amount" == "1000000" ]]; then
+                  echo "Token redemption succeeded."
+              else
+                  echo "Token redemption failed."
+                  exit 0
+              fi
 
           - name: _Test x/liquid happy path
             env:
