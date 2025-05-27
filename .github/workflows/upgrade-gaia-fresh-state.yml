@@ -1735,9 +1735,11 @@
     
           - name: Tokenize with wallet 5
             run: |
+              echo "> Delegating."
               $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000uatom --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
-              $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLT_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+              echo "> Command: $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
+              $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
           
