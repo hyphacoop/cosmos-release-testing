@@ -270,8 +270,8 @@
             env:
               CONSUMER_CHAIN_ID: v400-one
             run: |
-              scripts/vars_consumer.sh
-              scripts/vars.sh
+              source scripts/vars_consumer.sh
+              source scripts/vars.sh
               scripts/add_consumer.sh
       #     - name: Initialize consumer chain with ICS v4.0.0
       #       env:
