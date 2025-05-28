@@ -123,6 +123,7 @@ if [ "$COSMOVISOR" = true ]; then
 
 else
     ./stop.sh
+    sleep 5
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
         # Build
         sudo apt install build-essential -y
@@ -140,6 +141,8 @@ else
         wget $DOWNLOAD_URL -O ./upgraded -q
         chmod +x ./upgraded
         mv ./upgraded $HOME/go/bin/$CHAIN_BINARY_NAME
+        echo "> Downloaded version:"
+        $HOME/go/bin/$CHAIN_BINARY_NAME version
     fi
     ./start.sh
 fi
