@@ -122,11 +122,7 @@ if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
 
 else
-    # Replace binary
-    sudo systemctl stop $PROVIDER_SERVICE_1
-    sudo systemctl stop $PROVIDER_SERVICE_2
-    sudo systemctl stop $PROVIDER_SERVICE_3
-
+    ./stop.sh
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
         # Build
         sudo apt install build-essential -y
@@ -143,12 +139,9 @@ else
         echo "Downloading new binary..."
         wget $DOWNLOAD_URL -O ./upgraded -q
         chmod +x ./upgraded
-        mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
+        mv ./upgraded $HOME/go/bin/$CHAIN_BINARY_NAME
     fi
-
-    sudo systemctl start $PROVIDER_SERVICE_1
-    sudo systemctl start $PROVIDER_SERVICE_2
-    sudo systemctl start $PROVIDER_SERVICE_3
+    ./start.sh
 fi
 
 sleep 10
