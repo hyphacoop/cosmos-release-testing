@@ -203,7 +203,7 @@
               - target_version: main
                 upgrade_mechanism: cv_auto
               - enable_cosmovisor: false
-                cv_version: cv_auto
+                upgrade_mechanism: cv_auto
           fail-fast: false
         env:
           COSMOVISOR: ${{ matrix.enable_cosmovisor }}
