@@ -198,12 +198,15 @@
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
             cv_version: [v1.7.1]
             upgrade_mechanism: [cv_auto, cv_manual]
+            enable_cosmovisor: [false, true]
             exclude:
               - target_version: main
                 upgrade_mechanism: cv_auto
+              - enable_cosmovisor: false
+                cv_version: cv_auto
           fail-fast: false
         env:
-          COSMOVISOR: true
+          COSMOVISOR: ${{ matrix.enable_cosmovisor }}
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
@@ -239,12 +242,6 @@
               sleep 5
               tail -n 100 log_001
               scripts/wait_for_block.sh 3
-          # - name: Start chain
-          #   run: |
-          #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-          #     scripts/start_chain.sh
-          # - name: Block production check
-          #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
           - name: Test software upgrade
             env:
@@ -257,7 +254,7 @@
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
-              scripts/wait_for_block.sh 50
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
                   
           # - name: _Transactions verified> bank send, delegate, and withdraw rewards
           #   run: tests/test_tx_fresh.sh
