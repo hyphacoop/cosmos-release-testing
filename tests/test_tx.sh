@@ -21,7 +21,7 @@ done
 
 $CHAIN_BINARY keys list --output json --home ${homes[0]} > keys.json
 jq '.' keys.json
-for i in $(seq -w 001 $validator_count)
+for i in $(seq 0 $[$validator_count-1])
 do
     wallet=$(jq -r --arg MONIKER "${monikers[i]}" '.[] | select(.name==$MONIKER).address' keys.json)
     wallets+=($wallet)
@@ -30,7 +30,6 @@ do
     echo "> Wallet: $wallet | operator: $operator"
 done
 rm keys.json
-
 
 check_code()
 {
