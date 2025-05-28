@@ -6,6 +6,7 @@ export CHAIN_BINARY="./$CHAIN_BINARY_NAME"
 export MNEMONIC_1="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"
 export WALLET_1=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
 export VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv
+
 export CHAIN_ID=testnet
 export DENOM=uatom
 export VAL_FUNDS="10000000000"
