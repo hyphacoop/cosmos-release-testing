@@ -147,4 +147,4 @@ fi
 sleep 10
 
 echo "> Validator log:"
-tail -n 50 ${logs[0]}
+tail -n 100 ${logs[0]}
