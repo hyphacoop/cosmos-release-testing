@@ -209,8 +209,8 @@
           fail-fast: false
         env:
           COSMOVISOR: true
-          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+          # COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+          # UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
         steps:
           - name: Update PATH
