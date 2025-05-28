@@ -205,7 +205,7 @@
             # upgrade_mechanism: [cv_auto, cv_manual]
             exclude:
               - target_version: main
-                upgrade_mechanism: cv_auto
+                # upgrade_mechanism: cv_auto
           fail-fast: false
         env:
           COSMOVISOR: true
