@@ -13,7 +13,7 @@ done
 sed "s%\"chain_id\": \"\"%\"chain_id\": \"$CONSUMER_CHAIN_ID\"%g" templates/create-consumer.json > create-$CONSUMER_CHAIN_ID.json
 echo "Submitting proposal..."
 
-txhash="$CHAIN_BINARY tx provider create-consumer create-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --from ${monikers[0]} --home ${homes[0]} -y -o json"
+txhash=$($CHAIN_BINARY tx provider create-consumer create-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --from ${monikers[0]} --home ${homes[0]} -y -o json | jq -r '.txhash')
 # Wait for the proposal to go on chain
 sleep $(($COMMIT_TIMEOUT+2))
 
