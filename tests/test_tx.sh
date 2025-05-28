@@ -19,14 +19,17 @@ do
   logs+=($log)
 done
 
+$CHAIN_BINARY keys list --output json --home ${homes[0]} > keys.json
+jq '.' keys.json
 for i in $(seq -w 001 $validator_count)
 do
-    wallet=$($CHAIN_BINARY keys list --output json | jq -r --arg MONIKER "${monikers[i]}" '.[] | select(.name==$MONIKER).address')
+    wallet=$(jq -r --arg MONIKER "${monikers[i]}" '.[] | select(.name==$MONIKER).address' keys.json)
     wallets+=($wallet)
     operator=$($CHAIN_BINARY debug bech32-convert --prefix cosmosvaloper $wallet)
     operators+=($operator)
     echo "> Wallet: $wallet | operator: $operator"
 done
+rm keys.json
 
 
 check_code()
