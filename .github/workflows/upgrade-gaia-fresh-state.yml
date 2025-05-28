@@ -134,14 +134,9 @@
       STRIDE_DENOM: ustrd
       STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
       STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
-      # Neutron chain variables
-      NEUTRON_CHAIN_BINARY: neutrond
-      NEUTRON_VERSION: v4.2.4
-      NEUTRON_CHAIN_ID: neutron-test
-      NEUTRON_DENOM: untrn
       # Relayer variables
       RELAYER: hermes
-      HERMES_VERSION: v1.12.0
+      HERMES_VERSION: v1.13.1
       RLY_VERSION: "2.5.0"
     jobs:
       set-versions:
@@ -202,10 +197,10 @@
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
             cv_version: [v1.7.1]
-            # upgrade_mechanism: [cv_auto, cv_manual]
+            upgrade_mechanism: [cv_auto, cv_manual]
             exclude:
               - target_version: main
-                # upgrade_mechanism: cv_auto
+                upgrade_mechanism: cv_auto
           fail-fast: false
         env:
           COSMOVISOR: true
