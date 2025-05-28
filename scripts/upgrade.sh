@@ -62,7 +62,7 @@ echo "Using ($VOTING_PERIOD)s voting period to calculate the upgrade height."
     
 # Calculate upgrade height
 echo "Calculate upgrade height"
-block_time=1
+block_time=$TIMEOUT_COMMIT
 let voting_blocks_delta=$VOTING_PERIOD/$block_time+5
 height=$(curl -s http://127.0.0.1:${rpc_ports[0]}/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
@@ -115,7 +115,7 @@ blocks_delta=$(($upgrade_height-$current_height))
 echo "Waiting for the upgrade to take place at block height $upgrade_height..."
 tests/test_block_production.sh 127.0.0.1 ${rpc_ports[0]} $blocks_delta 50
 echo "> Validator log:"
-tail -n 100 ${logs[0]}
+tail -n 50 ${logs[0]}
 
 echo "The upgrade height was reached."
 if [ "$COSMOVISOR" = true ]; then
@@ -146,17 +146,5 @@ fi
 
 sleep 10
 
-# echo "Checking provider services are active..."
-# systemctl is-active --quiet $PROVIDER_SERVICE_1 && echo "$PROVIDER_SERVICE_1 is running"
-# systemctl is-active --quiet $PROVIDER_SERVICE_2 && echo "$PROVIDER_SERVICE_2 is running"
-# systemctl is-active --quiet $PROVIDER_SERVICE_3 && echo "$PROVIDER_SERVICE_3 is running"
-
-# printf "\n\n*** val1 ***\n\n"
-# journalctl -u $PROVIDER_SERVICE_1 | tail -n 150
-# curl -s http://localhost:$VAL1_RPC_PORT/abci_info | jq '.'
-# printf "\n\n*** val2 ***\n\n"
-# journalctl -u $PROVIDER_SERVICE_2 | tail -n 150
-# curl -s http://localhost:$VAL2_RPC_PORT/abci_info | jq '.'
-# printf "\n\n*** val3 ***\n\n"
-# journalctl -u $PROVIDER_SERVICE_3 | tail -n 150
-# curl -s http://localhost:$VAL3_RPC_PORT/abci_info | jq '.'
+echo "> Validator log:"
+tail -n 50 ${logs[0]}
