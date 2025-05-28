@@ -193,7 +193,7 @@
          upgrade_name: ${{ steps.upgrade.outputs.name }}
          binary_source: ${{ steps.binary.outputs.source }}
 
-      Test-01-upgrade:
+      Test-01-cosmovisor-upgrade:
         runs-on: ubuntu-22.04
         needs: set-versions
         strategy:
@@ -251,16 +251,18 @@
           # - name: Block production check
           #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
   
-          # - name: Test software upgrade
-          #   env:
-          #     TARGET_VERSION: ${{ matrix.target_version }}
-          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-          #   run: |
-          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-          # - name: _Blocks produced after upgrade
-          #   run: |
-          #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              scripts/wait_for_block.sh 50
                   
           # - name: _Transactions verified> bank send, delegate, and withdraw rewards
           #   run: tests/test_tx_fresh.sh
