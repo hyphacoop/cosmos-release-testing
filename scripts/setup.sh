@@ -183,6 +183,8 @@ rm reset.sh ; touch reset.sh ; chmod +x reset.sh ; echo "#!/bin/bash" >> reset.s
 echo "echo \"Resetting chain...\"" >> reset.sh
 echo "./stop.sh" >> reset.sh
 
+echo "> Current folder:"
+pwd
 for i in $(seq 0 $[$validator_count-1])
 do
     echo "echo \"Starting validator ${monikers[i]}...\"" >> start.sh
