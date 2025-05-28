@@ -177,7 +177,7 @@ do
     sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' ${homes[i]}/config/config.toml
     sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
     toml set --toml-path ${homes[i]}/config/config.toml block_sync false
-    toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${TIMEOUT_COMMIT}s"
+    toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
     toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers ""
     if [ $i -ne "0" ]; then
         toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$val1_peer"

@@ -15,7 +15,7 @@ echo "Block height: $height"
 echo "Waiting to reach block height $target_height..."
 until [ $height -ge $target_height ]
 do
-    sleep $TIMEOUT_COMMIT
+    sleep $COMMIT_TIMEOUT
     height=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r .result.block.header.height)
     if [ -z "$height" ]
     then

@@ -63,7 +63,7 @@ echo "Using ($VOTING_PERIOD)s voting period to calculate the upgrade height."
     
 # Calculate upgrade height
 echo "Calculate upgrade height"
-block_time=$TIMEOUT_COMMIT
+block_time=$COMMIT_TIMEOUT
 let voting_blocks_delta=$VOTING_PERIOD/$block_time+5
 height=$(curl -s http://127.0.0.1:${rpc_ports[0]}/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
@@ -86,7 +86,7 @@ proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --fr
 echo "Submitting the upgrade proposal."
 echo $proposal
 txhash=$($proposal | jq -r .txhash)
-sleep $(($TIMEOUT_COMMIT+2))
+sleep $(($COMMIT_TIMEOUT+2))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
@@ -99,7 +99,7 @@ echo "Submitting the \"yes\" vote to proposal $proposal_id..."
 vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from ${monikers[0]} --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home ${homes[0]} -o json"
 echo $vote
 txhash=$($vote | jq -r .txhash)
-sleep $(($TIMEOUT_COMMIT+2))
+sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home ${homes[0]}
 
 # Wait for the voting period to be over
