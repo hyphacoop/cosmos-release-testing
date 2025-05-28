@@ -46,6 +46,7 @@ check_code()
   fi
 }
 
+## BANK
 echo "Sending funds with tx bank send..."
 command="$CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} $SEND_AMOUNT$DENOM --home ${homes[0]} --from ${wallets[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
 echo $command
@@ -54,6 +55,7 @@ echo "Tx hash: $TXHASH"
 sleep $(($COMMIT_TIMEOUT+2))
 check_code $TXHASH
 
+## STAKING
 echo "Delegating funds from test account to validator..."
 command="$CHAIN_BINARY tx staking delegate ${operators[0]} $DELEGATION_AMOUNT$DENOM --home ${homes[0]} --from ${wallets[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
 echo $command
@@ -62,6 +64,7 @@ echo "Tx hash: $TXHASH"
 sleep $(($COMMIT_TIMEOUT+2))
 check_code $TXHASH
 
+## DISTRIBUTION
 starting_balance=$($CHAIN_BINARY q bank balances ${wallets[0]} --home ${homes[0]} -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
 echo "Starting balance: $starting_balance"
 echo "Waiting for rewards to accumulate..."
@@ -82,12 +85,9 @@ else
     exit 1
 fi
 
-# $CHAIN_BINARY q staking validators --home ${homes[0]}
-
 echo "Unbonding funds from test account to validator..."
 TXHASH=$($CHAIN_BINARY tx staking unbond ${operators[0]} $DELEGATION_AMOUNT$DENOM --home ${homes[0]} --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
 echo "Tx hash: $TXHASH"
 sleep $(($COMMIT_TIMEOUT+2))
 check_code $TXHASH
 
-# $CHAIN_BINARY q staking validators --home ${homes[0]}
