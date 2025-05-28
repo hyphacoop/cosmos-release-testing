@@ -2,7 +2,7 @@
 # Test transactions with a fresh state.
 
 SEND_AMOUNT=1000000
-DELEGATION_AMOUNT=1000000
+DELEGATION_AMOUNT=10000000
 
 monikers=()
 homes=()
