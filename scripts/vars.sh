@@ -21,7 +21,7 @@ export GAS=auto
 export GAS_ADJUSTMENT=3
 
 export moniker_prefix='val_'
-export home_prefix='temp/.val_'
+export home_prefix='/home/runner/.val_'
 export whale_home=${home_prefix}001
 export api_prefix="25"
 export p2p_prefix="26"
