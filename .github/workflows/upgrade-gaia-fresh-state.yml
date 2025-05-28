@@ -30,72 +30,9 @@
       # Versions
       GO_VERSION: 1.23.8
       # All chain variables
-      COMMIT_TIMEOUT: 5
-      DOWNTIME_BLOCKS: 10000
       # Provider chain variables
-      CHAIN_BINARY: gaiad
-      BUILD_TAG: main
-      CHAIN_ID: testnet
-      DENOM: uatom
-      BASE_FEES: 2000
-      HIGH_FEES: 10000
-      GAS: auto
-      GAS_ADJUSTMENT: 2
-      GAS_PRICE: 0.005
-      EXPEDITED_VOTING_PERIOD: 10s
-      VOTING_PERIOD: 30s
-      COSMOS_SDK: v50
-      COSMOVISOR: false
-      # Provider nodes variables
-      HOME_1: /home/runner/.val1
-      HOME_2: /home/runner/.val2
-      HOME_3: /home/runner/.val3
-      PROVIDER_SERVICE_1: gaia1.service
-      PROVIDER_SERVICE_2: gaia2.service
-      PROVIDER_SERVICE_3: gaia3.service
-      MNEMONIC_1: abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art
-      MNEMONIC_2: abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon garage
-      MNEMONIC_3: abandon cash abandon cash abandon cash abandon cash abandon cash abandon cash abandon cash abandon cash abandon cash abandon cash abandon cash abandon earth
-      MNEMONIC_RELAYER: abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon success
-      MNEMONIC_4: abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon success
-      MNEMONIC_5: abandon fame abandon fame abandon fame abandon fame abandon fame abandon fame abandon fame abandon fame abandon fame abandon fame abandon fame abandon claim
-      MONIKER_1: val1
-      MONIKER_2: val2
-      MONIKER_3: val3
-      MONIKER_RELAYER: relayer
-      MONIKER_4: relayer
-      MONIKER_5: wallet5
-      VALOPER_1: cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv
-      VALOPER_2: cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
-      VALOPER_3: cosmosvaloper1v8zgdpzqfazvk6fgwhqqhzx0hfannrajukgdkc
-      WALLET_1: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-      WALLET_2: cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq
-      WALLET_3: cosmos1v8zgdpzqfazvk6fgwhqqhzx0hfannrajezuc6t
-      WALLET_4: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
-      WALLET_5: cosmos17n3vkvg6lwf98p3kanlhlyjk6zkrfla9pgh8fk
-      WALLET_6: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
       WALLET_RELAYER: cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
-      VAL1_STAKE: 800000000
-      VAL2_STAKE: 200000000
-      VAL3_STAKE: 10000000
-      VAL_FUNDS: 11000000000
-      VAL_STAKE: 1000000000
-      VAL_STAKE_STEP: 1000000
-      VAL1_API_PORT: 25001
-      VAL2_API_PORT: 25002
-      VAL3_API_PORT: 25003
-      VAL1_GRPC_PORT: 26001
-      VAL2_GRPC_PORT: 26002
-      VAL3_GRPC_PORT: 26003
-      VAL1_RPC_PORT: 27001
-      VAL2_RPC_PORT: 27002
-      VAL3_RPC_PORT: 27003
-      VAL1_P2P_PORT: 28001
-      VAL2_P2P_PORT: 28002
-      VAL3_P2P_PORT: 28003
-      VAL1_PPROF_PORT: 29001
-      VAL2_PPROF_PORT: 29002
-      VAL3_PPROF_PORT: 29003
+
       # Consumer chain variables
       RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
       PSS_ENABLED: true
