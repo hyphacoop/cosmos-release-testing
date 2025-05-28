@@ -35,6 +35,7 @@ if [ "$COSMOVISOR" = true ]; then
             git checkout $TARGET_VERSION
             make install
             cd ..
+            cp $HOME/go/bin/gaiad $CHAIN_BINARY
             for i in $(seq 0 $[$validator_count-1])
             do
                 mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
@@ -135,14 +136,13 @@ else
         git checkout $TARGET_VERSION
         make install
         cd ..
+        cp $HOME/go/bin/gaiad $CHAIN_BINARY
     else
         # Download
         echo "Downloading new binary..."
         wget $DOWNLOAD_URL -O ./upgraded -q
         chmod +x ./upgraded
-        mv ./upgraded $HOME/go/bin/$CHAIN_BINARY_NAME
-        echo "> Downloaded version:"
-        $HOME/go/bin/$CHAIN_BINARY_NAME version
+        mv ./upgraded $CHAIN_BINARY
     fi
     ./start.sh
 fi
