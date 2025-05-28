@@ -7,6 +7,7 @@ upgrade_name=$1
 monikers=()
 homes=()
 rpc_ports=()
+logs=()
 for i in $(seq -w 001 $validator_count)
 do
     moniker=$moniker_prefix$i
@@ -15,12 +16,13 @@ do
     homes+=($home)
     rpc_port=$rpc_prefix$i
     rpc_ports+=($rpc_port)
+    log=$log_prefix$i
+    logs+=($log)
 done
 
 if [ "$COSMOVISOR" = true ]; then
     if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
         echo "> Using manual upgrade mechanism"
-        mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
         if [ "$BINARY_SOURCE" = "BUILD" ]; then
             echo "> Using Cosmovisor"
             echo "Building new binary."
@@ -35,6 +37,7 @@ if [ "$COSMOVISOR" = true ]; then
             cd ..
             for i in $(seq 0 $[$validator_count-1])
             do
+                mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
                 cp $HOME/go/bin/gaiad ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY_NAME
             done
         else
@@ -43,6 +46,7 @@ if [ "$COSMOVISOR" = true ]; then
             chmod +x ./upgraded
             for i in $(seq 0 $[$validator_count-1])
             do
+                mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
                 cp ./upgraded ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY_NAME
             done                
         fi
@@ -109,10 +113,14 @@ blocks_delta=$(($upgrade_height-$current_height))
 
 # Wait until the right height is reached
 echo "Waiting for the upgrade to take place at block height $upgrade_height..."
-tests/test_block_production.sh 127.0.0.1 ${rpc_ports[0]} $blocks_delta 100
+tests/test_block_production.sh 127.0.0.1 ${rpc_ports[0]} $blocks_delta 50
+echo "> Validator log:"
+tail -n 100 ${logs[0]}
+
 echo "The upgrade height was reached."
 if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
+
 else
     # Replace binary
     sudo systemctl stop $PROVIDER_SERVICE_1
