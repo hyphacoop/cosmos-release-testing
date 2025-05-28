@@ -1,7 +1,8 @@
 export validator_count=5
 
 # Chain configuration
-export CHAIN_BINARY="./gaiad"
+export CHAIN_BINARY_NAME="gaiad"
+export CHAIN_BINARY="./$CHAIN_BINARY_NAME"
 export MNEMONIC_1="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"
 export WALLET_1=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
 export VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv

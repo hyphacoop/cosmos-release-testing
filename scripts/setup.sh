@@ -51,6 +51,11 @@ do
     $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
     $CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
     $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+
+    if [ "$COSMOVISOR" = true ]; then
+        mkdir -p ${homes[i]}/cosmovisor/genesis/bin
+        cp $CHAIN_BINARY ${homes[i]}/cosmovisor/genesis/bin/
+    fi
 done
 
 echo "> Adding keys to first home"
@@ -181,7 +186,11 @@ echo "./stop.sh" >> reset.sh
 for i in $(seq 0 $[$validator_count-1])
 do
     echo "echo \"Starting validator ${monikers[i]}...\"" >> start.sh
-    echo "tmux new-session -d -s ${monikers[i]} \"$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+    if [ "$COSMOVISOR" = true ]; then
+        echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+    else
+        echo "tmux new-session -d -s ${monikers[i]} \"$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+    fi
     echo "sleep 0.2s" >> start.sh
     echo "echo \"Stopping validator ${monikers[i]}...\"" >> stop.sh
     echo "tmux send-keys -t ${monikers[i]} C-c" >> stop.sh
