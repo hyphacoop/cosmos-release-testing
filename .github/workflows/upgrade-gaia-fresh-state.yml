@@ -243,22 +243,29 @@
               sleep 5
               tail -n 100 log_001
               scripts/wait_for_block.sh 3
-  
-          - name: Test software upgrade
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              source scripts/vars.sh
-              scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-          - name: _Blocks produced after upgrade
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
+              tests/test_tx.sh
+
+          # - name: Test software upgrade
+          #   env:
+          #     TARGET_VERSION: ${{ matrix.target_version }}
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+          #   run: |
+          #     source scripts/vars.sh
+          #     scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
+          # - name: _Blocks produced after upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
                   
           # - name: _Transactions verified> bank send, delegate, and withdraw rewards
-          #   run: tests/test_tx_fresh.sh
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_tx.sh
           # - name: _API endpoints check
           #   run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
           # - name: _RPC endpoints check

@@ -22,6 +22,8 @@ p2p_ports=()
 grpc_ports=()
 pprof_ports=()
 logs=()
+wallets=()
+operators=()
 for i in $(seq -w 001 $validator_count)
 do
     moniker=$moniker_prefix$i
@@ -60,10 +62,17 @@ done
 
 echo "> Adding keys to first home"
 echo $MNEMONIC_1 | $CHAIN_BINARY keys add ${monikers[0]} --home ${homes[0]} --output json --recover > temp/keys-${monikers[0]}.json
-jq '.' temp/keys-${monikers[0]}.json
+wallet=$(jq -r '.address' temp/keys-${monikers[0]}.json)
+operator=$($CHAIN_BINARY debug bech32-convert --prefix cosmosvaloper $wallet)
+wallets+=($wallet)
+operators+=($operator)
 for i in $(seq 1 $[$validator_count-1])
 do
     $CHAIN_BINARY keys add ${monikers[i]} --home ${homes[0]} --output json > temp/keys-${monikers[i]}.json
+    wallet=$(jq -r '.address' temp/keys-${monikers[i]}.json)
+    operator=$($CHAIN_BINARY debug bech32-convert --prefix cosmosvaloper $wallet)
+    wallets+=($wallet)
+    operators+=($operator)
 done
 
 echo "> Updating genesis file with specified denom"
