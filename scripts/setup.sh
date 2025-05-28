@@ -189,7 +189,11 @@ for i in $(seq 0 $[$validator_count-1])
 do
     echo "echo \"Starting validator ${monikers[i]}...\"" >> start.sh
     if [ "$COSMOVISOR" = true ]; then
-        echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+        if [ "$UPGRADE_MECHANISM" = 'cv_auto' ]; then
+            echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; export DAEMON_ALLOW_DOWNLOAD_BINARIES=true ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+        else
+            echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+        fi
     else
         echo "tmux new-session -d -s ${monikers[i]} \"$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
     fi
