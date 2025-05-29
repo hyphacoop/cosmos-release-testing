@@ -4,8 +4,8 @@
 
 echo "Running with $CONSUMER_CHAIN_BINARY."
 
-rm -rf temp
-mkdir temp
+rm -rf contemp
+mkdir contemp
 
 PROVIDER_HOME=${home_prefix}001
 echo "> Creating arrays"
