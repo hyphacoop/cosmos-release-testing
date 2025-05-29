@@ -65,6 +65,32 @@ do
     txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $pubkey --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $PROVIDER_HOME -y -o json | jq -r '.txhash')
 done
 
+echo "> Updating genesis file with right denom."
+# sed -i s%stake%$CONSUMER_DENOM%g $CONSUMER_HOME_1/config/genesis.json
+jq --arg DENOM "$CONSUMER_DENOM" '.app_state.crisis.constant_fee.denom = $DENOM' ${homes[0]}/config/genesis.json > genesis-1.json
+mv genesis-1.json ${homes[0]}/config/genesis.json
+
+echo "> Setting for block max gas != -1."
+jq -r '.consensus_params.block.max_gas = "50000000"' ${homes[0]}/config/genesis.json > consumer-gas.json
+mv consumer-gas.json ${homes[0]}/config/genesis.json
+
+echo "> Setting slashing to $CONSUMER_DOWNTIME_WINDOW"
+jq -r --arg SLASH "$CONSUMER_DOWNTIME_WINDOW" '.app_state.slashing.params.signed_blocks_window |= $SLASH' ${homes[0]}/config/genesis.json > consumer-slashing.json
+jq -r '.app_state.slashing.params.downtime_jail_duration |= "10s"' consumer-slashing.json > consumer-slashing-2.json
+mv consumer-slashing-2.json ${homes[0]}/config/genesis.json
+
+echo "> Creating and funding wallets."
+echo "> Adding keys to first home"
+echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${monikers[0]} --home ${homes[0]} --output json --recover > contemp/keys-${monikers[0]}.json
+wallet=$(jq -r '.address' contemp/keys-${monikers[0]}.json)
+wallets+=($wallet)
+for i in $(seq 1 $[$validator_count-1])
+do
+    $CONSUMER_CHAIN_BINARY keys add ${monikers[i]} --home ${homes[0]} --output json > contemp/keys-${monikers[i]}.json
+    wallet=$(jq -r '.address' temp/keys-${monikers[i]}.json)
+    wallets+=($wallet)
+    $CONSUMER_CHAIN_BINARY add-genesis-account ${monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+done
 exit 0
 
 

@@ -4,7 +4,7 @@ export CONSUMER_CHAIN_BINARY="$CONSUMER_CHAIN_BINARY_NAME"
 export CONSUMER_CHAIN_ID=v400-one
 export CONSUMER_DENOM=ucon
 
-export DOWNTIME_WINDOW=100000
+export CONSUMER_DOWNTIME_WINDOW=100000
 export RECIPIENT=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
 export WALLET_RELAYER=cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
 export MNEMONIC_RELAYER="abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon success"
