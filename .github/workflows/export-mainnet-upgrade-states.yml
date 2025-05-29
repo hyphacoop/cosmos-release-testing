@@ -189,8 +189,8 @@ jobs:
           --validator-pubkey "$pubkey" \
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl \
-          --replaced-operator-address="${{ env.VALIDATOR_TO_REPLACE }}" \
-          --replaced-consensus-address="${{ env.VALIDATOR_TO_REPLACE_CONSENSUS }}"
+          --replaced-operator-address="${{ vars.VALIDATOR_TO_REPLACE }}" \
+          --replaced-consensus-address="${{ vars.VALIDATOR_TO_REPLACE_CONSENSUS }}"
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
