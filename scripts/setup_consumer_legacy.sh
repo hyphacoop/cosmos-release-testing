@@ -91,6 +91,42 @@ do
     wallets+=($wallet)
     $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 done
+
+echo "> Copying genesis to all other homes"
+for i in $(seq 1 $[$validator_count-1])
+do
+    cp ${homes[0]}/config/genesis.json ${homes[i]}/config/genesis.json
+done
+
+echo "> Configuring app.toml"
+for i in $(seq 0 $[$validator_count-1])
+do
+    toml set --toml-path ${homes[i]}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE"
+    toml set --toml-path ${homes[i]}/config/app.toml api.enable true
+    toml set --toml-path ${homes[i]}/config/app.toml api.enabled-unsafe-cors true
+    toml set --toml-path ${homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${api_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/app.toml grpc.address "0.0.0.0:${grpc_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
+done
+
+echo "> Configuring config.toml"
+val1_node_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
+val1_peer="$val1_node_id@127.0.0.1:${p2p_ports[0]}"
+for i in $(seq 0 $[$validator_count-1])
+do
+    toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${rpc_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${pprof_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${p2p_ports[i]}"
+    sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' ${homes[i]}/config/config.toml
+    sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
+    toml set --toml-path ${homes[i]}/config/config.toml block_sync false
+    toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
+    toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers ""
+    if [ $i -ne "0" ]; then
+        toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$val1_peer"
+    fi
+done
+
 exit 0
 
 
