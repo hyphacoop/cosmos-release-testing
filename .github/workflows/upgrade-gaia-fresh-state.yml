@@ -273,13 +273,13 @@
               source scripts/vars_consumer.sh
               source scripts/vars.sh
               scripts/add_consumer.sh
-      #     - name: Initialize consumer chain with ICS v4.0.0
-      #       env:
-
-      #       run: |
-      #         export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-      #         scripts/init_consumer_permissionless.sh
-      #         sleep 20
+          - name: Initialize consumer chain with ICS v4.0.0
+            run: |
+              source scripts/vars_consumer.sh
+              source scripts/vars.sh  
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              scripts/setup_consumer_legacy.sh
+              sleep 20
       #     - name: Prepare consumer chain v400-one
       #       env:
       #         CONSUMER_CHAIN_ID: v400-one
