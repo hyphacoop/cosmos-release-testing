@@ -189,6 +189,7 @@ jobs:
           --validator-pubkey "$pubkey" \
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl \
+          --replace-validator \
           --replaced-operator-address="${{ vars.VALIDATOR_TO_REPLACE }}" \
           --replaced-consensus-address="${{ vars.VALIDATOR_TO_REPLACE_CONSENSUS }}"
           screen -r gaiad -p0 -X logfile flush 0
