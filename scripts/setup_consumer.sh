@@ -41,11 +41,11 @@ echo "> Creating homes"
 for i in $(seq 0 $[$validator_count-1])
 do
     echo "> Home $i"
-    $CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home ${homes[i]}
-    $CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
-    $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
-    $CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+    $CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
 done
 
 # Initialize home directories

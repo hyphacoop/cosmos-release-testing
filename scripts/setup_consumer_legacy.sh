@@ -21,7 +21,7 @@ logs=()
 wallets=()
 for i in $(seq -w 001 $validator_count)
 do
-    moniker=$consumer_moniker_prefix$i
+    moniker=$moniker_prefix$i
     monikers+=($moniker)
     home=$consumer_home_prefix$i
     homes+=($home)
@@ -43,16 +43,13 @@ echo "> Creating homes"
 for i in $(seq 0 $[$validator_count-1])
 do
     echo "> Home $i"
-    $CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home ${homes[i]}
-    $CHAIN_BINARY config keyring-backend test --home ${homes[i]}
-    $CHAIN_BINARY config broadcast-mode sync --home ${homes[i]}
-    $CHAIN_BINARY config node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+    $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY config keyring-backend test --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY config broadcast-mode sync --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY config node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
+    $CONSUMER_CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
 done
-
-echo "chains:"
 $CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json | jq -r '.chains[]'
-exit 0
 
 # client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
 # echo "Client ID: $client_id"
@@ -60,10 +57,17 @@ exit 0
 # CONSUMER_ID=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
 echo "Consumer ID: $CONSUMER_ID"
 
-echo "Submit key assignment tx..."
-CON1_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_1)
-CON2_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_2)
-CON3_PUBKEY=$($CHAIN_BINARY tendermint show-validator --home $CONSUMER_HOME_3)
+echo "> Submitting opt-in txs"
+for i in $(seq 0 $[validator_count-1])
+do
+    echo "> Opting in with ${monikers[i]}."
+    pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[i]})
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $pubkey --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $PROVIDER_HOME -y -o json | jq -r '.txhash')
+done
+
+exit 0
+
+
 if [ $TOPN -eq "0" ]; then
     echo "Opting in with val1..."
     txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $CON1_PUBKEY --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
@@ -93,7 +97,7 @@ fi
 # sleep $COMMIT_TIMEOUT
 # $CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_CHAIN_ID $CON3_PUBKEY --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
 # sleep $COMMIT_TIMEOUT
-
+echo "> Chains:
 $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
 echo "val1 key in consumer:"
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $HOME_1) --home $HOME_1
