@@ -89,7 +89,7 @@ do
     $CONSUMER_CHAIN_BINARY keys add ${monikers[i]} --home ${homes[0]} --output json > contemp/keys-${monikers[i]}.json
     wallet=$(jq -r '.address' temp/keys-${monikers[i]}.json)
     wallets+=($wallet)
-    $CONSUMER_CHAIN_BINARY add-genesis-account ${monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 done
 exit 0
 
