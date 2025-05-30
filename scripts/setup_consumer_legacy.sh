@@ -23,6 +23,8 @@ for i in $(seq -w 001 $validator_count)
 do
     moniker=$moniker_prefix$i
     monikers+=($moniker)
+    consumer_moniker=$consumer_moniker_prefix$i
+    consumer_monikers+=($consumer_moniker)
     home=$consumer_home_prefix$i
     homes+=($home)
     api_port=$consumer_api_prefix$i
@@ -47,7 +49,7 @@ do
     $CONSUMER_CHAIN_BINARY config keyring-backend test --home ${homes[i]}
     $CONSUMER_CHAIN_BINARY config broadcast-mode sync --home ${homes[i]}
     $CONSUMER_CHAIN_BINARY config node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CONSUMER_CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+    $CONSUMER_CHAIN_BINARY init ${consumer_monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
 done
 $CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json | jq -r '.chains[]'
 
@@ -81,15 +83,15 @@ mv consumer-slashing-2.json ${homes[0]}/config/genesis.json
 
 echo "> Creating and funding wallets."
 echo "> Adding keys to first home"
-echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${monikers[0]} --home ${homes[0]} --output json --recover > contemp/keys-${monikers[0]}.json
-wallet=$(jq -r '.address' contemp/keys-${monikers[0]}.json)
+echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --home ${homes[0]} --output json --recover > contemp/keys-${consumer_monikers[0]}.json
+wallet=$(jq -r '.address' contemp/keys-${consumer_monikers[0]}.json)
 wallets+=($wallet)
 for i in $(seq 1 $[$validator_count-1])
 do
-    $CONSUMER_CHAIN_BINARY keys add ${monikers[i]} --home ${homes[0]} --output json > contemp/keys-${monikers[i]}.json
-    wallet=$(jq -r '.address' temp/keys-${monikers[i]}.json)
+    $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --home ${homes[0]} --output json > contemp/keys-${monikers[i]}.json
+    wallet=$(jq -r '.address' temp/keys-${consumer_monikers[i]}.json)
     wallets+=($wallet)
-    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 done
 
 echo "> Copying genesis to all other homes"
@@ -137,11 +139,11 @@ echo "./stop.sh" >> reset.sh
 
 for i in $(seq 0 $[$validator_count-1])
 do
-    echo "echo \"Starting validator ${monikers[i]}...\"" >> start-$CONSUMER_CHAIN_ID.sh
-    echo "tmux new-session -d -s ${monikers[i]} \"$CONSUMER_CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start-$CONSUMER_CHAIN_ID.sh
+    echo "echo \"Starting validator ${consumer_monikers[i]}...\"" >> start-$CONSUMER_CHAIN_ID.sh
+    echo "tmux new-session -d -s ${consumer_monikers[i]} \"$CONSUMER_CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start-$CONSUMER_CHAIN_ID.sh
     echo "sleep 0.2s" >> start.sh
-    echo "echo \"Stopping validator ${monikers[i]}...\"" >> stop-$CONSUMER_CHAIN_ID.sh
-    echo "tmux send-keys -t ${monikers[i]} C-c" >> stop-$CONSUMER_CHAIN_ID.sh
+    echo "echo \"Stopping validator ${consumer_monikers[i]}...\"" >> stop-$CONSUMER_CHAIN_ID.sh
+    echo "tmux send-keys -t ${consumer_monikers[i]} C-c" >> stop-$CONSUMER_CHAIN_ID.sh
     echo "$CONSUMER_CHAIN_BINARY tendermint unsafe-reset-all --home ${homes[i]}" >> reset-$CONSUMER_CHAIN_ID.sh
     echo "sleep 0.2s" >> reset-$CONSUMER_CHAIN_ID.sh
 done
