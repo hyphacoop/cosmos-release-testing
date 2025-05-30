@@ -90,7 +90,7 @@ fi
 echo "Submitting the upgrade proposal."
 echo $proposal
 txhash=$($proposal | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT+5))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
@@ -103,7 +103,7 @@ echo "Submitting the \"yes\" vote to proposal $proposal_id..."
 vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT -y --home $HOME_1 -o json"
 echo $vote
 txhash=$($vote | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT+5))
 $CHAIN_BINARY q tx $txhash --home $HOME_1
 
 # Wait for the voting period to be over
