@@ -30,12 +30,12 @@ echo "> Submitting update consumer tx."
 $CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from ${monikers[0]} --home $PROVIDER_HOME --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
 sleep $(($COMMIT_TIMEOUT*3))
 echo "> List consumer chains"
-$CHAIN_BINARY q provider list-consumer-chains --home ${homes[0]} -o json | jq '.'
+$CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json | jq '.'
 echo "> Query consumer chain"
-$CHAIN_BINARY q provider consumer-chain $CONSUMER_ID --home ${homes[0]} -o json | jq '.'
+$CHAIN_BINARY q provider consumer-chain $CONSUMER_ID --home $PROVIDER_HOME -o json | jq '.'
 
 echo "> Collecting the CCV state"
-$CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home ${homes[0]} > ccv.json
+$CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $PROVIDER_HOME > ccv.json
 jq '.' ccv.json
 
 echo "> Patching the CCV state with the provider reward denom"
