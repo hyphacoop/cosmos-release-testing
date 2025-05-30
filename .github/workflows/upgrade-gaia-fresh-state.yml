@@ -295,7 +295,7 @@
             run: |
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
-              tail -n 20 conlog_001
+              tail -n 100 conlog_001
       #     - name: Set up relayer
       #       run: scripts/setup_relayer.sh
       #     - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
