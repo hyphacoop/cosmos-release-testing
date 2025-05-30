@@ -137,7 +137,7 @@ echo "./stop.sh" >> reset.sh
 
 for i in $(seq 0 $[$validator_count-1])
 do
-    echo "echo \"Starting validator ${monikers[i]}...\"" >> start.sh
+    echo "echo \"Starting validator ${monikers[i]}...\"" >> start-$CONSUMER_CHAIN_ID.sh
     echo "tmux new-session -d -s ${monikers[i]} \"$CONSUMER_CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start-$CONSUMER_CHAIN_ID.sh
     echo "sleep 0.2s" >> start.sh
     echo "echo \"Stopping validator ${monikers[i]}...\"" >> stop-$CONSUMER_CHAIN_ID.sh
