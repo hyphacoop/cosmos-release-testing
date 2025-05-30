@@ -11,14 +11,14 @@ do
     homes+=($home)
 done
 
-jq --version
 echo "> Patch create consumer message with spawn time."
 jq '.' create-$CONSUMER_CHAIN_ID.json
-init_params=$(jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json)
-echo "> Init params: $init_params"
-echo $init_params | jq '.'
+# init_params=$(jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json)
+# echo "> Init params: $init_params"
+# echo $init_params | jq '.'
+jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json > init_params.json
 spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
-jq --argjson PARAMS $init_params '.initialization_parameters |= $PARAMS' templates/update-spawn-time.json > update-$CONSUMER_CHAIN_ID.json
+jq --argfile PARAMS init_params.json '.initialization_parameters |= $PARAMS' templates/update-spawn-time.json > update-$CONSUMER_CHAIN_ID.json
 jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
 jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
