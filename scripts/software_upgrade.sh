@@ -82,8 +82,7 @@ echo "Modified proposal:"
 jq '.' upgrade-4.json
 
 # $CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1
-proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment $GAS_ADJUSTMENT --yes --home $HOME_1"
-
+proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE$DENOM --gas-adjustment 10 --yes --home $HOME_1"
 
 # Submit the proposal
 echo "Submitting the upgrade proposal."
