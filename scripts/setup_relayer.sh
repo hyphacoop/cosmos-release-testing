@@ -60,55 +60,6 @@ elif [ $RELAYER == "rly" ]; then
     # provider
     rly chains add --file templates/testnet.json
 
-    # two
-    # jq '.value."chain-id" = "two-v200"' tests/v15_upgrade/testnet.json > two-1.json
-    # jq '.value."rpc-addr" = "http://localhost:27201"' two-1.json > two-2.json
-    # jq '.value."gas-prices" = "0.005ucon"' two-2.json > two-v200.json
-    # cat two-v200.json
-    # rly chains add --file two-v200.json
-
-    # v310-one
-    jq '.value."chain-id" = "v310-one"' templates/testnet.json > v310-1.json
-    jq '.value."rpc-addr" = "http://localhost:31121"' v310-1.json > v310-2.json
-    jq '.value."gas-prices" = "0.005ucon"' v310-2.json > v310-one.json
-    cat v310-one.json
-    rly chains add --file v310-one.json
-
-    # v310-two
-    jq '.value."chain-id" = "v310-two"' templates/testnet.json > v310-1.json
-    jq '.value."rpc-addr" = "http://localhost:31221"' v310-1.json > v310-2.json
-    jq '.value."gas-prices" = "0.005ucon"' v310-2.json > v310-two.json
-    cat v310-two.json
-    rly chains add --file v310-two.json
-
-    # v320-one
-    jq '.value."chain-id" = "v320-one"' templates/testnet.json > v320-1.json
-    jq '.value."rpc-addr" = "http://localhost:32121"' v320-1.json > v320-2.json
-    jq '.value."gas-prices" = "0.005ucon"' v320-2.json > v320-one.json
-    cat v320-one.json
-    rly chains add --file v320-one.json
-
-    # v320-two
-    jq '.value."chain-id" = "v320-two"' templates/testnet.json > v320-1.json
-    jq '.value."rpc-addr" = "http://localhost:32221"' v320-1.json > v320-2.json
-    jq '.value."gas-prices" = "0.005ucon"' v320-2.json > v320-two.json
-    cat v320-two.json
-    rly chains add --file v320-two.json
-
-    # v330-one
-    jq '.value."chain-id" = "v330-one"' templates/testnet.json > v330-1.json
-    jq '.value."rpc-addr" = "http://localhost:33121"' v330-1.json > v330-2.json
-    jq '.value."gas-prices" = "0.005ucon"' v330-2.json > v330-one.json
-    cat v330-one.json
-    rly chains add --file v330-one.json
-
-    # v330-two
-    jq '.value."chain-id" = "v330-two"' templates/testnet.json > v330-1.json
-    jq '.value."rpc-addr" = "http://localhost:33221"' v330-1.json > v330-2.json
-    jq '.value."gas-prices" = "0.005ucon"' v330-2.json > v330-two.json
-    cat v330-two.json
-    rly chains add --file v330-two.json
-
     # v400-one
     jq '.value."chain-id" = "v400-one"' templates/testnet.json > v400-1.json
     jq '.value."rpc-addr" = "http://localhost:40121"' v400-1.json > v400-2.json
@@ -161,12 +112,6 @@ elif [ $RELAYER == "rly" ]; then
 
     echo "Adding relayer keys..."
     rly keys restore $CHAIN_ID default "$MNEMONIC_RELAYER"
-    rly keys restore v310-one default "$MNEMONIC_RELAYER"
-    rly keys restore v310-two default "$MNEMONIC_RELAYER"
-    rly keys restore v320-one default "$MNEMONIC_RELAYER"
-    rly keys restore v320-two default "$MNEMONIC_RELAYER"
-    rly keys restore v330-one default "$MNEMONIC_RELAYER"
-    rly keys restore v330-two default "$MNEMONIC_RELAYER"
     rly keys restore v400-one default "$MNEMONIC_RELAYER"
     rly keys restore v400-two default "$MNEMONIC_RELAYER"
     rly keys restore stride-test default "$MNEMONIC_RELAYER"
