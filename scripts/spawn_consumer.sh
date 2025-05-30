@@ -11,6 +11,7 @@ do
     homes+=($home)
 done
 
+jq --version
 echo "> Patch create consumer message with spawn time."
 jq '.' create-$CONSUMER_CHAIN_ID.json
 init_params=$(jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json)
