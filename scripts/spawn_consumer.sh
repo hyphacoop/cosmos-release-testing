@@ -108,3 +108,5 @@ for i in $(seq 0 $[$validator_count-1])
 do
     cp consumer-genesis.json ${homes[i]}/config/genesis.json
 done
+
+jq '.' consumer-genesis.json

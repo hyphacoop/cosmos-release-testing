@@ -88,7 +88,7 @@ wallet=$(jq -r '.address' contemp/keys-${consumer_monikers[0]}.json)
 wallets+=($wallet)
 for i in $(seq 1 $[$validator_count-1])
 do
-    $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --home ${homes[0]} --output json > contemp/keys-${monikers[i]}.json
+    $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --home ${homes[0]} --output json > contemp/keys-${consumer_monikers[i]}.json
     wallet=$(jq -r '.address' contemp/keys-${consumer_monikers[i]}.json)
     wallets+=($wallet)
     $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
