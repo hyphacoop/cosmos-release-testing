@@ -22,9 +22,11 @@ jq --argfile PARAMS init_params.json '.initialization_parameters |= $PARAMS' tem
 jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
 jq -r --arg SPAWNTIME "$spawn_time" '.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
+echo "> Update consumer JSON:"
+jq '.' spawn-$CONSUMER_CHAIN_ID.json
 echo "> Submitting update consumer tx."
 $CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from ${monikers[0]} --home ${homes[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT*3))
 echo "> List consumer chains"
 $CHAIN_BINARY q provider list-consumer-chains --home ${homes[0]} -o json | jq '.'
 echo "> Query consumer chain"
