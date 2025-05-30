@@ -8,7 +8,7 @@ for i in $(seq -w 001 $validator_count)
 do
     moniker=$moniker_prefix$i
     monikers+=($moniker)
-    home=$home_prefix$i
+    home=$consumer_home_prefix$i
     homes+=($home)
 done
 
