@@ -2424,6 +2424,7 @@
               $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
           - name: Change consensus and feemarket params
             run: |
+              $CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
               txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
               echo "tx hash: $txhash"
               sleep $(($COMMIT_TIMEOUT+2))
