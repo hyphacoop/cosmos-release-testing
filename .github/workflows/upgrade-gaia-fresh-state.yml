@@ -1739,7 +1739,7 @@
               sleep $(($COMMIT_TIMEOUT+2))
               echo "> Tokenizing."
               echo "> Command: $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
-              $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+              $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $WALLET_5 --home $HOME_1 -o json | jq '.'
           
