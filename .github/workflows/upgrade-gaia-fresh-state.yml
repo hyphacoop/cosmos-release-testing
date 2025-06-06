@@ -1994,6 +1994,8 @@
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           VESTING_AMOUNT: 110000000
           VESTING_DELEGATED_AMOUNT: 100000000
           VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
@@ -2128,6 +2130,8 @@
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           CHAIN_BINARY_SECONDARY: gaiad-ibc
           COMMIT_TIMEOUT: 1
           RELAYER: hermes

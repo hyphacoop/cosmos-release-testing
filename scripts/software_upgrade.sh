@@ -128,6 +128,7 @@ else
 
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
         # Build
+        echo "> Building new binary."
         sudo apt install build-essential -y
         wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
@@ -139,7 +140,7 @@ else
         cd ..
     else
         # Download
-        echo "Downloading new binary..."
+        echo "> Downloading new binary."
         wget $DOWNLOAD_URL -O ./upgraded -q
         chmod +x ./upgraded
         mv ./upgraded $HOME/go/bin/$CHAIN_BINARY
