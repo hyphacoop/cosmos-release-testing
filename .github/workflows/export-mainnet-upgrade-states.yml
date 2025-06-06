@@ -44,6 +44,7 @@ jobs:
           sudo /usr/sbin/sshd
       - name: Setup SSH auth
         run: |
+          ls -al ~/
           if [ ! -d ~/.ssh ]
           then
             mkdir -m 700 ~/.ssh
