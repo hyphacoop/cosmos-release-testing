@@ -18,9 +18,9 @@ on:
       archive_url:
         description: 'URL for archive file'
         required: true
-        # default: 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz'
+        default: 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz'
         # default: 'https://files.polypore.xyz/archived-state/v23.3.0_25706750-stateful-upgrade.tar.gz'
-        default: 'https://files.polypore.xyz/archived-state/v23.3.0_25740800-stateful-upgrade.tar.gz'
+        # default: 'https://files.polypore.xyz/archived-state/v23.3.0_25740800-stateful-upgrade.tar.gz'
 
   # schedule:
   #   # Once a day at 13:15
@@ -31,11 +31,11 @@ concurrency:
 jobs:
   set-version-matrix:
     env:
-      START: ${{ github.event_name == 'push' && 'v23.3.0' || inputs.from_version }}
+      START: ${{ github.event_name == 'push' && 'v23.3.0' || github.event_name == 'repository_dispatch' && 'v23.3.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'v24.0.0-rc1' || inputs.to_version }}
-      # ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz' || inputs.archive_url }}
+      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v23.tar.gz' || inputs.archive_url }}
       # ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/v23.3.0_25706750-stateful-upgrade.tar.gz' || inputs.archive_url }}
-      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/v23.3.0_25740800-stateful-upgrade.tar.gz' || inputs.archive_url }}
+      # ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/v23.3.0_25740800-stateful-upgrade.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-22.04
     steps:
       # Get system info
