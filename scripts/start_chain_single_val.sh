@@ -172,7 +172,7 @@ echo ""                                     | sudo tee /etc/systemd/system/$PROV
 echo "[Service]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 if [ "$COSMOVISOR" = true ]; then
-    echo "ExecStart=$HOME/go/bin/cosmovisor run start --x-crisis-skip-assert-invariants --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
+    echo "ExecStart=$HOME/go/bin/cosmovisor run start --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     echo "Environment=\"DAEMON_NAME=$CHAIN_BINARY\""               | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     echo "Environment=\"DAEMON_HOME=$HOME_1\""                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     echo "Environment=\"DAEMON_RESTART_AFTER_UPGRADE=true\""       | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
@@ -181,7 +181,7 @@ if [ "$COSMOVISOR" = true ]; then
         echo "Environment=\"DAEMON_ALLOW_DOWNLOAD_BINARIES=true\"" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     fi
 else
-    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
+    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start  --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 fi
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a

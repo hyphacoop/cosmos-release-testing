@@ -117,26 +117,10 @@ echo "** HAPPY PATH> STEP 4: REDEEM TOKENS **"
     submit_tx "tx liquid redeem-tokens $liquid_balance_2$liquid_denom_2 --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
     sleep $(($COMMIT_TIMEOUT*2))
 
-    # echo "Sending $ibc_denom tokens from STRIDE_WALLET_LIQUID to $CHAIN_ID chain for redeem operation..."
-    # $CHAIN_BINARY q bank balances $happy_liquid_3 --home $HOME_1
-    # submit_ibc_tx "tx ibc-transfer transfer transfer channel-1 $happy_liquid_3 $ibc_transfer_amount$ibc_denom --from $STRIDE_WALLET_LIQUID -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$STRIDE_DENOM -y" $STRIDE_CHAIN_BINARY $STRIDE_HOME_1
-    # sleep 20
-    # $CHAIN_BINARY q bank balances $happy_liquid_3 --home $HOME_1
-    # echo "***RELAYER DATA***"
-    # journalctl -u $RELAYER | tail -n 100
-    # echo "***RELAYER DATA***"
-    # echo "Redeeming tokens from happy_liquid_3..."
-    # $CHAIN_BINARY q tendermint-validator-set --home $HOME_1
-    # $CHAIN_BINARY q tendermint-validator-set --home $STRIDE_HOME_1
-    # # tests/v12_upgrade/log_lsm_data.sh happy pre-redeem-3 $happy_liquid_3 $ibc_transfer_amount
-    # submit_tx "tx staking redeem-tokens $ibc_transfer_amount$tokenized_denom --from $happy_liquid_3 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y" $CHAIN_BINARY $HOME_1
-    # # tests/v12_upgrade/log_lsm_data.sh happy post-redeem-3 $happy_liquid_3 $ibc_transfer_amount
-
     happy_liquid_1_delegations_2=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     happy_liquid_1_delegations_diff=$((${happy_liquid_1_delegations_2%.*}-${happy_liquid_1_delegations_1%.*}))
     happy_liquid_2_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
-    # happy_liquid_3_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_3 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
-
+    
     happy_liquid_1_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
     happy_liquid_2_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
     happy_liquid_3_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_3 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
@@ -155,10 +139,6 @@ echo "** HAPPY PATH> CLEANUP **"
     echo "Validator unbond from happy_liquid_2..."
     submit_tx "tx staking unbond $VALOPER_1 $happy_liquid_2_delegations$DENOM --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
 
-    # echo "Validator unbond from happy_liquid_3..."
-    # # tests/v12_upgrade/log_lsm_data.sh happy pre-unbond-4 $happy_liquid_3 $ibc_transfer_amount
-    # submit_tx "tx staking unbond $VALOPER_1 $ibc_transfer_amount$DENOM --from $happy_liquid_3 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT -y --gas-prices $GAS_PRICE$DENOM" $CHAIN_BINARY $HOME_1
-    # # tests/v12_upgrade/log_lsm_data.sh happy post-unbond-4 $happy_liquid_3 $ibc_transfer_amount
     happy_liquid_1_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_1 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     happy_liquid_2_delegations=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $HOME_1 -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).delegation.shares')
     echo "happy_liquid_1 delegation shares: ${happy_liquid_1_delegations%.*}"
