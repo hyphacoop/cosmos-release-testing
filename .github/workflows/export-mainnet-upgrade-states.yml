@@ -44,12 +44,14 @@ jobs:
           sudo /usr/sbin/sshd
       - name: Setup SSH auth
         run: |
-          ls -al ~/
           if [ ! -d ~/.ssh ]
           then
+            echo "mkdir ~/.ssh"
             mkdir -m 700 ~/.ssh
           fi
+          echo "Setup ~/.ssh/authorized_keys"
           echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          echo "ssh-keyscan files.polypore.xyz"
           ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
 
       - name: Set SSH key
