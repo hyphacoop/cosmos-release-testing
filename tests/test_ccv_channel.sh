@@ -22,9 +22,9 @@ sleep $(($COMMIT_TIMEOUT*8))
 journalctl -u $RELAYER | tail -n 200
 
 echo "Querying provider valset:"
-$CHAIN_BINARY q tendermint-validator-set --home $whale_home
+$CHAIN_BINARY q COMET-validator-set --home $whale_home
 echo "Querying consumer valset:"
-$CHAIN_BINARY q tendermint-validator-set --home $whale_home_consumer
+$CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $whale_home_consumer
 echo "Querying provider params:"
 $CHAIN_BINARY q provider params --home $whale_home
 
