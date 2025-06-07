@@ -191,7 +191,7 @@ type = "CosmosSdk"
 [[chains]]
 id = 'testnet'
 rpc_addr = 'http://localhost:27001'
-grpc_addr = 'http://localhost:26001'
+grpc_addr = 'http://localhost:28001'
 event_source = { mode = 'push', url = 'ws://localhost:27001/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
