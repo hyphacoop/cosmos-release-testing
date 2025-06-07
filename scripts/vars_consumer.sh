@@ -6,8 +6,6 @@ export CONSUMER_DENOM=ucon
 
 export CONSUMER_DOWNTIME_WINDOW=100000
 export RECIPIENT=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-export WALLET_RELAYER=cosmos1ty2qlurqsxj6sgs378hxmzyxh0ds8ukc70w844
-export MNEMONIC_RELAYER="abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon property abandon success"
 export CONSUMER_DENOM=ucon
 export CONSUMER_GAS_PRICE=0.005$DENOM
 

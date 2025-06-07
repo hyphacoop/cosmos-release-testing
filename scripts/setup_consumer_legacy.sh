@@ -83,6 +83,9 @@ mv consumer-slashing-2.json ${homes[0]}/config/genesis.json
 
 echo "> Creating and funding wallets."
 echo "> Adding keys to first home"
+echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add relayer --home ${homes[0]} --output json --recover > contemp/keys-relayer.json
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+
 echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --home ${homes[0]} --output json --recover > contemp/keys-${consumer_monikers[0]}.json
 wallet=$(jq -r '.address' contemp/keys-${consumer_monikers[0]}.json)
 wallets+=($wallet)

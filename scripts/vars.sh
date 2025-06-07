@@ -7,6 +7,9 @@ export MNEMONIC_1="abandon abandon abandon abandon abandon abandon abandon aband
 export WALLET_1=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
 export VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv
 
+export MNEMONIC_RELAYER="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
+export WALLET_RELAYER=cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
+
 export CHAIN_ID=testnet
 export DENOM=uatom
 export VAL_FUNDS="10000000000"

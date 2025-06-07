@@ -61,6 +61,7 @@ do
 done
 
 echo "> Adding keys to first home"
+echo $MNEMONIC_RELAYER | $CHAIN_BINARY keys add relayer --home ${homes[0]} --output json --recover > temp/keys-relayer.json
 echo $MNEMONIC_1 | $CHAIN_BINARY keys add ${monikers[0]} --home ${homes[0]} --output json --recover > temp/keys-${monikers[0]}.json
 wallet=$(jq -r '.address' temp/keys-${monikers[0]}.json)
 operator=$($CHAIN_BINARY debug bech32-convert --prefix cosmosvaloper $wallet)
@@ -85,7 +86,9 @@ jq -r --arg DENOM "$DENOM" '.app_state.gov.params.expedited_min_deposit[0].denom
 cp temp/denom-6.json ${homes[0]}/config/genesis.json
 
 echo "> Creating validators"
-mkdir  -p ${homes[0]}/config//gentx
+mkdir  -p ${homes[0]}/config/gentx
+$CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$DENOM --home ${homes[0]}
+
 for i in $(seq 0 $[$validator_count-1])
 do
     $CHAIN_BINARY genesis add-genesis-account ${monikers[i]} $VAL_FUNDS$DENOM --home ${homes[0]}

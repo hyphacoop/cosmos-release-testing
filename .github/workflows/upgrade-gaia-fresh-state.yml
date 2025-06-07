@@ -301,7 +301,10 @@
               source scripts/vars_consumer.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}001 5
           - name: Set up relayer
-            run: scripts/setup_relayer.sh
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer.sh
+              scripts/setup_relayer.sh
 
           - name: Establish CCV channel for v400-one
             env:
