@@ -16,6 +16,7 @@ export ICS_TRANSFORM_BINARY=cd-transform
 
 export consumer_moniker_prefix='con_'
 export consumer_home_prefix='/home/runner/.con_'
+export whale_home_consumer=${consumer_home_prefix}001
 export consumer_api_prefix="35"
 export consumer_p2p_prefix="36"
 export consumer_rpc_prefix="37"
