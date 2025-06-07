@@ -308,6 +308,7 @@
               CONSUMER_CHAIN_ID: v400-one
             run: |
               source scripts/vars.sh  
+              source scripts/vars_consumer.sh 
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
