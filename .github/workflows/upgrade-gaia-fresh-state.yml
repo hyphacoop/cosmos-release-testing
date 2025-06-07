@@ -297,7 +297,9 @@
               sleep 10
               tail -n 100 conlog_001
           - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
-            run: tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}001 5
+            run: |
+              source scripts/vars_consumer.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}001 5
           - name: Set up relayer
             run: scripts/setup_relayer.sh
 
