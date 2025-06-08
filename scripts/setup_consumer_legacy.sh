@@ -87,6 +87,7 @@ echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add relayer --home ${homes[
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 
 echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --home ${homes[0]} --output json --recover > contemp/keys-${consumer_monikers[0]}.json
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 wallet=$(jq -r '.address' contemp/keys-${consumer_monikers[0]}.json)
 wallets+=($wallet)
 for i in $(seq 1 $[$validator_count-1])
