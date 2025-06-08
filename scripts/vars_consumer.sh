@@ -5,7 +5,7 @@ export CONSUMER_CHAIN_ID=v400-one
 export CONSUMER_DENOM=ucon
 
 export CONSUMER_DOWNTIME_WINDOW=100000
-export RECIPIENT=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+export RECIPIENT=consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
 export CONSUMER_DENOM=ucon
 export CONSUMER_GAS_PRICE=0.005$CONSUMER_DENOM
 
