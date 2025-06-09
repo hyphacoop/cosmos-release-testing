@@ -326,10 +326,7 @@
               $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
           - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
             env:
-              # CONSUMER_CHAIN_ID: v400-one
-              # CONSUMER_HOME_1: /home/runner/.v400-1-1
               RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-              # CON1_RPC_PORT: 40121
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer.sh 
@@ -568,48 +565,42 @@
       #     #     echo "> Validator outstanding rewards:"
       #     #     $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
 
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: "${{ matrix.target_version }}"
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
     
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-    
-      #     - name: Restart relayer
-      #       run: sudo systemctl restart $RELAYER
-    
-      #     - name: Flush "migration successful" lines
-      #       run: |
-      #         $CHAIN_BINARY keys list --home $HOME_1
+          - name: Restart relayer
+            run: sudo systemctl restart $RELAYER
     
       #     - name: List consumer chains
       #       run: |
       #         $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
 
-      #     - name: _CCV channel verified> ICS v4.0.0 chain 1
-      #       env:
-      #         CONSUMER_HOME_1: /home/runner/.v400-1-1
-      #         CON1_RPC_PORT: 40121
-      #       run: tests/test_ccv_key_assignment.sh
-      #     - name: _IBC transfer successful> ICS v4.0.0 chain 1
-      #       env:
-      #         CONSUMER_CHAIN_ID: v400-one
-      #         CONSUMER_HOME_1: /home/runner/.v400-1-1
-      #         RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-      #         CON1_RPC_PORT: 40121
-      #       run: |
-      #         export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #         tests/test_consumer_ibc_transfer_node.sh $channel_id
+          - name: _CCV channel verified> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer.sh  
+              tests/test_ccv_channel.sh
+          - name: _IBC transfer successful> ICS v4.0.0 chain 1
+            env:
+              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer.sh 
+              export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
 
       #     - name: _CCV channel verified> ICS v5.2.0 chain 1
       #       env:
