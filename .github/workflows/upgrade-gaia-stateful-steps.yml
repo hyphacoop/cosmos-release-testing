@@ -1326,9 +1326,6 @@ jobs:
           MAX_ENTRIES: 8
           HISTORICAL_ENTRIES: 15000
           MIN_COMMISSION_RATE: "0.010000000000000000"
-          VALIDATOR_BOND_FACTOR: "200.000000000000000000"
-          GLOBAL_LIQUID_STAKING_CAP: "0.200000000000000000"
-          VALIDATOR_LIQUID_STAKING_CAP: "0.400000000000000000"
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
@@ -1337,9 +1334,6 @@ jobs:
           Q_MAX_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_entries')
           Q_HISTORICAL_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.historical_entries')
           Q_MIN_COMMISSION_RATE=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.min_commission_rate')
-          Q_VALIDATOR_BOND_FACTOR=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_bond_factor')
-          Q_GLOBAL_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.global_liquid_staking_cap')
-          Q_VALIDATOR_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_liquid_staking_cap')
           if [ "$Q_UNBONDING_TIME" != "$UNBONDING_TIME" ]
           then
             echo "[ERROR]: UNBONDING_TIME does not match query: $UNBONDING_TIME $Q_UNBONDING_TIME"
@@ -1363,21 +1357,6 @@ jobs:
           if [ "$Q_MIN_COMMISSION_RATE" != "$MIN_COMMISSION_RATE" ]
           then
             echo "[ERROR]: MIN_COMMISSION_RATE does not match query: $MIN_COMMISSION_RATE $Q_MIN_COMMISSION_RATE"
-            error="1"
-          fi
-          if [ "$Q_VALIDATOR_BOND_FACTOR" != "$VALIDATOR_BOND_FACTOR" ]
-          then
-            echo "[ERROR]: VALIDATOR_BOND_FACTOR does not match query: $VALIDATOR_BOND_FACTOR $Q_VALIDATOR_BOND_FACTOR"
-            error="1"
-          fi
-          if [ "$Q_GLOBAL_LIQUID_STAKING_CAP" != "$GLOBAL_LIQUID_STAKING_CAP" ]
-          then
-            echo "[ERROR]: GLOBAL_LIQUID_STAKING_CAP does not match query: $GLOBAL_LIQUID_STAKING_CAP $Q_GLOBAL_LIQUID_STAKING_CAP"
-            error="1"
-          fi
-          if [ "$Q_VALIDATOR_LIQUID_STAKING_CAP" != "$VALIDATOR_LIQUID_STAKING_CAP" ]
-          then
-            echo "[ERROR]: VALIDATOR_LIQUID_STAKING_CAP does not match query: $VALIDATOR_LIQUID_STAKING_CAP $Q_VALIDATOR_LIQUID_STAKING_CAP"
             error="1"
           fi
           if [ "$error" == "1" ]

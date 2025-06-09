@@ -9,8 +9,7 @@
        "max_entries": 7,
        "historical_entries": 10000,
        "bond_denom": "uatom",
-       "min_commission_rate": "0.050000000000000000",
-       "validator_bond_factor": "250.000000000000000000"
+       "min_commission_rate": "0.050000000000000000"
       }
      }
     ],
