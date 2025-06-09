@@ -1,0 +1,1621 @@
+---
+
+name: Test Gaia Stateful Upgrade Steps
+on:
+  workflow_call:
+    inputs:
+      runs-on-os:
+        required: true
+        type: string
+      gaia_version:
+        required: true
+        type: string
+      upgrade_version:
+        required: true
+        type: string
+      env_name:
+        required: true
+        type: string
+      archive_url:
+        required: true
+        type: string
+      
+jobs:
+  test-upgrade:
+    runs-on: ${{ inputs.runs-on-os }}
+    environment: ${{ inputs.env_name }}
+    env:
+      SSH_KEYS: ${{ vars.SSH_KEYS }}
+      PROVIDER_SERVICE_1: ${{ vars.PROVIDER_SERVICE_1 }}
+      PROVIDER_SERVICE_2: ${{ vars.PROVIDER_SERVICE_2 }}
+      CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
+      CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+      HOME_1: ${{ vars.HOME_1 }}
+      HOME_2: ${{ vars.HOME_2 }}
+      CHAIN_ID: ${{ vars.CHAIN_ID }}
+      MONIKER_1: ${{ vars.MONIKER_1 }}
+      MONIKER_2: ${{ vars.MONIKER_2 }}
+      MONIKER_4: ${{ vars.MONIKER_4 }}
+      MONIKER_5: ${{ vars.MONIKER_5 }}
+      MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
+      MNEMONIC_2: ${{ vars.MNEMONIC_2 }}
+      MNEMONIC_4: ${{ vars.MNEMONIC_4 }}
+      MNEMONIC_5: ${{ vars.MNEMONIC_5 }}
+      DENOM: ${{ vars.DENOM }}
+      VAL_FUNDS: ${{ vars.VAL_FUNDS }}
+      VAL_STAKE: ${{ vars.VAL_STAKE }}
+      VAL_STAKE_STEP: ${{ vars.VAL_STAKE_STEP }}
+      VOTING_PERIOD: ${{ vars.VOTING_PERIOD }}
+      VAL1_RPC_PORT: 27001
+      VAL1_API_PORT: 25001
+      VAL1_GRPC_PORT: 26001
+      VAL1_P2P_PORT: 28001
+      VAL1_PPROF_PORT: 6061
+      VAL1_PROM_PORT: 26660
+      VAL2_RPC_PORT: 27002
+      VAL2_API_PORT: 25002
+      VAL2_GRPC_PORT: 26002
+      VAL2_P2P_PORT: 28002
+      VAL2_PPROF_PORT: 6062
+      VAL2_PROM_PORT: 26662
+      WALLET_1: ${{ vars.WALLET_1 }}
+      WALLET_2: ${{ vars.WALLET_2 }}
+      WALLET_4: ${{ vars.WALLET_4 }}
+      WALLET_5: ${{ vars.WALLET_5 }}
+      WALLET_CONSUMER_1: ${{ vars.WALLET_CONSUMER_1 }}
+      VALOPER_1: ${{ vars.VALOPER_1 }}
+      CONSUMER_CHAIN_BINARY_URL: ${{ vars.CONSUMER_CHAIN_BINARY_URL }}
+      CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY }}
+      CONSUMER_CHAIN_BINARY_URL_2: ${{ vars.CONSUMER_CHAIN_BINARY_URL_2 }}
+      CONSUMER_CHAIN_BINARY_2: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+      CONSUMER_DENOM: ${{ vars.CONSUMER_DENOM }}
+      CONSUMER_HOME_1: /home/runner/.cona1
+      CONSUMER_HOME_2: /home/runner/.cona2
+      CONSUMERB_HOME_1: /home/runner/.conb1
+      CONSUMERB_HOME_2: /home/runner/.conb2
+      STRIDE_SOV_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v11.0.0/stride-v11.0.0-linux-amd64
+      STRIDE_CON_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v12.1.0/stride-v12.1.0-linux-amd64
+      STRIDE_CHAIN_BINARY: strided
+      STRIDE_HOME_1: /home/runner/.stride1
+      STRIDE_SERVICE_1: stride1.service
+      STRIDE_CHAIN_ID: consumerd
+      STRIDE_DENOM: ustrd
+      STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+      STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+      STRIDE_WALLET_5: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+      STRIDE_API_1: 35001
+      STRIDE_GRPC_1: 36001
+      STRIDE_RPC_1: 37001
+      STRIDE_P2P_1: 38001
+      STRIDE_PPROF_1: 39001
+      CON1_API_PORT: 25101
+      CON1_GRPC_PORT: 26101
+      CON1_RPC_PORT: 27101
+      CON1_P2P_PORT: 28101
+      CON1_PPROF_PORT: 6163
+      CON2_API_PORT: 25102
+      CON2_GRPC_PORT: 26102
+      CON2_RPC_PORT: 27102
+      CON2_P2P_PORT: 28102
+      CON2_PPROF_PORT: 6164
+      CON2_MIN_GAS_PRICES: 0.0025
+      CONSUMER_SERVICE_1: cona1.service
+      CONSUMER_SERVICE_2: cona2.service
+      CONSUMER_MIN_GAS_PRICES: 0.0025
+      CONB1_API_PORT: 55101
+      CONB1_GRPC_PORT: 56101
+      CONB1_RPC_PORT: 57101
+      CONB1_P2P_PORT: 58101
+      CONB1_PPROF_PORT: 56163
+      CONB2_API_PORT: 55102
+      CONB2_GRPC_PORT: 56102
+      CONB2_RPC_PORT: 57102
+      CONB2_P2P_PORT: 58102
+      CONB2_PPROF_PORT: 56164
+      CONSUMERB_SERVICE_1: conb1.service
+      CONSUMERB_SERVICE_2: conb2.service
+      CONSUMERB_MIN_GAS_PRICES: 0.0025
+      BASE_FEES: 30000
+      HIGH_FEES: 25000
+      GAS: auto
+      GAS_ADJUSTMENT: 2.0
+      GAS_PRICES: 0.005
+      DELEGATE_1: ${{ vars.DELEGATE_1 }}
+      DELEGATE_1_AMOUNT: ${{ vars.DELEGATE_1_AMOUNT }}
+      DELEGATE_2_AMOUNT: ${{ vars.DELEGATE_2_AMOUNT }}
+      LSM_LOG: /home/runner/artifact/lsm_log.csv
+      COMMIT_TIMEOUT: 5
+      CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
+      VESTING_TARGET: "1772414007"
+      UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+      # UPGRADE_VERSION: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
+      HERMES_VERSION: ${{ vars.HERMES_VERSION }}
+      CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "$SSH_KEYS" > ~/.ssh/authorized_keys
+      - name: start-version
+        run: echo ${{inputs.gaia_version}}
+      - name: target-version
+        run: echo ${{inputs.upgrade_version}}
+      - name: target-commit
+        if: ${{ inputs.upgrade_version == 'main' }}
+        run: |
+          BUILD_TAG=gaiad-linux-${{inputs.upgrade_version}}
+          TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+          echo TARGET_COMMIT: $TARGET_COMMIT
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
+      - name: Consumer chain binary URLs
+        run: echo "$CONSUMER_CHAIN_BINARY runs off $CONSUMER_CHAIN_BINARY_URL"
+      - name: Update PATH
+        run: |
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+          echo "$HOME/.hermes" >> $GITHUB_PATH
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli
+          python -m pip install graph-cli
+      - name: Print RPC port
+        run: echo $VAL1_RPC_PORT
+      - name: Test software upgrade for published releases
+        if: ${{ inputs.upgrade_version != 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ inputs.upgrade_version }}/gaiad-${{ inputs.upgrade_version }}-linux-amd64
+        run: |
+          echo "$DOWNLOAD_URL"
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+      - name: Test software upgrade for main branch
+        if: ${{ inputs.upgrade_version == 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+        run: |
+          echo "$DOWNLOAD_URL"
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+      - name: Set up memory monitor for provider
+        run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
+      - name: Start chain val1 and link val2 node
+        env:
+          START_VERSION: ${{inputs.gaia_version}}
+          ARCHIVE_URL: ${{ inputs.archive_url }}
+        run: scripts/stateful/start_chain_val1.sh
+      - name: _Blocks produced after upgrade
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 12600
+      - name: _Blocks produced on val2
+        run: tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 12600
+      - name: Check block hashes on both nodes
+        run: |
+          set -e
+          latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
+          echo "[INFO]: Block height is $latest_block"
+          hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          sleep 6
+          hash_val2=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          if [ $hash_val1 != $hash_val2 ]
+          then
+            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+            exit 1
+          else
+            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+          fi
+      - name: Flush "migration successful" lines
+        run: |
+          $CHAIN_BINARY keys list --home $HOME_1
+          $CHAIN_BINARY keys list --home $HOME_2
+      - name: Get starting balances
+        run: |
+          set -e
+          echo "[INFO] val1:"
+          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+          echo "[INFO] val2:"
+          wallets=$(gaiad --home $HOME_2 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
+      - name: Query staking params
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q staking params
+          # unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.unbonding_time' | sed 's/.$//')
+          # unbonding=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
+          # echo "UNBONDING_TIME=$unbonding" >> $GITHUB_ENV
+      - name: Set staking params
+        run: scripts/submit_proposal.sh templates/proposal-stateful-staking-params.json
+      - name: Query staking params after prop passed
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q staking params
+      - name: Update templates/proposal-add-template.json unbonding time
+        run: |
+          set -e
+          # unbonding_period=$(echo "${{ env.UNBONDING_TIME }}*1000000000" | bc)
+          # jq ". .unbonding_period=$unbonding_period" templates/proposal-add-template.json > proposal-add-template.json
+          echo "$CONSUMER_UNBOND_TIME"
+          jq ". .unbonding_period=$CONSUMER_UNBOND_TIME" templates/proposal-add-template.json > proposal-add-template.json
+          mv proposal-add-template.json templates/proposal-add-template.json
+          echo "[INFO] Contents of templates/proposal-add-template.json:"
+          cat templates/proposal-add-template.json
+      - name: Set voting period to 60s and 15s expedited voting period"
+        env:
+          VOTING_PERIOD: "20s"
+        run: scripts/stateful/set_voting_period.sh templates/proposal-voting-period-60s.json
+      - name: Query gov params time
+        run: $CHAIN_BINARY --home $HOME_1 q gov params
+      - name: Query provider params
+        run: $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+      - name: Set BlocksPerEpoch to 1
+        run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-1.json
+      - name: Query provider params
+        run: $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+      - name: Check BlocksPerEpoch is 1
+        run: |
+          set -e
+          BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
+          echo "BlocksPerEpoch is: $BPE"
+          if [ $BPE != 1 ]
+          then
+            echo "BlocksPerEpoch is not 1"
+            exit 1
+          fi
+      - name: Set slashing values
+        run: |
+          jq -r '.messages[0].params.signed_blocks_window="20"' templates/proposal-slashing-params.json > templates/proposal-slashing-params_signed_blocks_window.json
+          mv templates/proposal-slashing-params_signed_blocks_window.json templates/proposal-slashing-params.json
+          echo "[DEBUG]: Slashing proposal file:"
+          jq -r '.' templates/proposal-slashing-params.json
+      - name: Query slashing params
+        run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
+      - name: Submit proposal to update slashing params
+        run: scripts/submit_proposal.sh templates/proposal-slashing-params.json
+      - name: Create val2 validator
+        env:
+          VAL2_DELEGATION_AMOUNT: 500000000000000
+          VAL2_BANK_SEND_AMOUNT: 500005000000000
+        run: |
+          set -e
+          echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} $VAL2_BANK_SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+          echo "[INFO]: Wait for one block to pass"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Check val2 address balances"
+          $CHAIN_BINARY --home $HOME_1 q bank balances ${{ env.VAL2_SELF_DELEGATION }}
+          echo "[INFO]: Store pub key params"
+          pub_key_type=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
+          pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '.key')
+          echo "type: $pub_key_type"
+          echo "key: $pub_key"
+          jq -r ".pubkey.\"@type\" = \"$pub_key_type\" | .pubkey.key = \"$pub_key\" | .\"amount\" = \"$VAL2_DELEGATION_AMOUNT$DENOM\"" templates/create-validator.json > tmp.json
+          mv tmp.json templates/create-validator.json
+          echo "[INFO]: templates/create-validator.json"
+          jq -r '.' templates/create-validator.json
+          echo "[INFO]: tx staking create-validator..."
+          $CHAIN_BINARY --home $HOME_2 tx staking create-validator templates/create-validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
+          echo "[INFO]: Wait for one block to pass"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Query staking validators"
+          $CHAIN_BINARY --home $HOME_2 query staking validators
+      - name: Query slashing params
+        run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
+      - name: Check tendermint validators
+        run: $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
+      - name: Check validator set is 1
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.'
+          total_validator=$($CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.pagination.total')
+          if [ $total_validator != 1 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_validator, expected 1"
+            exit 1
+          fi
+      - name: Check number of signatures
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 1 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+            exit 1
+          fi
+      - name: _Transactions verified> bank send, delegate, and withdraw rewards
+        run: tests/stateful/test_tx.sh
+      - name: Send funds to wallet 4
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      - name: Wait for 1 block to pass
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      # - name: Generate wallets for fee market
+      #   run: |
+      #     feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
+      #     echo "[INFO] feemarket_wallet1: $feemarket_wallet1_json"
+      #     echo "FEE_MARKET_WALLET1=$(echo $feemarket_wallet1_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-2 --output json)
+      #     echo "[INFO] feemarket_wallet2: $feemarket_wallet2_json"
+      #     echo "FEE_MARKET_WALLET2=$(echo $feemarket_wallet2_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet3_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-3 --output json)
+      #     echo "[INFO] feemarket_wallet3: $feemarket_wallet3_json"
+      #     echo "FEE_MARKET_WALLET3=$(echo $feemarket_wallet3_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet4_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-4 --output json)
+      #     echo "[INFO] feemarket_wallet4: $feemarket_wallet4_json"
+      #     echo "FEE_MARKET_WALLET4=$(echo $feemarket_wallet4_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet5_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-5 --output json)
+      #     echo "[INFO] feemarket_wallet5: $feemarket_wallet5_json"
+      #     echo "FEE_MARKET_WALLET5=$(echo $feemarket_wallet5_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet6_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-6 --output json)
+      #     echo "[INFO] feemarket_wallet6: $feemarket_wallet6_json"
+      #     echo "FEE_MARKET_WALLET6=$(echo $feemarket_wallet6_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet7_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-7 --output json)
+      #     echo "[INFO] feemarket_wallet7: $feemarket_wallet7_json"
+      #     echo "FEE_MARKET_WALLET7=$(echo $feemarket_wallet7_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet8_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-8 --output json)
+      #     echo "[INFO] feemarket_wallet8: $feemarket_wallet8_json"
+      #     echo "FEE_MARKET_WALLET8=$(echo $feemarket_wallet8_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet9_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-9 --output json)
+      #     echo "[INFO] feemarket_wallet9: $feemarket_wallet9_json"
+      #     echo "FEE_MARKET_WALLET9=$(echo $feemarket_wallet9_json | jq -r '.address')" >> $GITHUB_ENV
+      #     feemarket_wallet10_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-10 --output json)
+      #     echo "[INFO] feemarket_wallet10: $feemarket_wallet10_json"
+      #     echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq -r '.address')" >> $GITHUB_ENV
+      # - name: Send funds to feemarket wallets
+      #   env:
+      #     SEND_AMOUNT: 1000000000
+      #   run: |
+      #     echo "[INFO] sending funds to feemarket-1 ${{ env.FEE_MARKET_WALLET1 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET1 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-2 ${{ env.FEE_MARKET_WALLET2 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET2 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-3 ${{ env.FEE_MARKET_WALLET3 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET3 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-4 ${{ env.FEE_MARKET_WALLET4 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET4 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-5 ${{ env.FEE_MARKET_WALLET5 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET5 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-6 ${{ env.FEE_MARKET_WALLET6 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET6 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-7 ${{ env.FEE_MARKET_WALLET7 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET7 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-8 ${{ env.FEE_MARKET_WALLET8 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET8 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-9 ${{ env.FEE_MARKET_WALLET9 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET9 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO] sending funds to feemarket-10 ${{ env.FEE_MARKET_WALLET10 }}"
+      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET10 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Get wallet balances
+        run: |
+          set -e
+          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+      - name: _Test commission rate
+        run: |
+          echo "[INFO]: Get current commission rate..."
+          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+          echo "$json"
+          current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+          echo "[INFO]: Current commission rate is: $current_commission_rate"
+          echo "[INFO]: Set commission to 0.05 higher"
+          set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
+          echo "[INFO]: Set commission to: $set_commission_rate"
+          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Get latest comission rate..."
+          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+          echo "$json"
+          modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+          echo "[INFO]: Current commission rate is: $modified_commission_rate"
+          if [ "$modified_commission_rate" != "$set_commission_rate" ]
+          then
+            echo "[ERROR]: commission rate not set!"
+            echo "Expected $set_commission_rate got $modified_commission_rate"
+          fi
+
+      - name: _Test permissioned cosmwasm
+        run: tests/stateful/test_cosmwasm.sh
+      - name: Print netstat
+        run: netstat -ntap
+      - name: _Provider API tests using localhost> gaiad
+        run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+      - name: _Provider RPC tests using localhost> gaiad
+        run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+
+      - name: Set up relayer
+        run: scripts/stateful/setup_relayer.sh
+      - name: Download consumer chain binaries
+        run: |
+          set -e
+          wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+          wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+
+      - name: Installing secondary chain binaries
+        env:
+          START_VERSION: ${{ vars.ICA_CHAIN_GAIA_VERSION }}
+        run: |
+          set -e
+          export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+          echo "Chain binary URL: $CHAIN_BINARY_URL"
+          echo "Installing secondary chain binary..."
+          wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
+          chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
+      - name: Start secondary chain
+        env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+          CHAIN_SERVICE: ica-chain.service
+          CHAIN_HOME: /home/runner/.ica-chain
+          CHAIN_ID: ica-chain
+          VAL_STAKE: 100000000
+          API_PORT: 35011
+          GRPC_PORT: 36011
+          RPC_PORT: 37011
+          P2P_PORT: 38011
+          PPROF_PORT: 39011
+          GAS_PRICE: 0.0025
+          MONIKER_RELAYER: ${{ vars.MONIKER_2 }}
+          MNEMONIC_RELAYER: ${{ vars.MNEMONIC_2 }}
+        run: |
+          source ~/env/bin/activate
+          scripts/stateful/start_chain_secondary.sh
+      - name: _ICA chain produces blocks> ica-chain
+        run: tests/test_block_production.sh 127.0.0.1 37011 10
+      - name: Send funds to wallet 4 on ICA chain
+        env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+          CHAIN_SERVICE: ica-chain.service
+          CHAIN_HOME: /home/runner/.ica-chain
+        run: |
+          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
+          sleep 60
+          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
+      - name: Establish Connection to ICA chain
+        env:
+          CHAIN_HOME: /home/runner/.val1
+        run: |
+          set -e
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
+          hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
+          echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
+          hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
+          sleep 30
+          # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
+          # client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
+          # echo "Client ID is: $client_id"
+          # hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
+          hermes create connection --a-chain ica-chain --b-chain $CHAIN_ID
+          echo "ica-chain connection-0 info:"
+          hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      - name: Test ICA
+        env:
+          ICA_HOME: /home/runner/.ica-chain
+          CHAIN_HOME: /home/runner/.val1
+        run: tests/stateful/test_ica_controller.sh 
+      - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          DOWNTIME_BLOCKS: 20
+          CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+        run: scripts/stateful/init_consumer_2_vals.sh
+      - name: Launch opt-in consumer chain a
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+          PSS_ENABLED: true
+          TOPN: 0
+        run: scripts/stateful/launch_consumer_2_vals_optin.sh
+      - name: _Opt-in consumer chain produces blocks val1> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
+      - name: _Opt-in consumer chain produces blocks val2> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
+      - name: Check block hashes on both consumer nodes
+        run: |
+          set -e
+          # $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status
+          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.sync_info.latest_block_height')
+          echo "[INFO]: Block height is $latest_block"
+          hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          sleep 6
+          hash_val2=$(curl -s 127.0.0.1:$CON2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          echo "[INFO]: cona1 $hash_val1"
+          echo "[INFO]: cona2 $hash_val1"
+          if [ $hash_val1 != $hash_val2 ]
+          then
+            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+            exit 1
+          else
+            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+          fi
+      - name: Get consumer consumer_id
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          STORE_ENV_VAR_NAME: CONSUMERA_CONSUMER_ID
+        run: |
+          consumer_id=$($CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains -o json | jq -r ".chains[] | select(.chain_id==\"$CONSUMER_CHAIN_ID\") | .consumer_id")
+          echo "$STORE_ENV_VAR_NAME=$consumer_id" >> $GITHUB_ENV
+      - name: Print opt-in consumer tendermint validators
+        env:
+          CONSUMER_ID: ${{ env.CONSUMERA_CONSUMER_ID }}
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_ID"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_ID -o json | jq -r '.'
+      - name: Check number of signatures on consumera
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 2 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
+            exit 1
+          else
+            echo "Expected correct number of validators: $total_signatures"
+          fi
+      - name: Establish CCV channel for consumer a
+        run: |
+          set -e
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          echo "[DEBUG]: gaiad q provider list-consumer-chains"
+          gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
+          hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      # - name: DEBUG
+      #   if: always()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
+      - name: _VSC successful> Interchain Security (Consumer) PSS
+        run: tests/stateful/test_ccv.sh
+      - name: _IBC transfer successful> Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumera
+        run: |
+          set -e
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json --reverse | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
+          echo "Client ID: $client_id"
+          connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
+          echo "Connection ID: $connection_id"
+          channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
+          echo "Channel ID: $channel_id"
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1000
+          echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
+          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
+          echo "consumera denom: $denom"
+          echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
+      - name: Send tx on consumer with huge gas (not needed keep commented out)
+        run: |
+          json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
+          echo "[INFO]: Transaction Result..."
+          echo "$json"
+          echo "[INFO]: Wait for 1 block to pass..."
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "[INFO]: TX result..."
+          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      - name: _Check consumera rewards in rewards pool balances
+        run: |
+          echo "[INFO]: Wait for 20 blocks to pass"
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
+          echo "[INFO]: Rewards pool balances:"
+          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
+          echo "[INFO]: Looking for denom: $denom"
+          if [ "$denom" != "$CONSUMERA_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in rewards pool"
+            exit 1
+          else
+            echo "[PASS] Denom is in rewards pool: $denom"
+          fi
+      # - name: Register reward denom for consumer a using proposal
+      #   run: |
+      #     jq -r --arg DENOMTOADD "$CONSUMERA_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
+      #     scripts/submit_proposal.sh proposal-denom-hash.json
+      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
+      - name: Register reward denom for consumer a using update consumer
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          CONSUMER_DENOM: ${{ env.CONSUMERA_DENOM }}
+        run: |
+          jq -r --arg denom1 "$CONSUMER_DENOM" '.allowlisted_reward_denoms.denoms |= [$denom1]' templates/update-consumer-params.json > $CONSUMER_CHAIN_ID-set-allowed-denoms.json
+          jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chain_id=$chain_id' $CONSUMER_CHAIN_ID-set-allowed-denoms.json > $CONSUMER_CHAIN_ID-set-chain_id.json
+          jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
+          echo "[INFO]: Update consumer json:"
+          cat $CONSUMER_CHAIN_ID-register-denoms.json
+          echo "[INFO]: Create and submit update-consumer"
+          $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 -y
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
+          echo "[INFO]: Query consumer-chain consumera"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
+          echo "[INFO]: Query consumer chains list"
+          $CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains --reverse --output json | jq
+          echo "[INFO]: Trigger additional rewards"
+          txhash=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --fees 10000000ucon --gas-adjustment 2 -y -o json | jq -r '.txhash')
+          sleep 30
+          echo "[INFO]: Rewards trigger tx"
+          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
+      - name: _Check validator outstanding rewards for consumer chain a
+        run: |
+          ls $HOME/artifact
+          echo "[INFO]: Hermes log"
+          tail -n 100 $HOME/artifact/hermes.service.log
+          echo "[INFO]: Gaia log"
+          tail -n 100 $HOME/artifact/gaia1.service.log
+          echo "[INFO]: Rewards pool balances:"
+          $CHAIN_BINARY --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          echo "[INFO]: Rewards for val1 self-delegation wallet:"
+          $CHAIN_BINARY --home $HOME_1 q distribution rewards $WALLET_1 -o json | jq
+          echo "[INFO]: Rewards for val2 self-delegation wallet:"
+          $CHAIN_BINARY --home $HOME_1 q distribution rewards ${{ env.VAL2_SELF_DELEGATION }} -o json | jq
+          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
+          echo "[INFO]: val1 balances:"
+          $CHAIN_BINARY --home ~/.val1 q bank balances $WALLET_1 -o json | jq
+          echo "[INFO]: Current validator outstanding rewards:"
+          echo "$outstanding_rewards"
+          echo "[INFO]: Checking if expected reward listed..."
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
+          echo "[INFO]: Looking for denom: $denom"
+          if [ "$denom" != "$CONSUMERA_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
+            exit 1
+          else
+            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
+          fi
+
+      - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          DOWNTIME_BLOCKS: 20
+          CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+          CON1_API_PORT: ${{ env.CONB1_API_PORT }}
+          CON1_GRPC_PORT: ${{ env.CONB1_GRPC_PORT }}
+          CON1_RPC_PORT: ${{ env.CONB1_RPC_PORT }}
+          CON1_P2P_PORT: ${{ env.CONB1_P2P_PORT }}
+          CON1_PPROF_PORT: ${{ env.CONB1_PPROF_PORT }}
+          CON2_API_PORT: ${{ env.CONB2_API_PORT }}
+          CON2_GRPC_PORT: ${{ env.CONB2_GRPC_PORT }}
+          CON2_RPC_PORT: ${{ env.CONB2_RPC_PORT }}
+          CON2_P2P_PORT: ${{ env.CONB2_P2P_PORT }}
+          CON2_PPROF_PORT: ${{ env.CONB2_PPROF_PORT }}
+          CONSUMER_SERVICE_1: conb1.service
+          CONSUMER_SERVICE_2: conb2.service
+        run: scripts/stateful/init_consumer_2_vals.sh
+      - name: Launch TopN consumer chain b
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+          CONSUMER_SERVICE_1: conb1.service
+          CONSUMER_SERVICE_2: conb2.service
+          CONSUMER_MIN_GAS_PRICES: ${{ env.CONSUMERB_MIN_GAS_PRICES }}
+          PSS_ENABLED: true
+          TOPN: 95
+        run: |
+          scripts/stateful/launch_consumer_2_vals_topn.sh
+      - name: _TopN consumer chain produces blocks val1> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 10
+      - name: _TopN consumer chain produces blocks val2> ICS v4.0.0
+        run: tests/test_block_production.sh 127.0.0.1 $CONB2_RPC_PORT 10
+      # - name: Check block hashes on both consumerb nodes
+      #   run: |
+      #     set -e
+      #     latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
+      #     echo "[INFO]: Block height is $latest_block"
+      #     hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+      #     sleep 6
+      #     hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+      #     echo "[INFO]: conb1 $hash_val1"
+      #     echo "[INFO]: conb2 $hash_val2"
+      #     if [ $hash_val1 != $hash_val2 ]
+      #     then
+      #       echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+      #       exit 1
+      #     else
+      #       echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+      #     fi
+      # - name: Check number of signatures on consumerb
+      #   run: |
+      #     set -e
+      #     total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+      #     if [ $total_signatures != 1 ]
+      #     then
+      #       echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+      #       exit 1
+      #     else
+      #       echo "Expected correct number of validators: $total_signatures"
+      #     fi
+      - name: Establish CCV channel for consumerb
+        run: |
+          set -e
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
+          hermes create connection --a-chain consumerb --a-client 07-tendermint-0 --b-client $client_id
+          hermes create channel --a-chain consumerb --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      - name: _VSC successful> Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+          CON1_RPC_PORT: ${{ env.CONB1_RPC_PORT }}
+        run: tests/stateful/test_ccv.sh
+      - name: _IBC transfer successful> Interchain Security (Consumer) PSS consumerb
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+          CONSUMER_SERVICE_1: conb1.service
+          CONSUMER_SERVICE_2: conb2.service
+        run: |
+          set -e
+          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
+          echo "Client ID: $client_id"
+          connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
+          echo "Connection ID: $connection_id"
+          channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
+          echo "Channel ID: $channel_id"
+          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1002
+          echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
+          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1002") | .denom')
+          echo "consumerb denom: $denom"
+          echo "CONSUMERB_DENOM=$denom" >> $GITHUB_ENV
+      - name: Print opt-in consumer tendermint validators consumerb
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
+      - name: Opt-in second validator to consumerb
+        run: |
+          set -e
+          echo "[INFO] Optin second validator"
+          node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_2 tendermint show-validator)
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from val2 -y -o json)
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "$json" | jq -r '.'
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
+      - name: Wait for 20 block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
+      - name: Print opt-in consumer tendermint validators consumerb after opt-in
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
+      - name: _Check number of signatures on consumerb
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 2 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
+            exit 1
+          else
+            echo "Expected correct number of validators: $total_signatures"
+          fi
+      - name: _Check consumer b rewards in rewards pool balances
+        run: |
+          echo "[INFO]: Wait for 20 blocks to pass"
+          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 20
+          echo "[INFO]: Rewards pool balances:"
+          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
+          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.balances[] | select(.denom==$CONSUMERB_DENOM) | .denom')
+          echo "[INFO]: Looking for denom: $denom"
+          if [ "$denom" != "$CONSUMERB_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in rewards pool"
+            exit 1
+          else
+            echo "[PASS] Denom is in rewards pool: $denom"
+          fi
+      - name: Register reward denom for consumer b using proposal
+        run: |
+          jq -r --arg DENOMTOADD "$CONSUMERB_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
+          scripts/submit_proposal.sh proposal-denom-hash.json
+          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 20
+      - name: _Check validator outstanding rewards for consumer chain b
+        run: |
+          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
+          echo "[INFO]: Current validator outstanding rewards:"
+          echo "$outstanding_rewards"
+          echo "[INFO]: Checking if expected reward listed..."
+          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERB_DENOM) | .denom' )
+          echo "[INFO]: Looking for denom: $denom"
+          if [ "$denom" != "$CONSUMERB_DENOM" ]
+          then
+            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
+            exit 1
+          else
+            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
+          fi
+      # Opt-out consumerb
+      - name: Opt-out second validator to consumerb
+        run: |
+          set -e
+          echo "[INFO] Opt-out second validator"
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID_TOPN }} --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from val2 -y -o json)
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "$json" | jq -r '.'
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
+      - name: Wait for 20 block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
+      - name: Print opt-in consumer tendermint validators consumerb after opt-out
+        env:
+          CONSUMER_CHAIN_ID: consumerb
+          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
+          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
+          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
+      - name: _Check number of signatures on consumerb after opt-out
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 1 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+            exit 1
+          else
+            echo "Expected correct number of validators: $total_signatures"
+          fi
+      # Opt-out consumera
+      - name: Opt-out second validator to consumera
+        run: |
+          set -e
+          echo "[INFO] Opt-out second validator"
+          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID }} --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT  --from val2 -y -o json)
+          txhash=$(echo "$json" | jq -r .txhash)
+          echo "$json" | jq -r '.'
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
+      - name: Wait for 20 block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
+      - name: Print opt-in consumer tendermint validators consumera after opt-out
+        run: |
+          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
+          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
+          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
+          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
+          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID }}"
+          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID }} -o json | jq -r '.'
+      - name: _Check number of signatures on consumera after opt-out
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 1 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+            exit 1
+          else
+            echo "Expected correct number of validators: $total_signatures"
+          fi
+      - name: Set BlocksPerEpoch to 100
+        run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-100.json
+      - name: Check BlocksPerEpoch is 100
+        run: |
+          BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
+          echo "BlocksPerEpoch is: $BPE"
+          if [ $BPE != 100 ]
+          then
+            echo "BlocksPerEpoch is not 100"
+            exit 1
+          fi
+      - name: Waiting for 100th block
+        run: |
+          cur_height=0
+          echo_height=1
+          height=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
+          to_height=$(scripts/stateful/roundup-100.py $height)
+          echo "[INFO] waiting to reach height $to_height"
+          until [[ "${cur_height}" -gt "${to_height}" ]]
+          do
+              cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+              if [ $echo_height -ne $cur_height ]
+              then
+                echo "[INFO] Current height: $cur_height"
+                echo_height=$cur_height
+              fi
+              sleep 1
+          done
+      - name: _VSC successful epoch> ICS cona1
+        # env:
+        #   CON1_RPC_PORT: 27201
+        run: tests/stateful/test_ccv_epoch.sh 100
+      - name: _Test expedited proposal
+        run: |
+          export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
+          echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
+          tests/stateful/gaia-v18/test_expedited_proposal.sh
+      # - name: Print block params
+      #   run: |
+      #     params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
+      #     echo "$params"
+      # - name: Set block params
+      #   env:
+      #     MAX_BYTES: 1000000
+      #     MAX_GAS: 100000000
+      #     EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
+      #     EVIDENCE_MAX_AGE_DURATION: 172800s
+      #     EVIDENCE_MAX_BYTES: 50000
+      #   run: |
+      #     scripts/stateful/set_block_size.sh
+      # - name: Query feemarket params
+      #   run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
+      # - name: Set feemarket params
+      #   run: |
+      #     scripts/submit_proposal.sh templates/proposal-feemarket.json
+      # - name: Query feemarket params
+      #   run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
+      # - name: Set consensus timeout to 140s
+      #   run: |
+      #     source ~/env/bin/activate
+      #     toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "140s"
+      #     screen -S $PROVIDER_SERVICE_1 -p 0 -X stuff "^C"
+      # - name: Wait for 2 blocks
+      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 600
+      # - name: _Test Feemarket
+      #   run: |
+      #     export FEE_MARKET_1_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET1 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET1 }} is: $FEE_MARKET_1_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_2_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET2 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET2 }} is: $FEE_MARKET_2_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_3_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET3 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET3 }} is: $FEE_MARKET_3_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_4_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET4 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET4 }} is: $FEE_MARKET_4_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_5_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET5 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET5 }} is: $FEE_MARKET_5_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_6_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET6 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET6 }} is: $FEE_MARKET_6_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_7_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET7 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET7 }} is: $FEE_MARKET_7_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_8_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET8 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET8 }} is: $FEE_MARKET_8_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_9_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET9 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET9 }} is: $FEE_MARKET_9_ACCOUNT_NUMBER"
+      #     export FEE_MARKET_10_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET10 }} -o json | jq -r '.account.value.account_number')
+      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET10 }} is: $FEE_MARKET_10_ACCOUNT_NUMBER"
+      #     tests/stateful/gaia-v18/test_feemarket.sh
+      # - name: DEBUG
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
+
+      ### Param tests
+      - name: Query current consensus params
+        run: |
+          echo "Query current consensus params"
+          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+      - name: Query current provider params
+        run: |
+          echo "Query current provider params"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+      - name: Query current feemarket params
+        run: |
+          echo "Query current feemarket params"
+          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      - name: Query current staking params
+        run: |
+          echo "Query current staking params"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+      - name: Query current gov params
+        run: |
+          echo "Query current gov params"
+          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
+      - name: _Pre-proposal test current gov params
+        run: |
+          echo "Verify deposit is not burned when quorum is reached by voting no"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          source scripts/submit_proposal.sh templates/proposal-text.json no
+          fees_proposal_tx=$(echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          fees_vote_tx=$(echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          echo "[INFO]: Gas used during proposal tx: $fees_proposal_tx"
+          echo "[INFO]: Gas used during vote tx: $fees_vote_tx"
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx - $fees_vote_tx" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is burned when no_with_veto passed"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          source scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          fees_proposal_tx=$(echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          fees_vote_tx=$(echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          echo "[INFO]: Gas used during proposal tx: $fees_proposal_tx"
+          echo "[INFO]: Gas used during vote tx: $fees_vote_tx"
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx - $fees_vote_tx - 100000000" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is not burned when quorum is not reached"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and not voting"
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          echo "[INFO]: Wait for voting period to end..."
+          sleep $VOTING_PERIOD
+          sleep $VOTING_PERIOD
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Pre-proposal test current consensus and feemarket params
+        run: |
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[ERROR]: Proposal did not go through"
+            exit 1
+          fi
+      - name: Submit proposal to update modules params
+        run: scripts/submit_proposal.sh templates/proposal-test-update-all-modules.json
+      - name: _Verify consensus params prop is set
+        env:
+          CONSENSUS_BLOCK_MAX_BYTES: "3000"
+          CONSENSUS_BLOCK_MAX_GAS: "76000000"
+          CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS: "2000000"
+          CONSENSUS_EVIDENCE_MAX_AGE_DURATION: "48h0m0s"
+          CONSENSUS_EVIDENCE_MAX_BYTES: "2900"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.'
+          Q_CONSENSUS_BLOCK_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_bytes')
+          Q_CONSENSUS_BLOCK_MAX_GAS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.block.max_gas')
+          Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_num_blocks')
+          Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_age_duration')
+          Q_CONSENSUS_EVIDENCE_MAX_BYTES=$($CHAIN_BINARY --home $HOME_1 q consensus params -o json | jq -r '.params.evidence.max_bytes')
+          if [ "$Q_CONSENSUS_BLOCK_MAX_BYTES" != "$CONSENSUS_BLOCK_MAX_BYTES" ]
+          then
+            echo "[ERROR]: CONSENSUS_BLOCK_MAX_BYTES does not match query: $CONSENSUS_BLOCK_MAX_BYTES $Q_CONSENSUS_BLOCK_MAX_BYTES"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_BLOCK_MAX_GAS" != "$CONSENSUS_BLOCK_MAX_GAS" ]
+          then
+            echo "[ERROR]: CONSENSUS_BLOCK_MAX_GAS does not match query: $CONSENSUS_BLOCK_MAX_GAS $Q_CONSENSUS_BLOCK_MAX_GAS"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" != "$CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS" ]
+          then
+            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS does not match query: $CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS $Q_CONSENSUS_EVIDENCE_MAX_AGE_NUM_BLOCKS"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION" != "$CONSENSUS_EVIDENCE_MAX_AGE_DURATION" ]
+          then
+            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_AGE_DURATION does not match query: $CONSENSUS_EVIDENCE_MAX_AGE_DURATION $Q_CONSENSUS_EVIDENCE_MAX_AGE_DURATION"
+            error="1"
+          fi
+          if [ "$Q_CONSENSUS_EVIDENCE_MAX_BYTES" != "$CONSENSUS_EVIDENCE_MAX_BYTES" ]
+          then
+            echo "[ERROR]: CONSENSUS_EVIDENCE_MAX_BYTES does not match query: $CONSENSUS_EVIDENCE_MAX_BYTES $Q_CONSENSUS_EVIDENCE_MAX_BYTES"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify provider params prop is set
+        env:
+          TEMPLATE_CLIENT_TRUSTING_PERIOD: "3600s"
+          TEMPLATE_CLIENT_UNBONDING_PERIOD: "1800s"
+          TRUSTING_PERIOD_FRACTION: "0.76"
+          CCV_TIMEOUT_PERIOD: "2419200s"
+          SLASH_METER_REPLENISH_PERIOD: "1800s"
+          SLASH_METER_REPLENISH_FRACTION: "0.01"
+          CONSUMER_REWARD_DENOM_REGISTRATION_FEE: "50000000"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
+          Q_TEMPLATE_CLIENT_TRUSTING_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.template_client.trusting_period') 
+          Q_TEMPLATE_CLIENT_UNBONDING_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.template_client.unbonding_period')
+          Q_TRUSTING_PERIOD_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.trusting_period_fraction')
+          Q_CCV_TIMEOUT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.ccv_timeout_period')
+          Q_SLASH_METER_REPLENISH_PERIOD=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_period')
+          Q_SLASH_METER_REPLENISH_FRACTION=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.slash_meter_replenish_fraction')
+          Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE=$($CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.consumer_reward_denom_registration_fee.amount')
+          if [ "$Q_TEMPLATE_CLIENT_TRUSTING_PERIOD" != "$TEMPLATE_CLIENT_TRUSTING_PERIOD" ]
+          then
+            echo "[ERROR]: TEMPLATE_CLIENT_TRUSTING_PERIOD does not match query: $TEMPLATE_CLIENT_TRUSTING_PERIOD $Q_TEMPLATE_CLIENT_TRUSTING_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_TEMPLATE_CLIENT_UNBONDING_PERIOD" != "$TEMPLATE_CLIENT_UNBONDING_PERIOD" ]
+          then
+            echo "[ERROR]: TEMPLATE_CLIENT_UNBONDING_PERIOD does not match query: $TEMPLATE_CLIENT_UNBONDING_PERIOD $Q_TEMPLATE_CLIENT_UNBONDING_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_TRUSTING_PERIOD_FRACTION" != "$TRUSTING_PERIOD_FRACTION" ]
+          then
+            echo "[ERROR]: TRUSTING_PERIOD_FRACTION does not match query: $TRUSTING_PERIOD_FRACTION $TRUSTING_PERIOD_FRACTION"
+            error="1"
+          fi
+          if [ "$Q_CCV_TIMEOUT_PERIOD" != "$CCV_TIMEOUT_PERIOD" ]
+          then
+            echo "[ERROR]: CCV_TIMEOUT_PERIOD does not match query: $CCV_TIMEOUT_PERIOD $Q_CCV_TIMEOUT_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_SLASH_METER_REPLENISH_PERIOD" != "$SLASH_METER_REPLENISH_PERIOD" ]
+          then
+            echo "[ERROR]: SLASH_METER_REPLENISH_PERIOD does not match query: $SLASH_METER_REPLENISH_PERIOD $Q_SLASH_METER_REPLENISH_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_SLASH_METER_REPLENISH_FRACTION" != "$SLASH_METER_REPLENISH_FRACTION" ]
+          then
+            echo "[ERROR]: SLASH_METER_REPLENISH_FRACTION does not match query: $SLASH_METER_REPLENISH_FRACTION $Q_SLASH_METER_REPLENISH_FRACTION"
+            error="1"
+          fi
+          if [ "$Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE" != "$CONSUMER_REWARD_DENOM_REGISTRATION_FEE" ]
+          then
+            echo "[ERROR]: CONSUMER_REWARD_DENOM_REGISTRATION_FEE does not match query: $CONSUMER_REWARD_DENOM_REGISTRATION_FEE $Q_CONSUMER_REWARD_DENOM_REGISTRATION_FEE"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify staking params prop is set
+        env:
+          UNBONDING_TIME: "240h0m0s"
+          MAX_VALIDATORS: 10
+          MAX_ENTRIES: 8
+          HISTORICAL_ENTRIES: 15000
+          MIN_COMMISSION_RATE: "0.010000000000000000"
+          VALIDATOR_BOND_FACTOR: "200.000000000000000000"
+          GLOBAL_LIQUID_STAKING_CAP: "0.200000000000000000"
+          VALIDATOR_LIQUID_STAKING_CAP: "0.400000000000000000"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+          Q_UNBONDING_TIME=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.unbonding_time')
+          Q_MAX_VALIDATORS=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_validators')
+          Q_MAX_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.max_entries')
+          Q_HISTORICAL_ENTRIES=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.historical_entries')
+          Q_MIN_COMMISSION_RATE=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.min_commission_rate')
+          Q_VALIDATOR_BOND_FACTOR=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_bond_factor')
+          Q_GLOBAL_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.global_liquid_staking_cap')
+          Q_VALIDATOR_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_liquid_staking_cap')
+          if [ "$Q_UNBONDING_TIME" != "$UNBONDING_TIME" ]
+          then
+            echo "[ERROR]: UNBONDING_TIME does not match query: $UNBONDING_TIME $Q_UNBONDING_TIME"
+            error="1"
+          fi
+          if [ "$Q_MAX_VALIDATORS" != "$MAX_VALIDATORS" ]
+          then
+            echo "[ERROR]: MAX_VALIDATORS does not match query: $MAX_VALIDATORS $Q_MAX_VALIDATORS"
+            error="1"
+          fi
+          if [ "$Q_MAX_ENTRIES" != "$MAX_ENTRIES" ]
+          then
+            echo "[ERROR]: MAX_ENTRIES does not match query: $MAX_ENTRIES $Q_MAX_ENTRIES"
+            error="1"
+          fi
+          if [ "$Q_HISTORICAL_ENTRIES" != "$HISTORICAL_ENTRIES" ]
+          then
+            echo "[ERROR]: HISTORICAL_ENTRIES does not match query: $HISTORICAL_ENTRIES $Q_HISTORICAL_ENTRIES"
+            error="1"
+          fi
+          if [ "$Q_MIN_COMMISSION_RATE" != "$MIN_COMMISSION_RATE" ]
+          then
+            echo "[ERROR]: MIN_COMMISSION_RATE does not match query: $MIN_COMMISSION_RATE $Q_MIN_COMMISSION_RATE"
+            error="1"
+          fi
+          if [ "$Q_VALIDATOR_BOND_FACTOR" != "$VALIDATOR_BOND_FACTOR" ]
+          then
+            echo "[ERROR]: VALIDATOR_BOND_FACTOR does not match query: $VALIDATOR_BOND_FACTOR $Q_VALIDATOR_BOND_FACTOR"
+            error="1"
+          fi
+          if [ "$Q_GLOBAL_LIQUID_STAKING_CAP" != "$GLOBAL_LIQUID_STAKING_CAP" ]
+          then
+            echo "[ERROR]: GLOBAL_LIQUID_STAKING_CAP does not match query: $GLOBAL_LIQUID_STAKING_CAP $Q_GLOBAL_LIQUID_STAKING_CAP"
+            error="1"
+          fi
+          if [ "$Q_VALIDATOR_LIQUID_STAKING_CAP" != "$VALIDATOR_LIQUID_STAKING_CAP" ]
+          then
+            echo "[ERROR]: VALIDATOR_LIQUID_STAKING_CAP does not match query: $VALIDATOR_LIQUID_STAKING_CAP $Q_VALIDATOR_LIQUID_STAKING_CAP"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify gov params prop is set
+        env:
+          MAX_DEPOSIT_PERIOD: "10m0s"
+          BURN_VOTE_QUORUM: "true"
+          BURN_PROPOSAL_DEPOSIT_PREVOTE: "true"
+          BURN_VOTE_VETO: "null"
+        run: |
+          echo "[INFO]: Current params:"
+          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+          Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
+          Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_quorum')
+          Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_proposal_deposit_prevote')
+          Q_BURN_VOTE_VETO=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_veto')
+          if [ "$Q_MAX_DEPOSIT_PERIOD" != "$MAX_DEPOSIT_PERIOD" ]
+          then
+            echo "[ERROR]: MAX_DEPOSIT_PERIOD does not match query: $MAX_DEPOSIT_PERIOD $Q_MAX_DEPOSIT_PERIOD"
+            error="1"
+          fi
+          if [ "$Q_BURN_VOTE_QUORUM" != "$BURN_VOTE_QUORUM" ]
+          then
+            echo "[ERROR]: BURN_VOTE_QUORUM does not match query: $BURN_VOTE_QUORUM $Q_BURN_VOTE_QUORUM"
+            error="1"
+          fi
+          if [ "$Q_BURN_PROPOSAL_DEPOSIT_PREVOTE" != "$BURN_PROPOSAL_DEPOSIT_PREVOTE" ]
+          then
+            echo "[ERROR]: BURN_PROPOSAL_DEPOSIT_PREVOTE does not match query: $BURN_PROPOSAL_DEPOSIT_PREVOTE $Q_BURN_PROPOSAL_DEPOSIT_PREVOTE"
+            error="1"
+          fi
+          if [ "$Q_BURN_VOTE_VETO" != "$BURN_VOTE_VETO" ]
+          then
+            echo "[ERROR]: BURN_VOTE_VETO does not match query: $BURN_VOTE_VETO $Q_BURN_VOTE_VETO"
+            error="1"
+          fi
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify Gov params
+        run: |
+          echo "Verify deposit is not burned when quorum is reached by voting no"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          source scripts/submit_proposal.sh templates/proposal-text.json no
+          fees_proposal_tx=$(echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          fees_vote_tx=$(echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          echo "[INFO]: Gas used during proposal tx: $fees_proposal_tx"
+          echo "[INFO]: Gas used during vote tx: $fees_vote_tx"
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx - $fees_vote_tx" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is not burned when no_with_veto passed"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and voting no"
+          source scripts/submit_proposal.sh templates/proposal-text.json no_with_veto
+          fees_proposal_tx=$(echo "$PROPOSAL_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          fees_vote_tx=$(echo "$VOTE_TX_JSON" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
+          echo "[INFO]: Gas used during proposal tx: $fees_proposal_tx"
+          echo "[INFO]: Gas used during vote tx: $fees_vote_tx"
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx - $fees_vote_tx" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          echo "[INFO]: Verify deposit is burned when quorum is not reached"
+          starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Starting balance: $starting_balance"
+          echo "[INFO]: Submiting proposal and not voting"
+          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          echo "[INFO]: Wait for voting period to end..."
+          sleep $VOTING_PERIOD
+          sleep $VOTING_PERIOD
+          current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
+          echo "[INFO]: Balance after no vote: $current_balance"
+          echo "[INFO]: Calculate currect balance"
+          expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
+          echo "[DEBUG]: expected_balance: $expected_balance"
+          if [ $expected_balance -ne $current_balance ]
+          then
+            echo "[ERROR] Amount is not correct"
+            echo "Expected balance should be $expected_balance, bank have $current_balance"
+            error="1"
+          else
+            echo "Bank balance matches the caluclated balance"
+            echo "Expected balance is $expected_balance and bank have $current_balance"
+          fi
+
+          if [ "$error" == "1" ]
+          then
+            exit 1
+          else
+            echo "PASSED!"
+          fi
+      - name: _Verify consensus params
+        run: |
+          set +e
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          if [ $? -eq 0 ]
+          then
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[INFO]: Waiting for proposal to end"
+            sleep $VOTING_PERIOD
+            tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+            # get tx hash
+            txhash=$(echo $json | jq -r '.txhash')
+            $CHAIN_BINARY --home $HOME_1 q tx $txhash
+            proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+            $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+            echo "[ERROR]: Proposal went through"
+            exit 1
+          else
+            echo "[DEBUG]: json output:"
+            echo "$json"
+            echo "[PASS]: Proposal did not go through"
+          fi
+      - name: Submit feemarket params
+        run: scripts/submit_proposal.sh templates/proposal-feemarket-stateful.json
+      - name: _Verify feemarket params
+        run: |
+          set +e
+          echo "[INFO]: Submit large proposal..."
+          json=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-large-summary.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json)
+          echo "[DEBUG]: json output:"
+          echo "$json"
+          echo $json | jq -r '.raw_log' | grep "insufficient fee"
+          if [ $? -eq 0 ]
+          then
+            echo "[PASS]: Proposal did not go through"
+          else
+            echo "[ERROR]: No insufficient fee from log!"
+            exit 1
+          fi
+
+      - name: Stop services
+        if: always()
+        run: |
+          # hermes
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          # provider
+          killall ${{ env.CHAIN_BINARY }}  || true
+          screen -XS {{ env.PROVIDER_SERVICE_1 }} quit || true
+          # consumer chains
+          killall ${{ env.CONSUMER_CHAIN_BINARY }} || true
+          killall ${{ env.CONSUMER_CHAIN_BINARY_2 }} || true
+          screen -XS ${{ env.CONSUMER_SERVICE_1 }} quit || true
+          screen -XS conb1.service quit || true
+          # stride
+          killall ${{ env.STRIDE_CHAIN_BINARY }}  || true
+          screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
+          killall screen || true
+          sleep 20
+      - name: Generate info graphs
+        if: always()
+        run: |
+          source ~/env/bin/activate
+          # Main gaia service
+          graph $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv -o $HOME/artifact/mem-$PROVIDER_SERVICE_1.png --fill --time-format-input epoch --time-format-output %H:%M:%S --fontsize 8 --title "Gaiad RAM Usages" --ylabel "Memory Used (MB)" --xlabel Time --figsize 1920x1080
+      - name: Save config files
+        if: always()
+        run: |
+          mkdir ~/artifact/configs
+          cp -rp ${{ vars.HOME_1 }}/config/ ~/artifact/configs/val1 || true
+          cp -rp ~/.hermes/ ~/artifact/configs/hermes/ || true
+          cp -rp ~/.cona1/config/ ~/artifact/configs/cona1 || true
+          cp -rp ~/.conb1/config/ ~/artifact/configs/conb1 || true
+          cp -rp ~/.stride1/config/ ~/artifact/configs/stride1 || true
+          mkdir ~/artifact/bin
+          cp -p ~/go/bin/* ~/artifact/bin/ || true
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          path: ~/artifact/
+          include-hidden-files: true
+      # Upload states to artifats
+      # - name: Upload provider chain state val1
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
+      #     path: ~/.val1/
+      #     include-hidden-files: true
+      # - name: Upload provider chain state val2
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
+      #     path: ~/.val2/
+      #     include-hidden-files: true
+      # - name: Upload cona1 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
+      #     path: ~/.cona1/
+      #     include-hidden-files: true
+      # - name: Upload cona2 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
+      #     path: ~/.cona2/
+      #     include-hidden-files: true
