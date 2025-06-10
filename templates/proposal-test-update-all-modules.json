@@ -138,6 +138,14 @@
             }
         },
         {
+            "@type": "/gaia.liquid.v1beta1.MsgUpdateParams",
+            "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+            "params": {
+                "global_liquid_staking_cap": "0.200000000000000000",
+                "validator_liquid_staking_cap": "0.400000000000000000"
+            }
+        },
+        {
             "@type": "/cosmos.gov.v1.MsgUpdateParams",
             "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
             "params": {
