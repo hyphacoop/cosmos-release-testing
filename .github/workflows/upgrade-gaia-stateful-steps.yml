@@ -1376,8 +1376,8 @@ jobs:
         run: |
           echo "[INFO]: Current params:"
           $CHAIN_BINARY --home $HOME_1 q liquid params -o json | jq -r '.'
-          Q_GLOBAL_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.global_liquid_staking_cap')
-          Q_VALIDATOR_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.params.validator_liquid_staking_cap')
+          Q_GLOBAL_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q liquid params -o json | jq -r '.params.global_liquid_staking_cap')
+          Q_VALIDATOR_LIQUID_STAKING_CAP=$($CHAIN_BINARY --home $HOME_1 q liquid params -o json | jq -r '.params.validator_liquid_staking_cap')
           if [ "$Q_GLOBAL_LIQUID_STAKING_CAP" != "$GLOBAL_LIQUID_STAKING_CAP" ]
           then
             echo "[ERROR]: GLOBAL_LIQUID_STAKING_CAP does not match query: $GLOBAL_LIQUID_STAKING_CAP $Q_GLOBAL_LIQUID_STAKING_CAP"
