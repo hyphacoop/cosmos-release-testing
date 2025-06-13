@@ -123,7 +123,7 @@ if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
 
 else
-    ./stop.sh
+    ./$STOP_SCRIPT
     sleep 5
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
         # Build
@@ -144,7 +144,7 @@ else
         chmod +x ./upgraded
         mv ./upgraded $CHAIN_BINARY
     fi
-    ./start.sh
+    ./$START_SCRIPT
 fi
 
 sleep 10

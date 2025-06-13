@@ -33,3 +33,7 @@ export rpc_prefix="27"
 export grpc_prefix="28"
 export pprof_prefix="29"
 export log_prefix="log_"
+
+export START_SCRIPT="start-provider.sh"
+export STOP_SCRIPT="stop-provider.sh"
+export RESET_SCRIPT="reset-provider.sh"

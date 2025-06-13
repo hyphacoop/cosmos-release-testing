@@ -188,45 +188,45 @@ do
 done
 
 echo "> Configuring session scripts"
-rm start.sh ; touch start.sh ; chmod +x start.sh ; echo "#!/bin/bash" >> start.sh
-rm stop.sh ; touch stop.sh ; chmod +x stop.sh ; echo "#!/bin/bash" >> stop.sh
-rm reset.sh ; touch reset.sh ; chmod +x reset.sh ; echo "#!/bin/bash" >> reset.sh
+rm $START_SCRIPT ; touch $START_SCRIPT ; chmod +x $START_SCRIPT ; echo "#!/bin/bash" >> $START_SCRIPT
+rm $STOP_SCRIPT ; touch $STOP_SCRIPT ; chmod +x $STOP_SCRIPT ; echo "#!/bin/bash" >> $STOP_SCRIPT
+rm $RESET_SCRIPT ; touch $RESET_SCRIPT ; chmod +x $RESET_SCRIPT ; echo "#!/bin/bash" >> $RESET_SCRIPT
 
-echo "echo \"Resetting chain...\"" >> reset.sh
-echo "./stop.sh" >> reset.sh
+echo "echo \"Resetting chain...\"" >> $RESET_SCRIPT
+echo "./$STOP_SCRIPT" >> $RESET_SCRIPT
 
 echo "> Current folder:"
 pwd
 for i in $(seq 0 $[$validator_count-1])
 do
-    echo "echo \"Starting validator ${monikers[i]}...\"" >> start.sh
+    echo "echo \"Starting validator ${monikers[i]}...\"" >> $START_SCRIPT
     if [ "$COSMOVISOR" = true ]; then
         echo "> Setting up with Cosmovisor"
         if [ "$UPGRADE_MECHANISM" = 'cv_auto' ]; then
-            echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; export DAEMON_ALLOW_DOWNLOAD_BINARIES=true ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+            echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; export DAEMON_ALLOW_DOWNLOAD_BINARIES=true ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> $START_SCRIPT
         else
-            echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+            echo "tmux new-session -d -s ${monikers[i]} \"export DAEMON_NAME=$CHAIN_BINARY_NAME ; export DAEMON_HOME=${homes[i]} ; export DAEMON_LOG_BUFFER_SIZE=512 ; cosmovisor run start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> $START_SCRIPT
         fi
     else
         echo "> Setting up without Cosmovisor"
-        echo "tmux new-session -d -s ${monikers[i]} \"$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start.sh
+        echo "tmux new-session -d -s ${monikers[i]} \"$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> $START_SCRIPT
     fi
-    echo "sleep 0.2s" >> start.sh
-    echo "echo \"Stopping validator ${monikers[i]}...\"" >> stop.sh
-    echo "tmux send-keys -t ${monikers[i]} C-c" >> stop.sh
-    echo "$CHAIN_BINARY tendermint unsafe-reset-all --home ${homes[i]}" >> reset.sh
-    echo "sleep 0.2s" >> reset.sh
+    echo "sleep 0.2s" >> $START_SCRIPT
+    echo "echo \"Stopping validator ${monikers[i]}...\"" >> $STOP_SCRIPT
+    echo "tmux send-keys -t ${monikers[i]} C-c" >> $STOP_SCRIPT
+    echo "$CHAIN_BINARY tendermint unsafe-reset-all --home ${homes[i]}" >> $RESET_SCRIPT
+    echo "sleep 0.2s" >> $RESET_SCRIPT
 done
 
-echo "./start.sh" >> reset.sh
+echo "./$START_SCRIPT" >> $RESET_SCRIPT
 
-echo "sleep 3s" >> start.sh
-# echo "echo \"tmux sessions:\"" >> start.sh
-# echo "tmux list-sessions" >> start.sh
-echo "echo \"tmux sessions:\"" >> stop.sh
-echo "tmux list-sessions" >> stop.sh
+echo "sleep 3s" >> $START_SCRIPT
+# echo "echo \"tmux sessions:\"" >> $START_SCRIPT
+# echo "tmux list-sessions" >> $START_SCRIPT
+echo "echo \"tmux sessions:\"" >> $STOP_SCRIPT
+echo "tmux list-sessions" >> $STOP_SCRIPT
 
 echo "> Setup complete."
-echo "* Run start.sh to start the chain"
-echo "* Run stop.sh to stop the chain"
-echo "* Run reset.sh to reset the chain"
+echo "* Run $START_SCRIPT to start the chain"
+echo "* Run $STOP_SCRIPT to stop the chain"
+echo "* Run $RESET_SCRIPT to reset the chain"

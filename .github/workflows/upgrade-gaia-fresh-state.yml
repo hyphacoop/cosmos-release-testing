@@ -118,94 +118,94 @@
          upgrade_name: ${{ steps.upgrade.outputs.name }}
          binary_source: ${{ steps.binary.outputs.source }}
 
-      # Test-01-cosmovisor-upgrade:
-      #   runs-on: ubuntu-22.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #       cv_version: [v1.7.1]
-      #       upgrade_mechanism: [cv_auto, cv_manual]
-      #       enable_cosmovisor: [false, true]
-      #       exclude:
-      #         - target_version: main
-      #           upgrade_mechanism: cv_auto
-      #         - enable_cosmovisor: false
-      #           upgrade_mechanism: cv_auto
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: ${{ matrix.enable_cosmovisor }}
-      #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-      #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     GO_VERSION: 1.24.1
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v4
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v5
-      #       with:
-      #         python-version: '3.10'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-      #     - name: Install Cosmovisor
-      #       if: ${{ matrix.enable_cosmovisor == true }}
-      #       run: |
-      #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-      #         echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./start.sh
-      #         sleep 5
-      #         tail -n 100 log_001
-      #         scripts/wait_for_block.sh 3
+      Test-01-cosmovisor-upgrade:
+        runs-on: ubuntu-22.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+            cv_version: [v1.7.1]
+            upgrade_mechanism: [cv_auto, cv_manual]
+            enable_cosmovisor: [false, true]
+            exclude:
+              - target_version: main
+                upgrade_mechanism: cv_auto
+              - enable_cosmovisor: false
+                upgrade_mechanism: cv_auto
+          fail-fast: false
+        env:
+          COSMOVISOR: ${{ matrix.enable_cosmovisor }}
+          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          GO_VERSION: 1.24.1
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.10'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Install Cosmovisor
+            if: ${{ matrix.enable_cosmovisor == true }}
+            run: |
+              go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+              echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_001
+              scripts/wait_for_block.sh 3
           
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
 
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
                   
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
 
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost ${api_prefix}001
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost ${rpc_prefix}001
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}001
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}001
   
       # Test-02-ics-optin:
       #   runs-on: ubuntu-22.04
@@ -259,7 +259,7 @@
       #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
       #         source scripts/vars.sh
       #         scripts/setup.sh
-      #         ./start.sh
+      #         ./$START_SCRIPT
       #         sleep 5
       #         tail -n 100 log_001
       #         scripts/wait_for_block.sh 3
@@ -3292,14 +3292,91 @@
           
           - name: Set up tmkmks
             run: |
-              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -y
+              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo sh -y
               cargo install tmkms --features=softsign
               tmkms init .kms
               
           - name: Set up chain
             run: |
               source scripts/vars.sh
-              ./start.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_001
+              scripts/wait_for_block.sh 3
+          
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
+                  
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}001
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}001
+
+      Test-15-State-Sync:
+        runs-on: ubuntu-22.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          GO_VERSION: 1.24.1
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.10'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Set up chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+                        
+          - name: Set up chain
+            run: |
+              source scripts/vars.sh
+              ./$START_SCRIPT
               sleep 5
               tail -n 100 log_001
               scripts/wait_for_block.sh 3
