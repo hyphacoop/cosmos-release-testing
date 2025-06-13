@@ -3290,7 +3290,7 @@
               source scripts/vars.sh
               scripts/setup.sh
           
-          - name: Set up tmkmks
+          - name: Set up tmkms
             run: |
               source scripts/vars.sh
               curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
@@ -3305,7 +3305,7 @@
               tmux new-session -d -s tmkms "tmkms start -c templates/tmkms-config.toml 2>&1 | tee tmkms.log"
               sleep 5
               tail -n 100 tmkms.log
-          - name: Set up chain with tmkms
+          - name: Start chain with tmkms
             run: |
               source scripts/vars.sh
               # Modify whale_home to use tmkms
@@ -3315,6 +3315,7 @@
               ./$START_SCRIPT
               sleep 5
               tail -n 100 log_001
+              tail -n 100 tmkms.log
               scripts/wait_for_block.sh 3
           
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
