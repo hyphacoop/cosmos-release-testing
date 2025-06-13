@@ -88,7 +88,7 @@ fi
 echo "Unbonding funds from test account to validator..."
 delegations=$($CHAIN_BINARY q staking delegations ${wallets[0]} --home ${homes[0]} -o json | jq -r '.delegation_responses[] | select(.delegation.validator_address=="'${operators[0]}'") | .delegation.shares')
 echo "> Delegations: $delegations"
-TXHASH=$($CHAIN_BINARY tx staking unbond ${operators[0]} $DELEGATION_AMOUNT$DENOM --home ${homes[0]} --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
+TXHASH=$($CHAIN_BINARY tx staking unbond ${operators[0]} $DELEGATION_AMOUNT$DENOM --home ${homes[0]} --from ${monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
 echo "Tx hash: $TXHASH"
 sleep $(($COMMIT_TIMEOUT+2))
 check_code $TXHASH
