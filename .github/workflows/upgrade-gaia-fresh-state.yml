@@ -3292,7 +3292,7 @@
           
           - name: Set up tmkmks
             run: |
-              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sudo sh -y
+              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
               cargo install tmkms --features=softsign
               tmkms init .kms
               
@@ -3408,7 +3408,7 @@
           - name: _State sync test
             run: |
               source scripts/vars_state_sync.sh
-              tests/setup_state_sync.sh
+              scripts/setup_state_sync.sh
               ./$START_SCRIPT
               sleep 5
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
