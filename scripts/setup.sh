@@ -167,6 +167,8 @@ do
     toml set --toml-path ${homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${api_ports[i]}"
     toml set --toml-path ${homes[i]}/config/app.toml grpc.address "0.0.0.0:${grpc_ports[i]}"
     toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
+    toml set --toml-path ${homes[i]}/config/app.toml state-sync.snapshot-interval $STATE_SYNC_SNAPSHOT_INTERVAL
+    toml set --toml-path ${homes[i]}/config/app.toml state-sync.snapshot-keep-recent $STATE_SYNC_SNAPSHOT_KEEP_RECENT
 done
 
 echo "> Configuring config.toml"

@@ -3376,6 +3376,7 @@
           - name: Set up chain
             run: |
               source scripts/vars.sh
+              export COMMIT_TIMEOUT=3
               ./$START_SCRIPT
               sleep 5
               tail -n 100 log_001
@@ -3404,11 +3405,10 @@
               source scripts/vars.sh
               tests/test_tx.sh
 
-          - name: _API endpoints check
+          - name: _State sync test
             run: |
-              source scripts/vars.sh
-              tests/test_endpoints_api.sh localhost ${api_prefix}001
-          - name: _RPC endpoints check
-            run: |
-              source scripts/vars.sh
-              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}001
+              source scripts/vars_state_sync.sh
+              tests/setup_state_sync.sh
+              ./$START_SCRIPT
+              sleep 5
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5

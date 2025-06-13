@@ -23,6 +23,8 @@ export COMMIT_TIMEOUT="5"
 export GAS_PRICE=0.005$DENOM
 export GAS=auto
 export GAS_ADJUSTMENT=3
+export STATE_SYNC_SNAPSHOT_INTERVAL=50
+export STATE_SYNC_SNAPSHOT_KEEP_RECENT=5
 
 export moniker_prefix='val_'
 export home_prefix='/home/runner/.val_'
@@ -34,6 +36,6 @@ export grpc_prefix="28"
 export pprof_prefix="29"
 export log_prefix="log_"
 
-export START_SCRIPT="start-provider.sh"
-export STOP_SCRIPT="stop-provider.sh"
-export RESET_SCRIPT="reset-provider.sh"
+export START_SCRIPT="start.sh"
+export STOP_SCRIPT="stop.sh"
+export RESET_SCRIPT="reset.sh"
