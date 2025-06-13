@@ -75,6 +75,7 @@
           TARGET: ${{ github.event_name == 'push' && 'v24.0.0' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v24' || inputs.upgrade_name }}
         runs-on: ubuntu-22.04
+        # runs-on: cosmos-runner-set
         steps:
           - name: Debug env vars
             run: |
@@ -3312,6 +3313,8 @@
               toml set --toml-path $whale_home/config/app.toml priv_validator_laddr "tcp://0.0.0.0:24001"
               toml set --toml-path $whale_home/config/app.toml priv_validator_key_file ""
               toml set --toml-path $whale_home/config/app.toml priv_validator_state_file ""
+              echo "> app.toml file:"
+              cat $whale_home/config/app.toml
               ./$START_SCRIPT
               sleep 5
               tail -n 100 log_001
