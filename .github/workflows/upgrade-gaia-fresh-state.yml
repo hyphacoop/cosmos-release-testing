@@ -3311,8 +3311,8 @@
               source scripts/vars.sh
               echo "> Configure config.toml for tmkms"
               toml set --toml-path $whale_home/config/config.toml priv_validator_laddr "tcp://127.0.0.1:24001"
-              toml set --toml-path $whale_home/config/config.toml priv_validator_key_file ""
-              toml set --toml-path $whale_home/config/config.toml priv_validator_state_file ""
+              sed -i -e "s/priv_validator_key_file/#priv_validator_key_file/" $whale_home/config/config.toml
+              sed -i -e "s/priv_validator_key_file/#priv_validator_state_file/" $whale_home/config/config.toml
               echo "> config.toml file:"
               cat $whale_home/config/config.toml
               ./$START_SCRIPT
