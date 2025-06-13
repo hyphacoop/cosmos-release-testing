@@ -3310,14 +3310,14 @@
             run: |
               source scripts/vars.sh
               # Modify whale_home to use tmkms
-              toml set --toml-path $whale_home/config/app.toml priv_validator_laddr "tcp://0.0.0.0:24001"
-              toml set --toml-path $whale_home/config/app.toml priv_validator_key_file ""
-              toml set --toml-path $whale_home/config/app.toml priv_validator_state_file ""
-              echo "> app.toml file:"
-              cat $whale_home/config/app.toml
+              toml set --toml-path $whale_home/config/config.toml priv_validator_laddr "tcp://127.0.0.1:24001"
+              toml set --toml-path $whale_home/config/config.toml priv_validator_key_file ""
+              toml set --toml-path $whale_home/config/config.toml priv_validator_state_file ""
+              echo "> config.toml file:"
+              cat $whale_home/config/config.toml
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_001
+              tail -n 50 log_001
               tail -n 100 tmkms.log
               scripts/wait_for_block.sh 3
           
