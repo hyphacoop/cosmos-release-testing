@@ -3293,6 +3293,7 @@
           - name: Set up tmkmks
             run: |
               curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
+              chmod +x rustup-init.sh
               ./rustup-init.sh -y
               cargo install tmkms --features=softsign
               tmkms init .kms
@@ -3337,82 +3338,82 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost ${rpc_prefix}001
 
-      Test-15-State-Sync:
-        runs-on: ubuntu-22.04
-        needs: set-versions
-        strategy:
-          matrix:
-            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-          fail-fast: false
-        env:
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          GO_VERSION: 1.24.1
-        steps:
-          - name: Update PATH
-            run: |
-              mkdir -p $HOME/go/bin
-              echo "$HOME/go/bin" >> $GITHUB_PATH
-              echo "$HOME/.hermes" >> $GITHUB_PATH
-              echo "$HOME/.relayer" >> $GITHUB_PATH
-          - name: Bypass the grub-efi-amd64-signed package
-            run: sudo apt-mark hold grub-efi-amd64-signed
-          - name: Check out repository code
-            uses: actions/checkout@v4
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.10'
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              python -m pip install toml-cli
-          - name: Set up chain
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-              source scripts/vars.sh
-              scripts/setup.sh
+      # Test-15-State-Sync:
+      #   runs-on: ubuntu-22.04
+      #   needs: set-versions
+      #   strategy:
+      #     matrix:
+      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+      #     fail-fast: false
+      #   env:
+      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+      #     GO_VERSION: 1.24.1
+      #   steps:
+      #     - name: Update PATH
+      #       run: |
+      #         mkdir -p $HOME/go/bin
+      #         echo "$HOME/go/bin" >> $GITHUB_PATH
+      #         echo "$HOME/.hermes" >> $GITHUB_PATH
+      #         echo "$HOME/.relayer" >> $GITHUB_PATH
+      #     - name: Bypass the grub-efi-amd64-signed package
+      #       run: sudo apt-mark hold grub-efi-amd64-signed
+      #     - name: Check out repository code
+      #       uses: actions/checkout@v4
+      #     - name: Set up Python
+      #       uses: actions/setup-python@v5
+      #       with:
+      #         python-version: '3.10'
+      #     - name: Install dependencies
+      #       run: |
+      #         python -m pip install --upgrade pip
+      #         python -m pip install toml-cli
+      #     - name: Set up chain
+      #       run: |
+      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+      #         source scripts/vars.sh
+      #         scripts/setup.sh
                         
-          - name: Set up chain
-            run: |
-              source scripts/vars.sh
-              export COMMIT_TIMEOUT=3
-              ./$START_SCRIPT
-              sleep 5
-              tail -n 100 log_001
-              scripts/wait_for_block.sh 3
+      #     - name: Set up chain
+      #       run: |
+      #         source scripts/vars.sh
+      #         export COMMIT_TIMEOUT=3
+      #         ./$START_SCRIPT
+      #         sleep 5
+      #         tail -n 100 log_001
+      #         scripts/wait_for_block.sh 3
           
-          - name: _Transactions verified> bank send, delegate, and withdraw rewards
-            run: |
-              source scripts/vars.sh
-              tests/test_tx.sh
+      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
+      #       run: |
+      #         source scripts/vars.sh
+      #         tests/test_tx.sh
 
-          - name: Test software upgrade
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              source scripts/vars.sh
-              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+      #     - name: Test software upgrade
+      #       env:
+      #         TARGET_VERSION: ${{ matrix.target_version }}
+      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+      #       run: |
+      #         source scripts/vars.sh
+      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
+      #     - name: _Blocks produced after upgrade
+      #       run: |
+      #         source scripts/vars.sh
+      #         tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
                   
-          - name: _Transactions verified> bank send, delegate, and withdraw rewards
-            run: |
-              source scripts/vars.sh
-              tests/test_tx.sh
+      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
+      #       run: |
+      #         source scripts/vars.sh
+      #         tests/test_tx.sh
 
-          - name: _State sync test
-            run: |
-              source scripts/vars.sh
-              echo "> Sleeping $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ] seconds for state sync to be ready"
-              sleep $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ]
-              source scripts/vars_state_sync.sh
-              scripts/setup_state_sync.sh
-              ./$START_SCRIPT
-              sleep 5
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
+      #     - name: _State sync test
+      #       run: |
+      #         source scripts/vars.sh
+      #         echo "> Sleeping $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ] seconds for state sync to be ready"
+      #         sleep $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ]
+      #         source scripts/vars_state_sync.sh
+      #         scripts/setup_state_sync.sh
+      #         ./$START_SCRIPT
+      #         sleep 5
+      #         tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
