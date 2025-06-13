@@ -3302,7 +3302,7 @@
               tmkms softsign keygen /home/runner/.kms/secrets/secret_connection_key
               cp $whale_home/config/priv_validator_key.json /home/runner/.kms/secrets/
               tmkms softsign import /home/runner/.kms/secrets/priv_validator_key.json /home/runner/.kms/secrets/priv_validator_key
-              tmux new-session -d -s "tmkms start -c templates/tmkms-config.toml 2>&1 | tee tmkms.log"
+              tmux new-session -d -s tmkms "tmkms start -c templates/tmkms-config.toml 2>&1 | tee tmkms.log"
               sleep 5
               tail -n 100 tmkms.log
           - name: Set up chain with tmkms
