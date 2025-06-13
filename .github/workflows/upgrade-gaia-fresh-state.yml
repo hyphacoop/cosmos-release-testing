@@ -3292,15 +3292,24 @@
           
           - name: Set up tmkmks
             run: |
+              source scripts/vars.sh
               curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init.sh
               chmod +x rustup-init.sh
               ./rustup-init.sh -y
               cargo install tmkms --features=softsign
-              tmkms init .kms
-              
-          - name: Set up chain
+              tmkms init /home/runner/.kms
+              tmkms init .kms       
+              tmkms softsign keygen /home/runner/.kms/secrets/secret_connection_key
+              cp $whale_home/config/priv_validator_key.json /home/runner/.kms/secrets/
+              tmkms softsign import /home/runner/.kms/secrets/priv_validator_key.json /home/runner/.kms/secrets/priv_validator_key
+              tmux new-session -d -s "tmkms start -c templates/tmkms-config.toml 2>&1 | tee tmkms.log"
+
+          - name: Set up chain with tmkms
             run: |
               source scripts/vars.sh
+              # Modify whale_home to use tmkms
+              priv_validator_laddr = "
+              toml set --toml-path $whale_home/config/app.toml priv_validator_laddr "tcp://0.0.0.0:24001"
               ./$START_SCRIPT
               sleep 5
               tail -n 100 log_001

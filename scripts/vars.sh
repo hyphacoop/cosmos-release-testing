@@ -34,6 +34,7 @@ export p2p_prefix="26"
 export rpc_prefix="27"
 export grpc_prefix="28"
 export pprof_prefix="29"
+export sign_prefix="24"
 export log_prefix="log_"
 
 export START_SCRIPT="start.sh"
