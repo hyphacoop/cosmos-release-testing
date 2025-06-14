@@ -31,10 +31,12 @@ if [ "$COSMOVISOR" = true ]; then
             sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
             rm -rf gaia
             git clone https://github.com/cosmos/gaia.git
-            cd gaia
+            # cd gaia
+            pushd gaia
             git checkout $TARGET_VERSION
             make install
-            cd ..
+            # cd ..
+            popd
             cp $HOME/go/bin/gaiad $HOME_1/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
             cp $HOME/go/bin/gaiad $HOME_2/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
             cp $HOME/go/bin/gaiad $HOME_3/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY
@@ -135,10 +137,12 @@ else
         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
         rm -rf gaia
         git clone https://github.com/cosmos/gaia.git
-        cd gaia
+        # cd gaia
+        pushd gaia
         git checkout $TARGET_VERSION
         make install
-        cd ..
+        # cd ..
+        popd
     else
         # Download
         echo "Downloading new binary..."

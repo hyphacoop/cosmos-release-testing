@@ -31,10 +31,12 @@ if [ "$COSMOVISOR" = true ]; then
             sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
             rm -rf gaia
             git clone https://github.com/cosmos/gaia.git
-            cd gaia
+            # cd gaia
+            pushd gaia
             git checkout $TARGET_VERSION
             make install
-            cd ..
+            # cd ..
+            popd
             cp $HOME/go/bin/gaiad $CHAIN_BINARY
             for i in $(seq 0 $[$validator_count-1])
             do
@@ -132,10 +134,12 @@ else
         sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
         rm -rf gaia
         git clone https://github.com/cosmos/gaia.git
-        cd gaia
+        # cd gaia
+        pushd gaiad
         git checkout $TARGET_VERSION
         make install
-        cd ..
+        # cd ..
+        popd
         cp $HOME/go/bin/gaiad $CHAIN_BINARY
     else
         # Download

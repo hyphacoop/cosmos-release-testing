@@ -145,7 +145,7 @@ for i in $(seq 0 $[$validator_count-1])
 do
     echo "echo \"Starting validator ${consumer_monikers[i]}...\"" >> start-$CONSUMER_CHAIN_ID.sh
     echo "tmux new-session -d -s ${consumer_monikers[i]} \"$CONSUMER_CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"" >> start-$CONSUMER_CHAIN_ID.sh
-    echo "sleep 0.2s" >> start.sh
+    echo "sleep 0.2s" >> start-$CONSUMER_CHAIN_ID.sh
     echo "echo \"Stopping validator ${consumer_monikers[i]}...\"" >> stop-$CONSUMER_CHAIN_ID.sh
     echo "tmux send-keys -t ${consumer_monikers[i]} C-c" >> stop-$CONSUMER_CHAIN_ID.sh
     echo "$CONSUMER_CHAIN_BINARY tendermint unsafe-reset-all --home ${homes[i]}" >> reset-$CONSUMER_CHAIN_ID.sh
