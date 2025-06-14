@@ -144,6 +144,7 @@ else
         chmod +x ./upgraded
         mv ./upgraded $CHAIN_BINARY
     fi
+    ls -la
     ./$START_SCRIPT
 fi
 
