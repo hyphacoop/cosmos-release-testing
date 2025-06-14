@@ -134,9 +134,9 @@ do
 done
 
 echo "> Configuring session scripts"
-rm start.sh ; touch start-$CONSUMER_CHAIN_ID.sh ; chmod +x start-$CONSUMER_CHAIN_ID.sh ; echo "#!/bin/bash" >> start-$CONSUMER_CHAIN_ID.sh
-rm stop.sh ; touch stop-$CONSUMER_CHAIN_ID.sh ; chmod +x stop-$CONSUMER_CHAIN_ID.sh ; echo "#!/bin/bash" >> stop-$CONSUMER_CHAIN_ID.sh
-rm reset.sh ; touch reset-$CONSUMER_CHAIN_ID.sh ; chmod +x reset-$CONSUMER_CHAIN_ID.sh ; echo "#!/bin/bash" >> reset-$CONSUMER_CHAIN_ID.sh
+touch start-$CONSUMER_CHAIN_ID.sh ; chmod +x start-$CONSUMER_CHAIN_ID.sh ; echo "#!/bin/bash" >> start-$CONSUMER_CHAIN_ID.sh
+touch stop-$CONSUMER_CHAIN_ID.sh ; chmod +x stop-$CONSUMER_CHAIN_ID.sh ; echo "#!/bin/bash" >> stop-$CONSUMER_CHAIN_ID.sh
+touch reset-$CONSUMER_CHAIN_ID.sh ; chmod +x reset-$CONSUMER_CHAIN_ID.sh ; echo "#!/bin/bash" >> reset-$CONSUMER_CHAIN_ID.sh
 
 echo "echo \"Resetting chain...\"" >> reset.sh
 echo "./stop.sh" >> reset.sh
