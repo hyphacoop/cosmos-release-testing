@@ -77,13 +77,29 @@ do
 done
 
 echo "> Updating genesis file with specified denom"
-jq -r --arg DENOM "$DENOM" '.app_state.crisis.constant_fee.denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-1.json
-jq -r --arg DENOM "$DENOM" '.app_state.mint.params.mint_denom = $DENOM' temp/denom-1.json > temp/denom-2.json
-jq -r --arg DENOM "$DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $DENOM' temp/denom-2.json > temp/denom-3.json
-jq -r --arg DENOM "$DENOM" '.app_state.staking.params.bond_denom = $DENOM' temp/denom-3.json > temp/denom-4.json
-jq -r --arg DENOM "$DENOM" '.app_state.gov.params.min_deposit[0].denom = $DENOM' temp/denom-4.json > temp/denom-5.json
-jq -r --arg DENOM "$DENOM" '.app_state.gov.params.expedited_min_deposit[0].denom = $DENOM' temp/denom-5.json > temp/denom-6.json
-cp temp/denom-6.json ${homes[0]}/config/genesis.json
+echo "> Updating crisis denom"
+jq -r --arg DENOM "$DENOM" '.app_state.crisis.constant_fee.denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-crisis.json
+cp temp/denom-crisis.json ${homes[0]}/config/genesis.json
+
+echo "> Updating mint denom"
+jq -r --arg DENOM "$DENOM" '.app_state.mint.params.mint_denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-mint.json
+cp temp/denom-mint.json ${homes[0]}/config/genesis.json
+
+echo "> Updating provider denom"
+jq -r --arg DENOM "$DENOM" '.app_state.provider.params.consumer_reward_denom_registration_fee.denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-provider.json
+cp temp/denom-provider.json ${homes[0]}/config/genesis.json
+
+echo "> Updating staking denom"
+jq -r --arg DENOM "$DENOM" '.app_state.staking.params.bond_denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-staking.json
+cp temp/denom-staking.json ${homes[0]}/config/genesis.json
+
+echo "> Updating gov denom"
+jq -r --arg DENOM "$DENOM" '.app_state.gov.params.min_deposit[0].denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-dep.json
+cp temp/denom-staking.json ${homes[0]}/config/genesis.json
+
+echo "> Updating gov expedited denom"
+jq -r --arg DENOM "$DENOM" '.app_state.gov.params.expedited_min_deposit[0].denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-exp.json
+cp temp/denom-exp.json ${homes[0]}/config/genesis.json
 
 echo "> Creating validators"
 mkdir  -p ${homes[0]}/config/gentx
