@@ -1,5 +1,6 @@
 
-# export CONSUMER_CHAIN_BINARY_NAME="consumerd-v0-one"
+export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-cd-linux
+export CONSUMER_CHAIN_BINARY_NAME="consumerd-v400-one"
 export CONSUMER_CHAIN_BINARY="$CONSUMER_CHAIN_BINARY_NAME"
 export CONSUMER_CHAIN_ID=v400-one
 export CONSUMER_DENOM=ucon
@@ -10,14 +11,14 @@ export CONSUMER_DENOM=ucon
 export CONSUMER_GAS_PRICE=0.005$CONSUMER_DENOM
 
 export ICS_TRANSFORM_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-export ICS_TRANSFORM_BINARY=cd-transform
+export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_BINARY
 
 export consumer_moniker_prefix='con_'
 export consumer_home_prefix='/home/runner/.con_'
 export whale_home_consumer=${consumer_home_prefix}001
-export consumer_api_prefix="35"
-export consumer_p2p_prefix="36"
-export consumer_rpc_prefix="37"
-export consumer_grpc_prefix="38"
-export consumer_pprof_prefix="39"
-export consumer_log_prefix="conlog_"
+export consumer_api_prefix="40"
+export consumer_p2p_prefix="40"
+export consumer_rpc_prefix="40"
+export consumer_grpc_prefix="40"
+export consumer_pprof_prefix="40"
+export consumer_log_prefix="con40log_"
