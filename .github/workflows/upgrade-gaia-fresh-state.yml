@@ -290,7 +290,9 @@
               source scripts/vars_consumer_v400_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
-              tail -n 100 ${consumer_log_prefix}_001
+              pwd
+              ls
+              tail -n 100 ${consumer_log_prefix}001
           - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
             run: |
               source scripts/vars_consumer_v400_one.sh
@@ -460,7 +462,7 @@
               source scripts/vars_consumer_v640_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
-              tail -n 100 ${consumer_log_prefix}_001
+              tail -n 100 ${consumer_log_prefix}001
           - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
             run: |
               source scripts/vars_consumer_v640_one.sh
