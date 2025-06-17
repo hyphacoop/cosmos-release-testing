@@ -34,7 +34,6 @@
       PROVIDER_ICS: v6.4.0
       TOPN: 0
       # Reference ICS chain variables
-
       CONSUMER_CHAIN_V330_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v3.3.0/interchain-security-cd-linux
       CONSUMER_CHAIN_V330_BINARY: consumerd_v4.0.0
       # CONSUMER_CHAIN_V400_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v4.0.0/interchain-security-cd-linux
@@ -240,20 +239,20 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
 
-          - name: Download consumer chain binaries
-            run: |
-              wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
-              wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
-              wget $CONSUMER_CHAIN_V520_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY
-              wget $CONSUMER_CHAIN_V630_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY
-              # wget $CONSUMER_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY -q
-              # chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY
-              wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-              chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+          # - name: Download consumer chain binaries
+          #   run: |
+          #     wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
+          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
+          #     wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
+          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
+          #     wget $CONSUMER_CHAIN_V520_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY -q
+          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY
+          #     wget $CONSUMER_CHAIN_V630_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY -q
+          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY
+          #     # wget $CONSUMER_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY -q
+          #     # chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY
+          #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
+          #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
 
           - name: Start chain
             run: |
