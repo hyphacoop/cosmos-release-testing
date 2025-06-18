@@ -288,19 +288,17 @@
           - name: Start consumer chain v400-one
             run: |
               source scripts/vars_consumer_v400_one.sh
-              # echo "> Services listening on consumer chain ports:"
-              # ss -tulnp | grep :40
               pwd
               ls
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
 
-              tail -n 100 ${consumer_log_prefix}001
+              tail -n 100 ${consumer_log_prefix}01
             continue-on-error: true
           - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
             run: |
               source scripts/vars_consumer_v400_one.sh
-              tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}001 5
+              tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}01 5
           - name: Set up relayer
             run: |
               source scripts/vars.sh
@@ -468,11 +466,11 @@
               ss -tulnp | grep :64
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
-              tail -n 100 ${consumer_log_prefix}001
+              tail -n 100 ${consumer_log_prefix}01
           - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
             run: |
               source scripts/vars_consumer_v640_one.sh
-              tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}001 5
+              tests/test_block_production.sh 127.0.0.1 ${consumer_rpc_prefix}01 5
       #     - name: Establish CCV channel for v630-one
       #       env:
       #         CONSUMER_CHAIN_ID: v630-one

@@ -7,7 +7,7 @@ echo "Running with $CONSUMER_CHAIN_BINARY."
 rm -rf contemp
 mkdir contemp
 
-PROVIDER_HOME=${home_prefix}001
+PROVIDER_HOME=${home_prefix}01
 echo "> Creating arrays"
 
 monikers=()
@@ -19,7 +19,7 @@ grpc_ports=()
 pprof_ports=()
 logs=()
 wallets=()
-for i in $(seq -w 001 $validator_count)
+for i in $(seq -w 01 $validator_count)
 do
     moniker=$moniker_prefix$i
     monikers+=($moniker)

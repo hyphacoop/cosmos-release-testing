@@ -15,10 +15,10 @@ export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_BINARY
 
 export consumer_moniker_prefix='con_'
 export consumer_home_prefix='/home/runner/.con_'
-export whale_home_consumer=${consumer_home_prefix}001
-export consumer_api_prefix="40"
-export consumer_p2p_prefix="40"
-export consumer_rpc_prefix="40"
-export consumer_grpc_prefix="40"
-export consumer_pprof_prefix="40"
+export whale_home_consumer=${consumer_home_prefix}01
+export consumer_api_prefix="401"
+export consumer_p2p_prefix="402"
+export consumer_rpc_prefix="403"
+export consumer_grpc_prefix="404"
+export consumer_pprof_prefix="405"
 export consumer_log_prefix="con40log_"
