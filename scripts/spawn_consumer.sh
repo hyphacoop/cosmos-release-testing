@@ -27,8 +27,11 @@ jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $S
 echo "> Update consumer JSON:"
 jq '.' spawn-$CONSUMER_CHAIN_ID.json
 echo "> Submitting update consumer tx."
-$CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from ${monikers[0]} --home $PROVIDER_HOME --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
+txhash=$($CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from ${monikers[0]} --home $PROVIDER_HOME --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT*3))
+echo "> Update consumer tx hash: $txhash"
+$CHAIN_BINARY q tx $txhash --home $PROVIDER_HOME -o json | jq '.'
+
 echo "> List consumer chains"
 $CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json | jq '.'
 echo "> Query consumer chain"
