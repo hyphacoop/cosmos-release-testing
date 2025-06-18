@@ -6,7 +6,7 @@ CONSUMER_ADDRESS=$(jq -r '.address' $consumer_whale_home/config/priv_validator_k
 
 delegation_amount=1000000
 provider_endpoint=${whale_rpc}
-consumer_endpoint=${whale_rpc_consumer}
+consumer_endpoint=${consumer_whale_rpc}
 
 # Delegate additional stake to val 1
 echo "Delegating additional stake to $VALOPER_1..."
