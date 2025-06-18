@@ -241,6 +241,13 @@ jobs:
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
           $CHAIN_BINARY keys list --home $HOME_2
+      - name: DEBUG
+        if: always()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Generate info graphs
         if: always()
         run: |
