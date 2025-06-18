@@ -27,9 +27,9 @@ port = 3001
 
 [[chains]]
 id = 'v400-one'
-rpc_addr = 'http://localhost:40001'
-grpc_addr = 'http://localhost:40001'
-event_source = { mode = 'push', url = 'ws://localhost:40001/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:40301'
+grpc_addr = 'http://localhost:40401'
+event_source = { mode = 'push', url = 'ws://localhost:40301/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'
@@ -135,9 +135,9 @@ type = "CosmosSdk"
 
 [[chains]]
 id = 'v640-one'
-rpc_addr = 'http://localhost:64001'
-grpc_addr = 'http://localhost:64001'
-event_source = { mode = 'push', url = 'ws://localhost:64001/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:64301'
+grpc_addr = 'http://localhost:64401'
+event_source = { mode = 'push', url = 'ws://localhost:64301/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'
