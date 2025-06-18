@@ -29,13 +29,13 @@ export STATE_SYNC_SNAPSHOT_KEEP_RECENT=5
 export moniker_prefix='val_'
 export home_prefix='/home/runner/.val_'
 export whale_home=${home_prefix}01
-export whale_rpc=${home_prefix}01
 export api_prefix="250"
 export p2p_prefix="260"
 export rpc_prefix="270"
 export grpc_prefix="280"
 export pprof_prefix="290"
 export sign_prefix="240"
+export whale_rpc=${rpc_prefix}01
 export log_prefix="log_"
 
 export START_SCRIPT="start.sh"
