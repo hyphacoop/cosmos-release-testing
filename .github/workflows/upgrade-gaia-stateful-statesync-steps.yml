@@ -1,0 +1,293 @@
+---
+
+name: Test Gaia Stateful State Sync Steps
+on:
+  workflow_call:
+    inputs:
+      runs-on-os:
+        required: true
+        type: string
+      gaia_version:
+        required: true
+        type: string
+      upgrade_version:
+        required: true
+        type: string
+      env_name:
+        required: true
+        type: string
+      archive_url:
+        required: true
+        type: string
+      
+jobs:
+  test-upgrade:
+    runs-on: ${{ inputs.runs-on-os }}
+    environment: ${{ inputs.env_name }}
+    env:
+      SSH_KEYS: ${{ vars.SSH_KEYS }}
+      PROVIDER_SERVICE_1: ${{ vars.PROVIDER_SERVICE_1 }}
+      PROVIDER_SERVICE_2: ${{ vars.PROVIDER_SERVICE_2 }}
+      CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
+      CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+      HOME_1: ${{ vars.HOME_1 }}
+      HOME_2: ${{ vars.HOME_2 }}
+      CHAIN_ID: ${{ vars.CHAIN_ID }}
+      MONIKER_1: ${{ vars.MONIKER_1 }}
+      MONIKER_2: ${{ vars.MONIKER_2 }}
+      MONIKER_4: ${{ vars.MONIKER_4 }}
+      MONIKER_5: ${{ vars.MONIKER_5 }}
+      MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
+      MNEMONIC_2: ${{ vars.MNEMONIC_2 }}
+      MNEMONIC_4: ${{ vars.MNEMONIC_4 }}
+      MNEMONIC_5: ${{ vars.MNEMONIC_5 }}
+      DENOM: ${{ vars.DENOM }}
+      VAL_FUNDS: ${{ vars.VAL_FUNDS }}
+      VAL_STAKE: ${{ vars.VAL_STAKE }}
+      VAL_STAKE_STEP: ${{ vars.VAL_STAKE_STEP }}
+      VOTING_PERIOD: ${{ vars.VOTING_PERIOD }}
+      VAL1_RPC_PORT: 27001
+      VAL1_API_PORT: 25001
+      VAL1_GRPC_PORT: 26001
+      VAL1_P2P_PORT: 28001
+      VAL1_PPROF_PORT: 6061
+      VAL1_PROM_PORT: 26660
+      VAL2_RPC_PORT: 27002
+      VAL2_API_PORT: 25002
+      VAL2_GRPC_PORT: 26002
+      VAL2_P2P_PORT: 28002
+      VAL2_PPROF_PORT: 6062
+      VAL2_PROM_PORT: 26662
+      WALLET_1: ${{ vars.WALLET_1 }}
+      WALLET_2: ${{ vars.WALLET_2 }}
+      WALLET_4: ${{ vars.WALLET_4 }}
+      WALLET_5: ${{ vars.WALLET_5 }}
+      WALLET_CONSUMER_1: ${{ vars.WALLET_CONSUMER_1 }}
+      VALOPER_1: ${{ vars.VALOPER_1 }}
+      CONSUMER_CHAIN_BINARY_URL: ${{ vars.CONSUMER_CHAIN_BINARY_URL }}
+      CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY }}
+      CONSUMER_CHAIN_BINARY_URL_2: ${{ vars.CONSUMER_CHAIN_BINARY_URL_2 }}
+      CONSUMER_CHAIN_BINARY_2: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+      CONSUMER_DENOM: ${{ vars.CONSUMER_DENOM }}
+      CONSUMER_HOME_1: /home/runner/.cona1
+      CONSUMER_HOME_2: /home/runner/.cona2
+      CONSUMERB_HOME_1: /home/runner/.conb1
+      CONSUMERB_HOME_2: /home/runner/.conb2
+      STRIDE_SOV_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v11.0.0/stride-v11.0.0-linux-amd64
+      STRIDE_CON_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v12.1.0/stride-v12.1.0-linux-amd64
+      STRIDE_CHAIN_BINARY: strided
+      STRIDE_HOME_1: /home/runner/.stride1
+      STRIDE_SERVICE_1: stride1.service
+      STRIDE_CHAIN_ID: consumerd
+      STRIDE_DENOM: ustrd
+      STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+      STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+      STRIDE_WALLET_5: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+      STRIDE_API_1: 35001
+      STRIDE_GRPC_1: 36001
+      STRIDE_RPC_1: 37001
+      STRIDE_P2P_1: 38001
+      STRIDE_PPROF_1: 39001
+      CON1_API_PORT: 25101
+      CON1_GRPC_PORT: 26101
+      CON1_RPC_PORT: 27101
+      CON1_P2P_PORT: 28101
+      CON1_PPROF_PORT: 6163
+      CON2_API_PORT: 25102
+      CON2_GRPC_PORT: 26102
+      CON2_RPC_PORT: 27102
+      CON2_P2P_PORT: 28102
+      CON2_PPROF_PORT: 6164
+      CON2_MIN_GAS_PRICES: 0.0025
+      CONSUMER_SERVICE_1: cona1.service
+      CONSUMER_SERVICE_2: cona2.service
+      CONSUMER_MIN_GAS_PRICES: 0.0025
+      CONB1_API_PORT: 55101
+      CONB1_GRPC_PORT: 56101
+      CONB1_RPC_PORT: 57101
+      CONB1_P2P_PORT: 58101
+      CONB1_PPROF_PORT: 56163
+      CONB2_API_PORT: 55102
+      CONB2_GRPC_PORT: 56102
+      CONB2_RPC_PORT: 57102
+      CONB2_P2P_PORT: 58102
+      CONB2_PPROF_PORT: 56164
+      CONSUMERB_SERVICE_1: conb1.service
+      CONSUMERB_SERVICE_2: conb2.service
+      CONSUMERB_MIN_GAS_PRICES: 0.0025
+      BASE_FEES: 30000
+      HIGH_FEES: 25000
+      GAS: auto
+      GAS_ADJUSTMENT: 2.0
+      GAS_PRICES: 0.005
+      DELEGATE_1: ${{ vars.DELEGATE_1 }}
+      DELEGATE_1_AMOUNT: ${{ vars.DELEGATE_1_AMOUNT }}
+      DELEGATE_2_AMOUNT: ${{ vars.DELEGATE_2_AMOUNT }}
+      LSM_LOG: /home/runner/artifact/lsm_log.csv
+      COMMIT_TIMEOUT: 5
+      CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
+      VESTING_TARGET: "1772414007"
+      UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+      # UPGRADE_VERSION: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
+      HERMES_VERSION: ${{ vars.HERMES_VERSION }}
+      CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "$SSH_KEYS" > ~/.ssh/authorized_keys
+      - name: start-version
+        run: echo ${{inputs.gaia_version}}
+      - name: target-version
+        run: echo ${{inputs.upgrade_version}}
+      - name: target-commit
+        if: ${{ inputs.upgrade_version == 'main' }}
+        run: |
+          BUILD_TAG=gaiad-linux-${{inputs.upgrade_version}}
+          TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+          echo TARGET_COMMIT: $TARGET_COMMIT
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
+      - name: Consumer chain binary URLs
+        run: echo "$CONSUMER_CHAIN_BINARY runs off $CONSUMER_CHAIN_BINARY_URL"
+      - name: Update PATH
+        run: |
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+          echo "$HOME/.hermes" >> $GITHUB_PATH
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli
+          python -m pip install graph-cli
+      - name: Print RPC port
+        run: echo $VAL1_RPC_PORT
+      - name: Test software upgrade for published releases
+        if: ${{ inputs.upgrade_version != 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ inputs.upgrade_version }}/gaiad-${{ inputs.upgrade_version }}-linux-amd64
+        run: |
+          echo "$DOWNLOAD_URL"
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+      - name: Test software upgrade for main branch
+        if: ${{ inputs.upgrade_version == 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+        run: |
+          echo "$DOWNLOAD_URL"
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+      - name: Set up memory monitor for provider
+        run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
+      - name: Start chain val1 and link val2 node
+        env:
+          START_VERSION: ${{inputs.gaia_version}}
+          ARCHIVE_URL: ${{ inputs.archive_url }}
+        run: scripts/stateful/start_chain_val1.sh
+      - name: _Blocks produced after upgrade
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 12600
+      - name: _Blocks produced on val2
+        run: tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 12600
+      - name: Check block hashes on both nodes
+        run: |
+          set -e
+          latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
+          echo "[INFO]: Block height is $latest_block"
+          hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          sleep 6
+          hash_val2=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          if [ $hash_val1 != $hash_val2 ]
+          then
+            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+            exit 1
+          else
+            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+          fi
+      - name: Flush "migration successful" lines
+        run: |
+          $CHAIN_BINARY keys list --home $HOME_1
+          $CHAIN_BINARY keys list --home $HOME_2
+      - name: Generate info graphs
+        if: always()
+        run: |
+          source ~/env/bin/activate
+          # Main gaia service
+          graph $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv -o $HOME/artifact/mem-$PROVIDER_SERVICE_1.png --fill --time-format-input epoch --time-format-output %H:%M:%S --fontsize 8 --title "Gaiad RAM Usages" --ylabel "Memory Used (MB)" --xlabel Time --figsize 1920x1080
+      - name: Save config files
+        if: always()
+        run: |
+          mkdir ~/artifact/configs
+          cp -rp ${{ vars.HOME_1 }}/config/ ~/artifact/configs/val1 || true
+          cp -rp ~/.hermes/ ~/artifact/configs/hermes/ || true
+          cp -rp ~/.cona1/config/ ~/artifact/configs/cona1 || true
+          cp -rp ~/.conb1/config/ ~/artifact/configs/conb1 || true
+          cp -rp ~/.stride1/config/ ~/artifact/configs/stride1 || true
+          mkdir ~/artifact/bin
+          cp -p ~/go/bin/* ~/artifact/bin/ || true
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          path: ~/artifact/
+          include-hidden-files: true
+      # Upload states to artifats
+      # - name: Upload provider chain state val1
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
+      #     path: ~/.val1/
+      #     include-hidden-files: true
+      # - name: Upload provider chain state val2
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
+      #     path: ~/.val2/
+      #     include-hidden-files: true
+      # - name: Upload cona1 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
+      #     path: ~/.cona1/
+      #     include-hidden-files: true
+      # - name: Upload cona2 chain state
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
+      #     path: ~/.cona2/
+      #     include-hidden-files: true
