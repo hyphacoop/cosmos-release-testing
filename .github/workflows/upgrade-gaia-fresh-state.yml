@@ -288,7 +288,7 @@
           - name: Start consumer chain v400-one
             run: |
               source scripts/vars_consumer_v400_one.sh
-              echo "> Services listening on consumer chain ports:""
+              echo "> Services listening on consumer chain ports:"
               ss -tulnp | grep :40
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
