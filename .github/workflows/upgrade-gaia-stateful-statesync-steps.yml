@@ -133,12 +133,12 @@ jobs:
       CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
       # Get system info
-      - name: Install required packages
+      - name: IP addresses
         run: |
-          sudo apt update
-          sudo apt dist-upgrade -y
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
-      - run: ifconfig
+          ipv6_addr=$(ip -j addr  | jq -r '.[] | select(.ifname=="eth0")| .addr_info[] | select((.family=="inet6") and .scope=="global") | .local')
+          ipv4_addr=$(ip -j addr  | jq -r '.[] | select(.ifname=="eth0")| .addr_info[] | select(.family=="inet") | .local')
+          echo "IPv6: $ipv6_addr"
+          echo "IPv4: $ipv4_addr"
       - run: lscpu
       - run: df -h
       - run: free -m
@@ -153,6 +153,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
+      - name: Install required packages
+        run: |
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
       - name: Install openssh-server
         run: |
           sudo apt install -y openssh-server
@@ -225,7 +228,7 @@ jobs:
           latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          sleep 6
+          tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 1 12600
           hash_val2=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           if [ $hash_val1 != $hash_val2 ]
           then
