@@ -288,6 +288,8 @@
           - name: Start consumer chain v400-one
             run: |
               source scripts/vars_consumer_v400_one.sh
+              echo "> Services listening on consumer chain ports:""
+              ss -tulnp | grep :40
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
               pwd
@@ -460,6 +462,8 @@
           - name: Start consumer chain v640-one
             run: |
               source scripts/vars_consumer_v640_one.sh
+              echo "> Services listening on consumer chain ports:""
+              ss -tulnp | grep :64
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
               tail -n 100 ${consumer_log_prefix}001
