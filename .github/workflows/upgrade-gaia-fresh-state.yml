@@ -262,7 +262,7 @@
               ./$START_SCRIPT
               sleep 5
               tail -n 100 log_01
-              scripts/wait_for_block.sh 3
+              scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Add consumer chain with ICS v4.0.0
             run: |

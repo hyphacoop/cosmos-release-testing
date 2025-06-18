@@ -1,22 +1,16 @@
 #!/bin/bash
 
-target_height=$1
+rpc_port=$1
+target_height=$2
 
-rpc_ports=()
-for i in $(seq -w 001 $validator_count)
-do
-    rpc_port=$rpc_prefix$i
-    rpc_ports+=($rpc_port)
-done
-
-height=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r .result.block.header.height)
+height=$(curl -s http://localhost:${rpc_port}/block | jq -r .result.block.header.height)
 echo "Block height: $height"
 
 echo "Waiting to reach block height $target_height..."
 until [ $height -ge $target_height ]
 do
     sleep $COMMIT_TIMEOUT
-    height=$(curl -s http://localhost:${rpc_ports[0]}/block | jq -r .result.block.header.height)
+    height=$(curl -s http://localhost:${rpc_port}/block | jq -r .result.block.header.height)
     if [ -z "$height" ]
     then
         height=0
