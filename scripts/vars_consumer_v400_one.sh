@@ -1,5 +1,5 @@
 
-export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-cd-linux
+export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.0.0/interchain-security-cd-linux
 export CONSUMER_CHAIN_BINARY_NAME="consumerd-v400-one"
 export CONSUMER_CHAIN_BINARY="$CONSUMER_CHAIN_BINARY_NAME"
 export CONSUMER_CHAIN_ID=v400-one
