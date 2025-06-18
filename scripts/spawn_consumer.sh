@@ -1,22 +1,15 @@
 #!/bin/bash
 # Spawn a consumer chain
 
-PROVIDER_HOME=${home_prefix}001
-monikers=()
 homes=()
-for i in $(seq -w 001 $validator_count)
+for i in $(seq -w 01 $validator_count)
 do
-    moniker=$moniker_prefix$i
-    monikers+=($moniker)
     home=$consumer_home_prefix$i
     homes+=($home)
 done
 
 echo "> Patch create consumer message with spawn time."
 jq '.' create-$CONSUMER_CHAIN_ID.json
-# init_params=$(jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json)
-# echo "> Init params: $init_params"
-# echo $init_params | jq '.'
 jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json > init_params.json
 spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
 echo "> Spawn time: $spawn_time"
@@ -27,18 +20,18 @@ jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $S
 echo "> Update consumer JSON:"
 jq '.' spawn-$CONSUMER_CHAIN_ID.json
 echo "> Submitting update consumer tx."
-txhash=$($CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from ${monikers[0]} --home $PROVIDER_HOME --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
+txhash=$($CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT*3))
 echo "> Update consumer tx hash: $txhash"
-$CHAIN_BINARY q tx $txhash --home $PROVIDER_HOME -o json | jq '.'
+$CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
 
 echo "> List consumer chains"
-$CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json | jq '.'
+$CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
 echo "> Query consumer chain"
-$CHAIN_BINARY q provider consumer-chain $CONSUMER_ID --home $PROVIDER_HOME -o json | jq '.'
+$CHAIN_BINARY q provider consumer-chain $CONSUMER_ID --home $whale_home -o json | jq '.'
 
 echo "> Collecting the CCV state"
-$CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $PROVIDER_HOME > ccv.json
+$CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $whale_home > ccv.json
 jq '.' ccv.json
 
 echo "> Patching the CCV state with the provider reward denom"
@@ -106,7 +99,7 @@ if [ "$CONSUMER_ICS" == "v6.3.0" ]; then
 fi
 
 echo "Patching the consumer genesis file..."
-jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' ${homes[0]}/config/genesis.json ccv.json > consumer-genesis.json
+jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $whale_home_consumer/config/genesis.json ccv.json > consumer-genesis.json
 for i in $(seq 0 $[$validator_count-1])
 do
     cp consumer-genesis.json ${homes[i]}/config/genesis.json
