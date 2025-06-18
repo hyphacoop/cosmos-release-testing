@@ -51,7 +51,7 @@ do
     $CONSUMER_CHAIN_BINARY config node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
     $CONSUMER_CHAIN_BINARY init ${consumer_monikers[i]} --chain-id $CONSUMER_CHAIN_ID --home ${homes[i]} &> /dev/null
 done
-$CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json | jq -r '.chains[]'
+$CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json --node http://localhost:$whale_rpc | jq -r '.chains[]'
 
 # client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
 # echo "Client ID: $client_id"

@@ -261,7 +261,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_001
+              tail -n 100 log_01
               scripts/wait_for_block.sh 3
 
           - name: Add consumer chain with ICS v4.0.0
@@ -546,7 +546,7 @@
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}001 5
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}01 5
     
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER

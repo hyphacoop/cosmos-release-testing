@@ -24,7 +24,7 @@ pprof_ports=()
 logs=()
 wallets=()
 operators=()
-for i in $(seq -w 001 $validator_count)
+for i in $(seq -w 01 $validator_count)
 do
     moniker=$moniker_prefix$i
     monikers+=($moniker)
