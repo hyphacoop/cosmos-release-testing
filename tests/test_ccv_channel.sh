@@ -2,11 +2,11 @@
 # Test Validator Set Changes
 
 PROVIDER_ADDRESS=$(jq -r '.address' $whale_home/config/priv_validator_key.json)
-CONSUMER_ADDRESS=$(jq -r '.address' $whale_home_consumer/config/priv_validator_key.json)
+CONSUMER_ADDRESS=$(jq -r '.address' $consumer_whale_home/config/priv_validator_key.json)
 
 delegation_amount=1000000
-provider_endpoint=${rpc_prefix}001
-consumer_endpoint=${consumer_rpc_prefix}001
+provider_endpoint=${whale_rpc}
+consumer_endpoint=${whale_rpc_consumer}
 
 # Delegate additional stake to val 1
 echo "Delegating additional stake to $VALOPER_1..."
@@ -24,7 +24,7 @@ journalctl -u $RELAYER | tail -n 200
 echo "Querying provider valset:"
 $CHAIN_BINARY q comet-validator-set --home $whale_home
 echo "Querying consumer valset:"
-$CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $whale_home_consumer
+$CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
 echo "Querying provider params:"
 $CHAIN_BINARY q provider params --home $whale_home
 

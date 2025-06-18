@@ -16,10 +16,12 @@ export CONSUMER_ICS="v6.4.0"
 
 export consumer_moniker_prefix='con640_'
 export consumer_home_prefix='/home/runner/.con640_'
-export whale_home_consumer=${consumer_home_prefix}001
 export consumer_api_prefix="641"
 export consumer_p2p_prefix="642"
 export consumer_rpc_prefix="643"
 export consumer_grpc_prefix="644"
 export consumer_pprof_prefix="645"
 export consumer_log_prefix="con64log_"
+
+export consumer_whale_home=${consumer_home_prefix}01
+export consumer_whale_rpc=${consumer_rpc_prefix}01
