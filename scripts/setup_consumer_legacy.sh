@@ -4,9 +4,6 @@
 
 echo "Running with $CONSUMER_CHAIN_BINARY."
 
-rm -rf contemp
-mkdir contemp
-
 PROVIDER_HOME=${home_prefix}01
 echo "> Creating arrays"
 
@@ -51,12 +48,7 @@ do
     $CONSUMER_CHAIN_BINARY config node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
     $CONSUMER_CHAIN_BINARY init ${consumer_monikers[i]} --chain-id $CONSUMER_CHAIN_ID --home ${homes[i]} &> /dev/null
 done
-$CHAIN_BINARY q provider list-consumer-chains --home $PROVIDER_HOME -o json --node http://localhost:$whale_rpc | jq -r '.chains[]'
-
-# client_id=$($CHAIN_BINARY q provider list-consumer-chains --home $HOME_1 -o json | jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain_id).client_id')
-# echo "Client ID: $client_id"
-# $CHAIN_BINARY q provider  consumer-id-from-client-id $client_id
-# CONSUMER_ID=$($CHAIN_BINARY q provider  consumer-id-from-client-id $client_id)
+$CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json --node http://localhost:$whale_rpc | jq -r '.chains[]'
 echo "Consumer ID: $CONSUMER_ID"
 
 echo "> Submitting opt-in txs"
@@ -64,11 +56,10 @@ for i in $(seq 0 $[validator_count-1])
 do
     echo "> Opting in with ${monikers[i]}."
     pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[i]})
-    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $pubkey --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $PROVIDER_HOME -y -o json | jq -r '.txhash')
+    txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $pubkey --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 done
 
 echo "> Updating genesis file with right denom."
-# sed -i s%stake%$CONSUMER_DENOM%g $CONSUMER_HOME_1/config/genesis.json
 jq --arg DENOM "$CONSUMER_DENOM" '.app_state.crisis.constant_fee.denom = $DENOM' ${homes[0]}/config/genesis.json > genesis-1.json
 mv genesis-1.json ${homes[0]}/config/genesis.json
 
