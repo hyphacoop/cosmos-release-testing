@@ -3,9 +3,7 @@
 
 echo "Running with $CONSUMER_CHAIN_BINARY."
 
-PROVIDER_HOME=${home_prefix}01
 echo "> Creating arrays"
-
 monikers=()
 homes=()
 api_ports=()
@@ -17,8 +15,10 @@ logs=()
 wallets=()
 for i in $(seq -w 01 $validator_count)
 do
-    moniker=$consumer_moniker_prefix$i
+    moniker=$moniker_prefix$i
     monikers+=($moniker)
+    consumer_moniker=$consumer_moniker_prefix$i
+    consumer_monikers+=($consumer_moniker)
     home=$consumer_home_prefix$i
     homes+=($home)
     api_port=$consumer_api_prefix$i

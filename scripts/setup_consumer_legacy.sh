@@ -4,9 +4,7 @@
 
 echo "Running with $CONSUMER_CHAIN_BINARY."
 
-PROVIDER_HOME=${home_prefix}01
 echo "> Creating arrays"
-
 monikers=()
 homes=()
 api_ports=()
