@@ -87,6 +87,9 @@ do
     $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 done
 
+echo "> Consumer keys:"
+$CONSUMER_CHAIN_BINARY keys list --home ${homes[0]}
+
 # # Update genesis file with right denom
 # if [ "$CONSUMER_CHAIN_BINARY" == "strided" ]; then
 #     echo "Patching genesis file for Stride denom..."

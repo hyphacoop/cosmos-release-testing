@@ -87,6 +87,9 @@ do
     $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 done
 
+echo "> Consumer keys:"
+$CONSUMER_CHAIN_BINARY keys list --home {homes[0]}
+
 echo "> Copying genesis to all other homes"
 for i in $(seq 1 $[$validator_count-1])
 do
