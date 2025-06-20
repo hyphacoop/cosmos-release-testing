@@ -43,7 +43,7 @@ do
     $CONSUMER_CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
     $CONSUMER_CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
     $CONSUMER_CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CONSUMER_CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+    $CONSUMER_CHAIN_BINARY init ${consumer_monikers[i]} --chain-id $CONSUMER_CHAIN_ID --home ${homes[i]} &> /dev/null
 done
 
 $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json --node http://localhost:$whale_rpc | jq -r '.chains[]'
