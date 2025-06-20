@@ -195,17 +195,12 @@ jobs:
       - name: Wait for snapshot to be created
         run: |
           echo "Wait for snapshot to be created..."
+          tail -f $HOME/artifact/gaia2.service.log | grep snapshot &
           ( tail -f -n0 $HOME/artifact/gaia2.service.log & ) | grep -q "completed state snapshot"
           sleep 60
       - name: Start node with state sync
         run: |
-          # SS_SERVICE_1: ss1.service
-          # SS_API_1: 35001
-          # SS_GRPC_1: 36001
-          # SS_RPC_1: 37001
-          # SS_P2P_1: 38001
-          # SS_PPROF_1: 39001
-
+          source ~/env/bin/activate
           $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $SS_HOME_1
           cp $HOME_2/config/genesis.json $SS_HOME_1/config/genesis.json
           cp $HOME_2/config/config.toml $SS_HOME_1/config/
