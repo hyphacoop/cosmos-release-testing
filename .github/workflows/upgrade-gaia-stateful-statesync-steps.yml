@@ -192,22 +192,49 @@ jobs:
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
           $CHAIN_BINARY keys list --home $HOME_2
-      # - name: Wait for snapshot to be created
-      #   run: |
-      #     echo "Wait for snapshot to be created..."
-      #     ( tail -f -n0 $HOME/artifact/gaia2.service.log & ) | grep -q "completed state snapshot"
-      #     sleep 60
+      - name: Wait for snapshot to be created
+        run: |
+          echo "Wait for snapshot to be created..."
+          ( tail -f -n0 $HOME/artifact/gaia2.service.log & ) | grep -q "completed state snapshot"
+          sleep 60
       - name: Start node with state sync
         run: |
-          mkdir $SS_HOME_1
-          cp -rv $HOME_1/config $SS_HOME_1/
-      - name: DEBUG
-        if: always()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+          # SS_SERVICE_1: ss1.service
+          # SS_API_1: 35001
+          # SS_GRPC_1: 36001
+          # SS_RPC_1: 37001
+          # SS_P2P_1: 38001
+          # SS_PPROF_1: 39001
+
+          $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $SS_HOME_1
+          cp $HOME_2/config/genesis.json $SS_HOME_1/config/genesis.json
+          cp $HOME_2/config/config.toml $SS_HOME_1/config/
+          cp $HOME_2/config/app.toml $SS_HOME_1/config/
+          cp $HOME_2/config/client.toml $SS_HOME_1/config/
+          toml set --toml-path $SS_HOME_1/config/config.toml rpc.laddr "tcp://0.0.0.0:$SS_RPC_1"
+          # Set different ports for rpc pprof
+          toml set --toml-path $SS_HOME_1/config/config.toml rpc.pprof_laddr "localhost:$SS_PPROF_1"
+          # Set different ports for p2p
+          toml set --toml-path $SS_HOME_1/config/config.toml p2p.laddr "tcp://0.0.0.0:$SS_P2P_1"
+          # Set client ports for rpc
+          toml set --toml-path $SS_HOME_1/config/client.toml node "tcp://localhost:$SS_RPC_1"
+          toml set --toml-path $SS_HOME_1/config/app.toml state-sync.snapshot-interval --to-int 0
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.enable true
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.rpc_servers "http://127.0.0.1:$VAL2_RPC_PORT,http://127.0.0.1:$VAL2_RPC_PORT"
+          # Get snapshot height
+          trust_block=$(cat artifact/gaia2.service.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep "completed state snapshot" | grep -o -P '(?<=height=).*(?=module)')
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.trust_height --to-int $trust_block
+          # Get trust hash
+          trust_hash=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$trust_block | jq -r '.result.block_id.hash')
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.trust_hash "$trust_hash"
+
+      # - name: DEBUG
+      #   if: always()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: Generate info graphs
         if: always()
         run: |
