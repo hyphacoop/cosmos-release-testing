@@ -4,18 +4,12 @@
 
 upgrade_name=$1
 
-monikers=()
 homes=()
-rpc_ports=()
 logs=()
-for i in $(seq -w 001 $validator_count)
+for i in $(seq -w 01 $validator_count)
 do
-    moniker=$moniker_prefix$i
-    monikers+=($moniker)
     home=$home_prefix$i
     homes+=($home)
-    rpc_port=$rpc_prefix$i
-    rpc_ports+=($rpc_port)
     log=$log_prefix$i
     logs+=($log)
 done
@@ -67,7 +61,7 @@ echo "Using ($VOTING_PERIOD)s voting period to calculate the upgrade height."
 echo "Calculate upgrade height"
 block_time=$COMMIT_TIMEOUT
 let voting_blocks_delta=$VOTING_PERIOD/$block_time+5
-height=$(curl -s http://127.0.0.1:${rpc_ports[0]}/block | jq -r .result.block.header.height)
+height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
 
@@ -81,7 +75,7 @@ jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.jso
 jq -r '.expedited |= false' upgrade-3.json > upgrade-4.json
 echo "Modified proposal:"
 jq '.' upgrade-4.json
-proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from ${monikers[0]} --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --yes --home ${homes[0]}"
+proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --yes --home $whale_home"
 
 
 # Submit the proposal
@@ -92,31 +86,31 @@ sleep $(($COMMIT_TIMEOUT+2))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
-proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home ${homes[0]} | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "Proposal ID: $proposal_id"
 
 # Vote yes on the proposal
 echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from ${monikers[0]} --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home ${homes[0]} -o json"
+vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
 echo $vote
 txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
-$CHAIN_BINARY q tx $txhash --home ${homes[0]}
+$CHAIN_BINARY q tx $txhash --home $whale_home
 
 # Wait for the voting period to be over
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
 echo "Upgrade proposal $proposal_id status:"
-$CHAIN_BINARY q gov proposal $proposal_id --output json --home ${homes[0]} | jq '.proposal.status'
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
 
-current_height=$(curl -s http://127.0.0.1:${rpc_ports[0]}/block | jq -r '.result.block.header.height')
+current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
 blocks_delta=$(($upgrade_height-$current_height))
 
 # Wait until the right height is reached
 echo "Waiting for the upgrade to take place at block height $upgrade_height..."
-tests/test_block_production.sh 127.0.0.1 ${rpc_ports[0]} $blocks_delta 50
+tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 50
 echo "> Validator log:"
 tail -n 50 ${logs[0]}
 
@@ -155,4 +149,4 @@ fi
 sleep 10
 
 echo "> Validator log:"
-tail -n 100 ${logs[0]}
+tail -n 50 ${logs[0]}
