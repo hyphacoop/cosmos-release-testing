@@ -73,48 +73,13 @@ jobs:
       CONSUMER_HOME_2: /home/runner/.cona2
       CONSUMERB_HOME_1: /home/runner/.conb1
       CONSUMERB_HOME_2: /home/runner/.conb2
-      STRIDE_SOV_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v11.0.0/stride-v11.0.0-linux-amd64
-      STRIDE_CON_CHAIN_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/stride-v12.1.0/stride-v12.1.0-linux-amd64
-      STRIDE_CHAIN_BINARY: strided
-      STRIDE_HOME_1: /home/runner/.stride1
-      STRIDE_SERVICE_1: stride1.service
-      STRIDE_CHAIN_ID: consumerd
-      STRIDE_DENOM: ustrd
-      STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-      STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
-      STRIDE_WALLET_5: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
-      STRIDE_API_1: 35001
-      STRIDE_GRPC_1: 36001
-      STRIDE_RPC_1: 37001
-      STRIDE_P2P_1: 38001
-      STRIDE_PPROF_1: 39001
-      CON1_API_PORT: 25101
-      CON1_GRPC_PORT: 26101
-      CON1_RPC_PORT: 27101
-      CON1_P2P_PORT: 28101
-      CON1_PPROF_PORT: 6163
-      CON2_API_PORT: 25102
-      CON2_GRPC_PORT: 26102
-      CON2_RPC_PORT: 27102
-      CON2_P2P_PORT: 28102
-      CON2_PPROF_PORT: 6164
-      CON2_MIN_GAS_PRICES: 0.0025
-      CONSUMER_SERVICE_1: cona1.service
-      CONSUMER_SERVICE_2: cona2.service
-      CONSUMER_MIN_GAS_PRICES: 0.0025
-      CONB1_API_PORT: 55101
-      CONB1_GRPC_PORT: 56101
-      CONB1_RPC_PORT: 57101
-      CONB1_P2P_PORT: 58101
-      CONB1_PPROF_PORT: 56163
-      CONB2_API_PORT: 55102
-      CONB2_GRPC_PORT: 56102
-      CONB2_RPC_PORT: 57102
-      CONB2_P2P_PORT: 58102
-      CONB2_PPROF_PORT: 56164
-      CONSUMERB_SERVICE_1: conb1.service
-      CONSUMERB_SERVICE_2: conb2.service
-      CONSUMERB_MIN_GAS_PRICES: 0.0025
+      SS_HOME_1: /home/runner/.statesync
+      SS_SERVICE_1: ss1.service
+      SS_API_1: 35001
+      SS_GRPC_1: 36001
+      SS_RPC_1: 37001
+      SS_P2P_1: 38001
+      SS_PPROF_1: 39001
       BASE_FEES: 30000
       HIGH_FEES: 25000
       GAS: auto
@@ -123,14 +88,7 @@ jobs:
       DELEGATE_1: ${{ vars.DELEGATE_1 }}
       DELEGATE_1_AMOUNT: ${{ vars.DELEGATE_1_AMOUNT }}
       DELEGATE_2_AMOUNT: ${{ vars.DELEGATE_2_AMOUNT }}
-      LSM_LOG: /home/runner/artifact/lsm_log.csv
-      COMMIT_TIMEOUT: 5
-      CB_ACCT: cosmos145hytrc49m0hn6fphp8d5h4xspwkawcuzmx498
-      VESTING_TARGET: "1772414007"
       UPGRADE_VERSION: ${{ inputs.upgrade_version }}
-      # UPGRADE_VERSION: "4c2767394a3752d0f79f11ebbcb718f8693bb2bc"
-      HERMES_VERSION: ${{ vars.HERMES_VERSION }}
-      CONSUMER_UNBOND_TIME: ${{ vars.CONSUMER_UNBOND_TIME }}
     steps:
       # Get system info
       - name: Install required packages
@@ -234,6 +192,15 @@ jobs:
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
           $CHAIN_BINARY keys list --home $HOME_2
+      # - name: Wait for snapshot to be created
+      #   run: |
+      #     echo "Wait for snapshot to be created..."
+      #     ( tail -f -n0 $HOME/artifact/gaia2.service.log & ) | grep -q "completed state snapshot"
+      #     sleep 60
+      - name: Start node with state sync
+        run: |
+          mkdir $SS_HOME_1
+          cp -rv $HOME_1/config $SS_HOME_1/
       - name: DEBUG
         if: always()
         run: |
