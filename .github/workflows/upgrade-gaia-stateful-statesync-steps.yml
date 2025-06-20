@@ -223,13 +223,13 @@ jobs:
           trust_hash=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$trust_block | jq -r '.result.block_id.hash')
           toml set --toml-path $SS_HOME_1/config/config.toml statesync.trust_hash "$trust_hash"
 
-      # - name: DEBUG
-      #   if: always()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
+      - name: DEBUG
+        if: always()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Generate info graphs
         if: always()
         run: |
