@@ -253,6 +253,11 @@
           #     # chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY
           #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
           #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
+
 
           - name: Start chain
             run: |
@@ -295,15 +300,8 @@
             run: |
               source scripts/vars_consumer_v400_one.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
-          - name: Set up relayer
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh
-              scripts/setup_relayer.sh
 
           - name: Establish CCV channel for v400-one
-            env:
-              CONSUMER_CHAIN_ID: v400-one
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v400_one.sh 
@@ -320,8 +318,6 @@
               tests/test_ccv_channel.sh
               $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
           - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
-            env:
-              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v400_one.sh
@@ -463,43 +459,30 @@
             run: |
               source scripts/vars_consumer_v640_one.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
-      #     - name: Establish CCV channel for v630-one
-      #       env:
-      #         CONSUMER_CHAIN_ID: v630-one
-      #       run: |
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         if [ $RELAYER == "hermes" ]; then
-      #           echo "Creating channel with Hermes..."
-      #           hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-      #           hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-      #         elif [ $RELAYER == "rly" ]; then
-      #           echo "Creating channel with Go relayer..."
-      #           jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
-      #           jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v630-1.json > v630-2.json
-      #           rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v630-1 --file v630-2.json
-      #           rly transact connection v630-1
-      #           rly transact channel v630-1 --src-port consumer --dst-port provider --order ordered --version 1
-      #         fi
-      #         sudo systemctl restart $RELAYER
-      #         sleep 10
-      #     - name: _Pre-upgrade CCV channel verified> ICS v6.3.0 chain 1
-      #       env:
-      #         CONSUMER_HOME_1: /home/runner/.v630-1-1
-      #         CON1_RPC_PORT: 63121
-      #       run: |
-      #         tests/test_ccv_key_assignment.sh
-      #         $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
-      #     - name: _Pre-upgrade IBC transfer successful> ICS v6.3.0 chain 1
-      #       env:
-      #         CONSUMER_CHAIN_ID: v630-one
-      #         CONSUMER_HOME_1: /home/runner/.v630-1-1
-      #         RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-      #       run: |
-      #         export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V630_BINARY
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #         tests/test_consumer_ibc_transfer.sh $channel_id
+          - name: Establish CCV channel for v640-one
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh 
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              sudo systemctl restart $RELAYER
+              sleep 10
+          - name: _Pre-upgrade CCV channel verified> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh  
+              tests/test_ccv_channel.sh
+              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+          - name: _Pre-upgrade IBC transfer successful> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v400_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
     
       #     # - name: Register consumer reward denoms
       #     #   env:
@@ -553,8 +536,6 @@
               source scripts/vars_consumer_v400_one.sh  
               tests/test_ccv_channel.sh
           - name: _IBC transfer successful> ICS v4.0.0 chain 1
-            env:
-              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v400_one.sh 
@@ -569,8 +550,6 @@
               source scripts/vars_consumer_v640_one.sh  
               tests/test_ccv_channel.sh
           - name: _IBC transfer successful> ICS v6.4.0 chain 1
-            env:
-              RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
