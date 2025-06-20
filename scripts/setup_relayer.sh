@@ -24,18 +24,7 @@ if [ $RELAYER == "hermes" ]; then
     echo "Adding relayer keys..."
     echo $MNEMONIC_RELAYER > mnemonic.txt
     hermes keys add --chain $CHAIN_ID --mnemonic-file mnemonic.txt
-    hermes keys add --chain v310-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v310-two --mnemonic-file mnemonic.txt
-    hermes keys add --chain v320-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v320-two --mnemonic-file mnemonic.txt
-    hermes keys add --chain v330-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v330-two --mnemonic-file mnemonic.txt
     hermes keys add --chain v400-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v450-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v450-two --mnemonic-file mnemonic.txt
-    hermes keys add --chain v520-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v630-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v630-two --mnemonic-file mnemonic.txt
     hermes keys add --chain v640-one --mnemonic-file mnemonic.txt
     hermes keys add --chain stride-test --mnemonic-file mnemonic.txt
     hermes keys add --chain neutron-test --mnemonic-file mnemonic.txt

@@ -14,8 +14,8 @@ export ICS_TRANSFORM_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/relea
 export ICS_TRANSFORM_BINARY=$CONSUMER_CHAIN_BINARY
 export CONSUMER_ICS="v4.0.0"
 
-export consumer_moniker_prefix='con_'
-export consumer_home_prefix='/home/runner/.con_'
+export consumer_moniker_prefix='con400_'
+export consumer_home_prefix='/home/runner/.con400_'
 export consumer_api_prefix="401"
 export consumer_p2p_prefix="402"
 export consumer_rpc_prefix="403"
