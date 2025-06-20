@@ -211,6 +211,8 @@ jobs:
           toml set --toml-path $SS_HOME_1/config/config.toml rpc.pprof_laddr "localhost:$SS_PPROF_1"
           # Set different ports for p2p
           toml set --toml-path $SS_HOME_1/config/config.toml p2p.laddr "tcp://0.0.0.0:$SS_P2P_1"
+          # Turn on Instrumentation
+          toml set --toml-path $SS_HOME_1/config/config.toml instrumentation.prometheus false
           # Set client ports for rpc
           toml set --toml-path $SS_HOME_1/config/client.toml node "tcp://localhost:$SS_RPC_1"
           toml set --toml-path $SS_HOME_1/config/app.toml state-sync.snapshot-interval --to-int 0
@@ -225,7 +227,7 @@ jobs:
           echo "Starting node..."
           echo "Setting up services..."
           echo "Creating script for statesync node service"
-          echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home $HOME_1; sleep 1; done" > $HOME/$SS_SERVICE_1.sh
+          echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home $SS_HOME_1; sleep 1; done" > $HOME/$SS_SERVICE_1.sh
           chmod +x $HOME/$SS_SERVICE_1.sh
           echo "Starting $CHAIN_BINARY"
           screen -L -Logfile $HOME/artifact/$SS_SERVICE_1.log -S $SS_SERVICE_1 -d -m bash $HOME/$SS_SERVICE_1.sh
