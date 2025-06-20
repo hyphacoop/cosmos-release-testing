@@ -50,8 +50,11 @@ toml set --toml-path $HOME_2/config/client.toml node "tcp://localhost:$VAL2_RPC_
 # Set client chain-id
 toml set --toml-path $HOME_2/config/client.toml chain-id "$CHAIN_ID"
 
-# Turn on Instrumentation
-toml set --toml-path $HOME_2/config/config.toml instrumentation.prometheus true
+# Turn off Instrumentation
+toml set --toml-path $HOME_2/config/config.toml instrumentation.prometheus false
+
+# Turn on statesync
+toml set --toml-path $HOME_2/config/app.toml state-sync.snapshot-interval --to-int 1000
 
 # Set persistent_peer
 val1_node_id=$(gaiad --home $HOME_1 tendermint show-node-id)
