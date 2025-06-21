@@ -225,8 +225,8 @@ jobs:
           trust_hash=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$trust_block | jq -r '.result.block_id.hash')
           toml set --toml-path $SS_HOME_1/config/config.toml statesync.trust_hash "$trust_hash"
           # Set persistent_peer
-          val1_node_id=$(gaiad --home $HOME_1 tendermint show-node-id)
-          toml set --toml-path $SS_HOME_1/config/config.toml p2p.persistent_peers "$val1_node_id@localhost:$VAL1_P2P_PORT"
+          val1_node_id=$(gaiad --home $HOME_2 tendermint show-node-id)
+          toml set --toml-path $SS_HOME_1/config/config.toml p2p.persistent_peers "$val1_node_id@localhost:$VAL2_P2P_PORT"
           echo "Starting node..."
           echo "Setting up services..."
           echo "Creating script for statesync node service"
@@ -238,7 +238,7 @@ jobs:
           screen -r $SS_SERVICE_1 -p0 -X logfile flush 0
       - name: Wait for statesync gaiad to start and stabilize
         run: |
-          tail -f /home/runner/artifact/gaiad_sync.log &
+          tail -f $HOME/artifact/$SS_SERVICE_1.log &
           tests/test_block_production.sh 127.0.0.1 $SS_RPC_1 10 12600
       - name: Syncing Chain
         run: |
