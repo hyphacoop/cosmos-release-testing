@@ -50,8 +50,8 @@ toml set --toml-path $HOME_2/config/client.toml node "tcp://localhost:$VAL2_RPC_
 # Set client chain-id
 toml set --toml-path $HOME_2/config/client.toml chain-id "$CHAIN_ID"
 
-# Turn off Instrumentation
-toml set --toml-path $HOME_2/config/config.toml instrumentation.prometheus false
+# Turn on Instrumentation
+toml set --toml-path $HOME_2/config/config.toml instrumentation.prometheus true
 
 # Turn on statesync
 toml set --toml-path $HOME_2/config/app.toml state-sync.snapshot-interval --to-int 1000
@@ -59,6 +59,9 @@ toml set --toml-path $HOME_2/config/app.toml state-sync.snapshot-interval --to-i
 # Set persistent_peer
 val1_node_id=$(gaiad --home $HOME_1 tendermint show-node-id)
 toml set --toml-path $HOME_2/config/config.toml p2p.persistent_peers "$val1_node_id@localhost:$VAL1_P2P_PORT"
+
+# rm addrbook
+rm $HOME_2/config/addrbook.json || true
 
 # Create self-delegation accounts
 val2_self_delegation=$($CHAIN_BINARY --home $HOME_2 keys add val2 --output json)

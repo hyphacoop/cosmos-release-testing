@@ -85,6 +85,9 @@ toml set --toml-path $HOME_1/config/app.toml state-sync.snapshot-interval --to-i
 # Create self-delegation accounts
 echo $MNEMONIC_2 | $CHAIN_BINARY keys add $MONIKER_2 --keyring-backend test --home $HOME_1 --recover
 
+# rm addrbook
+rm $HOME_1/config/addrbook.json || true
+
 echo "Setting up services..."
 echo "Creating script for $CHAIN_BINARY"
 echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home $HOME_1; sleep 1; done" > $HOME/$PROVIDER_SERVICE_1.sh
