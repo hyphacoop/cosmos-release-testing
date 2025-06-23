@@ -16,12 +16,12 @@ export CONSUMER_ICS="v6.4.0"
 
 export consumer_moniker_prefix='con701_'
 export consumer_home_prefix='/home/runner/.con701_'
-export consumer_api_prefix="701"
-export consumer_p2p_prefix="702"
-export consumer_rpc_prefix="703"
-export consumer_grpc_prefix="704"
-export consumer_pprof_prefix="705"
-export consumer_log_prefix="con70log_"
+export consumer_api_prefix="171"
+export consumer_p2p_prefix="172"
+export consumer_rpc_prefix="173"
+export consumer_grpc_prefix="174"
+export consumer_pprof_prefix="175"
+export consumer_log_prefix="con701log_"
 
 export consumer_whale_home=${consumer_home_prefix}01
 export consumer_whale_rpc=${consumer_rpc_prefix}01
