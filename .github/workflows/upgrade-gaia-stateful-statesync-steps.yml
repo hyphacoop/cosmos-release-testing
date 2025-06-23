@@ -242,7 +242,6 @@ jobs:
           tests/test_block_production.sh 127.0.0.1 $SS_RPC_1 10 12600
       - name: Syncing Chain
         run: |
-          tail -f $HOME/artifact/$SS_SERVICE_1.log &
           catching_up="true"
           while [ $catching_up == "true" ]
           do
@@ -253,13 +252,6 @@ jobs:
           echo "Done Syncing"
       - name: _Blocks on statesync node
         run: tests/test_block_production.sh 127.0.0.1 $SS_RPC_1 10 12600
-      - name: DEBUG
-        if: always()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
       - name: Generate info graphs
         if: always()
         run: |
@@ -271,10 +263,8 @@ jobs:
         run: |
           mkdir ~/artifact/configs
           cp -rp ${{ vars.HOME_1 }}/config/ ~/artifact/configs/val1 || true
-          cp -rp ~/.hermes/ ~/artifact/configs/hermes/ || true
-          cp -rp ~/.cona1/config/ ~/artifact/configs/cona1 || true
-          cp -rp ~/.conb1/config/ ~/artifact/configs/conb1 || true
-          cp -rp ~/.stride1/config/ ~/artifact/configs/stride1 || true
+          cp -rp ${{ vars.HOME_2 }}/config/ ~/artifact/configs/val2 || true
+          cp -rp $SS_HOME_1/config/ ~/artifact/configs/statesync || true
           mkdir ~/artifact/bin
           cp -p ~/go/bin/* ~/artifact/bin/ || true
       - name: Upload artifacts
@@ -284,32 +274,3 @@ jobs:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
           path: ~/artifact/
           include-hidden-files: true
-      # Upload states to artifats
-      # - name: Upload provider chain state val1
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val1-state
-      #     path: ~/.val1/
-      #     include-hidden-files: true
-      # - name: Upload provider chain state val2
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-provider-val2-state
-      #     path: ~/.val2/
-      #     include-hidden-files: true
-      # - name: Upload cona1 chain state
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona1-state
-      #     path: ~/.cona1/
-      #     include-hidden-files: true
-      # - name: Upload cona2 chain state
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}-cona2-state
-      #     path: ~/.cona2/
-      #     include-hidden-files: true
