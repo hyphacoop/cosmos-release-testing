@@ -14,7 +14,7 @@
           to_version:
             description: 'Gaia version to upgrade to'
             required: true
-            default: v25.0.0-rc0
+            default: v25.0.0
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
@@ -33,27 +33,6 @@
       PSS_ENABLED: true
       PROVIDER_ICS: v6.4.0
       TOPN: 0
-      # Reference ICS chain variables
-      CONSUMER_CHAIN_V330_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v3.3.0/interchain-security-cd-linux
-      CONSUMER_CHAIN_V330_BINARY: consumerd_v4.0.0
-      # CONSUMER_CHAIN_V400_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-consumer-v4.0.0/interchain-security-cd-linux
-      # CONSUMER_CHAIN_V400_BINARY: consumerd_v4.0.0
-      CONSUMER_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-cd-linux
-      CONSUMER_CHAIN_V450_BINARY: consumerd_v4.5.0
-      CONSUMER_CHAIN_V520_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v5.2.0/interchain-security-cd-linux
-      CONSUMER_CHAIN_V520_BINARY: consumerd_v5.2.0
-      CONSUMER_CHAIN_V630_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.3.0/interchain-security-cd-linux
-      CONSUMER_CHAIN_V630_BINARY: consumerd_v6.3.0
-      # CONSUMER_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-cd-linux
-      # CONSUMER_CHAIN_V640_BINARY: consumerd-v640-one
-      SOVEREIGN_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-sd-linux
-      SOVEREIGN_CHAIN_V450_BINARY: consumersd_v4.5.0
-      CHANGEOVER_CHAIN_V450_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v4.5.0/interchain-security-cdd-linux
-      CHANGEOVER_CHAIN_V450_BINARY: consumerdd_v4.5.0
-      SOVEREIGN_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-sd-linux
-      SOVEREIGN_CHAIN_V640_BINARY: consumersd_v6.4.0
-      CHANGEOVER_CHAIN_V640_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v6.4.0/interchain-security-cdd-linux
-      CHANGEOVER_CHAIN_V640_BINARY: consumerdd_v6.4.0
       ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
       ICS_TRANSFORM_BINARY: cd-transform
       # Stride chain variables
@@ -71,7 +50,7 @@
       set-versions:
         env:
           START: ${{ github.event_name == 'push' && 'v24.0.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'v25.0.0-rc0' || inputs.to_version }}
+          TARGET: ${{ github.event_name == 'push' && 'v25.0.0' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v25.0.0' || inputs.upgrade_name }}
         runs-on: ubuntu-22.04
         # runs-on: cosmos-runner-set
@@ -239,25 +218,10 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
 
-          # - name: Download consumer chain binaries
-          #   run: |
-          #     wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
-          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
-          #     wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
-          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
-          #     wget $CONSUMER_CHAIN_V520_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY -q
-          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V520_BINARY
-          #     wget $CONSUMER_CHAIN_V630_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY -q
-          #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V630_BINARY
-          #     # wget $CONSUMER_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY -q
-          #     # chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V640_BINARY
-          #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-          #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
           - name: Set up relayer
             run: |
               source scripts/vars.sh
               scripts/setup_relayer.sh
-
 
           - name: Start chain
             run: |
@@ -269,62 +233,6 @@
               tail -n 100 log_01
               scripts/wait_for_block.sh $whale_rpc 3
 
-          - name: Add consumer chain with ICS v4.0.0
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh
-              scripts/add_consumer.sh
-          - name: Initialize consumer chain with ICS v4.0.0
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v400_one.sh
-              wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-              scripts/setup_consumer_legacy.sh
-              sleep 20
-          - name: Spawn consumer chain v400-one
-            env:
-              PROVIDER_ICS: v6.4.0
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v400_one.sh
-              scripts/spawn_consumer.sh
-          - name: Start consumer chain v400-one
-            run: |
-              source scripts/vars_consumer_v400_one.sh
-              ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
-              tail -n 100 ${consumer_log_prefix}01
-            continue-on-error: true
-          - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars_consumer_v400_one.sh
-              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
-
-          - name: Establish CCV channel for v400-one
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v400_one.sh 
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              echo "Creating channel with Hermes..."
-              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
-              sleep 10
-          - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh  
-              tests/test_ccv_channel.sh
-              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
-          - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v400_one.sh
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-              tests/test_consumer_ibc_transfer.sh $channel_id
 
           - name: Add consumer chain with ICS v6.4.0
             run: |
@@ -482,20 +390,6 @@
       #       run: |
       #         $CHAIN_BINARY q provider list-consumer-chains --home $HOME_1
 
-          - name: _CCV channel verified> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh  
-              tests/test_ccv_channel.sh
-          - name: _IBC transfer successful> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v400_one.sh 
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-              tests/test_consumer_ibc_transfer.sh $channel_id
-
           - name: _CCV channel verified> ICS v6.4.0 chain 1
             run: |
               source scripts/vars.sh
@@ -509,6 +403,21 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
+
+          - name: _CCV channel verified> ICS v7.0.1 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v701_one.sh  
+              tests/test_ccv_channel.sh
+          - name: _IBC transfer successful> ICS v7.0.1 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v701_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
+
 
       #     - name: _CCV channel verified> ICS v5.2.0 chain 1
       #       env:
