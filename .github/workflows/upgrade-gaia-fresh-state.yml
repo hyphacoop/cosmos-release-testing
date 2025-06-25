@@ -151,7 +151,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_001
+              tail -n 100 log_01
               scripts/wait_for_block.sh 3
           
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
@@ -187,8 +187,7 @@
               tests/test_endpoints_rpc.sh localhost ${rpc_prefix}001
   
       Test-02-ics-optin:
-        # runs-on: ubuntu-22.04
-        runs-on: cosmos-runner-set
+        runs-on: ubuntu-22.04
         needs: set-versions
         strategy:
           matrix:
