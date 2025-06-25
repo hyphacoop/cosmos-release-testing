@@ -28,6 +28,8 @@ for i in $(seq 0 $[$validator_count-1])
 do
     wallet=$(jq -r --arg MONIKER "${monikers[i]}" '.[] | select(.name==$MONIKER).address' keys.json)
     wallets+=($wallet)
+    echo "> Wallet: $wallet"
+    echo "> Command: $CHAIN_BINARY debug bech32-convert --prefix cosmosvaloper $wallet"
     operator=$($CHAIN_BINARY debug bech32-convert --prefix cosmosvaloper $wallet)
     operators+=($operator)
     echo "> Wallet: $wallet | operator: $operator"
