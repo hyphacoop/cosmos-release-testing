@@ -95,7 +95,7 @@ cp temp/denom-staking.json ${homes[0]}/config/genesis.json
 
 echo "> Updating gov denom"
 jq -r --arg DENOM "$DENOM" '.app_state.gov.params.min_deposit[0].denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-dep.json
-cp temp/denom-staking.json ${homes[0]}/config/genesis.json
+cp temp/denom-dep.json ${homes[0]}/config/genesis.json
 
 echo "> Updating gov expedited denom"
 jq -r --arg DENOM "$DENOM" '.app_state.gov.params.expedited_min_deposit[0].denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-exp.json
