@@ -3006,7 +3006,7 @@
               sed -i -e "s/priv_validator_key_file/#priv_validator_state_file/" $whale_home/config/config.toml
               ./$START_SCRIPT
               sleep 5
-              tail -n 50 log_001
+              tail -n 50 log_01
               echo "> Tmkms logs:"
               tail -n 50 tmkms.log
               scripts/wait_for_block.sh 3
@@ -3086,7 +3086,7 @@
               export COMMIT_TIMEOUT=3
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_001
+              tail -n 100 log_01
               scripts/wait_for_block.sh 3
           
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
