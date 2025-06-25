@@ -10,7 +10,7 @@ rpc_ports=()
 logs=()
 wallets=()
 operators=()
-for i in $(seq -w 001 $validator_count)
+for i in $(seq -w $COUNT_WIDTH $validator_count)
 do
   moniker=$moniker_prefix$i
   monikers+=($moniker)

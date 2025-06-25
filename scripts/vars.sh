@@ -26,6 +26,7 @@ export GAS_ADJUSTMENT=3
 export STATE_SYNC_SNAPSHOT_INTERVAL=50
 export STATE_SYNC_SNAPSHOT_KEEP_RECENT=5
 
+export COUNT_WIDTH="01"
 export moniker_prefix='val_'
 export home_prefix='/home/runner/.val_'
 export api_prefix="250"
@@ -36,8 +37,9 @@ export pprof_prefix="290"
 export sign_prefix="240"
 export log_prefix="log_"
 
-export whale_home=${home_prefix}01
-export whale_rpc=${rpc_prefix}01
+export whale_home=${home_prefix}$COUNT_WIDTH
+export whale_rpc=${rpc_prefix}$COUNT_WIDTH
+export whale_log=${log_prefix}$COUNT_WIDTH
 
 export START_SCRIPT="start.sh"
 export STOP_SCRIPT="stop.sh"

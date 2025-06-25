@@ -151,7 +151,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_01
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh 3
           
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
