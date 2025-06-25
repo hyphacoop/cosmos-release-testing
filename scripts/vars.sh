@@ -38,6 +38,7 @@ export sign_prefix="240"
 export log_prefix="log_"
 
 export whale_home=${home_prefix}$COUNT_WIDTH
+export whale_api=${api_prefix}$COUNT_WIDTH
 export whale_rpc=${rpc_prefix}$COUNT_WIDTH
 export whale_log=${log_prefix}$COUNT_WIDTH
 
