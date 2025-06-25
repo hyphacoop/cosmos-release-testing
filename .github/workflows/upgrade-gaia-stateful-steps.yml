@@ -396,6 +396,103 @@ jobs:
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
           fi
+      - name: _TX liquid tokenize-share 1
+        run: |
+          txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 --home $HOME_1 1000000uatom $MONIKER_2 --from $MONIKER_2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+          echo "[INFO]: txhash: $txhash"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 20
+          code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
+          echo "[INFO]: Code is: $code"
+          if [ -z $code ]; then
+            echo "[ERROR]: code returned blank, TX was unsuccessful."
+          elif [ $code -ne 0 ]; then
+            echo "[ERROR]: code returned: $code, TX unsuccessful"
+            exit 1
+          fi
+      - name: Wait for block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: _TX liquid tokenize-share 2
+        run: |
+          txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 --home $HOME_1 2000000uatom $MONIKER_2 --from $MONIKER_2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+          echo "[INFO]: txhash: $txhash"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 20
+          code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
+          echo "[INFO]: Code is: $code"
+          if [ -z $code ]; then
+            echo "[ERROR]: code returned blank, TX was unsuccessful."
+          elif [ $code -ne 0 ]; then
+            echo "[ERROR]: code returned: $code, TX unsuccessful"
+            exit 1
+          fi
+      - name: Wait for block
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Query bank balances
+        run: gaiad --home $HOME_1 q bank balances $MONIKER_2
+      - name: Get liquid denom with 1000000uatom
+        run: |
+          denom=$($CHAIN_BINARY q bank balances $MONIKER_2 -o json | jq -r '.balances[] | select(.amount == "1000000") | .denom')
+          echo "$denom"
+          echo "LIQUID_DENOM1=$(echo $denom)" >> $GITHUB_ENV
+      - name: Get liquid denom with 2000000uatom
+        run: |
+          denom=$($CHAIN_BINARY q bank balances $MONIKER_2 -o json | jq -r '.balances[] | select(.amount == "2000000") | .denom')
+          echo "$denom"
+          echo "LIQUID_DENOM2=$(echo $denom)" >> $GITHUB_ENV
+      - name: Get record for the 1000000uatom liquid denom
+        run: |
+          json=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom ${{ env.LIQUID_DENOM1 }} -o json | jq -r '.')
+          record_id=$(echo $json | jq -r ".record.id")
+          record_owner=$(echo $json | jq -r ".record.owner")
+          record_module_account=$(echo $json | jq -r ".record.module_account")
+          record_validator=$(echo $json | jq -r ".record.validator")
+          echo "record_id: $record_id"
+          echo "record_owner: $record_owner"
+          echo "record_module_account: $record_module_account"
+          echo "record_validator: $record_validator"
+          echo "LIQUID_DENOM1_RECORD_ID=$record_id" >> $GITHUB_ENV
+          echo "LIQUID_DENOM1_RECORD_OWNER=$record_owner" >> $GITHUB_ENV
+          echo "LIQUID_DENOM1_RECORD_MODULE_ACCOUNT=$record_module_account" >> $GITHUB_ENV
+          echo "LIQUID_DENOM1_RECORD_VALIDATOR=$record_validator" >> $GITHUB_ENV
+      - name: Get record for the 2000000uatom liquid denom
+        run: |
+          json=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom ${{ env.LIQUID_DENOM2 }} -o json | jq -r '.')
+          record_id=$(echo $json | jq -r ".record.id")
+          record_owner=$(echo $json | jq -r ".record.owner")
+          record_module_account=$(echo $json | jq -r ".record.module_account")
+          record_validator=$(echo $json | jq -r ".record.validator")
+          echo "record_id: $record_id"
+          echo "record_owner: $record_owner"
+          echo "record_module_account: $record_module_account"
+          echo "record_validator: $record_validator"
+          echo "LIQUID_DENOM2_RECORD_ID=$record_id" >> $GITHUB_ENV
+          echo "LIQUID_DENOM2_RECORD_OWNER=$record_owner" >> $GITHUB_ENV
+          echo "LIQUID_DENOM2_RECORD_MODULE_ACCOUNT=$record_module_account" >> $GITHUB_ENV
+          echo "LIQUID_DENOM2_RECORD_VALIDATOR=$record_validator" >> $GITHUB_ENV
+      - name: Transfer tokenized share ownership
+        run: |
+          txhash=$($CHAIN_BINARY tx liquid transfer-tokenize-share-record ${{ env.LIQUID_DENOM1_RECORD_ID }} cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp --from $MONIKER_2 --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json | jq '.txhash' | tr -d '"')
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
+          echo "[INFO]: Code is: $code"
+          if [ -z $code ]; then
+            echo "[ERROR]: code returned blank, TX was unsuccessful."
+          elif [ $code -ne 0 ]; then
+            echo "[ERROR]: code returned: $code, TX unsuccessful"
+            exit 1
+          fi
+      - name: Redeem tokenized shares
+        run: |
+          txhash=$($CHAIN_BINARY tx liquid redeem-tokens 2000000${{ env.LIQUID_DENOM2_RECORD_ID }} --from cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json | jq '.txhash' | tr -d '"')
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
+          echo "[INFO]: Code is: $code"
+          if [ -z $code ]; then
+            echo "[ERROR]: code returned blank, TX was unsuccessful."
+          elif [ $code -ne 0 ]; then
+            echo "[ERROR]: code returned: $code, TX unsuccessful"
+            exit 1
+          fi
+
       # - name: Generate wallets for fee market
       #   run: |
       #     feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
