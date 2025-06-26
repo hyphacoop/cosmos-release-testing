@@ -8,8 +8,6 @@ export DENOM=uatom
 export GAS_PRICE=0.005$DENOM
 
 export node_home='/home/runner/.statesync'
-export home_prefix='/home/runner/.val_'
-export whale_home=${home_prefix}001
 export api_prefix="25"
 export p2p_prefix="26"
 export rpc_prefix="27"
