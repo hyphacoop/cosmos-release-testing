@@ -366,6 +366,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
@@ -379,6 +380,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
@@ -392,6 +394,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
@@ -405,6 +408,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
@@ -420,6 +424,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
@@ -476,6 +481,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
@@ -488,6 +494,7 @@ jobs:
           echo "[INFO]: Code is: $code"
           if [ -z $code ]; then
             echo "[ERROR]: code returned blank, TX was unsuccessful."
+            exit 1
           elif [ $code -ne 0 ]; then
             echo "[ERROR]: code returned: $code, TX unsuccessful"
             exit 1
