@@ -2952,6 +2952,7 @@
     
           - name: _Test expedited proposals
             run: |
+              source ./scripts/vars.sh
               tests/test_expedited_proposals.sh
 
       Test-14-key-management:

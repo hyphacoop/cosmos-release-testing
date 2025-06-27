@@ -1,5 +1,4 @@
 #!/bin/bash
-source ./scripts/vars.sh
 proposal_json=$1
 
 proposal="$CHAIN_BINARY tx gov submit-proposal $proposal_json --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y"
