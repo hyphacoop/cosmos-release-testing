@@ -172,9 +172,9 @@ dynamic_gas_price = { enabled=true, multiplier = 1.5, max = 0.2 }
 
 [[chains]]
 id = 'pfm1'
-rpc_addr = 'http://localhost:27011'
-grpc_addr = 'http://localhost:26011'
-event_source = { mode = 'push', url = 'ws://localhost:27011/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:37001'
+grpc_addr = 'http://localhost:38001'
+event_source = { mode = 'push', url = 'ws://localhost:37001/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
@@ -190,9 +190,9 @@ dynamic_gas_price = { enabled=true, multiplier = 1.5, max = 0.2 }
 
 [[chains]]
 id = 'pfm2'
-rpc_addr = 'http://localhost:27012'
-grpc_addr = 'http://localhost:26012'
-event_source = { mode = 'push', url = 'ws://localhost:27012/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:47001'
+grpc_addr = 'http://localhost:48001'
+event_source = { mode = 'push', url = 'ws://localhost:47001/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
@@ -208,9 +208,9 @@ dynamic_gas_price = { enabled=true, multiplier = 1.5, max = 0.2 }
 
 [[chains]]
 id = 'pfm3'
-rpc_addr = 'http://localhost:27013'
-grpc_addr = 'http://localhost:26013'
-event_source = { mode = 'push', url = 'ws://localhost:27013/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:57001'
+grpc_addr = 'http://localhost:58001'
+event_source = { mode = 'push', url = 'ws://localhost:57001/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
