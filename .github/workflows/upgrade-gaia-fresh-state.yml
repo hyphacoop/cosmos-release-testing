@@ -44,7 +44,7 @@
       STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
       # Relayer variables
       RELAYER: hermes
-      HERMES_VERSION: v1.13.1
+      HERMES_VERSION: v1.13.2
       RLY_VERSION: "2.5.0"
     jobs:
       set-versions:
@@ -438,7 +438,7 @@
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
@@ -1151,11 +1151,6 @@
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-
-          - name: Start chain
-            run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
               source scripts/vars.sh
               scripts/setup.sh
@@ -1426,11 +1421,14 @@
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-       
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+
           - name: Add Stride consumer chain
             env:
               CONSUMER_CHAIN_ID: stride-test
@@ -1604,15 +1602,19 @@
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
-    
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+
           - name: Set up vesting account
             run: |
+              source scripts/vars.sh
               echo "Adding key..."
-              echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $HOME_1 --recover
+              echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $whale_home --recover
     
               echo "Creating vesting wallet..."
               start_time=$(date +%s)
@@ -1621,8 +1623,8 @@
               echo "end time: $end_time"
               $CHAIN_BINARY tx vesting create-vesting-account \
               $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
-              --from $WALLET_1 --home $HOME_1 \
-              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+              --from $WALLET_1 --home $whale_home \
+              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               sleep $COMMIT_TIMEOUT
               sleep $COMMIT_TIMEOUT
     
@@ -1635,36 +1637,38 @@
     
           - name: Set up bonding
             run: |
-              $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+              source scripts/vars.sh
+              $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
     
           - name: Delegate with vesting wallet
             run: |
-              $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $whale_home -o json | jq '.'
               echo "Delegating from vesting wallet..."
               $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
-              --from $VESTING_WALLET --home $HOME_1 \
-              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
+              --from $VESTING_WALLET --home $whale_home \
+              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               sleep $COMMIT_TIMEOUT
               sleep $COMMIT_TIMEOUT
       
     
           - name: Test software upgrade
             env:
-              TARGET_VERSION: "${{ matrix.target_version }}"
+              TARGET_VERSION: ${{ matrix.target_version }}
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
           - name: _Blocks produced after upgrade
             run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-    
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 3
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Tokenize with vesting wallet
             run: |
-              $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $HOME_1 -o json | jq '.'
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $whale_home -o json | jq '.'
   
               echo "vesting_start_time = $vesting_start_time"
               echo "vesting_end_time = $vesting_end_time"
@@ -1680,8 +1684,8 @@
               vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
               echo "vested amount: $vested_amount"
     
-              # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y
-              txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
+              # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
+              txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
               echo "txhash: $txhash"
     
               sleep $COMMIT_TIMEOUT
