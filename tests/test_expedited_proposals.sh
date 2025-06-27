@@ -1,6 +1,5 @@
 #!/bin/bash 
 
-
 echo "> Staking params:"
 $CHAIN_BINARY q staking params --output json --home $whale_home | jq '.'
 value_pre_change=$($CHAIN_BINARY q staking params --output json --home $whale_home | jq -r '.params.max_validators')
