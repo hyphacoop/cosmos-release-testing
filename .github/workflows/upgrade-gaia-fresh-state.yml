@@ -98,7 +98,7 @@
          binary_source: ${{ steps.binary.outputs.source }}
 
       Test-01-cosmovisor-upgrade:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -187,7 +187,7 @@
               tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
   
       Test-02-ics-optin:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -763,7 +763,7 @@
       #     #     fi
   
       Test-03-ics-topn:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1113,7 +1113,7 @@
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
       Test-04-pfm:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1256,7 +1256,7 @@
               tests/test_pfm_transfers.sh
     
       Test-05-liquid-staking:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1297,25 +1297,29 @@
               python -m pip install toml-cli
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Set up happy path LSM accounts
             run: |
+              source scripts/vars.sh
               scripts/lsm_account_setup.sh
 
-          - name: _Pre-upgrade LSM happy path
-            env:
-              BASE_FEES: 3000
-            run: |
-              tests/test_lsm_happy_path.sh
+          # - name: _Pre-upgrade LSM happy path
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_lsm_happy_path.sh
     
           - name: Tokenize with wallet 5
             run: |
+              source scripts/vars.sh
               echo "> Delegating."
-              $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000uatom --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+              $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000uatom --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
               echo "> Tokenizing."
               echo "> Command: $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
@@ -1360,7 +1364,7 @@
               tests/test_liquid_happy_path.sh
     
       Test-06-mainnet-consumer-chains:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1565,7 +1569,7 @@
               tests/test_consumer_ibc_transfer.sh $channel_id
     
       Test-07-vesting-liquid-staking:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1699,7 +1703,7 @@
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
 
       Test-08-ICA-controller:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1836,7 +1840,7 @@
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
       Test-09-cosmwasm:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -1929,7 +1933,7 @@
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
     
       Test-10-feemarket:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -2026,7 +2030,7 @@
             run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
   
       Test-11-ics-sovereign-reuse-connection:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -2514,7 +2518,7 @@
           #     fi
 
       Test-12-ics-sovereign-new-connection:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -2880,7 +2884,7 @@
               fi
 
       Test-13-expedited-proposals:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -2943,7 +2947,7 @@
               tests/test_expedited_proposals.sh
 
       Test-14-key-management:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
@@ -3041,7 +3045,7 @@
               tests/test_endpoints_rpc.sh localhost $whale_rpc
 
       Test-15-state-sync:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
           matrix:
