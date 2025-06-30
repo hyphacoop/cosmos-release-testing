@@ -39,9 +39,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "unknown arguement: $2"
+            shift
+            shift
             exit 1
-            shift
-            shift
             ;;
     esac
 done
