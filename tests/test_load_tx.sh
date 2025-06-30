@@ -3,17 +3,17 @@
 while [[ $# -gt 0 ]]; do
     case $1 in
         --rpc-host)
-        RPC_HOST="$2"
+            RPC_HOST="$2"
             shift
             shift
             ;;
         --rpc-port)
-        RPC_PORT="$2"
+            RPC_PORT="$2"
             shift
             shift
             ;;
         --from-wallet)
-        FROM_WALLET="$2"
+            FROM_WALLET="$2"
             shift
             shift
             ;;
@@ -38,14 +38,13 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            echo "test: $2"
+            echo "unknown arguement: $2"
+            exit 1
             shift
             shift
             ;;
     esac
 done
-
-exit 0
 
 echo "[DEBUG]: TX bank send"
 txhash=$($CHAIN_BINARY tx bank send $FROM_WALLET $TO_WALLET $VAL_STAKE_STEP$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
