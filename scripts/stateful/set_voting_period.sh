@@ -17,7 +17,7 @@ echo "$gaiadout"
 
 txhash=$(echo "$gaiadout" | jq -r .txhash)
 # Wait for the proposal to go on chain
-sleep 6
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
