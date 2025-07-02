@@ -125,15 +125,15 @@ echo "[DEBUG]: Query bank balances"
 $CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET
 
 echo "[DEBUG]: Get liquid denom with 1000000uatom"
-LIQUID_DENOM1=$($CHAIN_BINARY q bank balances $FROM_WALLET -o json | jq -r '.balances[] | select(.amount == "1000000") | .denom')
+LIQUID_DENOM1=$($CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET -o json | jq -r '.balances[] | select(.amount == "1000000") | .denom')
 echo "$LIQUID_DENOM1"
 
 echo "[DEBUG]: Get liquid denom with 2000000uatom"
-LIQUID_DENOM2=$($CHAIN_BINARY q bank balances $FROM_WALLET -o json | jq -r '.balances[] | select(.amount == "2000000") | .denom')
+LIQUID_DENOM2=$($CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET -o json | jq -r '.balances[] | select(.amount == "2000000") | .denom')
 echo "$LIQUID_DENOM2"
 
 echo "[DEBUG]: Get record for the 1000000uatom liquid denom"
-json=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom $LIQUID_DENOM1 -o json | jq -r '.')
+json=$($CHAIN_BINARY --home $HOME_DIR q liquid tokenize-share-record-by-denom $LIQUID_DENOM1 -o json | jq -r '.')
 LIQUID_DENOM1_RECORD_ID=$(echo $json | jq -r ".record.id")
 LIQUID_DENOM1_RECORD_OWNER=$(echo $json | jq -r ".record.owner")
 LIQUID_DENOM1_RECORD_MODULE_ACCOUNT=$(echo $json | jq -r ".record.module_account")
@@ -144,7 +144,7 @@ echo "record_module_account: $LIQUID_DENOM1_RECORD_MODULE_ACCOUNT"
 echo "record_validator: $LIQUID_DENOM1_RECORD_VALIDATOR"
 
 echo "[DEBUG]: Get record for the 2000000uatom liquid denom"
-json=$($CHAIN_BINARY q liquid tokenize-share-record-by-denom $LIQUID_DENOM2 -o json | jq -r '.')
+json=$($CHAIN_BINARY --home $HOME_DIR q liquid tokenize-share-record-by-denom $LIQUID_DENOM2 -o json | jq -r '.')
 LIQUID_DENOM2_RECORD_ID=$(echo $json | jq -r ".record.id")
 LIQUID_DENOM2_RECORD_OWNER=$(echo $json | jq -r ".record.owner")
 LIQUID_DENOM2_RECORD_MODULE_ACCOUNT=$(echo $json | jq -r ".record.module_account")
@@ -155,10 +155,10 @@ echo "record_module_account: $LIQUID_DENOM2_RECORD_MODULE_ACCOUNT"
 echo "record_validator: $LIQUID_DENOM2_RECORD_VALIDATOR"
 
 echo "[DEBUG]: Transfer tokenized share ownership"
-echo "$CHAIN_BINARY tx liquid transfer-tokenize-share-record $LIQUID_DENOM1_RECORD_ID $LIQUID_TRANSFER_TO --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json"
-txhash=$($CHAIN_BINARY tx liquid transfer-tokenize-share-record $LIQUID_DENOM1_RECORD_ID $LIQUID_TRANSFER_TO --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY --home $HOME_DIR tx liquid transfer-tokenize-share-record $LIQUID_DENOM1_RECORD_ID $LIQUID_TRANSFER_TO --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json"
+txhash=$($CHAIN_BINARY --home $HOME_DIR tx liquid transfer-tokenize-share-record $LIQUID_DENOM1_RECORD_ID $LIQUID_TRANSFER_TO --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json | jq '.txhash' | tr -d '"')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
-code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
+code=$($CHAIN_BINARY --home $HOME_DIR q tx $txhash -o json --home $HOME_DIR | jq '.code')
 echo "[INFO]: Code is: $code"
 if [ -z $code ]; then
     echo "[ERROR]: code returned blank, TX was unsuccessful."
@@ -169,10 +169,10 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: Redeem tokenized shares"
-echo "$CHAIN_BINARY tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json"
-txhash=$($CHAIN_BINARY tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json"
+txhash=$($CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json | jq '.txhash' | tr -d '"')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
-code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
+code=$($CHAIN_BINARY --home $HOME_DIR q tx $txhash -o json --home $HOME_1 | jq '.code')
 echo "[INFO]: Code is: $code"
 if [ -z $code ]; then
     echo "[ERROR]: code returned blank, TX was unsuccessful."
