@@ -169,8 +169,8 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: Redeem tokenized shares"
-echo "$CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json"
-txhash=$($CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2 --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json"
+txhash=$($CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2 --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json | jq '.txhash' | tr -d '"')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
 code=$($CHAIN_BINARY --home $HOME_DIR q tx $txhash -o json --home $HOME_1 | jq '.code')
 echo "[INFO]: Code is: $code"
