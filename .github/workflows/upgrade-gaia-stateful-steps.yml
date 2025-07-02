@@ -358,7 +358,7 @@ jobs:
         
       # DEBUG END TX
       - name: _TX tests
-        run: tests/test_load_tx.sh --rpc-host 127.0.0.1 --rpc-port $VAL1_RPC_PORT --home $HOME_1 --from-wallet $WALLET_2 --to-wallet $MONIKER_1 --valoper_address_1 $VALOPER_1 --liquid-transfer-to cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
+        run: tests/test_load_tx.sh --rpc-host 127.0.0.1 --rpc-port $VAL1_RPC_PORT --home $HOME_1 --from-wallet $WALLET_1 --to-wallet $WALLET_2 --valoper_address_1 $VALOPER_1 --liquid-transfer-to cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
       # - name: _TX bank send
       #   run: |
       #     txhash=$($CHAIN_BINARY tx bank send $WALLET_1 $WALLET_2 $VAL_STAKE_STEP$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
