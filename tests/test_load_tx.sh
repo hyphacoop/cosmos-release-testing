@@ -47,7 +47,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "[DEBUG]: TX bank send"
-txhash=$($CHAIN_BINARY tx bank send $FROM_WALLET $TO_WALLET $VAL_STAKE_STEP$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY tx bank send $FROM_WALLET $TO_WALLET $VAL_STAKE_STEP$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json"
+txhash=$($CHAIN_BINARY tx bank send $FROM_WALLET $TO_WALLET $VAL_STAKE_STEP$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json | jq '.txhash' | tr -d '"')
 echo "[INFO]: txhash: $txhash"
 tests/test_block_production.sh $RPC_HOST $RPC_PORT 5 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
@@ -61,7 +62,8 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: TX delegate funds"
-txhash=$($CHAIN_BINARY tx staking delegate $VALOPER_ADDRESS_1 $VAL_STAKE$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY tx staking delegate $VALOPER_ADDRESS_1 $VAL_STAKE$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json"
+txhash=$($CHAIN_BINARY tx staking delegate $VALOPER_ADDRESS_1 $VAL_STAKE$DENOM --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json | jq '.txhash' | tr -d '"')
 echo "[INFO]: txhash: $txhash"
 tests/test_block_production.sh $RPC_HOST $RPC_PORT 5 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
@@ -75,7 +77,8 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: TX delegate withdraw-rewards"
-txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_ADDRESS_1 --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_ADDRESS_1 --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json"
+txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_ADDRESS_1 --home $HOME_DIR --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json | jq '.txhash' | tr -d '"')
 echo "[INFO]: txhash: $txhash"
 tests/test_block_production.sh $RPC_HOST $RPC_PORT 5 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
@@ -89,7 +92,8 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: TX liquid tokenize-share 1"
-txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_ADDRESS_1 --home $HOME_DIR 1000000uatom $FROM_WALLET --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY tx liquid tokenize-share $VALOPER_ADDRESS_1 --home $HOME_DIR 1000000uatom $FROM_WALLET --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json"
+txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_ADDRESS_1 --home $HOME_DIR 1000000uatom $FROM_WALLET --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json | jq '.txhash' | tr -d '"')
 echo "[INFO]: txhash: $txhash"
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
@@ -103,7 +107,8 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: TX liquid tokenize-share 2"
-txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_ADDRESS_1 --home $HOME_DIR 2000000uatom $FROM_WALLET --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+echo "$CHAIN_BINARY tx liquid tokenize-share $VALOPER_ADDRESS_1 --home $HOME_DIR 2000000uatom $FROM_WALLET --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json"
+txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_ADDRESS_1 --home $HOME_DIR 2000000uatom $FROM_WALLET --from $FROM_WALLET --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICES$DENOM --chain-id $CHAIN_ID -y -o json | jq '.txhash' | tr -d '"')
 echo "[INFO]: txhash: $txhash"
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
@@ -150,6 +155,7 @@ echo "record_module_account: $LIQUID_DENOM2_RECORD_MODULE_ACCOUNT"
 echo "record_validator: $LIQUID_DENOM2_RECORD_VALIDATOR"
 
 echo "[DEBUG]: Transfer tokenized share ownership"
+echo "$CHAIN_BINARY tx liquid transfer-tokenize-share-record $LIQUID_DENOM1_RECORD_ID $LIQUID_TRANSFER_TO --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json"
 txhash=$($CHAIN_BINARY tx liquid transfer-tokenize-share-record $LIQUID_DENOM1_RECORD_ID $LIQUID_TRANSFER_TO --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json | jq '.txhash' | tr -d '"')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_DIR | jq '.code')
@@ -163,6 +169,7 @@ elif [ $code -ne 0 ]; then
 fi
 
 echo "[DEBUG]: Redeem tokenized shares"
+echo "$CHAIN_BINARY tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json"
 txhash=$($CHAIN_BINARY tx liquid redeem-tokens 2000000$LIQUID_DENOM2_RECORD_ID --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y-o json | jq '.txhash' | tr -d '"')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 20
 code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
