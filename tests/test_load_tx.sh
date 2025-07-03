@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -196,3 +197,6 @@ $CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET
 echo ""
 echo "[DEBUG]: Query bank balances $TO_WALLET"
 $CHAIN_BINARY --home $HOME_DIR q bank balances $TO_WALLET
+echo ""
+echo "[DEBUG]: Query bank balances $LIQUID_TRANSFER_TO (Liquid transfer wallet)"
+$CHAIN_BINARY --home $HOME_DIR q bank balances $LIQUID_TRANSFER_TO
