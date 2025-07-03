@@ -121,8 +121,11 @@ elif [ $code -ne 0 ]; then
     exit 1
 fi
 
-echo "[DEBUG]: Query bank balances"
+echo "[DEBUG]: Query bank balances $FROM_WALLET"
 $CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET
+echo ""
+echo "[DEBUG]: Query bank balances $TO_WALLET"
+$CHAIN_BINARY --home $HOME_DIR q bank balances $TO_WALLET
 
 echo "[DEBUG]: Get liquid denom with 1000000uatom"
 LIQUID_DENOM1=$($CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET -o json | jq -r '.balances[] | select(.amount == "1000000") | .denom')
@@ -168,6 +171,12 @@ elif [ $code -ne 0 ]; then
     exit 1
 fi
 
+echo "[DEBUG]: Query bank balances $FROM_WALLET"
+$CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET
+echo ""
+echo "[DEBUG]: Query bank balances $TO_WALLET"
+$CHAIN_BINARY --home $HOME_DIR q bank balances $TO_WALLET
+
 echo "[DEBUG]: Redeem tokenized shares"
 echo "$CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2 --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json"
 txhash=$($CHAIN_BINARY --home $HOME_DIR tx liquid redeem-tokens 2000000$LIQUID_DENOM2 --from $FROM_WALLET --gas auto --gas-adjustment 3 --gas-prices 0.005uatom -y -o json | jq '.txhash' | tr -d '"')
@@ -181,3 +190,9 @@ elif [ $code -ne 0 ]; then
     echo "[ERROR]: code returned: $code, TX unsuccessful"
     exit 1
 fi
+
+echo "[DEBUG]: Query bank balances $FROM_WALLET"
+$CHAIN_BINARY --home $HOME_DIR q bank balances $FROM_WALLET
+echo ""
+echo "[DEBUG]: Query bank balances $TO_WALLET"
+$CHAIN_BINARY --home $HOME_DIR q bank balances $TO_WALLET
