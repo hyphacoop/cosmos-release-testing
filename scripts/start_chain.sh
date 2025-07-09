@@ -69,12 +69,6 @@ echo "Set max block gas to 100_000_000."
 jq -r '.consensus.params.block.max_gas = "100000000"' $HOME_1/config/genesis.json > block-max-gas.json
 mv block-max-gas.json $HOME_1/config/genesis.json
 
-echo "Patching genesis file for LSM params..."
-jq -r '.app_state.staking.params.validator_bond_factor = "10.000000000000000000"' $HOME_1/config/genesis.json > lsm-1.json
-jq -r '.app_state.staking.params.global_liquid_staking_cap = "0.100000000000000000"' lsm-1.json > lsm-2.json
-jq -r '.app_state.staking.params.validator_liquid_staking_cap = "0.200000000000000000"' lsm-2.json > lsm-3.json
-mv lsm-3.json $HOME_1/config/genesis.json
-
 echo "Setting blocks_per_epoch to 1..."
 jq -r --arg BLOCKS "1" '.app_state.provider.params.blocks_per_epoch |= $BLOCKS' $HOME_1/config/genesis.json > ./blocks_per_epoch.json
 cp blocks_per_epoch.json $HOME_1/config/genesis.json
