@@ -10,16 +10,16 @@
             description: 'Gaia version to upgrade from'
             required: true
             type: string
-            default: v24.0.0
+            default: v25.0.0
           to_version:
             description: 'Gaia version to upgrade to'
             required: true
-            default: v25.0.0
+            default: v25.1.0
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
             type: string
-            default: v25.0.0
+            default: v25.1.0
       push:
     
     concurrency:
@@ -49,9 +49,9 @@
     jobs:
       set-versions:
         env:
-          START: ${{ github.event_name == 'push' && 'v24.0.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'v25.0.0' || inputs.to_version }}
-          NAME: ${{ github.event_name == 'push' && 'v25.0.0' || inputs.upgrade_name }}
+          START: ${{ github.event_name == 'push' && 'v25.0.0' || inputs.from_version }}
+          TARGET: ${{ github.event_name == 'push' && 'v25.1.0' || inputs.to_version }}
+          NAME: ${{ github.event_name == 'push' && 'v25.1.0' || inputs.upgrade_name }}
         runs-on: ubuntu-24.04
         steps:
           - name: Debug env vars

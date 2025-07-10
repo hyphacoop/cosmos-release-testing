@@ -13,7 +13,7 @@ jq '.' create-$CONSUMER_CHAIN_ID.json
 jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json > init_params.json
 spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
 echo "> Spawn time: $spawn_time"
-jq --argfile PARAMS init_params.json '.initialization_parameters |= $PARAMS' templates/update-spawn-time.json > update-$CONSUMER_CHAIN_ID.json
+jq --slurpfile PARAMS init_params.json '.initialization_parameters |= $PARAMS[0]' templates/update-spawn-time.json > update-$CONSUMER_CHAIN_ID.json
 jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
