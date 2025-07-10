@@ -1491,15 +1491,17 @@ jobs:
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and not voting"
-          $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          # $CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json
+          proposal_tx_json="$CHAIN_BINARY tx gov submit-proposal templates/proposal-text.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json"
           echo "[INFO]: Wait for voting period to end..."
           sleep $VOTING_PERIOD
           sleep $VOTING_PERIOD
+          fees_proposal_tx=$(echo "$proposal_tx_json" | jq -r '.tx.auth_info.fee.amount[] | select(.denom=="uatom") | .amount')
           current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Balance after no vote: $current_balance"
           echo "[INFO]: Calculate currect balance"
           # expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
-          expected_balance=$(echo "$starting_balance - $BASE_FEES" | bc)
+          expected_balance=$(echo "$starting_balance - $fees_proposal_tx" | bc)
           echo "[DEBUG]: expected_balance: $expected_balance"
           if [ $expected_balance -ne $current_balance ]
           then
