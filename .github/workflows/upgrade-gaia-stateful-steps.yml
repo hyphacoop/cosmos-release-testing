@@ -356,72 +356,6 @@ jobs:
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
-      # - name: Generate wallets for fee market
-      #   run: |
-      #     feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
-      #     echo "[INFO] feemarket_wallet1: $feemarket_wallet1_json"
-      #     echo "FEE_MARKET_WALLET1=$(echo $feemarket_wallet1_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-2 --output json)
-      #     echo "[INFO] feemarket_wallet2: $feemarket_wallet2_json"
-      #     echo "FEE_MARKET_WALLET2=$(echo $feemarket_wallet2_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet3_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-3 --output json)
-      #     echo "[INFO] feemarket_wallet3: $feemarket_wallet3_json"
-      #     echo "FEE_MARKET_WALLET3=$(echo $feemarket_wallet3_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet4_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-4 --output json)
-      #     echo "[INFO] feemarket_wallet4: $feemarket_wallet4_json"
-      #     echo "FEE_MARKET_WALLET4=$(echo $feemarket_wallet4_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet5_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-5 --output json)
-      #     echo "[INFO] feemarket_wallet5: $feemarket_wallet5_json"
-      #     echo "FEE_MARKET_WALLET5=$(echo $feemarket_wallet5_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet6_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-6 --output json)
-      #     echo "[INFO] feemarket_wallet6: $feemarket_wallet6_json"
-      #     echo "FEE_MARKET_WALLET6=$(echo $feemarket_wallet6_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet7_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-7 --output json)
-      #     echo "[INFO] feemarket_wallet7: $feemarket_wallet7_json"
-      #     echo "FEE_MARKET_WALLET7=$(echo $feemarket_wallet7_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet8_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-8 --output json)
-      #     echo "[INFO] feemarket_wallet8: $feemarket_wallet8_json"
-      #     echo "FEE_MARKET_WALLET8=$(echo $feemarket_wallet8_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet9_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-9 --output json)
-      #     echo "[INFO] feemarket_wallet9: $feemarket_wallet9_json"
-      #     echo "FEE_MARKET_WALLET9=$(echo $feemarket_wallet9_json | jq -r '.address')" >> $GITHUB_ENV
-      #     feemarket_wallet10_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-10 --output json)
-      #     echo "[INFO] feemarket_wallet10: $feemarket_wallet10_json"
-      #     echo "FEE_MARKET_WALLET10=$(echo $feemarket_wallet10_json | jq -r '.address')" >> $GITHUB_ENV
-      # - name: Send funds to feemarket wallets
-      #   env:
-      #     SEND_AMOUNT: 1000000000
-      #   run: |
-      #     echo "[INFO] sending funds to feemarket-1 ${{ env.FEE_MARKET_WALLET1 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET1 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-2 ${{ env.FEE_MARKET_WALLET2 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET2 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-3 ${{ env.FEE_MARKET_WALLET3 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET3 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-4 ${{ env.FEE_MARKET_WALLET4 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET4 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-5 ${{ env.FEE_MARKET_WALLET5 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET5 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-6 ${{ env.FEE_MARKET_WALLET6 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET6 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-7 ${{ env.FEE_MARKET_WALLET7 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET7 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-8 ${{ env.FEE_MARKET_WALLET8 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET8 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-9 ${{ env.FEE_MARKET_WALLET9 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET9 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO] sending funds to feemarket-10 ${{ env.FEE_MARKET_WALLET10 }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET10 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: Get wallet balances
         run: |
           set -e
@@ -1033,56 +967,7 @@ jobs:
           export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
           echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
           tests/stateful/gaia-v18/test_expedited_proposal.sh
-      # - name: Print block params
-      #   run: |
-      #     params=$(curl -s http://127.0.0.1:$VAL1_API_PORT/cosmos/consensus/v1/params | jq -r '.params')
-      #     echo "$params"
-      # - name: Set block params
-      #   env:
-      #     MAX_BYTES: 1000000
-      #     MAX_GAS: 100000000
-      #     EVIDENCE_MAX_AGE_NUM_BLOCKS: 1000000
-      #     EVIDENCE_MAX_AGE_DURATION: 172800s
-      #     EVIDENCE_MAX_BYTES: 50000
-      #   run: |
-      #     scripts/stateful/set_block_size.sh
-      # - name: Query feemarket params
-      #   run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
-      # - name: Set feemarket params
-      #   run: |
-      #     scripts/submit_proposal.sh templates/proposal-feemarket.json
-      # - name: Query feemarket params
-      #   run: gaiad --home $HOME/.val1 q feemarket params -o json | jq
-      # - name: Set consensus timeout to 140s
-      #   run: |
-      #     source ~/env/bin/activate
-      #     toml set --toml-path $HOME_1/config/config.toml consensus.timeout_commit "140s"
-      #     screen -S $PROVIDER_SERVICE_1 -p 0 -X stuff "^C"
-      # - name: Wait for 2 blocks
-      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 600
-      # - name: _Test Feemarket
-      #   run: |
-      #     export FEE_MARKET_1_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET1 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET1 }} is: $FEE_MARKET_1_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_2_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET2 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET2 }} is: $FEE_MARKET_2_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_3_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET3 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET3 }} is: $FEE_MARKET_3_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_4_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET4 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET4 }} is: $FEE_MARKET_4_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_5_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET5 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET5 }} is: $FEE_MARKET_5_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_6_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET6 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET6 }} is: $FEE_MARKET_6_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_7_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET7 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET7 }} is: $FEE_MARKET_7_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_8_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET8 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET8 }} is: $FEE_MARKET_8_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_9_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET9 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET9 }} is: $FEE_MARKET_9_ACCOUNT_NUMBER"
-      #     export FEE_MARKET_10_ACCOUNT_NUMBER=$($CHAIN_BINARY --home $HOME_1 q auth account ${{ env.FEE_MARKET_WALLET10 }} -o json | jq -r '.account.value.account_number')
-      #     echo "[INFO] Account number for ${{ env.FEE_MARKET_WALLET10 }} is: $FEE_MARKET_10_ACCOUNT_NUMBER"
-      #     tests/stateful/gaia-v18/test_feemarket.sh
+     
       # - name: DEBUG
       #   run: |
       #     while [ ! -f /continue ]
@@ -1120,7 +1005,7 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
       - name: _Pre-proposal test current gov params
         run: |
-          echo "Verify deposit is not burned when quorum is reached by voting no"
+          echo "[INFO]: Verify deposit is not burned when quorum is reached by voting no"
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and voting no"
@@ -1406,7 +1291,7 @@ jobs:
           BURN_VOTE_VETO: "null"
         run: |
           echo "[INFO]: Current params:"
-          $CHAIN_BINARY --home $HOME_1 q staking params -o json | jq -r '.'
+          $CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.'
           Q_MAX_DEPOSIT_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.max_deposit_period')
           Q_BURN_VOTE_QUORUM=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_vote_quorum')
           Q_BURN_PROPOSAL_DEPOSIT_PREVOTE=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.burn_proposal_deposit_prevote')
@@ -1439,7 +1324,7 @@ jobs:
           fi
       - name: _Verify Gov params
         run: |
-          echo "Verify deposit is not burned when quorum is reached by voting no"
+          echo "[INFO]: Verify deposit is not burned when quorum is reached by voting no"
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and voting no"
