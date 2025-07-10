@@ -1487,7 +1487,7 @@ jobs:
             echo "Expected balance is $expected_balance and bank have $current_balance"
           fi
 
-          echo "[INFO]: Verify deposit is burned when quorum is not reached"
+          echo "[INFO]: Verify deposit is NOT burned when quorum is not reached"
           starting_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Starting balance: $starting_balance"
           echo "[INFO]: Submiting proposal and not voting"
@@ -1498,7 +1498,8 @@ jobs:
           current_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select (.denom == "uatom") | .amount')
           echo "[INFO]: Balance after no vote: $current_balance"
           echo "[INFO]: Calculate currect balance"
-          expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
+          # expected_balance=$(echo "$starting_balance - $BASE_FEES - 100000000" | bc)
+          expected_balance=$(echo "$starting_balance - $BASE_FEES" | bc)
           echo "[DEBUG]: expected_balance: $expected_balance"
           if [ $expected_balance -ne $current_balance ]
           then
