@@ -10,7 +10,7 @@ export VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv
 export MNEMONIC_RELAYER="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
 export WALLET_RELAYER=cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
 
-export CHAIN_ID=pfm1
+export CHAIN_ID=pfm2
 export DENOM=uatom
 export VAL_FUNDS="10000000000"
 export VAL_WHALE="100000000"
