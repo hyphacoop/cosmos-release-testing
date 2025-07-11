@@ -2,15 +2,13 @@
 # Configure variables before running this file.
 # source vars.sh
 
-if [ "$CHAIN_ID" = "testnet" ]; then
-    echo "> Downloading binary..."
-    wget $CHAIN_BINARY_URL -q -O $CHAIN_BINARY
-    chmod +x $CHAIN_BINARY
-    $CHAIN_BINARY version
+echo "> Downloading binary..."
+wget $CHAIN_BINARY_URL -q -O $CHAIN_BINARY
+chmod +x $CHAIN_BINARY
+$CHAIN_BINARY version
 
-    rm -rf temp
-    mkdir temp
-fi
+rm -rf temp
+mkdir temp
 
 echo "> Creating a $validator_count-validator chain"
 # We are only after a single thing: Create an N-validator chain without creating multiple services
