@@ -21,6 +21,11 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 echo "> Proposal hashes:"
 height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
 height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
+echo "txhash_1:"
+$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 
+echo "txhash_2:"
+$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 
+
 
 echo "> Height for tx 1: $height_1"
 echo "> Base gas price at proposal height:"
