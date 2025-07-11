@@ -16,7 +16,7 @@ echo "> Submitting proposal."
 txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices 0.1$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
 txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices 0.1$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
 # wait for block
-tests/test_block_production.sh
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "> Proposal hashes:"
 height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
