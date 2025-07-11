@@ -351,6 +351,8 @@ jobs:
           fi
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
+      - name: _Test feemarket
+        run: tests/test_feemarket.sh
       - name: Send funds to wallet 4
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
