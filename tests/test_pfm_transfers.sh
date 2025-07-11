@@ -1,12 +1,12 @@
 #!/bin/bash
 source scripts/vars_pfm_3.sh
-channel_pfm3=$($CHAIN_BINARY q ibc channel end transfer channel-0 --home $whale_home --output json | jq -r '.channel.counterparty.channel_id')
+# channel_provider=$($CHAIN_BINARY q ibc channel end transfer channel-0 --home $whale_home --output json | jq -r '.channel.counterparty.channel_id')
 
-echo "Provider chain channel ID: $channel_pfm3"
+echo "Provider chain channel ID: channel-0"
 # provider -> channel-0 chain a -> channel-0 chain b -> channel-0 chain c (A->D)
 target_denom_a_d=ibc/$(echo -n transfer/channel-0/transfer/channel-0/transfer/channel-0/uatom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 # chain c -> channel-1 chain b -> channel-1 chain a -> channel-X provider (D->A)
-target_denom_d_a=ibc/$(echo -n transfer/$channel_pfm3/transfer/channel-1/transfer/channel-1/uatom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+target_denom_d_a=ibc/$(echo -n transfer/channel-0/transfer/channel-1/transfer/channel-1/uatom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 echo "Target denom A->D: $target_denom_a_d"
 echo "Target denom D->A: $target_denom_d_a"
 
@@ -17,7 +17,7 @@ fi
 echo "Chain D starting balance in expected denom: $d_start_balance"
 
 source scripts/vars.sh
-txhash=$($CHAIN_BINARY tx ibc-transfer transfer transfer $channel_pfm3 "pfm" --memo "{\"forward\": {\"receiver\": \"pfm\",\"port\": \"transfer\",\"channel\": \"channel-1\",\"timeout\": \"10m\",\"next\": {\"forward\": {\"receiver\": \"$WALLET_1\",\"port\": \"transfer\",\"channel\":\"channel-1\",\"timeout\":\"10m\"}}}}" 1000000$DENOM --from $WALLET_1 --gas auto --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json | jq -r '.txhash')
+txhash=$($CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 "pfm" --memo "{\"forward\": {\"receiver\": \"pfm\",\"port\": \"transfer\",\"channel\": \"channel-1\",\"timeout\": \"10m\",\"next\": {\"forward\": {\"receiver\": \"$WALLET_1\",\"port\": \"transfer\",\"channel\":\"channel-1\",\"timeout\":\"10m\"}}}}" 1000000$DENOM --from $WALLET_1 --gas auto --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json | jq -r '.txhash')
 echo "Waiting for the transfer to reach chain D..."
 date
 sleep $(($COMMIT_TIMEOUT+60))

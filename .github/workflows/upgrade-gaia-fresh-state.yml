@@ -1891,10 +1891,14 @@
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+
           - name: _Test counter contract
             run: |
               tests/test_contract_counter.sh
@@ -1997,6 +2001,7 @@
           
           - name: _Test feemarket
             run: |
+              source scripts/vars.sh
               tests/test_feemarket.sh
   
           - name: Print consensus and feemarket params
