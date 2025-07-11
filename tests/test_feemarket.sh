@@ -1,7 +1,7 @@
 #!/bin/bash
 PAYLOAD_SIZE=50000
 
-preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
+preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home -o json | jq -r '.prices[0].amount')
 echo "Pre-load price: $preload_price$DENOM"
 
 openssl rand -hex $PAYLOAD_SIZE > payload.txt
@@ -13,15 +13,15 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 echo "> Proposal JSON:"
 jq '.' proposal.json
 echo "> Submitting proposal."
-txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_RELAYER --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT+2))
 
 echo "> Proposal hashes:"
-$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq '.'
-$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq '.'
+$CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq '.'
 
-current_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq -r '.prices[0].amount')
+current_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home -o json | jq -r '.prices[0].amount')
 echo "Current gas price: $current_price$DENOM"
 if (( $(echo "$current_price > $preload_price" | bc -l) )); then
     echo "PASS: Current price is greater than pre-load price."

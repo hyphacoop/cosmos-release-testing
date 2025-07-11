@@ -1224,9 +1224,8 @@
               # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
               # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
           - name: _Test PFM transfers
-            env:
-              PFM_HOME: /home/runner/.pfm3
             run: |
+              source scripts/vars_pfm_3.sh
               tests/test_pfm_transfers.sh
           - name: Test software upgrade
             env:
@@ -1581,8 +1580,8 @@
         env:
           VESTING_AMOUNT: 110000000
           VESTING_DELEGATED_AMOUNT: 100000000
-          VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
-          VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
+          # VESTING_WALLET: cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
+          # VESTING_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
         steps:
           - name: Update PATH
             run: |
@@ -1617,7 +1616,7 @@
             run: |
               source scripts/vars.sh
               echo "Adding key..."
-              echo "$VESTING_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $whale_home --recover
+              echo "$RELAYER_MNEMONIC" | $CHAIN_BINARY keys add vesting --home $whale_home --recover
     
               echo "Creating vesting wallet..."
               start_time=$(date +%s)
@@ -1625,7 +1624,7 @@
               end_time=$(date -d '10 minutes'  +%s)
               echo "end time: $end_time"
               $CHAIN_BINARY tx vesting create-vesting-account \
-              $VESTING_WALLET $VESTING_AMOUNT$DENOM $end_time \
+              $WALLET_RELAYER $VESTING_AMOUNT$DENOM $end_time \
               --from $WALLET_1 --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               sleep $COMMIT_TIMEOUT
@@ -1638,18 +1637,18 @@
               echo "vesting_end_time=$end_time" >> $GITHUB_ENV
               echo "vesting_duration=$duration" >> $GITHUB_ENV
     
-          - name: Set up bonding
-            run: |
-              source scripts/vars.sh
-              $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
+          # - name: Set up bonding
+          #   run: |
+          #     source scripts/vars.sh
+          #     $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
     
           - name: Delegate with vesting wallet
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q bank spendable-balances $VESTING_WALLET --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q bank spendable-balances $WALLET_RELAYER --home $whale_home -o json | jq '.'
               echo "Delegating from vesting wallet..."
               $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
-              --from $VESTING_WALLET --home $whale_home \
+              --from $WALLET_RELAYER --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               sleep $COMMIT_TIMEOUT
               sleep $COMMIT_TIMEOUT
@@ -1688,7 +1687,7 @@
               echo "vested amount: $vested_amount"
     
               # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-              txhash=$($CHAIN_BINARY tx staking tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
+              txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
               echo "txhash: $txhash"
     
               sleep $COMMIT_TIMEOUT
@@ -1742,13 +1741,25 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
           - name: Set up relayer
-            run: scripts/gaia-v16/setup_relayer_ica_controller.sh
-          - name: Start chain
-            env:
-              START_VERSION: ${{matrix.start_version}}
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              scripts/start_chain_single_val.sh
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
+
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+          # - name: Start chain
+          #   env:
+          #     START_VERSION: ${{matrix.start_version}}
+          #   run: |
+          #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+          #     scripts/start_chain_single_val.sh
           - name: Check Gaia log
             run: sudo journalctl -u $PROVIDER_SERVICE_1
           - name: Print Gaia version
@@ -1973,12 +1984,16 @@
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+
           - name: Query consensus params
-            run: curl -s http://localhost:$VAL1_API_PORT/cosmos/consensus/v1/params | jq '.'
+            run: curl -s http://localhost:$whale_api/cosmos/consensus/v1/params | jq '.'
           
           - name: _Test feemarket
             run: |

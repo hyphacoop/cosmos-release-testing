@@ -11,7 +11,7 @@ $CHAIN_BINARY keys add happy_liquid_2 --home $whale_home
 $CHAIN_BINARY keys add happy_liquid_3 --home $whale_home
 $CHAIN_BINARY keys add happy_owner --home $whale_home
 
-upgrade_walleet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="upgrade_wallet").address')
+upgrade_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="upgrade_wallet").address')
 happy_bonding=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="happy_bonding").address')
 happy_liquid_1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="happy_liquid_1").address')
 happy_liquid_2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="happy_liquid_2").address')
