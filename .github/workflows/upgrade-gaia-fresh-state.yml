@@ -2024,7 +2024,7 @@
           - name: Query feemarket params
             run: |
               source scripts/vars.sh
-              curl -s http://localhost:$whale_api/feemarket//v1/params | jq '.'          
+              curl -s http://localhost:$whale_api/feemarket/v1/params | jq '.'          
           - name: _Test feemarket
             run: |
               source scripts/vars.sh
