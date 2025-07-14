@@ -354,13 +354,12 @@ jobs:
       - name: Query current feemarket params
         run: |
           $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
-      - name: _Test feemarket
-        run: tests/stateful/test_feemarket.sh
       - name: Send funds to wallet 4
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 50000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-
+      - name: _Test feemarket
+        run: tests/stateful/test_feemarket.sh
       # - name: Generate wallets for fee market
       #   run: |
       #     feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)

@@ -5,8 +5,8 @@ preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 -o json | jq
 echo "Pre-load price: $preload_price$DENOM"
 
 openssl rand -hex $PAYLOAD_SIZE > payload.txt
-echo "Payload:"
-cat payload.txt
+# echo "Payload:"
+# cat payload.txt
 jq --rawfile PAYLOAD payload.txt '$PAYLOAD'
 echo "> Assembling text proposal."
 jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.json > proposal.json
@@ -15,16 +15,22 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 echo "> Submitting proposal."
 txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices 0.1$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
 txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices 0.1$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+txhash_3=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_4 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices 0.1$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+
 # wait for block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "> Proposal hashes:"
 height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
 height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
-echo "txhash_1:"
-$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 
-echo "txhash_2:"
-$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 
+height_3=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
+
+# echo "txhash_1:"
+# $CHAIN_BINARY q tx $txhash_1 --home $HOME_1 
+# echo "txhash_2:"
+# $CHAIN_BINARY q tx $txhash_2 --home $HOME_1 
+# echo "txhash_3:"
+# $CHAIN_BINARY q tx $txhash_2 --home $HOME_1 
 
 
 echo "> Height for tx 1: $height_1"
