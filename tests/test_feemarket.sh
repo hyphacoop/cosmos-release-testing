@@ -1,17 +1,21 @@
 #!/bin/bash
-PAYLOAD_SIZE=50000
+max_block_utilization=$($CHAIN_BINARY q feemarket params --home $whale_home -o json | jq -r '.max_block_utilization')
+payload_size=$(echo "$max_block_utilization / 10000" | bc)
+echo "Max block utilization: $max_block_utilization"
+echo "Payload size: $payload_size"]]
+# PAYLOAD_SIZE=50000
 
 preload_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home -o json | jq -r '.prices[0].amount')
 echo "Pre-load price: $preload_price$DENOM"
 
-openssl rand -hex $PAYLOAD_SIZE > payload.txt
-echo "Payload:"
-cat payload.txt
-jq --rawfile PAYLOAD payload.txt '$PAYLOAD'
+openssl rand -hex $payload_size > payload.txt
+# echo "Payload:"
+# cat payload.txt
+# jq --rawfile PAYLOAD payload.txt '$PAYLOAD'
 echo "> Assembling text proposal."
 jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.json > proposal.json
-echo "> Proposal JSON:"
-jq '.' proposal.json
+# echo "> Proposal JSON:"
+# jq '.' proposal.json
 echo "> Submitting proposal."
 txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_RELAYER --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')

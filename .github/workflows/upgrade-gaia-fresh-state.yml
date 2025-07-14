@@ -1928,15 +1928,15 @@
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
-              tests/test_tx_fresh.sh
+              tests/test_tx.sh
           - name: _API endpoints check
             run: |
               source scripts/vars.sh
-              tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+              tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
             run: |
               source scripts/vars.sh
-              tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
 
           - name: Test software upgrade
             env:
@@ -1964,15 +1964,15 @@
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
-              tests/test_tx_fresh.sh
+              tests/test_tx.sh
           - name: _API endpoints check
             run: |
               source scripts/vars.sh
-              tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+              tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
             run: |
               source scripts/vars.sh
-              tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
     
       Test-10-feemarket:
         runs-on: ubuntu-24.04
