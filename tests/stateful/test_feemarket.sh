@@ -25,6 +25,11 @@ height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height'
 height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
 height_3=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
 
+echo "> Tx heights:"
+echo "$height_1"
+echo "$height_2"
+echo "$height_3"
+
 # echo "txhash_1:"
 # $CHAIN_BINARY q tx $txhash_1 --home $HOME_1 
 # echo "txhash_2:"
