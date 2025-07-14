@@ -154,6 +154,8 @@ cp temp/voting.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for 2MiB block size"
 jq -r '.consensus_params.block.max_bytes = "2097152"' ${homes[0]}/config/genesis.json  > temp/blocksize.json
 cp temp/blocksize.json ${homes[0]}/config/genesis.json
+jq -r '.consensus_params.block.max_gas = "20000000"' ${homes[0]}/config/genesis.json  > temp/blockgas.json
+cp temp/blockgas.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis for slashing block window"
 jq -r --arg WINDOW "$DOWNTIME_WINDOW" '.app_state.slashing.params.signed_blocks_window = $WINDOW' ${homes[0]}/config/genesis.json > temp/slashing.json
@@ -162,6 +164,8 @@ cp temp/slashing.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for feemarket params"
 jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' ${homes[0]}/config/genesis.json > temp/feemarket-denom.json
 mv temp/feemarket-denom.json ${homes[0]}/config/genesis.json
+jq -r '.app_state.feemarket.params.max_block_utilization |= "20000000"' ${homes[0]}/config/genesis.json > temp/feemarket-gas.json
+mv temp/feemarket-gas.json ${homes[0]}/config/genesis.json
 jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' ${homes[0]}/config/genesis.json > temp/feemarket-min-base.json
 mv temp/feemarket-min-base.json ${homes[0]}/config/genesis.json
 jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' ${homes[0]}/config/genesis.json > temp/feemarket-base.json
