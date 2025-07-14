@@ -2032,55 +2032,68 @@
   
           - name: Print consensus and feemarket params
             run: |
+              source scripts/vars.sh  
               echo "> consensus params:"
-              $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
               echo "> feemarket params:"
-              $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
   
     
           - name: Test software upgrade
             env:
-              TARGET_VERSION: "${{ matrix.target_version }}"
+              TARGET_VERSION: ${{ matrix.target_version }}
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
           - name: _Blocks produced after upgrade
             run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
   
           - name: _Test feemarket
             run: |
+              source scripts/vars.sh
               tests/test_feemarket.sh
   
           - name: Print consensus and feemarket params
             run: |
+              source scripts/vars.sh
               echo "> consensus params:"
-              $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
               echo "> feemarket params:"
-              $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
           - name: Change consensus and feemarket params
             run: |
-              txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+              txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
               echo "tx hash: $txhash"
               sleep $(($COMMIT_TIMEOUT+2))
-              prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
+              prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
               echo "> Proposal ID: $prop_id"
-              $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+              $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
               sleep $VOTING_PERIOD
               sleep $(($COMMIT_TIMEOUT+2))
           - name: Print consensus and feemarket params
             run: |
+              source scripts/vars.sh
               echo "> consensus params:"
-              $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
               echo "> feemarket params:"
-              $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
   
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
-            run: tests/test_tx_fresh.sh
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
           - name: _API endpoints check
-            run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
-            run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
   
       Test-11-ics-sovereign-reuse-connection:
         runs-on: ubuntu-24.04
@@ -3087,7 +3100,6 @@
             run: |
               source scripts/vars.sh
               tests/test_tx.sh
-
           - name: _API endpoints check
             run: |
               source scripts/vars.sh
