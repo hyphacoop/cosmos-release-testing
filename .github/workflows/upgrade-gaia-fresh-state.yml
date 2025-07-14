@@ -2110,7 +2110,7 @@
           # Consumer chain variables
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
           CONSUMER_ICS: v6.3.0
-          PROVIDER_ICS: v6.3.0
+          PROVIDER_ICS: v6.4.0
           # Reference ICS chain variables
           CONSUMER_DENOM: ucon
           CONSUMER_FEES: 500
@@ -2137,30 +2137,16 @@
 
           - name: Set up relayer
             run: scripts/setup_relayer.sh
-          - name: Download consumer chain binaries
-            run: |
-              wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
-              wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
-              wget $SOVEREIGN_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY
-              wget $CHANGEOVER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY
-              wget $SOVEREIGN_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$SOVEREIGN_CHAIN_V640_BINARY -q
-              chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V640_BINARY
-              wget $CHANGEOVER_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V640_BINARY -q
-              chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V640_BINARY
-          - name: Consumer chain binary URLs
-            run: |
-              echo "$CONSUMER_CHAIN_V400_BINARY runs off $CONSUMER_CHAIN_V400_BINARY_URL"
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
     
           - name: Start sovereign chain
             env:
@@ -2635,30 +2621,16 @@
 
           - name: Set up relayer
             run: scripts/setup_relayer.sh
-          - name: Download consumer chain binaries
-            run: |
-              wget $CONSUMER_CHAIN_V400_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V400_BINARY
-              wget $CONSUMER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_V450_BINARY
-              wget $SOVEREIGN_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V450_BINARY
-              wget $CHANGEOVER_CHAIN_V450_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY -q
-              chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V450_BINARY
-              wget $SOVEREIGN_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$SOVEREIGN_CHAIN_V640_BINARY -q
-              chmod +x $HOME/go/bin/$SOVEREIGN_CHAIN_V640_BINARY
-              wget $CHANGEOVER_CHAIN_V640_BINARY_URL -O $HOME/go/bin/$CHANGEOVER_CHAIN_V640_BINARY -q
-              chmod +x $HOME/go/bin/$CHANGEOVER_CHAIN_V640_BINARY
-          - name: Consumer chain binary URLs
-            run: |
-              echo "$CONSUMER_CHAIN_V400_BINARY runs off $CONSUMER_CHAIN_V400_BINARY_URL"
 
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
-              scripts/start_chain.sh
-          - name: Block production check
-            run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
     
           - name: Start sovereign chain
             env:
