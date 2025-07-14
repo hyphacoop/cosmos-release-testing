@@ -358,6 +358,11 @@ jobs:
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 50000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Get wallet balances
+        run: |
+          set -e
+          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: _Test feemarket
         run: tests/stateful/test_feemarket.sh
       # - name: Generate wallets for fee market
@@ -426,11 +431,6 @@ jobs:
       #     echo "[INFO] sending funds to feemarket-10 ${{ env.FEE_MARKET_WALLET10 }}"
       #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.FEE_MARKET_WALLET10 }} $SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -b sync
       #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      - name: Get wallet balances
-        run: |
-          set -e
-          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
-          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
       - name: _Test commission rate
         run: |
           echo "[INFO]: Get current commission rate..."
