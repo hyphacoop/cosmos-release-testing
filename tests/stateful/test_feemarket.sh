@@ -18,8 +18,8 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 # jq '.' proposal.json
 echo "> Submitting proposal."
 gas=$(echo "($max_block_utilization / 2) - 1000000" | bc)
-txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas $gas --gas-prices $GAS_PRICES --home $HOME_1 -y -o json | jq -r '.txhash')
-txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas $gas --gas-prices $GAS_PRICES --home $HOME_1 -y -o json | jq -r '.txhash')
+txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas $gas --gas-prices $GAS_PRICES$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas $gas --gas-prices $GAS_PRICES$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "> Proposal hashes:"
