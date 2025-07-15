@@ -1238,10 +1238,9 @@
               scripts/upgrade.sh ${{ matrix.upgrade_name }}  
           - name: _Blocks produced after upgrade
             run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
           - name: Flush "migration successful" lines
