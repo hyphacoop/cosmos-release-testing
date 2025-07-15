@@ -947,14 +947,11 @@
 
           - name: _Blocks produced after upgrade
             run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
-    
-          - name: Flush "migration successful" lines
-            run: |
-              $CHAIN_BINARY keys list --home $HOME_1
     
           # - name: _CCV channel verified> ICS v4.0.0 chain 1
           #   env:
@@ -1784,7 +1781,7 @@
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
               source scripts/vars_ica.sh
               scripts/setup.sh
-              ./START_SCRIPT
+              ./$START_SCRIPT
               sleep 5
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
