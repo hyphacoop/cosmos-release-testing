@@ -1798,9 +1798,10 @@
             run: |
               source scripts/vars.sh
               echo "> Registering ICA."
-              $CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
               sleep 60
-                          
+              echo "txhash: $txhash"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
               ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $whale_home -o json | jq -r '.address')
               echo "ICA address: $ica_address"
               echo "> Funding ICA."
