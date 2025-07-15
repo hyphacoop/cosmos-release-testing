@@ -19,7 +19,7 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 echo "> Submitting proposal."
 txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_RELAYER --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT*2))
 
 echo "> Proposal hashes:"
 $CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq '.'
@@ -30,9 +30,9 @@ height_2=$($CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq -r '.hei
 
 echo "> Transaction heights: $height_1, $height_2"
 
-current_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home --height $height_1 -o json | jq -r '.prices[0].amount')
-echo "Current gas price: $current_price$DENOM"
-if (( $(echo "$current_price > $preload_price" | bc -l) )); then
+gas_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home --height $height_1 -o json | jq -r '.prices[0].amount')
+echo "Gas price at tx height: $gas_price$DENOM"
+if (( $(echo "$gas_price > $preload_price" | bc -l) )); then
     echo "PASS: Current price is greater than pre-load price."
 else
     echo "FAIL: Current price is not greater than pre-load price."
