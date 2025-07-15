@@ -154,6 +154,7 @@ cp temp/voting.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for 2MiB block size"
 jq -r '.consensus_params.block.max_bytes = "2097152"' ${homes[0]}/config/genesis.json  > temp/blocksize.json
 cp temp/blocksize.json ${homes[0]}/config/genesis.json
+echo "> Patching genesis for 20M gas limit"
 jq -r '.consensus_params.block.max_gas = "20000000"' ${homes[0]}/config/genesis.json  > temp/blockgas.json
 cp temp/blockgas.json ${homes[0]}/config/genesis.json
 
@@ -171,6 +172,7 @@ mv temp/feemarket-min-base.json ${homes[0]}/config/genesis.json
 jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' ${homes[0]}/config/genesis.json > temp/feemarket-base.json
 mv temp/feemarket-base.json ${homes[0]}/config/genesis.json
 
+jq '.' ${homes[0]}/config/genesis.json
 
 echo "> Copying genesis to all other homes"
 for i in $(seq 1 $[$validator_count-1])
