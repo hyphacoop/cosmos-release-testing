@@ -1240,9 +1240,7 @@
 
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
-          - name: Flush "migration successful" lines
-            run: |
-              $CHAIN_BINARY keys list --home $HOME_1
+
           - name: _Test PFM transfers
             env:
               PFM_HOME: /home/runner/.pfm3
