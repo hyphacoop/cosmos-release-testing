@@ -25,7 +25,12 @@ echo "> Proposal hashes:"
 $CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq '.'
 $CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq '.'
 
-current_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home -o json | jq -r '.prices[0].amount')
+height_1=$CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq -r '.height'
+height_2=$CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq -r '.height'
+
+echo "> Transaction heights: $height_1, $height_2"
+
+current_price=$($CHAIN_BINARY q feemarket gas-prices --home $whale_home --height $height_1 -o json | jq -r '.prices[0].amount')
 echo "Current gas price: $current_price$DENOM"
 if (( $(echo "$current_price > $preload_price" | bc -l) )); then
     echo "PASS: Current price is greater than pre-load price."
