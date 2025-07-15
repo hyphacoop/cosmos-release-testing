@@ -375,13 +375,13 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
       - name: _Test feemarket
         run: tests/stateful/test_feemarket.sh
-      - name: DEBUG
-        if: always() && !cancelled()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       # - name: Generate wallets for fee market
       #   run: |
       #     feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
