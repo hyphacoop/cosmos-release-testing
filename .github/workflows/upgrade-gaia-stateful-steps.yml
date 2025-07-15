@@ -35,6 +35,7 @@ jobs:
       CHAIN_ID: ${{ vars.CHAIN_ID }}
       MONIKER_1: ${{ vars.MONIKER_1 }}
       MONIKER_2: ${{ vars.MONIKER_2 }}
+      MONIKER_3: ${{ vars.MONIKER_3 }}
       MONIKER_4: ${{ vars.MONIKER_4 }}
       MONIKER_5: ${{ vars.MONIKER_5 }}
       MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
