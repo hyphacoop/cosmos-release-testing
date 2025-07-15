@@ -152,10 +152,10 @@ cp temp/voting.json ${homes[0]}/config/genesis.json
 
 
 echo "> Patching genesis for 2MiB block size"
-jq -r '.consensus_params.block.max_bytes = "2097152"' ${homes[0]}/config/genesis.json  > temp/blocksize.json
+jq -r '.consensus.params.block.max_bytes = "2097152"' ${homes[0]}/config/genesis.json  > temp/blocksize.json
 cp temp/blocksize.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for 20M gas limit"
-jq -r '.consensus_params.block.max_gas = "20000000"' ${homes[0]}/config/genesis.json  > temp/blockgas.json
+jq -r '.consensus.params.block.max_gas = "20000000"' ${homes[0]}/config/genesis.json  > temp/blockgas.json
 cp temp/blockgas.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis for slashing block window"
