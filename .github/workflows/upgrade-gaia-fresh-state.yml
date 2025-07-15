@@ -1341,6 +1341,7 @@
     
           - name: Redeem tokens with upgrade_wallet
             run: |
+              source scripts/vars.sh
               $CHAIN_BINARY q bank balances upgrade_wallet --home $whale_home -o json | jq '.'
               liquid_denom=$($CHAIN_BINARY q bank balances $WALLET_5 --home $whale_home -o json | jq -r '.balances[-2].denom')
               $CHAIN_BINARY q staking delegations $WALLET_5 --home $whale_home -o json | jq '.'
@@ -1619,9 +1620,6 @@
           - name: Set up vesting account
             run: |
               source scripts/vars.sh
-              echo "Adding key..."
-              echo "$MNEMONIC_RELAYER" | $CHAIN_BINARY keys add vesting --home $whale_home --recover
-    
               echo "Creating vesting wallet..."
               start_time=$(date +%s)
               echo "start time: $start_time"
