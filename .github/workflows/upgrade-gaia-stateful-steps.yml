@@ -369,7 +369,7 @@ jobs:
       - name: _Test feemarket
         run: tests/stateful/test_feemarket.sh
       - name: DEBUG
-        if: !cancelled()
+        if: always() && !cancelled()
         run: |
           while [ ! -f /continue ]
           do
