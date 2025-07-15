@@ -25,8 +25,8 @@ echo "> Proposal hashes:"
 $CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq '.'
 $CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq '.'
 
-height_1=$CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq -r '.height'
-height_2=$CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq -r '.height'
+height_1=$($CHAIN_BINARY q tx $txhash_1 --home $whale_home -o json | jq -r '.height')
+height_2=$($CHAIN_BINARY q tx $txhash_2 --home $whale_home -o json | jq -r '.height')
 
 echo "> Transaction heights: $height_1, $height_2"
 
