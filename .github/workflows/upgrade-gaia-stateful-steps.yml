@@ -368,6 +368,13 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
       - name: _Test feemarket
         run: tests/stateful/test_feemarket.sh
+      - name: DEBUG
+        if: !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       # - name: Generate wallets for fee market
       #   run: |
       #     feemarket_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add feemarket-1 --output json)
@@ -629,13 +636,6 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      # - name: DEBUG
-      #   if: always()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: _VSC successful> Interchain Security (Consumer) PSS
         run: tests/stateful/test_ccv.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
