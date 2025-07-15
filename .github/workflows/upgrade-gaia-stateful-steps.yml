@@ -39,6 +39,7 @@ jobs:
       MONIKER_5: ${{ vars.MONIKER_5 }}
       MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
       MNEMONIC_2: ${{ vars.MNEMONIC_2 }}
+      MNEMONIC_2: ${{ vars.MNEMONIC_3 }}
       MNEMONIC_4: ${{ vars.MNEMONIC_4 }}
       MNEMONIC_5: ${{ vars.MNEMONIC_5 }}
       DENOM: ${{ vars.DENOM }}
@@ -60,6 +61,7 @@ jobs:
       VAL2_PROM_PORT: 26662
       WALLET_1: ${{ vars.WALLET_1 }}
       WALLET_2: ${{ vars.WALLET_2 }}
+      WALLET_3: ${{ vars.WALLET_3 }}
       WALLET_4: ${{ vars.WALLET_4 }}
       WALLET_5: ${{ vars.WALLET_5 }}
       WALLET_CONSUMER_1: ${{ vars.WALLET_CONSUMER_1 }}
@@ -300,57 +302,61 @@ jobs:
         run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
       - name: Submit proposal to update slashing params
         run: scripts/submit_proposal.sh templates/proposal-slashing-params.json
-      # - name: Create val2 validator
-      #   env:
-      #     VAL2_DELEGATION_AMOUNT: 500000000000000
-      #     VAL2_BANK_SEND_AMOUNT: 500005000000000
-      #   run: |
-      #     set -e
-      #     echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
-      #     $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} $VAL2_BANK_SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
-      #     echo "[INFO]: Wait for one block to pass"
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO]: Check val2 address balances"
-      #     $CHAIN_BINARY --home $HOME_1 q bank balances ${{ env.VAL2_SELF_DELEGATION }}
-      #     echo "[INFO]: Store pub key params"
-      #     pub_key_type=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
-      #     pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '.key')
-      #     echo "type: $pub_key_type"
-      #     echo "key: $pub_key"
-      #     jq -r ".pubkey.\"@type\" = \"$pub_key_type\" | .pubkey.key = \"$pub_key\" | .\"amount\" = \"$VAL2_DELEGATION_AMOUNT$DENOM\"" templates/create-validator.json > tmp.json
-      #     mv tmp.json templates/create-validator.json
-      #     echo "[INFO]: templates/create-validator.json"
-      #     jq -r '.' templates/create-validator.json
-      #     echo "[INFO]: tx staking create-validator..."
-      #     $CHAIN_BINARY --home $HOME_2 tx staking create-validator templates/create-validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
-      #     echo "[INFO]: Wait for one block to pass"
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO]: Query staking validators"
-      #     $CHAIN_BINARY --home $HOME_2 query staking validators
-      # - name: Query slashing params
-      #   run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
-      # - name: Check tendermint validators
-      #   run: $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
-      # - name: Check validator set is 1
-      #   run: |
-      #     $CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.'
-      #     total_validator=$($CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.pagination.total')
-      #     if [ $total_validator != 1 ]
-      #     then
-      #       echo "[ERROR]: Unexpected number of validators $total_validator, expected 1"
-      #       exit 1
-      #     fi
-      # - name: Check number of signatures
-      #   run: |
-      #     set -e
-      #     total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-      #     if [ $total_signatures != 1 ]
-      #     then
-      #       echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
-      #       exit 1
-      #     fi
+      - name: Create val2 validator
+        env:
+          VAL2_DELEGATION_AMOUNT: 500000000000000
+          VAL2_BANK_SEND_AMOUNT: 500005000000000
+        run: |
+          set -e
+          echo "[INFO]: Send funds to val2 address: ${{ env.VAL2_SELF_DELEGATION }}"
+          $CHAIN_BINARY tx bank send $WALLET_1 ${{ env.VAL2_SELF_DELEGATION }} $VAL2_BANK_SEND_AMOUNT$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+          echo "[INFO]: Wait for one block to pass"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Check val2 address balances"
+          $CHAIN_BINARY --home $HOME_1 q bank balances ${{ env.VAL2_SELF_DELEGATION }}
+          echo "[INFO]: Store pub key params"
+          pub_key_type=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '."@type"')
+          pub_key=$($CHAIN_BINARY --home $HOME_2 tendermint show-validator | jq -r '.key')
+          echo "type: $pub_key_type"
+          echo "key: $pub_key"
+          jq -r ".pubkey.\"@type\" = \"$pub_key_type\" | .pubkey.key = \"$pub_key\" | .\"amount\" = \"$VAL2_DELEGATION_AMOUNT$DENOM\"" templates/create-validator.json > tmp.json
+          mv tmp.json templates/create-validator.json
+          echo "[INFO]: templates/create-validator.json"
+          jq -r '.' templates/create-validator.json
+          echo "[INFO]: tx staking create-validator..."
+          $CHAIN_BINARY --home $HOME_2 tx staking create-validator templates/create-validator.json --from val2 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
+          echo "[INFO]: Wait for one block to pass"
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Query staking validators"
+          $CHAIN_BINARY --home $HOME_2 query staking validators
+      - name: Query slashing params
+        run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
+      - name: Check tendermint validators
+        run: $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
+      - name: Check validator set is 1
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.'
+          total_validator=$($CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.pagination.total')
+          if [ $total_validator != 1 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_validator, expected 1"
+            exit 1
+          fi
+      - name: Check number of signatures
+        run: |
+          set -e
+          total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
+          if [ $total_signatures != 1 ]
+          then
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+            exit 1
+          fi
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
+      - name: Send funds to wallet 3
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      - name: Wait for 1 block to pass
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: Send funds to wallet 4
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
