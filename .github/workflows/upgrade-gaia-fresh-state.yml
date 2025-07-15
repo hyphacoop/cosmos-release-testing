@@ -1622,12 +1622,14 @@
             run: |
               source scripts/vars.sh
               echo "Creating vesting wallet..."
+              $CHAIN_BINARY keys add vesting --recover --home $whale_home
+              vesting_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="vesting").address')
               start_time=$(date +%s)
               echo "start time: $start_time"
               end_time=$(date -d '10 minutes'  +%s)
               echo "end time: $end_time"
               $CHAIN_BINARY tx vesting create-vesting-account \
-              $WALLET_RELAYER $VESTING_AMOUNT$DENOM $end_time \
+              $vesting_wallet $VESTING_AMOUNT$DENOM $end_time \
               --from $WALLET_1 --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               sleep $COMMIT_TIMEOUT
@@ -1648,10 +1650,11 @@
           - name: Delegate with vesting wallet
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q bank spendable-balances $WALLET_RELAYER --home $whale_home -o json | jq '.'
+              vesting_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="vesting").address')
+              $CHAIN_BINARY q bank spendable-balances $vesting_wallet --home $whale_home -o json | jq '.'
               echo "Delegating from vesting wallet..."
               $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
-              --from $WALLET_RELAYER --home $whale_home \
+              --from $vesting_wallet --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               sleep $COMMIT_TIMEOUT
               sleep $COMMIT_TIMEOUT
@@ -1673,7 +1676,8 @@
           - name: Tokenize with vesting wallet
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q staking delegations $VESTING_WALLET --home $whale_home -o json | jq '.'
+              vesting_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="vesting").address')
+              $CHAIN_BINARY q staking delegations $vesting_wallet --home $whale_home -o json | jq '.'
   
               echo "vesting_start_time = $vesting_start_time"
               echo "vesting_end_time = $vesting_end_time"
@@ -1689,13 +1693,13 @@
               vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
               echo "vested amount: $vested_amount"
     
-              # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-              txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
+              # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $vesting_wallet --from $vesting_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
+              txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $vesting_wallet --from $vesting_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
               echo "txhash: $txhash"
     
               sleep $COMMIT_TIMEOUT
-              $CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
-              liquid_tokens=$($CHAIN_BINARY q bank balances $VESTING_WALLET --home $HOME_1 -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
+              $CHAIN_BINARY q bank balances $vesting_wallet --home $whale_home -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
+              liquid_tokens=$($CHAIN_BINARY q bank balances $vesting_wallet --home $whale_home -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
               echo "liquid tokens: $liquid_tokens"
               if [[ "$liquid_tokens" -gt "0" ]]; then
                 echo "PASS: Greater than zero amount in liquid tokens balance."
@@ -1705,11 +1709,17 @@
               fi
 
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
-            run: tests/test_tx_fresh.sh
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
           - name: _API endpoints check
-            run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
-            run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
 
       Test-08-ICA-controller:
         runs-on: ubuntu-24.04
@@ -1770,45 +1780,44 @@
           # - name: Block production check
             # run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
     
-          - name: Installing secondary chain binaries
-            env:
-              START_VERSION: ${{matrix.start_version}}
-            run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-              echo "Chain binary URL: $CHAIN_BINARY_URL"
-              echo "Installing secondary chain binary..."
-              wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
-              chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
           - name: Start host chain
-            env:
-              CHAIN_SERVICE: host.service
-              CHAIN_HOME: /home/runner/.host
-              CHAIN_ID: host
-              API_PORT: 25011
-              GRPC_PORT: 26011
-              RPC_PORT: 27011
-              P2P_PORT: 28011
-              PPROF_PORT: 29011
             run: |
-              scripts/start_chain_secondary.sh
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_ica.sh
+              scripts/setup.sh
+              ./START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
           - name: Generate host connection
             env:
-              TARGET_CHAIN_ID: host
-              CLIENT_COUNT: 0
-              RPC_PORT: 27011
+              CHAIN_1: testnet
+              CHAIN_2: ica
             run: |
-              scripts/gaia-v19/setup_connection_ica_controller.sh $CHAIN_ID $TARGET_CHAIN_ID $CLIENT_COUNT
+              hermes create client --host-chain $CHAIN_1 --reference-chain $CHAIN_2
+              hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
+              hermes create connection --a-chain $CHAIN_1 --a-client 07-tendermint-0 --b-client 07-tendermint-0
           - name: _Test ICA controller - register ICA with WALLET_1
-            env:
-              CONTROLLER_HOME: /home/runner/.val1
-              HOST_HOME: /home/runner/.host
+            # env:
+            #   CONTROLLER_HOME: /home/runner/.val1
+            #   HOST_HOME: /home/runner/.host
             run: |
-              export CONTROLLER_ACCT=$WALLET_1
-              scripts/register_ica.sh
+              source scripts/vars.sh
+              echo "> Registering ICA."
+              $CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep 60
+                          
+              ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $whale_home -o json | jq -r '.address')
+              echo "ICA address: $ica_address"
+              echo "> Funding ICA."
+              source scripts/vars_ica.sh
+              $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep 10
+
           - name: _Test ICA send
-            env:
-              CONTROLLER_HOME: /home/runner/.val1
-              HOST_HOME: /home/runner/.host
+            # env:
+            #   CONTROLLER_HOME: /home/runner/.val1
+            #   HOST_HOME: /home/runner/.host
             run: |
               export CONTROLLER_ACCT=$WALLET_1
               export RECIPIENT=$WALLET_3
@@ -1854,11 +1863,17 @@
               tests/test_ica_send.sh
 
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
-            run: tests/test_tx_fresh.sh
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
           - name: _API endpoints check
-            run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
-            run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
   
       Test-09-cosmwasm:
         runs-on: ubuntu-24.04
