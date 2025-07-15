@@ -39,7 +39,7 @@ jobs:
       MONIKER_5: ${{ vars.MONIKER_5 }}
       MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
       MNEMONIC_2: ${{ vars.MNEMONIC_2 }}
-      MNEMONIC_2: ${{ vars.MNEMONIC_3 }}
+      MNEMONIC_3: ${{ vars.MNEMONIC_3 }}
       MNEMONIC_4: ${{ vars.MNEMONIC_4 }}
       MNEMONIC_5: ${{ vars.MNEMONIC_5 }}
       DENOM: ${{ vars.DENOM }}
