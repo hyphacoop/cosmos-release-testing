@@ -17,6 +17,7 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 # echo "> Proposal JSON:"
 # jq '.' proposal.json
 echo "> Submitting proposal."
+gas=$(echo "($max_block_utilization / 2) - 10000000" | bc)
 txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas 20000000 --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_RELAYER --gas 20000000 --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT*2))
