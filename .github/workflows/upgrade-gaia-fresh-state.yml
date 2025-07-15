@@ -1621,7 +1621,7 @@
             run: |
               source scripts/vars.sh
               echo "Creating vesting wallet..."
-              $CHAIN_BINARY keys add vesting --recover --home $whale_home
+              $CHAIN_BINARY keys add vesting --home $whale_home
               vesting_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="vesting").address')
               start_time=$(date +%s)
               echo "start time: $start_time"
