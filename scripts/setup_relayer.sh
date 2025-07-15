@@ -154,6 +154,6 @@ echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/herme
 
 sudo systemctl daemon-reload
 sudo systemctl enable $RELAYER
-sudo systemctl enable hermes-evidence
+# sudo systemctl enable hermes-evidence
 sleep 10
 journalctl -u $RELAYER | tail -n 100
