@@ -22,6 +22,10 @@ txhash_4=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_4 -
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "> Proposal hashes:"
+echo "txhash_1"
+echo "txhash_2"
+echo "txhash_3"
+echo "txhash_4"
 height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
 height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
 height_3=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
