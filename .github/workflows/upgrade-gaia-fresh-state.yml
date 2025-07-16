@@ -832,7 +832,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v400_one.sh
-              scripts/spawn_consumer.sh
+              scripts/spawn_consumer_topn.sh
           - name: Start consumer chain v400-one
             run: |
               source scripts/vars.sh 
