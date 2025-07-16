@@ -840,6 +840,35 @@
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep 10
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
+
+          - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars_consumer_v400_one.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
+          - name: Establish CCV channel for v400-one
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v400_one.sh 
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              sudo systemctl restart $RELAYER
+              sleep 10
+          - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v400_one.sh  
+              tests/test_ccv_channel.sh
+              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+          - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v400_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
           # - name: Add consumer chain with ICS v4.0.0
           #   env:
           #     CONSUMER_CHAIN_ID: v400-one
