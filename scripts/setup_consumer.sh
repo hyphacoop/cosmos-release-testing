@@ -55,6 +55,14 @@ do
     echo "> Opting in with ${monikers[i]}."
     pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[i]})
     txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $pubkey --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+else
+    echo "> Submitting assign-consensus-key txs"
+        for i in $(seq 0 $[validator_count-1])
+    do
+        echo "> Assign consensus key with ${monikers[i]}."
+        pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[i]})
+        txhash=$($CHAIN_BINARY tx provider assign-consensus-key $CONSUMER_ID $pubkey --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+    done
 done
 
 echo "> Updating genesis file with right denom."
