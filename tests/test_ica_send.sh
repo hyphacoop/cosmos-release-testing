@@ -1,18 +1,15 @@
 #!/bin/bash
 
-source scripts/vars.sh
 ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $whale_home -o json | jq -r '.address')
-
 echo "> ICA address: $ica_address"
 
 echo "> ICA balance in secondary chain:"
 source scripts/vars_ica.sh
 $CHAIN_BINARY q bank balances $ica_address --home $whale_home -o json | jq '.'
-
 $CHAIN_BINARY keys add recipient --home $whale_home
 recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient").address')
 echo "ICA tx recipient in secondary chain:"
-$CHAIN_BINARY_SECONDARY q bank balances $recipient_wallet --home $HOST_HOME -o json | jq '.'
+$CHAIN_BINARY q bank balances $recipient_wallet --home $HOST_HOME -o json | jq '.'
 
 source scripts/vars.sh
 jq -r --arg FROMADDRESS "$ica_address" '.from_address = $FROMADDRESS' templates/ica-msg-send.json > msg-from.json
