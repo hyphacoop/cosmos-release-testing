@@ -16,15 +16,16 @@ spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
 echo "> Spawn time: $spawn_time"
 echo "> Proposal template:"
 jq '.' templates/proposal-update-consumer.json
-jq --slurpfile PARAMS init_params.json '.messages[0].initialization_parameters |= $PARAMS[0]' templates/proposal-update-consumer.json > update-$CONSUMER_CHAIN_ID.json
 
+jq --slurpfile PARAMS init_params.json '.messages[0].initialization_parameters |= $PARAMS[0]' templates/proposal-update-consumer.json > update-$CONSUMER_CHAIN_ID.json
 echo "> Proposal template with initialization params:"
 jq '.' update-$CONSUMER_CHAIN_ID.json
-jq --arg CONSUMERID "$CONSUMER_ID" 'messages[0].consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
-echo "> Proposal template with consumer ID::"
-jq '.' consumer-$CONSUMER_CHAIN_ID.json
-jq -r --arg SPAWNTIME "$spawn_time" 'messages[0].initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
+jq --arg CONSUMERID "$CONSUMER_ID" '.messages[0].consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
+echo "> Proposal template with consumer ID:"
+jq '.' consumer-$CONSUMER_CHAIN_ID.json
+
+jq -r --arg SPAWNTIME "$spawn_time" '.messages[0].initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 echo "> Update consumer JSON:"
 jq '.' spawn-$CONSUMER_CHAIN_ID.json
 echo "> Submitting proposal."
