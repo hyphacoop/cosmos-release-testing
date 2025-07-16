@@ -35,10 +35,12 @@ jobs:
       CHAIN_ID: ${{ vars.CHAIN_ID }}
       MONIKER_1: ${{ vars.MONIKER_1 }}
       MONIKER_2: ${{ vars.MONIKER_2 }}
+      MONIKER_3: ${{ vars.MONIKER_3 }}
       MONIKER_4: ${{ vars.MONIKER_4 }}
       MONIKER_5: ${{ vars.MONIKER_5 }}
       MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
       MNEMONIC_2: ${{ vars.MNEMONIC_2 }}
+      MNEMONIC_3: ${{ vars.MNEMONIC_3 }}
       MNEMONIC_4: ${{ vars.MNEMONIC_4 }}
       MNEMONIC_5: ${{ vars.MNEMONIC_5 }}
       DENOM: ${{ vars.DENOM }}
@@ -60,6 +62,7 @@ jobs:
       VAL2_PROM_PORT: 26662
       WALLET_1: ${{ vars.WALLET_1 }}
       WALLET_2: ${{ vars.WALLET_2 }}
+      WALLET_3: ${{ vars.WALLET_3 }}
       WALLET_4: ${{ vars.WALLET_4 }}
       WALLET_5: ${{ vars.WALLET_5 }}
       WALLET_CONSUMER_1: ${{ vars.WALLET_CONSUMER_1 }}
@@ -351,16 +354,34 @@ jobs:
           fi
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
-      - name: Send funds to wallet 4
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      - name: Send funds to wallet 3
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
         run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-
+      - name: Send funds to wallet 4
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      - name: Wait for 1 block to pass
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Get list of wallets
+        run: |
+          $CHAIN_BINARY --home $HOME_1 keys list
       - name: Get wallet balances
         run: |
           set -e
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+      - name: Query current feemarket params
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      - name: _Test feemarket
+        run: tests/stateful/test_feemarket.sh
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Test commission rate
         run: |
           echo "[INFO]: Get current commission rate..."
@@ -556,13 +577,6 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      # - name: DEBUG
-      #   if: always()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: _VSC successful> Interchain Security (Consumer) PSS
         run: tests/stateful/test_ccv.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
