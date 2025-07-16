@@ -22,7 +22,7 @@ echo "Sending ICA tx..."
 $CHAIN_BINARY tx interchain-accounts controller send-tx connection-0 send_packet.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
 sleep 60
 
-source
+source scripts/vars_ica.sh
 ica_balance=$($CHAIN_BINARY q bank balances $ica_address --home $whale_home -o json | jq -r '.balances[] | select(.denom == "uatom").amount')
 recipient_balance=$($CHAIN_BINARY q bank balances $recipient_wallet --home $whale_home -o json | jq -r '.balances[] | select(.denom == "uatom").amount')
 
