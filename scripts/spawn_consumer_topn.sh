@@ -25,9 +25,9 @@ jq --arg CONSUMERID "$CONSUMER_ID" '.messages[0].consumer_id |= $CONSUMERID' upd
 echo "> Proposal template with consumer ID:"
 jq '.' consumer-$CONSUMER_CHAIN_ID.json
 
-jq -r --arg SPAWNTIME "$spawn_time" '.messages[0].initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
-jq -r '.messages[0].initialization_parameters.revision_number |= "0"' spawn-$CONSUMER_CHAIN_ID.json > revnum-$CONSUMER_CHAIN_ID.json
-jq -r '.messages[0].initialization_parameters.revision_height |= "1"' revnum-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
+jq --arg SPAWNTIME "$spawn_time" '.messages[0].initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
+jq '.messages[0].initialization_parameters.revision_number = "0"' spawn-$CONSUMER_CHAIN_ID.json > revnum-$CONSUMER_CHAIN_ID.json
+jq '.messages[0].initialization_parameters.revision_height = "1"' revnum-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 echo "> Update consumer JSON:"
 jq '.' spawn-$CONSUMER_CHAIN_ID.json
 echo "> Submitting proposal."
