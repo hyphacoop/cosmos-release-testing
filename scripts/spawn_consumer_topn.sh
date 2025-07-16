@@ -8,27 +8,28 @@ do
     homes+=($home)
 done
 echo "> Consumer ID: $CONSUMER_ID"
+$CHAIN_BINARY q provider consumer-chain $CONSUMER_ID --home $whale_home -o json | jq '.'
 
 echo "> Patch create consumer message with spawn time."
-jq '.' create-$CONSUMER_CHAIN_ID.json
+# jq '.' create-$CONSUMER_CHAIN_ID.json
 jq '.initialization_parameters' create-$CONSUMER_CHAIN_ID.json > init_params.json
 spawn_time=$(date -u --iso-8601=ns | sed s/+00:00/Z/ | sed s/,/./)
 echo "> Spawn time: $spawn_time"
-echo "> Proposal template:"
-jq '.' templates/proposal-update-consumer.json
+# echo "> Proposal template:"
+# jq '.' templates/proposal-update-consumer.json
 
 jq --slurpfile PARAMS init_params.json '.messages[0].initialization_parameters |= $PARAMS[0]' templates/proposal-update-consumer.json > update-$CONSUMER_CHAIN_ID.json
-echo "> Proposal template with initialization params:"
-jq '.' update-$CONSUMER_CHAIN_ID.json
+# echo "> Proposal template with initialization params:"
+# jq '.' update-$CONSUMER_CHAIN_ID.json
 
 jq --arg CONSUMERID "$CONSUMER_ID" '.messages[0].consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
-echo "> Proposal template with consumer ID:"
-jq '.' consumer-$CONSUMER_CHAIN_ID.json
+# echo "> Proposal template with consumer ID:"
+# jq '.' consumer-$CONSUMER_CHAIN_ID.json
 
 jq --arg SPAWNTIME "$spawn_time" '.messages[0].initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 jq '.messages[0].initialization_parameters.initial_height.revision_number = "0"' spawn-$CONSUMER_CHAIN_ID.json > revnum-$CONSUMER_CHAIN_ID.json
 jq '.messages[0].initialization_parameters.initial_height.revision_height = "1"' revnum-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
-echo "> Update consumer JSON:"
+echo "> Proposal with spawn time JSON:"
 jq '.' spawn-$CONSUMER_CHAIN_ID.json
 echo "> Submitting proposal."
 txhash=$($CHAIN_BINARY tx gov submit-proposal spawn-$CONSUMER_CHAIN_ID.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
