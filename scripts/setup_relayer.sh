@@ -153,7 +153,7 @@ echo "[Install]"                            | sudo tee /etc/systemd/system/herme
 echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/hermes-evidence.service -a
 
 sudo systemctl daemon-reload
-sudo systemctl enable $RELAYER
+sudo systemctl enable $RELAYER --now
 # sudo systemctl enable hermes-evidence
 sleep 10
 journalctl -u $RELAYER | tail -n 100
