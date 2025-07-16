@@ -3,6 +3,8 @@
 echo "> Submitting update consumer transaction to change ownership"
 echo "Consumer ID: $consumer_id"
 echo "Consumer ID: $CONSUMER_ID"
+
+$CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
 jq -r --arg consumer_id "$consumer_id" '.consumer_id |= $consumer_id' templates/update-consumer.json > update.json
 cat update.json
 tx="$CHAIN_BINARY tx provider update-consumer update.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --from $WALLET_1 --keyring-backend test --home $whale_home --chain-id $CHAIN_ID -y -o json"
