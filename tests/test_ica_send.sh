@@ -1,6 +1,7 @@
 #!/bin/bash
+controller=$1
 
-ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $WALLET_1 connection-0 --home $whale_home -o json | jq -r '.address')
+ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller connection-0 --home $whale_home -o json | jq -r '.address')
 echo "> ICA address: $ica_address"
 
 echo "> ICA balance in secondary chain:"
@@ -19,7 +20,7 @@ echo "ICA Message:"
 jq '.' msg.json
 $CHAIN_BINARY tx interchain-accounts host generate-packet-data "$(cat msg.json)" --encoding proto3 > send_packet.json
 echo "Sending ICA tx..."
-$CHAIN_BINARY tx interchain-accounts controller send-tx connection-0 send_packet.json --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+$CHAIN_BINARY tx interchain-accounts controller send-tx connection-0 send_packet.json --from $controller --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
 sleep 60
 
 source scripts/vars_ica.sh
