@@ -28,7 +28,8 @@ echo "Getting proposal ID from txhash..."
 $CHAIN_BINARY q tx $txhash --home $whale_home
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $whale_home --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "Voting on proposal $proposal_id..."
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"sleep $(($COMMIT_TIMEOUT+2))
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json
+sleep $(($COMMIT_TIMEOUT+2))
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q gov tally $proposal_id --home $whale_home
 

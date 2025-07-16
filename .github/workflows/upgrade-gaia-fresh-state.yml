@@ -1818,7 +1818,9 @@
             run: |
               source scripts/vars.sh
               controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-              tests/test_ica_send.sh $controller1
+              $CHAIN_BINARY keys add recipient1 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient1").address')
+              tests/test_ica_send.sh $controller1 $recipient_wallet
       
           - name: Test software upgrade
             env:
@@ -1864,12 +1866,16 @@
             run: |
               source scripts/vars.sh
               controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
-              tests/test_ica_send.sh $controller2
+              $CHAIN_BINARY keys add recipient2 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient2").address')
+              tests/test_ica_send.sh $controller2 $recipient_wallet
           - name: _Test ICA send with pre-upgrade account
             run: |
               source scripts/vars.sh
               controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-              tests/test_ica_send.sh $controller1
+              $CHAIN_BINARY keys add recipient3 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient3").address')
+              tests/test_ica_send.sh $controller1 $recipient_wallet
 
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
