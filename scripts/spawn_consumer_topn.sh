@@ -57,6 +57,7 @@ echo "> Patching the CCV state with the provider reward denom"
 jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv.json > ccv-reward.json
 cp ccv-reward.json ccv.json
 
+echo "> Consumer: $CONSUMER_ICS, Provider: $PROVIDER_ICS"
 if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
     if [ "$PROVIDER_ICS" == "v6.3.0" ]; then
         echo "Patching for ICS compatibility: Provider $PROVIDER_ICS | Consumer $CONSUMER_ICS"
