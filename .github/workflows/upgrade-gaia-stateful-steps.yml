@@ -375,6 +375,11 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
       - name: _Test feemarket
         run: tests/stateful/test_feemarket.sh
+      - name: _Test cancelled upgrade
+        env:
+          UPGRADE_NAME: v99
+          UPGRADE_AFTER: 50
+        run: tests/stateful/cancel-upgrade.sh
       # - name: DEBUG
       #   if: always() && !cancelled()
       #   run: |
