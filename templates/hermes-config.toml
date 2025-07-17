@@ -136,9 +136,9 @@ dynamic_gas_price = { enabled=true, multiplier = 2, max = 0.5 }
 
 [[chains]]
 id = 'stride-test'
-rpc_addr = 'http://localhost:32321'
-grpc_addr = 'http://localhost:32311'
-event_source = { mode = 'push', url = 'ws://localhost:32321/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:31301'
+grpc_addr = 'http://localhost:31401'
+event_source = { mode = 'push', url = 'ws://localhost:31301/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'stride'
 key_name = 'wallet'
