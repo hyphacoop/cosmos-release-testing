@@ -992,7 +992,7 @@
 
           - name: _Consumer chain produces blocks> ICS v7.0.1 chain 1
             run: |
-              source scripts/vars_consumer_v700_one.sh
+              source scripts/vars_consumer_v701_one.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
           - name: Establish CCV channel for v640-one
             run: |
