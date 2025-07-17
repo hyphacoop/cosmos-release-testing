@@ -1400,9 +1400,6 @@
               scripts/setup_consumer_legacy.sh
               sleep 20
           - name: Spawn consumer chain stride-test
-            env:
-              CONSUMER_ICS: v4.0.0
-              PROVIDER_ICS: v6.4.0
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_stride.sh
