@@ -6,7 +6,7 @@ export CONSUMER_CHAIN_ID=stride-test
 export CONSUMER_DENOM=ustrd
 
 export CONSUMER_DOWNTIME_WINDOW=100000
-export RECIPIENT=consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+export RECIPIENT=stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
 export CONSUMER_GAS_PRICE=0.005$CONSUMER_DENOM
 
 export ICS_TRANSFORM_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd

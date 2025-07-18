@@ -1428,7 +1428,7 @@
               source scripts/vars.sh
               source scripts/vars_consumer_stride.sh
               tests/test_ccv_channel.sh
-              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+              $CHAIN_BINARY q ibc channel channels -o json --home $whale_home | jq -r '.'
           - name: _Pre-upgrade IBC transfer successful> Stride
             run: |
               source scripts/vars.sh
