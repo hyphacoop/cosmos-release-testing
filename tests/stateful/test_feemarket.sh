@@ -18,20 +18,27 @@ echo "> Assembling text proposal."
 jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.json > proposal.json
 # echo "> Proposal JSON:"
 # jq '.' proposal.json
-echo "> Submitting proposal."
-gas=$(echo "($max_block_utilization / 2) - 1000000" | bc)
-txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas $gas --gas-prices $GAS_PRICES$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas $gas --gas-prices $GAS_PRICES$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
-tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
-echo "> Proposal hashes:"
-$CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq '.'
-$CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq '.'
-echo "$txhash_1"
-echo "$txhash_2"
+# Loop until proposals are in the same block
+height_1="1"
+height_2="2"
+while [ "$height_1" != "$height_2 "]
+do
+    echo "> Submitting proposal."
+    gas=$(echo "($max_block_utilization / 2) - 1000000" | bc)
+    txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas $gas --gas-prices $GAS_PRICES$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_2 --gas $gas --gas-prices $GAS_PRICES$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+    tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
-height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
-height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
+    echo "> Proposal hashes:"
+    # $CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq '.'
+    # $CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq '.'
+    echo "$txhash_1"
+    echo "$txhash_2"
+
+    height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
+    height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
+done
 
 echo "> Transaction heights: $height_1, $height_2"
 
