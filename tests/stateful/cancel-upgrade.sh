@@ -17,7 +17,7 @@ upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
 echo $upgrade_plan
 
 # Check if plan is not empty
-if [ $upgrade_plan == "{}" ]
+if [ "$upgrade_plan" == "{}" ]
 then
     echo "[ERROR]: Upgrade plan is empty"
     exit 1
