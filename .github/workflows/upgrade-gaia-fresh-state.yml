@@ -2210,7 +2210,7 @@
               scripts/wait_for_block.sh $whale_rpc 3
     
           - name: Start sovereign chain
-            run:
+            run: |
               source scripts/vars_sovereign_v701.sh
               scripts/setup.sh
               ./$START_SCRIPT
@@ -2334,17 +2334,16 @@
     
           - name: Test software upgrade
             env:
-              TARGET_VERSION: "${{ matrix.target_version }}"
+              TARGET_VERSION: ${{ matrix.target_version }}
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
-              scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
           - name: _Blocks produced after upgrade
             run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-    
-          - name: _Blocks produced after upgrade
-            run: |
-              tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
