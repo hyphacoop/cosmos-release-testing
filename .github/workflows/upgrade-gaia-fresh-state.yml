@@ -2375,7 +2375,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_sovereign_v701.sh
-              export DOWNLOAD_URL: $CONSUMER_CHAIN_BINARY_URL
+              export DOWNLOAD_URL=$CONSUMER_CHAIN_BINARY_URL
               
               scripts/upgrade_changeover.sh
               # export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY

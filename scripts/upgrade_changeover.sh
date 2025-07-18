@@ -83,6 +83,7 @@ $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq 
 # # Wait until the right height is reached
 # echo "Waiting for the upgrade to take place at block height $upgrade_height..."
 # tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 50
+
 # echo "> Validator log:"
 # tail -n 50 ${logs[0]}
 
