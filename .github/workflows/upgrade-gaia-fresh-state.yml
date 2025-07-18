@@ -2211,6 +2211,7 @@
     
           - name: Start sovereign chain
             run:
+              source scripts/vars_sovereign_701.sh
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
