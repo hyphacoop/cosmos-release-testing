@@ -1334,7 +1334,6 @@
           TOPN: 95
           ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
           ICS_TRANSFORM_BINARY: cd-transform
-          STRIDE_VERSION: v24.0.0
           STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
           STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
         steps:
