@@ -1,4 +1,5 @@
 
+export STRIDE_VERSION=v27.0.0
 export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
 export CONSUMER_CHAIN_BINARY_NAME="strided"
 export CONSUMER_CHAIN_BINARY="$CONSUMER_CHAIN_BINARY_NAME"
