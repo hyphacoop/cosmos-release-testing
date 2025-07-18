@@ -22,7 +22,7 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 # Loop until proposals are in the same block
 height_1="1"
 height_2="2"
-while [ "$height_1" != "$height_2 "]
+while [ "$height_1" != "$height_2" ]
 do
     echo "> Submitting proposal."
     gas=$(echo "($max_block_utilization / 2) - 1000000" | bc)
@@ -38,9 +38,9 @@ do
 
     height_1=$($CHAIN_BINARY q tx $txhash_1 --home $HOME_1 -o json | jq -r '.height')
     height_2=$($CHAIN_BINARY q tx $txhash_2 --home $HOME_1 -o json | jq -r '.height')
+    echo "> Transaction heights: $height_1, $height_2"
 done
 
-echo "> Transaction heights: $height_1, $height_2"
 
 gas_price=$($CHAIN_BINARY q feemarket gas-prices --home $HOME_1 --height $height_1 -o json | jq -r '.prices[0].amount')
 echo "Gas price at tx height: $gas_price$DENOM"
