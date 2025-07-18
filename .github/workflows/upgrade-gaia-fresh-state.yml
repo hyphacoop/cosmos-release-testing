@@ -2348,36 +2348,41 @@
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
 
-          - name: Sovereign-consumer changeover
-            env:
-              CONSUMER_CHAIN_ID: v640-one
-              CONSUMER_HOME_1: /home/runner/.v640-1-1
-              CONSUMER_HOME_2: /home/runner/.v640-1-2
-              CONSUMER_HOME_3: /home/runner/.v640-1-3
-              CONSUMER_SERVICE_1: v640-1-1.service
-              CONSUMER_SERVICE_2: v640-1-2.service
-              CONSUMER_SERVICE_3: v640-1-3.service
-              CON1_API_PORT: 64101
-              CON2_API_PORT: 64102
-              CON3_API_PORT: 64103
-              CON1_GRPC_PORT: 64111
-              CON2_GRPC_PORT: 64112
-              CON3_GRPC_PORT: 64113
-              CON1_RPC_PORT: 64121
-              CON2_RPC_PORT: 64122
-              CON3_RPC_PORT: 64123
-              CON1_P2P_PORT: 64131
-              CON2_P2P_PORT: 64132
-              CON3_P2P_PORT: 64133
-              CON1_PPROF_PORT: 64141
-              CON2_PPROF_PORT: 64142
-              CON3_PPROF_PORT: 64143
+          - name: Sovereign chain upgrade
+            # env:
+            #   CONSUMER_CHAIN_ID: v640-one
+            #   CONSUMER_HOME_1: /home/runner/.v640-1-1
+            #   CONSUMER_HOME_2: /home/runner/.v640-1-2
+            #   CONSUMER_HOME_3: /home/runner/.v640-1-3
+            #   CONSUMER_SERVICE_1: v640-1-1.service
+            #   CONSUMER_SERVICE_2: v640-1-2.service
+            #   CONSUMER_SERVICE_3: v640-1-3.service
+            #   CON1_API_PORT: 64101
+            #   CON2_API_PORT: 64102
+            #   CON3_API_PORT: 64103
+            #   CON1_GRPC_PORT: 64111
+            #   CON2_GRPC_PORT: 64112
+            #   CON3_GRPC_PORT: 64113
+            #   CON1_RPC_PORT: 64121
+            #   CON2_RPC_PORT: 64122
+            #   CON3_RPC_PORT: 64123
+            #   CON1_P2P_PORT: 64131
+            #   CON2_P2P_PORT: 64132
+            #   CON3_P2P_PORT: 64133
+            #   CON1_PPROF_PORT: 64141
+            #   CON2_PPROF_PORT: 64142
+            #   CON3_PPROF_PORT: 64143
             run: |
-              export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
-              export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
-              scripts/changeover_v6.4.0_reuse_connection.sh
-              sleep 30
-              journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
+              source scripts/vars.sh
+              source scripts/vars_sovereign_v701.sh
+              export DOWNLOAD_URL: $CONSUMER_CHAIN_BINARY_URL
+              
+              scripts/upgrade_changeover.sh
+              # export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
+              # export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
+              # scripts/changeover_v6.4.0_reuse_connection.sh
+              # sleep 30
+              # journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
     
           - name: Establish CCV channel for v640-one
             env:
