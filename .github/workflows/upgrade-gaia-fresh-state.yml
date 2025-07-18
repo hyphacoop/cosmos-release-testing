@@ -1357,7 +1357,9 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
           - name: Set up relayer
-            run: scripts/setup_relayer.sh
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
           # - name: Download consumer chain binaries
           #   run: |
           #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
