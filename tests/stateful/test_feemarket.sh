@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 max_block_utilization=$($CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq -r '.max_block_utilization')
 payload_size=$(echo "$max_block_utilization / 1000" | bc)
 echo "Max block utilization: $max_block_utilization"
