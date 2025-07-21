@@ -39,7 +39,7 @@ echo "Wait until upgrade height is reached"
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
 echo $current_block
 count=0
-until [ "$current_block" -gt "$upgrade_height+5" ]
+until [ $current_block -gt $upgrade_height+5 ]
 do
     current_block=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
     if [ "$echo_height" != "$current_block" ]
