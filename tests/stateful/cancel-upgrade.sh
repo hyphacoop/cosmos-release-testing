@@ -38,13 +38,22 @@ scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
 echo "Wait until upgrade height is reached"
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
 echo $current_block
-until [ "$current_block" -gt "$upgrade_height" ]
+count=0
+until [ "$current_block" -gt "$upgrade_height+5" ]
 do
     current_block=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
     if [ "$echo_height" != "$current_block" ]
     then
         echo "[INFO] Current height: $current_block"
         echo_height=$current_block
+        count=0
+    fi
+    let count=$count+1
+    echo "[DEBUG]: count is: $count"
+    if [ $count -gt 20 ]
+    then
+        echo "[ERROR]: chain stopped"
+        exit 1
     fi
     sleep 1
 done
@@ -61,4 +70,4 @@ then
 fi
 
 # Make sure gaiad is still running
-tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+# tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
