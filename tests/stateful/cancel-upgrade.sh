@@ -34,7 +34,31 @@ fi
 
 # Submit cancel proposal
 scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
-
+post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
 echo $upgrade_plan
+
+# Check if plan is empty
+if [ "$upgrade_plan" != "{}" ]
+then
+    echo "[ERROR]: Upgrade plan is not empty"
+    exit 1
+fi
+
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
 echo $current_block
+
+
+echo "Wait until upgrade height is reached"
+until [[ "${current_block}" -gt "${upgrade_height}" ]]
+do
+    current_block=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+    if [ $echo_height -ne $current_block ]
+    then
+        echo "[INFO] Current height: $current_block"
+        echo_height=$current_block
+    fi
+    sleep 1
+done
+
+# Make sure gaiad is still running
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
