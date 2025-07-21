@@ -41,7 +41,7 @@ echo $current_block
 until [ "$current_block" -gt "$upgrade_height" ]
 do
     current_block=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
-    if [ $echo_height -ne $current_block ]
+    if [ "$echo_height" != "$current_block" ]
     then
         echo "[INFO] Current height: $current_block"
         echo_height=$current_block
