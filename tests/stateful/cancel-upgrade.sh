@@ -10,6 +10,7 @@ echo "Upgrade Name set to: $UPGRADE_NAME"
 echo "Upgrade height set to: $upgrade_height"
 
 jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"$UPGRADE_NAME\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+echo "[INFO]: Submit upgrade proposal..."
 scripts/submit_proposal.sh upgrade_prop.json
 
 echo "[INFO]: Upgrade plan:"
@@ -33,6 +34,7 @@ then
 fi
 
 # Submit cancel proposal
+echo "[INFO]: Submit cancel upgrade proposal..."
 scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
 
 echo "Wait until upgrade height is reached"
@@ -68,6 +70,3 @@ then
     echo "[ERROR]: Upgrade plan is not empty"
     exit 1
 fi
-
-# Make sure gaiad is still running
-# tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
