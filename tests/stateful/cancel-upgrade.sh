@@ -39,7 +39,6 @@ scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
 
 echo "Wait until upgrade height is reached"
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
-echo $current_block
 count=0
 let check_height=$upgrade_height+5
 until [ $current_block -gt $check_height ]
