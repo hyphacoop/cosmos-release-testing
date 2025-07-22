@@ -50,10 +50,9 @@ do
         count=0
     fi
     let count=$count+1
-    echo "[DEBUG]: count is: $count"
     if [ $count -gt 20 ]
     then
-        echo "[ERROR]: chain stopped"
+        echo "[ERROR]: chain stopped at height: $current_block"
         exit 1
     fi
     sleep 1
