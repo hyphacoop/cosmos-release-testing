@@ -33,7 +33,7 @@ then
 fi
 
 # Submit cancel proposal
-scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
+# scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
 
 echo "Wait until upgrade height is reached"
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
@@ -61,10 +61,10 @@ done
 
 echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
 post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
-echo $upgrade_plan
+echo $post_upgrade_plan
 
 # Check if plan is empty
-if [ "$upgrade_plan" != "{}" ]
+if [ "$post_upgrade_plan" != "{}" ]
 then
     echo "[ERROR]: Upgrade plan is not empty"
     exit 1
