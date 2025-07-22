@@ -33,7 +33,7 @@ then
 fi
 
 # Submit cancel proposal
-# scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
+scripts/submit_proposal.sh templates/proposal-cancel-software-upgrade.json
 
 echo "Wait until upgrade height is reached"
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
