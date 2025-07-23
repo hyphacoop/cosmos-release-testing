@@ -130,7 +130,7 @@ jobs:
           echo ""                                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
           echo "[Service]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
           echo "User=runner"                          | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
-          echo "ExecStart=/usr/local/bin/gaiad start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
+          echo "ExecStart=/usr/local/bin/gaiad start --home $NODE_HOME" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
           echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
           echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
           echo ""                                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_NAME.service -a
@@ -327,7 +327,7 @@ jobs:
       #     echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
       #     echo "[Service]"                            | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
       #     echo "User=runner"                          | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
-      #     echo "ExecStart=/usr/local/bin/neutrond start --x-crisis-skip-assert-invariants --home $NODE_HOME" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
+      #     echo "ExecStart=/usr/local/bin/neutrond start --home $NODE_HOME" | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
       #     echo "Restart=no"                           | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
       #     echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
       #     echo ""                                     | sudo tee /etc/systemd/system/$CONSUMER_SERVICE_NAME.service -a
