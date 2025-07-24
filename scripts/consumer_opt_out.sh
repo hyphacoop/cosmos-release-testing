@@ -15,7 +15,7 @@ $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json --node 
 echo "Consumer ID: $CONSUMER_ID"
 
 echo "> Submitting opt-out txs"
-for i in $(seq 0 $[validator_count-1])
+for i in $(seq 1 $[validator_count-1])
 do
     echo "> Opting out with ${monikers[i]}."
     txhash=$($CHAIN_BINARY tx provider opt-out $CONSUMER_ID --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')

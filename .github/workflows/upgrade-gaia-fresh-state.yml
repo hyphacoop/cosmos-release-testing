@@ -906,6 +906,20 @@
               export TOPN=0
               scripts/consumer_set_topn.sh
 
+          - name: Opt out from top n-1 validators 
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v400_one.sh
+              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+              scripts/consumer_opt_out.sh
+              $CHAIN_BINARY q comet-validator-set --home $whale_home
+              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+
+          - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars_consumer_v400_one.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
+
           - name: _CCV channel verified> ICS v4.0.0 chain 1
             run: |
               source scripts/vars.sh
@@ -920,16 +934,7 @@
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
 
-          - name: Opt out from top n-1 validators 
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh
-              scripts/consumer_opt_out.sh
 
-          - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars_consumer_v400_one.sh
-              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
           # - name: Add consumer chain with ICS v6.4.0 - top N
           #   run: |
           #     source scripts/vars.sh
