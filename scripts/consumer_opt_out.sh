@@ -18,7 +18,7 @@ echo "> Submitting opt-out txs"
 for i in $(seq 0 $[validator_count-1])
 do
     echo "> Opting out with ${monikers[i]}."
-    txhash=$($CHAIN_BINARY tx provider opt-out --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+    txhash=$($CHAIN_BINARY tx provider opt-out $CONSUMER_ID --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 done
 
 sleep $(($COMMIT_TIMEOUT*3))
