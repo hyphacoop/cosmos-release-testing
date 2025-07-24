@@ -919,7 +919,17 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id
-                            
+
+          - name: Opt out from top n-1 validators 
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v400_one.sh
+              scripts/consumer_opt_out.sh
+
+          - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars_consumer_v400_one.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
           # - name: Add consumer chain with ICS v6.4.0 - top N
           #   run: |
           #     source scripts/vars.sh
