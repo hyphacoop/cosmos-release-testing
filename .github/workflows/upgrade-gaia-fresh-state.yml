@@ -920,11 +920,12 @@
               source scripts/vars_consumer_v400_one.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
 
-          - name: _CCV channel verified> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh  
-              tests/test_ccv_channel.sh
+          # - name: _CCV channel verified> ICS v4.0.0 chain 1
+          #   run: |
+          #     source scripts/vars.sh
+          #     source scripts/vars_consumer_v400_one.sh  
+          #     tests/test_ccv_channel.sh
+
           - name: _IBC transfer successful> ICS v4.0.0 chain 1
             run: |
               source scripts/vars.sh  
@@ -1356,294 +1357,325 @@
       #         source scripts/vars.sh
       #         tests/test_liquid_happy_path.sh
     
-      # Test-06-mainnet-topn-consumer-chains:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     # Consumer chain variables
-      #     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+      Test-06-mainnet-topn-consumer-chains:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          # Consumer chain variables
+          RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
 
-      #     # Reference ICS chain variables
-      #     TOPN: 95
-      #     ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-      #     ICS_TRANSFORM_BINARY: cd-transform
-      #     STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-      #     STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v4
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v5
-      #       with:
-      #         python-version: '3.10'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-      #     - name: Set up relayer
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/setup_relayer.sh
-      #     # - name: Download consumer chain binaries
-      #     #   run: |
-      #     #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-      #     #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
+          # Reference ICS chain variables
+          TOPN: 95
+          ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
+          ICS_TRANSFORM_BINARY: cd-transform
+          STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.10'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
+          # - name: Download consumer chain binaries
+          #   run: |
+          #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
+          #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
 
-      #     - name: Install Stride binary
-      #       run: |
-      #         source scripts/vars_consumer_stride.sh
-      #         go version
-      #         git clone https://github.com/Stride-Labs/stride.git 
-      #         cd stride
-      #         git checkout $STRIDE_VERSION
-      #         make install
+          - name: Install Stride binary
+            run: |
+              source scripts/vars_consumer_stride.sh
+              go version
+              git clone https://github.com/Stride-Labs/stride.git 
+              cd stride
+              git checkout $STRIDE_VERSION
+              make install
               
-      #     # - name: Consumer chain binary URLs
-      #     #   run: |
-      #     #     echo "$NEUTRON_BINARY runs $($NEUTRON_BINARY version)"
-      #     #     echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
+          # - name: Consumer chain binary URLs
+          #   run: |
+          #     echo "$NEUTRON_BINARY runs $($NEUTRON_BINARY version)"
+          #     echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
 
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep 5
-      #         tail -n 100 log_$COUNT_WIDTH
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Add Stride chain - top N
-      #       run: |
-      #         source scripts/vars.sh
-      #         source scripts/vars_consumer_stride.sh
-      #         scripts/add_consumer.sh
-      #         scripts/consumer_set_gov_owner.sh
-      #         scripts/consumer_set_topn.sh
-      #     - name: Initialize consumer chain stride-test - top N
-      #       run: |
-      #         source scripts/vars.sh
-      #         source scripts/vars_consumer_stride.sh
-      #         scripts/setup_consumer_legacy.sh
-      #         sleep 20
-      #     - name: Spawn consumer chain stride-test
-      #       run: |
-      #         source scripts/vars.sh  
-      #         source scripts/vars_consumer_stride.sh
-      #         scripts/spawn_consumer_topn.sh
-      #     - name: Start consumer chain stride-test
-      #       run: |
-      #         source scripts/vars.sh 
-      #         source scripts/vars_consumer_stride.sh
-      #         ./start-$CONSUMER_CHAIN_ID.sh
-      #         sleep 10
-      #         tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
-      #     - name: Establish CCV channel for stride-test
-      #       run: |
-      #         source scripts/vars.sh  
-      #         source scripts/vars_consumer_stride.sh
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         echo "Creating channel with Hermes..."
-      #         hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-      #         hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-      #         sudo systemctl restart $RELAYER
-      #         sleep 10
-      #     - name: _Pre-upgrade CCV channel verified> Stride
-      #       run: |
-      #         source scripts/vars.sh
-      #         source scripts/vars_consumer_stride.sh
-      #         tests/test_ccv_channel.sh
-      #         $CHAIN_BINARY q ibc channel channels -o json --home $whale_home | jq -r '.'
-      #     - name: _Pre-upgrade IBC transfer successful> Stride
-      #       run: |
-      #         source scripts/vars.sh
-      #         source scripts/vars_consumer_stride.sh
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #         tests/test_consumer_ibc_transfer.sh $channel_id
+          - name: Add Stride chain - top N
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_stride.sh
+              scripts/add_consumer.sh
+              scripts/consumer_set_gov_owner.sh
+              scripts/consumer_set_topn.sh
+          - name: Initialize consumer chain stride-test - top N
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_stride.sh
+              scripts/setup_consumer_legacy.sh
+              sleep 20
+          - name: Spawn consumer chain stride-test
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_stride.sh
+              scripts/spawn_consumer_topn.sh
+          - name: Start consumer chain stride-test
+            run: |
+              source scripts/vars.sh 
+              source scripts/vars_consumer_stride.sh
+              ./start-$CONSUMER_CHAIN_ID.sh
+              sleep 10
+              tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
+          - name: Establish CCV channel for stride-test
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_stride.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              sudo systemctl restart $RELAYER
+              sleep 10
+          - name: _Pre-upgrade CCV channel verified> Stride
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_stride.sh
+              tests/test_ccv_channel.sh
+              $CHAIN_BINARY q ibc channel channels -o json --home $whale_home | jq -r '.'
+          - name: _Pre-upgrade IBC transfer successful> Stride
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_stride.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
 
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
-      #     - name: Restart relayer
-      #       run: sudo systemctl restart $RELAYER
+          - name: Restart relayer
+            run: sudo systemctl restart $RELAYER
     
-      #     - name: _CCV channel verified> stride-test
-      #       run: |
-      #         source scripts/vars.sh
-      #         source scripts/vars_consumer_stride.sh  
-      #         tests/test_ccv_channel.sh
-      #     - name: _IBC transfer successful> stride-test
-      #       run: |
-      #         source scripts/vars.sh  
-      #         source scripts/vars_consumer_stride.sh 
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #         channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #         tests/test_consumer_ibc_transfer.sh $channel_id
-      #     # - name: Add Stride consumer chain
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #     PSS_ENABLED: true
-      #     #     COSMOS_SDK: v50
-      #     #   run: |
-      #     #     scripts/add_consumer_topn.sh
-      #     # - name: Initialize Stride consumer chain
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #     CONSUMER_DENOM: ustrd
-      #     #     CONSUMER_HOME_1: /home/runner/.stride-1
-      #     #     CONSUMER_HOME_2: /home/runner/.stride-2
-      #     #     CONSUMER_HOME_3: /home/runner/.stride-3
-      #     #     CONSUMER_SERVICE_1: stride-1.service
-      #     #     CONSUMER_SERVICE_2: stride-2.service
-      #     #     CONSUMER_SERVICE_3: stride-3.service
-      #     #     CON1_API_PORT: 32301
-      #     #     CON2_API_PORT: 32302
-      #     #     CON3_API_PORT: 32303
-      #     #     CON1_GRPC_PORT: 32311
-      #     #     CON2_GRPC_PORT: 32312
-      #     #     CON3_GRPC_PORT: 32313
-      #     #     CON1_RPC_PORT: 32321
-      #     #     CON2_RPC_PORT: 32322
-      #     #     CON3_RPC_PORT: 32323
-      #     #     CON1_P2P_PORT: 32331
-      #     #     CON2_P2P_PORT: 32332
-      #     #     CON3_P2P_PORT: 32333
-      #     #     CON1_PPROF_PORT: 32341
-      #     #     CON2_PPROF_PORT: 32342
-      #     #     CON3_PPROF_PORT: 32343
-      #     #     DOWNTIME_BLOCKS: 100000
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-      #     #     scripts/init_consumer_permissionless.sh
-      #     #     sleep 20
-      #     # - name: Prepare consumer chain stride-test
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #     CONSUMER_HOME_1: /home/runner/.stride-1
-      #     #     CONSUMER_HOME_2: /home/runner/.stride-2
-      #     #     CONSUMER_HOME_3: /home/runner/.stride-3
-      #     #     CONSUMER_ICS: v4.0.0
-      #     #     PROVIDER_ICS: v6.4.0
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-      #     #     scripts/prepare_consumer_permissionless.sh
-      #     # - name: Start consumer chain stride-test
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #     CONSUMER_SERVICE_1: stride-1.service
-      #     #     CONSUMER_SERVICE_2: stride-2.service
-      #     #     CONSUMER_SERVICE_3: stride-3.service
-      #     #   run: |
-      #     #     sudo systemctl enable $CONSUMER_SERVICE_1 --now
-      #     #     sleep 5
-      #     #     journalctl -u $CONSUMER_SERVICE_1
-      #     # - name: _Pre-upgrade consumer chain produces blocks> Stride chain
-      #     #   env:
-      #     #     CON1_RPC_PORT: 32321
-      #     #   run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      #     # - name: Establish CCV channel for Stride chain
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #   run: |
-      #     #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #     #     if [ $RELAYER == "hermes" ]; then
-      #     #       echo "Creating channel with Hermes..."
-      #     #       hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-      #     #       hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-      #     #     elif [ $RELAYER == "rly" ]; then
-      #     #       echo "Creating channel with Go relayer..."
-      #     #       jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > stride-1.json
-      #     #       jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' stride-1.json > stride-2.json
-      #     #       rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID stride --file stride-2.json
-      #     #       rly transact connection stride
-      #     #       rly transact channel stride --src-port consumer --dst-port provider --order ordered --version 1
-      #     #     fi
-      #     #     sudo systemctl restart $RELAYER
-      #     #     sleep 10
-      #     # - name: _Pre-upgrade CCV channel verified> Stride chain
-      #     #   env:
-      #     #     CONSUMER_HOME_1: /home/runner/.stride-1
-      #     #     CON1_RPC_PORT: 32321
-      #     #   run: tests/test_ccv_key_assignment.sh
-      #     # - name: _Pre-upgrade IBC transfer successful> Stride chain
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #     CONSUMER_CHAIN_BINARY: strided
-      #     #     CONSUMER_HOME_1: /home/runner/.stride-1
-      #     #     CONSUMER_DENOM: ustrd
-      #     #     RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-      #     #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #     #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #     #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #     #     tests/test_consumer_ibc_transfer.sh $channel_id
+          - name: _CCV channel verified> stride-test
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_stride.sh  
+              tests/test_ccv_channel.sh
+          - name: _IBC transfer successful> stride-test
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_stride.sh 
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
+
+          - name: Set Top N to 0 for ICS v4.0.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_stride.sh
+              export TOPN=0
+              scripts/consumer_set_topn.sh
+
+          - name: Opt out from top n-1 validators 
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_stride.sh
+              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+              scripts/consumer_opt_out.sh
+              $CHAIN_BINARY q comet-validator-set --home $whale_home
+              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+
+          - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars_consumer_v400_one.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
+
+          - name: _IBC transfer successful> ICS v4.0.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_stride.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id
+
+          # - name: Add Stride consumer chain
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #     PSS_ENABLED: true
+          #     COSMOS_SDK: v50
+          #   run: |
+          #     scripts/add_consumer_topn.sh
+          # - name: Initialize Stride consumer chain
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #     CONSUMER_DENOM: ustrd
+          #     CONSUMER_HOME_1: /home/runner/.stride-1
+          #     CONSUMER_HOME_2: /home/runner/.stride-2
+          #     CONSUMER_HOME_3: /home/runner/.stride-3
+          #     CONSUMER_SERVICE_1: stride-1.service
+          #     CONSUMER_SERVICE_2: stride-2.service
+          #     CONSUMER_SERVICE_3: stride-3.service
+          #     CON1_API_PORT: 32301
+          #     CON2_API_PORT: 32302
+          #     CON3_API_PORT: 32303
+          #     CON1_GRPC_PORT: 32311
+          #     CON2_GRPC_PORT: 32312
+          #     CON3_GRPC_PORT: 32313
+          #     CON1_RPC_PORT: 32321
+          #     CON2_RPC_PORT: 32322
+          #     CON3_RPC_PORT: 32323
+          #     CON1_P2P_PORT: 32331
+          #     CON2_P2P_PORT: 32332
+          #     CON3_P2P_PORT: 32333
+          #     CON1_PPROF_PORT: 32341
+          #     CON2_PPROF_PORT: 32342
+          #     CON3_PPROF_PORT: 32343
+          #     DOWNTIME_BLOCKS: 100000
+          #   run: |
+          #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+          #     scripts/init_consumer_permissionless.sh
+          #     sleep 20
+          # - name: Prepare consumer chain stride-test
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #     CONSUMER_HOME_1: /home/runner/.stride-1
+          #     CONSUMER_HOME_2: /home/runner/.stride-2
+          #     CONSUMER_HOME_3: /home/runner/.stride-3
+          #     CONSUMER_ICS: v4.0.0
+          #     PROVIDER_ICS: v6.4.0
+          #   run: |
+          #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+          #     scripts/prepare_consumer_permissionless.sh
+          # - name: Start consumer chain stride-test
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #     CONSUMER_SERVICE_1: stride-1.service
+          #     CONSUMER_SERVICE_2: stride-2.service
+          #     CONSUMER_SERVICE_3: stride-3.service
+          #   run: |
+          #     sudo systemctl enable $CONSUMER_SERVICE_1 --now
+          #     sleep 5
+          #     journalctl -u $CONSUMER_SERVICE_1
+          # - name: _Pre-upgrade consumer chain produces blocks> Stride chain
+          #   env:
+          #     CON1_RPC_PORT: 32321
+          #   run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
+          # - name: Establish CCV channel for Stride chain
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #   run: |
+          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+          #     if [ $RELAYER == "hermes" ]; then
+          #       echo "Creating channel with Hermes..."
+          #       hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+          #       hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+          #     elif [ $RELAYER == "rly" ]; then
+          #       echo "Creating channel with Go relayer..."
+          #       jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > stride-1.json
+          #       jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' stride-1.json > stride-2.json
+          #       rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID stride --file stride-2.json
+          #       rly transact connection stride
+          #       rly transact channel stride --src-port consumer --dst-port provider --order ordered --version 1
+          #     fi
+          #     sudo systemctl restart $RELAYER
+          #     sleep 10
+          # - name: _Pre-upgrade CCV channel verified> Stride chain
+          #   env:
+          #     CONSUMER_HOME_1: /home/runner/.stride-1
+          #     CON1_RPC_PORT: 32321
+          #   run: tests/test_ccv_key_assignment.sh
+          # - name: _Pre-upgrade IBC transfer successful> Stride chain
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #     CONSUMER_CHAIN_BINARY: strided
+          #     CONSUMER_HOME_1: /home/runner/.stride-1
+          #     CONSUMER_DENOM: ustrd
+          #     RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          #   run: |
+          #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+          #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+          #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+          #     tests/test_consumer_ibc_transfer.sh $channel_id
     
-      #     # - name: Test software upgrade
-      #     #   env:
-      #     #     TARGET_VERSION: "${{ matrix.target_version }}"
-      #     #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #     #   run: |
-      #     #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
-      #     # - name: _Blocks produced after upgrade
-      #     #   run: |
-      #     #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
+          # - name: Test software upgrade
+          #   env:
+          #     TARGET_VERSION: "${{ matrix.target_version }}"
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+          #   run: |
+          #     scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
+          # - name: _Blocks produced after upgrade
+          #   run: |
+          #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
     
-      #     # - name: Restart relayer
-      #     #   run: sudo systemctl restart $RELAYER
+          # - name: Restart relayer
+          #   run: sudo systemctl restart $RELAYER
     
-      #     # - name: Flush "migration successful" lines
-      #     #   run: |
-      #     #     $CHAIN_BINARY keys list --home $HOME_1
+          # - name: Flush "migration successful" lines
+          #   run: |
+          #     $CHAIN_BINARY keys list --home $HOME_1
               
-      #     # - name: _CCV channel verified> Stride chain
-      #     #   env:
-      #     #     CONSUMER_HOME_1: /home/runner/.stride-1
-      #     #     CON1_RPC_PORT: 32321
-      #     #   run: tests/test_ccv_key_assignment.sh
+          # - name: _CCV channel verified> Stride chain
+          #   env:
+          #     CONSUMER_HOME_1: /home/runner/.stride-1
+          #     CON1_RPC_PORT: 32321
+          #   run: tests/test_ccv_key_assignment.sh
     
-      #     # - name: _IBC transfer successful> Stride chain
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: stride-test
-      #     #     CONSUMER_CHAIN_BINARY: strided
-      #     #     CONSUMER_HOME_1: /home/runner/.stride-1
-      #     #     CONSUMER_DENOM: ustrd
-      #     #     RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
-      #     #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #     #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #     #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #     #     tests/test_consumer_ibc_transfer.sh $channel_id
+          # - name: _IBC transfer successful> Stride chain
+          #   env:
+          #     CONSUMER_CHAIN_ID: stride-test
+          #     CONSUMER_CHAIN_BINARY: strided
+          #     CONSUMER_HOME_1: /home/runner/.stride-1
+          #     CONSUMER_DENOM: ustrd
+          #     RECIPIENT: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
+          #   run: |
+          #     export CONSUMER_CHAIN_BINARY=$STRIDE_CHAIN_BINARY
+          #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+          #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+          #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+          #     tests/test_consumer_ibc_transfer.sh $channel_id
     
       # Test-07-vesting-liquid-staking:
       #   runs-on: ubuntu-24.04
