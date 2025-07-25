@@ -23,7 +23,9 @@ done
 
 sleep $COMMIT_TIMEOUT
 echo "> Trigger CCV packet"
-$CHAIN_BINARY keys list -o json | jq -r '.'
+last_wallet=$CHAIN_BINARY keys list -o json | jq -r '.'
+$CHAIN_BINARY keys list --output json --home $whale_home | jq -r '.'
+$CHAIN_BINARY q staking validators -o json --home $whale_home | jq -r '.'
 $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
 # $CHAIN_BINARY tx staking unbond 
 sleep $(($COMMIT_TIMEOUT*3))
