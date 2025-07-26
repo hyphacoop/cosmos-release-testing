@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 vesting_time="5 minutes"
 vesting_amount=100000000
 
@@ -39,5 +41,5 @@ do
     sleep 1
 done
 
-timestamp=$($CHAIN_BINARY --home $HOME_1 q block --type=height $current_height -o json | jq -r '.header.time')
+timestamp=$($CHAIN_BINARY --home $HOME_1 q block --type=height $current_block -o json | jq -r '.header.time')
 echo $timestamp
