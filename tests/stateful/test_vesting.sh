@@ -10,7 +10,7 @@ vesting_wallet1_addr=$(echo $vesting_wallet1_json | jq -r '.address')
 
 echo "[INFO]: Creating vesting wallet: $vesting_wallet1_addr"
 vesting_end_time=$(date -d "+$vesting_time" +%s)
-$CHAIN_BINARY --home $HOME_1 tx vesting create-vesting-account $vesting_wallet1_addr $vesting_amount$DENOM $vesting_end_time --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM
+$CHAIN_BINARY --home $HOME_1 tx vesting create-vesting-account $vesting_wallet1_addr $vesting_amount$DENOM $vesting_end_time --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Wait until spendable balance matches vesting amount"
