@@ -352,6 +352,8 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
+      - name: _Test vesting accounts
+        run: tests/stateful/test_vesting.sh
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 3
@@ -375,8 +377,6 @@ jobs:
           $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
       - name: _Test feemarket
         run: tests/stateful/test_feemarket.sh
-      - name: _Test vesting accounts
-        run: tests/stateful/test_vesting.sh
       - name: _Test cancelled upgrade
         env:
           UPGRADE_NAME: v99

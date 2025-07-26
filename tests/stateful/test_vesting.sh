@@ -42,7 +42,16 @@ do
     sleep 1
 done
 
-timestamp=$($CHAIN_BINARY --home $HOME_1 q block --type=height $current_block -o json | jq -r '.header.time')
-echo "Last block timestamp: $timestamp"
-unix_time=$(date -d "$timestamp" +%s)
-echo "Last block INIX time: $unix_time"
+block_timestamp=$($CHAIN_BINARY --home $HOME_1 q block --type=height $current_block -o json | jq -r '.header.time')
+echo "Last block timestamp: $block_timestamp"
+block_unix_time=$(date -d "$block_timestamp" +%s)
+echo "Last block UNIX time: $block_unix_time"
+
+# check block time matches vesting period
+if [ $block_unix_time -eq $vesting_end_time ]
+then
+    echo "Spendable balance matches vesting end time"
+else
+    echo "Spendable balance does not match end time"
+    exit 1
+fi
