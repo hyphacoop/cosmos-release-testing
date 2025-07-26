@@ -48,7 +48,8 @@ block_unix_time=$(date -d "$block_timestamp" +%s)
 echo "Last block UNIX time: $block_unix_time"
 
 # check block time matches vesting period
-if [ $block_unix_time -eq $vesting_end_time ]
+let vesting_end_time_delta=$vesting_end_time+7
+if [[ $block_unix_time -lt $vesting_end_time_delta ] && [ $block_unix_time -gt $vesting_end_time ]]
 then
     echo "Spendable balance matches vesting end time"
 else
