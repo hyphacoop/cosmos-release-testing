@@ -2318,6 +2318,7 @@
 
           - name: Start consumer chain v640-one
             run: |
+              source scripts/vars.sh   
               source scripts/vars_changeover.sh
               ./$STOP_SCRIPT
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
