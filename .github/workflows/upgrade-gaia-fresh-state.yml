@@ -2319,10 +2319,10 @@
           - name: Start consumer chain v640-one
             run: |
               source scripts/vars_changeover.sh
-              ./stop-$CONSUMER_CHAIN_ID.sh
+              ./$STOP_SCRIPT
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-              ./start-$CONSUMER_CHAIN_ID.sh
+              ./$START_SCRIPT
               sleep 10
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
 
