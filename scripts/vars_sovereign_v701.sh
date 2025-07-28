@@ -1,6 +1,5 @@
 
 export validator_count=5
-COSMOVISOR=true
 export CHANGEOVER_UPGRADE_NAME="sovereign-changeover"
 export SOVEREIGN_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-sd-linux
 export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-cdd-linux

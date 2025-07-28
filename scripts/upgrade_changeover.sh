@@ -12,14 +12,14 @@ do
     logs+=($log)
 done
 
-echo "Downloading new binary."
-wget $CONSUMER_CHAIN_BINARY_URL -O $CONSUMER_CHAIN_BINARY -q
-chmod +x $CONSUMER_CHAIN_BINARY
-for i in $(seq 0 $[$validator_count-1])
-do
-    mkdir -p ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin
-    cp $CONSUMER_CHAIN_BINARY ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin/$CHAIN_BINARY_NAME
-done                
+# echo "Downloading new binary."
+# wget $CONSUMER_CHAIN_BINARY_URL -O $CONSUMER_CHAIN_BINARY -q
+# chmod +x $CONSUMER_CHAIN_BINARY
+# for i in $(seq 0 $[$validator_count-1])
+# do
+#     mkdir -p ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin
+#     cp $CONSUMER_CHAIN_BINARY ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin/$CHAIN_BINARY_NAME
+# done                
 
 echo "Attempting upgrade to $UPGRADE_NAME."
 
