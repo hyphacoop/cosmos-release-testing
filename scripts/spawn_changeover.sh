@@ -18,8 +18,10 @@ jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUME
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
 echo "> Revision height: $revision_height"
+jq --argjson REVISION $revision_height '.initialization_parameters.initial_height.revision_height |= $REVISION' spawn-$CONSUMER_CHAIN_ID.json > spawn-revision.json
+cp spawn-revision.json spawn-changeover.json
 
-jq -r '.initialization_parameters.connection_id |= "connection-0"' spawn-$CONSUMER_CHAIN_ID.json > spawn-connection.json
+jq -r '.initialization_parameters.connection_id |= "connection-0"' spawn-changeover.json > spawn-connection.json
 cp spawn-connection.json spawn-changeover.json
 
 jq -r '.initialization_parameters.distribution_transmission_channel |= "channel-0"' spawn-changeover.json > spawn-channel.json
