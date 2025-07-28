@@ -2105,6 +2105,7 @@
           fail-fast: false
         env:
           COSMOVISOR: false
+          COSMOVISOR_VERSION: v1.7.1
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           # Consumer chain variables
           RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
@@ -2131,10 +2132,8 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli
           - name: Install Cosmovisor
-            if: ${{ matrix.enable_cosmovisor == true }}
             run: |
               go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-              echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Set up relayer
             run: |
               source scripts/vars.sh
