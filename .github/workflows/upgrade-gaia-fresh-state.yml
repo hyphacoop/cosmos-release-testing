@@ -2159,7 +2159,7 @@
               source scripts/vars_changeover_v701.sh
               sed -i -e "s|ccv_consumer_chain = true|ccv_consumer_chain = false|g" ~/.hermes/config.toml
               sleep 30s
-              hermes create connection --a-chain $CHAIN_ID --a-client 07-tendermint-0 --b-client 07-tendermint-0
+              hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
               hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
 
             #     journalctl -u $CONSUMER_SERVICE_1
