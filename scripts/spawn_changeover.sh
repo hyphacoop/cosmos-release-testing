@@ -105,7 +105,8 @@ if [ "$CONSUMER_ICS" == "v6.3.0" ]; then
 fi
 
 echo "> Setting new_chain to false."
-jq '.new_chain = false' ccv.json
+jq '.new_chain = false' ccv.json > newchain.json
+cp newchain.json ccv.json
 
 echo "Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $consumer_whale_home/config/genesis.json ccv.json > consumer-genesis.json
