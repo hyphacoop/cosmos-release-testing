@@ -16,12 +16,12 @@ echo "> Spawn time: $spawn_time"
 jq --slurpfile PARAMS init_params.json '.initialization_parameters |= $PARAMS[0]' templates/update-spawn-time.json > update-$CONSUMER_CHAIN_ID.json
 jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
-jq -r '.initialization_parameters.connection_id |= "connection-0"' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
+jq -r '.initialization_parameters.connection_id |= "connection-0"' spawn-$CONSUMER_CHAIN_ID.json > spawn-changeover.json
 
 echo "> Update consumer JSON:"
-jq '.' spawn-$CONSUMER_CHAIN_ID.json
+jq '.' spawn-changeover.json
 echo "> Submitting update consumer tx."
-txhash=$($CHAIN_BINARY tx provider update-consumer spawn-$CONSUMER_CHAIN_ID.json --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
+txhash=$($CHAIN_BINARY tx provider update-consumer spawn-changeover.json --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT*3))
 echo "> Update consumer tx hash: $txhash"
 $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'

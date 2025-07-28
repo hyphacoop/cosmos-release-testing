@@ -22,10 +22,10 @@ export consumer_grpc_prefix="644"
 export consumer_pprof_prefix="645"
 export consumer_log_prefix="sov_"
 
-export consumer_whale_home=${home_prefix}$COUNT_WIDTH
-export consumer_whale_api=${api_prefix}$COUNT_WIDTH
-export consumer_whale_rpc=${rpc_prefix}$COUNT_WIDTH
-export consumer_whale_log=${log_prefix}$COUNT_WIDTH
+export consumer_whale_home=${consumer_home_prefix}$COUNT_WIDTH
+export consumer_whale_api=${consumer_api_prefix}$COUNT_WIDTH
+export consumer_whale_rpc=${consumer_rpc_prefix}$COUNT_WIDTH
+export consumer_whale_log=${consumer_log_prefix}$COUNT_WIDTH
 
 export START_SCRIPT="start-sov.sh"
 export STOP_SCRIPT="stop-sov.sh"
