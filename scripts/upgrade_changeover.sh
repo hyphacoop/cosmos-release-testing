@@ -75,6 +75,11 @@ sleep $VOTING_PERIOD
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
 
+echo "> Saving revision height"
+revision=$(echo "$upgrade_height + 3" | bc )
+echo "revision_height: $revision"
+echo "revision_height=$revision" >> $GITHUB_ENV
+
 # current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
 # blocks_delta=$(($upgrade_height-$current_height))
 

@@ -2284,6 +2284,18 @@
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
 
+          - name: Add consumer chain with ICS v7.0.1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover_v701.sh
+              scripts/add_consumer.sh
+
+          - name: Opt in to consumer chain with ICS v7.0.1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover_v701.sh
+              scripts/consumer_opt_in.sh
+
           - name: Sovereign chain upgrade
             run: |
               source scripts/vars_sovereign_v701.sh
