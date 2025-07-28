@@ -17,6 +17,8 @@ jq --slurpfile PARAMS init_params.json '.initialization_parameters |= $PARAMS[0]
 jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
+echo "> Revision height: $revision_height"
+
 jq -r '.initialization_parameters.connection_id |= "connection-0"' spawn-$CONSUMER_CHAIN_ID.json > spawn-connection.json
 cp spawn-connection.json spawn-changeover.json
 
@@ -104,13 +106,15 @@ if [ "$CONSUMER_ICS" == "v6.3.0" ]; then
     fi
 fi
 
-echo "> Setting new_chain to false."
-jq '.new_chain = false' ccv.json > newchain.json
-cp newchain.json ccv.json
+# new_chain=true
+# echo "> Setting new_chain to $new_chain."
+# jq --arg flag $new_chain '.new_chain = $flag' ccv.json > newchain.json
+# cp newchain.json ccv.json
 
-echo "> Setting preCCV to false."
-jq '.preCCV = false' ccv.json > preccv.json
-cp preccv.json ccv.json
+# preCCV=true
+# echo "> Setting preCCV to $preCCV."
+# jq --arg flag $preCCV '.preCCV = $flag' ccv.json > preccv.json
+# cp preccv.json ccv.json
 
 echo "Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $consumer_whale_home/config/genesis.json ccv.json > consumer-genesis.json
