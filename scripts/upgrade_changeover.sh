@@ -2,8 +2,6 @@
 # Test a gaia software upgrade via governance proposal.
 # It assumes gaia is running on the local host.
 
-upgrade_name=$1
-
 homes=()
 logs=()
 for i in $(seq -w 01 $validator_count)
@@ -15,15 +13,15 @@ do
 done
 
 echo "Downloading new binary."
-wget $DOWNLOAD_URL -O ./upgraded -q
-chmod +x ./upgraded
+wget $DOWNLOAD_URL -O $CONSUMER_CHAIN_BINARY -q
+chmod +x $CONSUMER_CHAIN_BINARY
 for i in $(seq 0 $[$validator_count-1])
 do
     mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
     cp ./upgraded ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY_NAME
 done                
 
-echo "Attempting upgrade to $upgrade_name."
+echo "Attempting upgrade to $UPGRADE_NAME."
 
 # Set time to wait for proposal to pass
 # echo "Get voting_period from genesis file"
