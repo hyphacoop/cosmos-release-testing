@@ -2225,15 +2225,16 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_changeover.sh 
+              sudo systemctl stop $RELAYER
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              sudo systemctl start $RELAYER
               sleep 10
           - name: _Changeover CCV channel verified> ICS v6.4.0
             run: |
               source scripts/vars.sh
-              source scripts/vars_changeover.sh  
+              source scripts/vars_changeover.sh
               tests/test_ccv_channel.sh
           - name: _IBC transfer successful> ICS v6.4.0
             run: |
