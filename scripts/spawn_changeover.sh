@@ -108,6 +108,10 @@ echo "> Setting new_chain to false."
 jq '.new_chain = false' ccv.json > newchain.json
 cp newchain.json ccv.json
 
+echo "> Setting preCCV to false."
+jq '.preCCV = false' ccv.json > preccv.json
+cp preccv.json ccv.json
+
 echo "Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $consumer_whale_home/config/genesis.json ccv.json > consumer-genesis.json
 
