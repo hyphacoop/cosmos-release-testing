@@ -21,7 +21,7 @@ done
 #     cp $CONSUMER_CHAIN_BINARY ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin/$CHAIN_BINARY_NAME
 # done                
 
-echo "Attempting upgrade to $UPGRADE_NAME."
+echo "Attempting upgrade to $CHANGEOVER_UPGRADE_NAME."
 
 # Set time to wait for proposal to pass
 # echo "Get voting_period from genesis file"
@@ -40,7 +40,7 @@ upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
 echo "Starting proposal:"
 jq '.' templates/proposal-software-upgrade.json
 # Set up metadata
-jq -r --arg NAME "$UPGRADE_NAME" '.messages[0].plan.name |= $NAME' templates/proposal-changeover.json > upgrade-1.json
+jq -r --arg NAME "$CHANGEOVER_UPGRADE_NAME" '.messages[0].plan.name |= $NAME' templates/proposal-changeover.json > upgrade-1.json
 jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
 jq -r '.expedited |= false' upgrade-2.json > upgrade-3.json
 echo "Modified proposal:"
