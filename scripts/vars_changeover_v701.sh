@@ -2,17 +2,16 @@
 export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-cdd-linux
 export CONSUMER_CHAIN_BINARY_NAME="sovd"
 export CONSUMER_CHAIN_BINARY="./$CONSUMER_CHAIN_BINARY_NAME"
-export MNEMONIC_1="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"
-export WALLET_1=consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-
-export MNEMONIC_RELAYER="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
-export WALLET_RELAYER=consumer1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd57l33x
-
 export CONSUMER_CHAIN_ID=v701-one
-export CONSUMER_DENOM=ucon
+
 export CONSUMER_DOWNTIME_WINDOW="10"
+export RECIPIENT=consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
+export CONSUMER_DENOM=ucon
 export GAS_PRICE=0.005$CONSUMER_DENOM
-export GAS_ADJUSTMENT=3
+
+export ICS_TRANSFORM_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
+export ICS_TRANSFORM_BINARY=cd-transform
+export CONSUMER_ICS="v6.4.0"
 
 export consumer_moniker_prefix='sov_'
 export consumer_home_prefix='/home/runner/.sov_'
