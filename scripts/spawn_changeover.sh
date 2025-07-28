@@ -102,7 +102,8 @@ echo "Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $consumer_whale_home/config/genesis.json ccv.json > consumer-genesis.json
 for i in $(seq 0 $[$validator_count-1])
 do
-    cp consumer-genesis.json ${homes[i]}/config/genesis.json
+    mkdir -p ${homes[i]}/.sovereign/config
+    cp consumer-genesis.json ${homes[i]}/.sovereign/config/genesis.json
 done
 
 jq '.' consumer-genesis.json
