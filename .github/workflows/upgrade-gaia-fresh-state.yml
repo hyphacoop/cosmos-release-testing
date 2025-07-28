@@ -2295,7 +2295,7 @@
               source scripts/vars_changeover.sh
               scripts/add_consumer.sh
 
-          - name: Opt in to consumer chain with ICS v7.0.1
+          - name: Opt in to consumer chain with ICS v6.4.0
             run: |
               source scripts/vars.sh
               source scripts/vars_changeover.sh
@@ -2308,13 +2308,13 @@
               
               scripts/upgrade_changeover.sh
     
-          - name: Spawn consumer chain v701-one
+          - name: Spawn consumer chain v6.4.0
             env:
               PROVIDER_ICS: v6.4.0
             run: |
               source scripts/vars.sh  
               source scripts/vars_changeover.sh
-              scripts/spawn_consumer.sh
+              scripts/spawn_changeover.sh
 
           - name: Start consumer chain v640-one
             run: |

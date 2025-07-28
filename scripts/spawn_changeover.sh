@@ -104,6 +104,7 @@ for i in $(seq 0 $[$validator_count-1])
 do
     mkdir -p ${homes[i]}/.sovereign/config
     cp consumer-genesis.json ${homes[i]}/.sovereign/config/genesis.json
+    ls ${homes[i]}/.sovereign/config
 done
 
 jq '.' consumer-genesis.json
