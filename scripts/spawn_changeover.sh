@@ -104,13 +104,17 @@ if [ "$CONSUMER_ICS" == "v6.3.0" ]; then
     fi
 fi
 
+echo "> Setting new_chain to false."
+jq '.new_chain = false' ccv.json
+
 echo "Patching the consumer genesis file..."
 jq -s '.[0].app_state.ccvconsumer = .[1] | .[0]' $consumer_whale_home/config/genesis.json ccv.json > consumer-genesis.json
+
+
+jq '.' consumer-genesis.json
 for i in $(seq 0 $[$validator_count-1])
 do
     mkdir -p ${homes[i]}/.sovereign/config
     cp consumer-genesis.json ${homes[i]}/.sovereign/config/genesis.json
     ls ${homes[i]}/.sovereign/config
 done
-
-jq '.' consumer-genesis.json

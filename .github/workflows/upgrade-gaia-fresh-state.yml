@@ -2178,12 +2178,20 @@
           - name: List sovereign chain channels
             run: |
               source scripts/vars.sh
-              source scripts/vars_changeover.sh
+              source scripts/vars_sovereign.sh
               $CONSUMER_CHAIN_BINARY q ibc channel channels --node http://localhost:$consumer_whale_rpc
     
           - name: Restart relayer
-            run: sudo systemctl restart $RELAYER
+            run: |
+              sudo systemctl restart $RELAYER
+              sleep 10
 
+          - name: List sovereign chain channels
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_sovereign.sh
+              $CONSUMER_CHAIN_BINARY q ibc channel channels --node http://localhost:$consumer_whale_rpc
+    
           - name: Add changeover chain ICS v6.4.0
             run: |
               source scripts/vars.sh
@@ -2227,6 +2235,13 @@
               source scripts/vars.sh 
               source scripts/vars_changeover.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 10
+
+          - name: List sovereign chain channels
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_sovereign.sh
+              $CONSUMER_CHAIN_BINARY q ibc channel channels --node http://localhost:$consumer_whale_rpc
+    
           - name: Establish CCV channel for changeover chain ICS v6.4.0
             run: |
               source scripts/vars.sh  
