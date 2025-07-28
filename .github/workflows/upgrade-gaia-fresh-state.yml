@@ -2179,7 +2179,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_changeover.sh
-              $CONSUMER_CHAIN_BINARY q ibc channel channels --node $consumer_whale_rpc
+              $CONSUMER_CHAIN_BINARY q ibc channel channels --node http://localhost:$consumer_whale_rpc
     
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
