@@ -3,18 +3,17 @@ export validator_count=5
 COSMOVISOR=true
 export CHANGEOVER_UPGRADE_NAME="sovereign-changeover"
 export SOVEREIGN_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-sd-linux
-export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-cd-linux
+export CONSUMER_CHAIN_BINARY_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-cdd-linux
 export CHAIN_BINARY_URL=$SOVEREIGN_CHAIN_BINARY_URL
 export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v7.0.1/interchain-security-cd-linux
 # Chain configuration
 export CHAIN_BINARY_NAME="sovd"
 export CHAIN_BINARY="./$CHAIN_BINARY_NAME"
 export MNEMONIC_1="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art"
-export WALLET_1=cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-export VALOPER_1=cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv
+export WALLET_1=consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
 
 export MNEMONIC_RELAYER="abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble"
-export WALLET_RELAYER=cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
+export WALLET_RELAYER=consumer1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd57l33x
 
 export CHAIN_ID=v701-one
 export DENOM=ucon

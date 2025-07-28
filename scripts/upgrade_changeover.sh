@@ -13,12 +13,12 @@ do
 done
 
 echo "Downloading new binary."
-wget $DOWNLOAD_URL -O $CONSUMER_CHAIN_BINARY -q
+wget $CONSUMER_CHAIN_BINARY_URL -O $CONSUMER_CHAIN_BINARY -q
 chmod +x $CONSUMER_CHAIN_BINARY
 for i in $(seq 0 $[$validator_count-1])
 do
-    mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
-    cp ./upgraded ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY_NAME
+    mkdir -p ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin
+    cp $CONSUMER_CHAIN_BINARY ${homes[i]}/cosmovisor/upgrades/$UPGRADE_NAME/bin/$CHAIN_BINARY_NAME
 done                
 
 echo "Attempting upgrade to $UPGRADE_NAME."
@@ -40,7 +40,7 @@ upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
 echo "Starting proposal:"
 jq '.' templates/proposal-software-upgrade.json
 # Set up metadata
-jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-changeover.json > upgrade-1.json
+jq -r --arg NAME "$UPGRADE_NAME" '.messages[0].plan.name |= $NAME' templates/proposal-changeover.json > upgrade-1.json
 jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
 jq -r '.expedited |= false' upgrade-2.json > upgrade-3.json
 echo "Modified proposal:"
@@ -109,9 +109,9 @@ $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq 
 #     else
 #         # Download
 #         echo "Downloading new binary..."
-#         wget $DOWNLOAD_URL -O ./upgraded -q
-#         chmod +x ./upgraded
-#         mv ./upgraded $CHAIN_BINARY
+#         wget $DOWNLOAD_URL -O $CONSUMER_CHAIN_BINARY -q
+#         chmod +x $CONSUMER_CHAIN_BINARY
+#         mv $CONSUMER_CHAIN_BINARY $CHAIN_BINARY
 #     fi
 #     ls -la
 #     ./$START_SCRIPT
