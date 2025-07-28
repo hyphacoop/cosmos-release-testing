@@ -2153,10 +2153,13 @@
               sleep 5
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
-          - name: Print sovereign keys
+          - name: Create transfer channel with sovereign chain
             run: |
               source scripts/vars_sovereign_v701.sh
-              $CHAIN_BINARY keys list --home $whale_home
+              sed -i -e "s|ccv_consumer_chain = true|ccv_consumer_chain = false|g" ~/.hermes/config.toml
+              hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
+              hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
+
             #     journalctl -u $CONSUMER_SERVICE_1
           # - name: Sovereign block production check
           #   env:
@@ -2302,12 +2305,15 @@
               export DOWNLOAD_URL=$CONSUMER_CHAIN_BINARY_URL
               
               scripts/upgrade_changeover.sh
-              # export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
-              # export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
-              # scripts/changeover_v6.4.0_reuse_connection.sh
-              # sleep 30
-              # journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
     
+          - name: Spawn consumer chain v701-one
+            env:
+              PROVIDER_ICS: v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover_v701.sh
+              scripts/spawn_consumer.sh
+
           - name: Establish CCV channel for v640-one
             env:
               CONSUMER_CHAIN_ID: v640-one
