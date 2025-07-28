@@ -2316,6 +2316,20 @@
               source scripts/vars_changeover.sh
               scripts/spawn_consumer.sh
 
+          - name: Start consumer chain v640-one
+            run: |
+              source scripts/vars_changeover.sh
+              ./stop-$CONSUMER_CHAIN_ID.sh
+              wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
+              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+              ./start-$CONSUMER_CHAIN_ID.sh
+              sleep 10
+              tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
+
+          - name: _Post-changeover consumer chain produces blocks> ICS v6.4.0
+            run: |
+              source scripts/vars_changeover.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 10
           - name: Establish CCV channel for v640-one
             env:
               CONSUMER_CHAIN_ID: v640-one
