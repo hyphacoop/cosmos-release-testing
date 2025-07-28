@@ -16,6 +16,7 @@ echo "> Spawn time: $spawn_time"
 jq --slurpfile PARAMS init_params.json '.initialization_parameters |= $PARAMS[0]' templates/update-spawn-time.json > update-$CONSUMER_CHAIN_ID.json
 jq --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' update-$CONSUMER_CHAIN_ID.json > consumer-$CONSUMER_CHAIN_ID.json
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
+jq -r '.initialization_parameters.connection_id |= "connection-0"' consumer-$CONSUMER_CHAIN_ID.json > spawn-$CONSUMER_CHAIN_ID.json
 
 echo "> Update consumer JSON:"
 jq '.' spawn-$CONSUMER_CHAIN_ID.json
