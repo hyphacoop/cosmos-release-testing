@@ -33,12 +33,11 @@ export STATE_SYNC_SNAPSHOT_KEEP_RECENT=5
 export COUNT_WIDTH="01"
 export moniker_prefix='sov_'
 export home_prefix='/home/runner/.sov_'
-export api_prefix="350"
-export p2p_prefix="360"
-export rpc_prefix="370"
-export grpc_prefix="380"
-export pprof_prefix="390"
-export sign_prefix="340"
+export api_prefix="171"
+export p2p_prefix="172"
+export rpc_prefix="173"
+export grpc_prefix="174"
+export pprof_prefix="175"
 export log_prefix="sov_"
 
 export whale_home=${home_prefix}$COUNT_WIDTH
