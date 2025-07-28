@@ -2143,7 +2143,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
     
           - name: Start sovereign chain
@@ -2152,7 +2152,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
           - name: Print sovereign keys
             run: |
