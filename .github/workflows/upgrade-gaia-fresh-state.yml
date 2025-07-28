@@ -2174,6 +2174,12 @@
             run: |
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: List sovereign chain channels
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              $CONSUMER_CHAIN_BINARY q ibc channel channels --node $consumer_whale_rpc
     
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
