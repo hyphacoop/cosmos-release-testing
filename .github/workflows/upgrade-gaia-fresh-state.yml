@@ -2147,7 +2147,7 @@
     
           - name: Start sovereign chain
             run: |
-              source scripts/vars_sovereign_v701.sh
+              source scripts/vars_sovereign.sh
               scripts/setup.sh
               ./$START_SCRIPT
               sleep 5
@@ -2156,7 +2156,7 @@
           - name: Create transfer channel with sovereign chain
             run: |
               source scripts/vars.sh
-              source scripts/vars_changeover_v701.sh
+              source scripts/vars_changeover.sh
               sed -i -e "s|ccv_consumer_chain = true|ccv_consumer_chain = false|g" ~/.hermes/config.toml
               sleep 30s
               hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
@@ -2289,21 +2289,21 @@
           - name: Restart relayer
             run: sudo systemctl restart $RELAYER
 
-          - name: Add consumer chain with ICS v7.0.1
+          - name: Add consumer chain with ICS v6.4.0
             run: |
               source scripts/vars.sh
-              source scripts/vars_changeover_v701.sh
+              source scripts/vars_changeover.sh
               scripts/add_consumer.sh
 
           - name: Opt in to consumer chain with ICS v7.0.1
             run: |
               source scripts/vars.sh
-              source scripts/vars_changeover_v701.sh
+              source scripts/vars_changeover.sh
               scripts/consumer_opt_in.sh
 
           - name: Sovereign chain upgrade
             run: |
-              source scripts/vars_sovereign_v701.sh
+              source scripts/vars_sovereign.sh
               export DOWNLOAD_URL=$CONSUMER_CHAIN_BINARY_URL
               
               scripts/upgrade_changeover.sh
@@ -2313,7 +2313,7 @@
               PROVIDER_ICS: v6.4.0
             run: |
               source scripts/vars.sh  
-              source scripts/vars_changeover_v701.sh
+              source scripts/vars_changeover.sh
               scripts/spawn_consumer.sh
 
           - name: Establish CCV channel for v640-one
