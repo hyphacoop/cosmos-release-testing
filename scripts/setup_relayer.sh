@@ -114,46 +114,11 @@ elif [ $RELAYER == "rly" ]; then
     rly keys restore pfm3 default "$MNEMONIC_RELAYER"
 fi
 
-echo "Creating service..."
-sudo touch /etc/systemd/system/$RELAYER.service
-echo "[Unit]"                               | sudo tee /etc/systemd/system/$RELAYER.service
-echo "Description=Relayer service"          | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "After=network-online.target"          | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo ""                                     | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "[Service]"                            | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "User=$USER"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
-
+echo "> Running relayer in a tmux session"
 if [ $RELAYER == "hermes" ]; then
-    echo "ExecStart=$HOME/.hermes/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
-    # echo "ExecStart=$HOME/.cargo/bin/$RELAYER start"    | sudo tee /etc/systemd/system/$RELAYER.service -a
+    tmux new-session -d -s relayer "$HOME/.hermes/hermes | tee relayer.log"
 elif [ $RELAYER == "rly" ]; then
-    echo "ExecStart=$HOME/.relayer/$RELAYER start"   | sudo tee /etc/systemd/system/$RELAYER.service -a
+    tmux new-session -d -s relayer "$HOME/.relayer/rly | tee relayer.log"
 fi
-echo "Restart=no"                           | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo ""                                     | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "[Install]"                            | sudo tee /etc/systemd/system/$RELAYER.service -a
-echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/$RELAYER.service -a
 
-echo "Creating evidence service..."
-sudo touch /etc/systemd/system/hermes-evidence.service
-echo "[Unit]"                               | sudo tee /etc/systemd/system/hermes-evidence.service
-echo "Description=Hermes evidence service"          | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "After=network-online.target"          | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo ""                                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "[Service]"                            | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "User=$USER"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
-
-# echo "ExecStart=$HOME/.hermes/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "ExecStart=$HOME/.cargo/bin/hermes evidence"    | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "Restart=no"                           | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo ""                                     | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "[Install]"                            | sudo tee /etc/systemd/system/hermes-evidence.service -a
-echo "WantedBy=multi-user.target"           | sudo tee /etc/systemd/system/hermes-evidence.service -a
-
-sudo systemctl daemon-reload
-sudo systemctl enable $RELAYER
-# sudo systemctl enable hermes-evidence
-sleep 10
-journalctl -u $RELAYER | tail -n 100
+scripts/start_relayer.sh

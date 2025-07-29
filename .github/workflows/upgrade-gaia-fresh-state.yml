@@ -273,7 +273,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
             run: |
@@ -329,7 +331,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> ICS v6.4.0 chain 1
             run: |
@@ -385,7 +389,8 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 1
             run: |
@@ -441,8 +446,10 @@
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Restart relayer
-            run: sudo systemctl restart $RELAYER
-    
+            run: |
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
+
           - name: _CCV channel verified> ICS v4.0.0 chain 1
             run: |
               source scripts/vars.sh
@@ -526,7 +533,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 2
             run: |
@@ -853,7 +862,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
             run: |
@@ -883,7 +894,10 @@
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Restart relayer
-            run: sudo systemctl restart $RELAYER
+            run: |
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
     
           - name: _CCV channel verified> ICS v4.0.0 chain 1
             run: |
@@ -981,7 +995,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _CCV channel verified> ICS v6.4.0 chain 1
             run: |
@@ -1042,7 +1058,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _CCV channel verified> ICS v7.0.1 chain 1
             run: |
@@ -1239,7 +1257,10 @@
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: Restart relayer
-            run: sudo systemctl restart $RELAYER
+            run: |
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
 
           - name: _Test PFM transfers
             env:
@@ -1466,7 +1487,9 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> Stride
             run: |
@@ -1497,7 +1520,10 @@
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
           - name: Restart relayer
-            run: sudo systemctl restart $RELAYER
+            run: |
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
     
           - name: _CCV channel verified> stride-test
             run: |
@@ -1764,7 +1790,8 @@
               hermes create client --host-chain $CHAIN_1 --reference-chain $CHAIN_2
               hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
               hermes create connection --a-chain $CHAIN_1 --a-client 07-tendermint-0 --b-client 07-tendermint-0
-              sudo systemctl start $RELAYER
+              # sudo systemctl start $RELAYER
+              scripts/start_relayer.sh
           - name: _Test ICA controller - register ICA with controller1
             run: |
               source scripts/vars.sh
@@ -1811,7 +1838,9 @@
           
           - name: Restart relayer
             run: |
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 1m
           - name: _Test ICA controller - register ICA with controller2
             env:
@@ -2187,7 +2216,9 @@
     
           - name: Restart relayer
             run: |
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
 
           - name: List sovereign chain channels
@@ -2250,11 +2281,13 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_changeover.sh 
-              sudo systemctl stop $RELAYER
+              # sudo systemctl stop $RELAYER
+              tmux send-keys -t relayer C-c
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              sudo systemctl start $RELAYER
+              # sudo systemctl start $RELAYER
+              scripts/start_relayer.sh
               sleep 10
           - name: _Changeover CCV channel verified> ICS v6.4.0
             run: |
@@ -2432,7 +2465,9 @@
     
           - name: Restart relayer
             run: |
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
               sleep 10
 
           - name: List sovereign chain channels
@@ -2495,12 +2530,14 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_changeover.sh 
-              sudo systemctl stop $RELAYER
+              # sudo systemctl stop $RELAYER
+              tmux send-keys -t relayer C-c
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-1 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-1 --channel-version 1
-              sudo systemctl start $RELAYER
+              # sudo systemctl start $RELAYER
+              scripts/start_relayer.sh
               sleep 10
           - name: _Changeover CCV channel verified> ICS v6.4.0
             run: |
