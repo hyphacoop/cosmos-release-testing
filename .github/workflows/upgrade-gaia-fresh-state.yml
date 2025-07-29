@@ -2211,6 +2211,7 @@
           - name: Spawn changeover chain ICS v6.4.0
             env:
               PROVIDER_ICS: v6.4.0
+              REUSE_CONNECTION: true
             run: |
               source scripts/vars.sh  
               source scripts/vars_changeover.sh
@@ -2338,357 +2339,252 @@
                 echo "PASS: Consumer rewards distributed to val1."
               fi
 
-      # Test-12-ics-sovereign-new-connection:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     # Consumer chain variables
-      #     RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-      #     CONSUMER_ICS: v6.3.0
-      #     PROVIDER_ICS: v6.3.0
-      #     # Reference ICS chain variables
-      #     CONSUMER_DENOM: ucon
-      #     CONSUMER_FEES: 500
-      #     ICS_TRANSFORM_BINARY: cd-transform
-      #   steps:
-      #     - name: start-version
-      #       run: echo ${{matrix.gaia_version}}
-      #     - name: target-version
-      #       run: echo ${{matrix.upgrade_version}}
-      #     - name: target-commit
-      #       if: ${{ matrix.upgrade_version == 'main' }}
-      #       run: |
-      #         BUILD_TAG=gaiad-linux-${{matrix.upgrade_version}}
-      #         TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
-      #         echo TARGET_COMMIT: $TARGET_COMMIT
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v4
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v5
-      #       with:
-      #         python-version: '3.10'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
+      Test-12-ics-sovereign-new-connection:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          # Consumer chain variables
+          RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+          CONSUMER_ICS: v6.3.0
+          PROVIDER_ICS: v6.4.0
+          TOPN: 0
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.10'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
 
-      #     - name: Set up relayer
-      #       run: scripts/setup_relayer.sh
-
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep 5
-      #         tail -n 100 log_$COUNT_WIDTH
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 $log_prefix$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
     
-      #     - name: Start sovereign chain
-      #       env:
-      #         CONSUMER_CHAIN_ID: v640-one
-      #         CONSUMER_HOME_1: /home/runner/.v640-1-1
-      #         CONSUMER_HOME_2: /home/runner/.v640-1-2
-      #         CONSUMER_HOME_3: /home/runner/.v640-1-3
-      #         CONSUMER_SERVICE_1: v640-1-1.service
-      #         CONSUMER_SERVICE_2: v640-1-2.service
-      #         CONSUMER_SERVICE_3: v640-1-3.service
-      #         CON1_API_PORT: 64101
-      #         CON2_API_PORT: 64102
-      #         CON3_API_PORT: 64103
-      #         CON1_GRPC_PORT: 64111
-      #         CON2_GRPC_PORT: 64112
-      #         CON3_GRPC_PORT: 64113
-      #         CON1_RPC_PORT: 64121
-      #         CON2_RPC_PORT: 64122
-      #         CON3_RPC_PORT: 64123
-      #         CON1_P2P_PORT: 64131
-      #         CON2_P2P_PORT: 64132
-      #         CON3_P2P_PORT: 64133
-      #         CON1_PPROF_PORT: 64141
-      #         CON2_PPROF_PORT: 64142
-      #         CON3_PPROF_PORT: 64143
-      #         DOWNTIME_BLOCKS: 100000
-      #       run: |
-      #         export CHAIN_BINARY_URL=$SOVEREIGN_CHAIN_V640_BINARY_URL
-      #         export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
-      #         scripts/start_sovereign_chain_v50.sh
-      #         sleep 10
-      #     - name: Print sovereign logs
-      #       env:
-      #         CONSUMER_SERVICE_1: v640-1-1.service
-      #       run: 
-      #         journalctl -u $CONSUMER_SERVICE_1
-      #     - name: Sovereign block production check
-      #       env:
-      #         CON1_RPC_PORT: 64121
-      #       run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5 # 5 blocks
-      #     - name: Create transfer channel with sovereign chain
-      #       env:
-      #         CONSUMER_CHAIN_ID: v640-one
-      #       run: |
-      #         sed -i -e "s\ccv_consumer_chain = true\ccv_consumer_chain = false\g" ~/.hermes/config.toml
-      #         hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
-      #         hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer
-
-      #     # - name: Add consumer chain with ICS v4.0.0
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: v400-one
-      #     #     PSS_ENABLED: true
-      #     #     COSMOS_SDK: v50
-      #     #   run: |
-      #     #     scripts/add_consumer_optin.sh
-      #     # - name: Initialize consumer chain with ICS v4.0.0
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: v400-one
-      #     #     CONSUMER_HOME_1: /home/runner/.v400-1-1
-      #     #     CONSUMER_HOME_2: /home/runner/.v400-1-2
-      #     #     CONSUMER_HOME_3: /home/runner/.v400-1-3
-      #     #     CONSUMER_SERVICE_1: v400-1-1.service
-      #     #     CONSUMER_SERVICE_2: v400-1-2.service
-      #     #     CONSUMER_SERVICE_3: v400-1-3.service
-      #     #     CON1_API_PORT: 40101
-      #     #     CON2_API_PORT: 40102
-      #     #     CON3_API_PORT: 40103
-      #     #     CON1_GRPC_PORT: 40111
-      #     #     CON2_GRPC_PORT: 40112
-      #     #     CON3_GRPC_PORT: 40113
-      #     #     CON1_RPC_PORT: 40121
-      #     #     CON2_RPC_PORT: 40122
-      #     #     CON3_RPC_PORT: 40123
-      #     #     CON1_P2P_PORT: 40131
-      #     #     CON2_P2P_PORT: 40132
-      #     #     CON3_P2P_PORT: 40133
-      #     #     CON1_PPROF_PORT: 40141
-      #     #     CON2_PPROF_PORT: 40142
-      #     #     CON3_PPROF_PORT: 40143
-      #     #     DOWNTIME_BLOCKS: 100000
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-      #     #     scripts/init_consumer_permissionless.sh
-      #     #     sleep 20
-      #     # - name: Prepare consumer chain v400-one
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: v400-one
-      #     #     CONSUMER_HOME_1: /home/runner/.v400-1-1
-      #     #     CONSUMER_HOME_2: /home/runner/.v400-1-2
-      #     #     CONSUMER_HOME_3: /home/runner/.v400-1-3
-      #     #     ICS_400: true
-      #     #     CONSUMER_ICS: v4.1.1
-      #     #     PROVIDER_ICS: v4.2.0
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-      #     #     scripts/prepare_consumer_permissionless.sh
-      #     # - name: Start consumer chain v400-one
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: v400-one
-      #     #     CONSUMER_SERVICE_1: v400-1-1.service
-      #     #     CONSUMER_SERVICE_2: v400-1-2.service
-      #     #     CONSUMER_SERVICE_3: v400-1-3.service
-      #     #   run: |
-      #     #     sudo systemctl enable $CONSUMER_SERVICE_1 --now
-      #     #     sleep 5
-      #     #     journalctl -u $CONSUMER_SERVICE_1
-      #     # - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
-      #     #   env:
-      #     #     CON1_RPC_PORT: 40121
-      #     #   run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 5
-      #     # - name: Establish CCV channel for v400-one
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: v400-one
-      #     #   run: |
-      #     #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #     #     if [ $RELAYER == "hermes" ]; then
-      #     #       echo "Creating channel with Hermes..."
-      #     #       hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
-      #     #       hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-      #     #     elif [ $RELAYER == "rly" ]; then
-      #     #       echo "Creating channel with Go relayer..."
-      #     #       jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v400-1.json
-      #     #       jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v400-1.json > v400-2.json
-      #     #       rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v400-1 --file v400-2.json
-      #     #       rly transact connection v400-1
-      #     #       rly transact channel v400-1 --src-port consumer --dst-port provider --order ordered --version 1
-      #     #     fi
-      #     #     sudo systemctl restart $RELAYER
-      #     #     sleep 10
-      #     # - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
-      #     #   env:
-      #     #     CONSUMER_HOME_1: /home/runner/.v400-1-1
-      #     #     CON1_RPC_PORT: 40121
-      #     #   run: tests/test_ccv_key_assignment.sh
-      #     # - name: _Pre-upgrade IBC transfer successful> ICS v4.0.0 chain 1
-      #     #   env:
-      #     #     CONSUMER_CHAIN_ID: v400-one
-      #     #     CONSUMER_HOME_1: /home/runner/.v400-1-1
-      #     #     RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-      #     #   run: |
-      #     #     export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
-      #     #     client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #     #     connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #     #     channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #     #     tests/test_consumer_ibc_transfer.sh $channel_id
+          - name: Start sovereign chain
+            run: |
+              source scripts/vars_sovereign.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep 5
+              tail -n 100 $log_prefix$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+          - name: Create transfer channel with sovereign chain
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              sed -i -e "s|ccv_consumer_chain = true|ccv_consumer_chain = false|g" ~/.hermes/config.toml
+              sleep 30s
+              hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
+              hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
     
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: "${{ matrix.target_version }}"
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         scripts/software_upgrade.sh 127.0.0.1 $VAL1_RPC_PORT ${{ matrix.upgrade_name }}    
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10
-    
-      #     - name: Restart relayer
-      #       run: sudo systemctl restart $RELAYER
-
-      #     - name: Sovereign-consumer changeover
-      #       env:
-      #         CONSUMER_CHAIN_ID: v640-one
-      #         CONSUMER_HOME_1: /home/runner/.v640-1-1
-      #         CONSUMER_HOME_2: /home/runner/.v640-1-2
-      #         CONSUMER_HOME_3: /home/runner/.v640-1-3
-      #         CONSUMER_SERVICE_1: v640-1-1.service
-      #         CONSUMER_SERVICE_2: v640-1-2.service
-      #         CONSUMER_SERVICE_3: v640-1-3.service
-      #         CON1_API_PORT: 64101
-      #         CON2_API_PORT: 64102
-      #         CON3_API_PORT: 64103
-      #         CON1_GRPC_PORT: 64111
-      #         CON2_GRPC_PORT: 64112
-      #         CON3_GRPC_PORT: 64113
-      #         CON1_RPC_PORT: 64121
-      #         CON2_RPC_PORT: 64122
-      #         CON3_RPC_PORT: 64123
-      #         CON1_P2P_PORT: 64131
-      #         CON2_P2P_PORT: 64132
-      #         CON3_P2P_PORT: 64133
-      #         CON1_PPROF_PORT: 64141
-      #         CON2_PPROF_PORT: 64142
-      #         CON3_PPROF_PORT: 64143
-      #       run: |
-      #         export CONSUMER_CHAIN_BINARY=$SOVEREIGN_CHAIN_V640_BINARY
-      #         export CHANGEOVER_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
-      #         scripts/changeover_v6.4.0_new_connection.sh
-      #         sleep 60
-      #         journalctl -u $CONSUMER_SERVICE_1 | tail -n 100
-
-    
-      #     - name: Establish CCV channel for v640-one
-      #       env:
-      #         CONSUMER_CHAIN_ID: v640-one
-      #       run: |
-      #         sed -i -e "s\ccv_consumer_chain = false\ccv_consumer_chain = true\g" ~/.hermes/config.toml
-      #         echo "> Hermes config:"
-      #         cat ~/.hermes/config.toml
-      #         client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         echo "> Client ID: $client_id"
-      #         sudo systemctl stop $RELAYER
-      #         if [ $RELAYER == "hermes" ]; then
-      #           echo "Creating channel with Hermes..."
-      #           hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-1 --b-client $client_id
-      #           hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-1 --channel-version 1
-      #         elif [ $RELAYER == "rly" ]; then
-      #           echo "Creating channel with Go relayer..."
-      #           jq --arg CHAIN "$CONSUMER_CHAIN_ID" '.src."chain-id" = $CHAIN' templates/rly-path-template.json > v640-1.json
-      #           jq --arg CLIENT "$client_id" '.dst."client-id" = $CLIENT' v640-1.json > v640-2.json
-      #           rly paths add $CHAIN_ID $CONSUMER_CHAIN_ID v640-1 --file v640-2.json
-      #           rly transact connection v640-1
-      #           rly transact channel v640-1 --src-port consumer --dst-port provider --order ordered --version 1
-      #         fi
-      #         sudo systemctl restart $RELAYER
-      #         sleep 10
-      #     - name: _CCV channel verified> ICS v6.4.0 chain 1
-      #       env:
-      #         CONSUMER_HOME_1: /home/runner/.v640-1-1
-      #         CON1_RPC_PORT: 64121
-      #         CON1_P2P_PORT: 64131
-      #       run: tests/test_ccv_key_assignment.sh
-      #     - name: _IBC transfer successful> ICS v6.4.0 chain 1
-      #       env:
-      #         CONSUMER_CHAIN_ID: v640-one
-      #         CONSUMER_HOME_1: /home/runner/.v640-1-1
-      #         RECIPIENT: consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc
-      #       run: |
-      #         export CONSUMER_CHAIN_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
-      #         # echo "> List consumer chains:"
-      #         # $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
-      #         # client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-      #         # echo "> Client ID: $client_id"
-      #         # connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-      #         # echo "> Connection ID: $connection_id"
-      #         # channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-      #         tests/test_changeover_ibc_transfer.sh
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-      #     - name: Trigger consumer rewards distribution> ICS v6.4.0
-      #       env:
-      #         CONSUMER_HOME_1: /home/runner/.v640-1-1
-      #         CON1_RPC_PORT: 64121
-      #         CON1_P2P_PORT: 64131
-      #       run: |
-      #         export CONSUMER_CHAIN_BINARY=$CHANGEOVER_CHAIN_V640_BINARY
-      #         echo "> Consumer rewards pool balances:"
-      #         $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
-      #         echo "> Val1 outstanding rewards:"
-      #         $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
-      #         echo "> Send tx with high fees in consumer chain."
-      #         $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
-      #         --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
-      #         --gas auto --fees 10000ucon \
-      #         --home $CONSUMER_HOME_1 -o json -y | jq '.'
-      #         sleep $(($COMMIT_TIMEOUT*10))
-      #         echo "> Balance in consumer chain recipient:"
-      #         $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $CONSUMER_HOME_1 -o json | jq '.'
-      #         echo "> Val1 outstanding rewards:"
-      #         $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
-      #     - name: Register consumer reward denoms
-      #       env:
-      #         CONSUMER_DENOM: ucon
-      #       run: |
-      #         last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-      #         echo "> Last channel: $last_channel"
-      #         denom_640=$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-      #         echo "> Denom: $denom_640"
-      #         scripts/change_denoms.sh $denom_640
-      #         $CHAIN_BINARY q provider registered-consumer-reward-denoms --home $HOME_1 -o json | jq '.'
+          - name: List sovereign chain channels
+            run: |
+              source scripts/vars_sovereign.sh
+              $CHAIN_BINARY q ibc channel channels --node http://localhost:$whale_rpc
+    
+          - name: Restart relayer
+            run: |
+              sudo systemctl restart $RELAYER
+              sleep 10
 
-      #     - name: _Consumer rewards distribution> ICS v6.4.0
-      #       run: |
-      #         last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
-      #         ibc_denom=ibc/$(echo -n "transfer/${last_channel}/$CONSUMER_DENOM" | shasum -a 256 | cut -d ' ' -f1 | tr 'a-z' 'A-Z')
-      #         echo "> Denom: $ibc_denom"
-      #         echo "> Consumer rewards pool balances:"
-      #         $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $HOME_1 -o json | jq '.'
-      #         echo "> Val1 outstanding rewards:"
-      #         $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
-      #         val1_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
-      #         echo "> val1_rewards: $val1_rewards"
-      #         val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
-      #         echo "> val1_consumer_rewards: $val1_consumer_rewards"
-      #         if [ -z "$val1_consumer_rewards" ]; then
-      #           echo "FAIL: No consumer rewards distributed to val1."
-      #           exit 1
-      #         else
-      #           echo "PASS: Consumer rewards distributed to val1."
-      #         fi
+          - name: List sovereign chain channels
+            run: |
+              source scripts/vars_sovereign.sh
+              $CHAIN_BINARY q ibc channel channels --node http://localhost:$whale_rpc
+    
+          - name: Add changeover chain ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              scripts/add_consumer.sh
+
+          - name: Opt in to changeover chain ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              scripts/consumer_opt_in.sh
+
+          - name: Sovereign chain changeover upgrade
+            run: |
+              source scripts/vars_sovereign.sh
+              export DOWNLOAD_URL=$CONSUMER_CHAIN_BINARY_URL
+              scripts/upgrade_changeover.sh
+    
+          - name: Spawn changeover chain ICS v6.4.0
+            env:
+              PROVIDER_ICS: v6.4.0
+              REUSE_CONNECTION: false
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover.sh
+              scripts/spawn_changeover.sh
+
+          - name: Start changeover chain ICS v6.4.0
+            run: |
+              source scripts/vars.sh   
+              source scripts/vars_changeover.sh
+              ./$STOP_SCRIPT
+              wget $CONSUMER_CHAIN_BINARY_URL -O $CONSUMER_CHAIN_BINARY -q
+              chmod +x $CONSUMER_CHAIN_BINARY
+              $CONSUMER_CHAIN_BINARY version --long
+              ./$START_SCRIPT
+              sleep 10
+              tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
+
+          - name: _Post-changeover consumer chain produces blocks> ICS v6.4.0
+            run: |
+              source scripts/vars.sh 
+              source scripts/vars_changeover.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
+
+          - name: List changeover chain channels
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              $CONSUMER_CHAIN_BINARY q ibc channel channels --node http://localhost:$consumer_whale_rpc
+    
+          - name: Establish CCV channel for changeover chain ICS v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover.sh 
+              sudo systemctl stop $RELAYER
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-1 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-1 --channel-version 1
+              sudo systemctl start $RELAYER
+              sleep 10
+          - name: _Changeover CCV channel verified> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              tests/test_ccv_channel.sh
+          - name: _IBC transfer successful> ICS v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              # channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              # consumer_channel_id=$($CONSUMER_CHAIN_BINARY q ibc channel connections $connection_id -o json --home $consumer_whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              channel_id="channel-2"
+              consumer_channel_id="channel-2"
+              echo "> Provider channel: $channel_id, consumer channel: $consumer_channel_id"
+              tests/test_consumer_ibc_transfer.sh $channel_id $consumer_channel_id
+    
+          
+          - name: Trigger consumer rewards distribution> ICS v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000ucon \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Rewards pool:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
+          - name: Register consumer reward denoms
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover.sh
+              scripts/update_consumer_rewards.sh channel-2              
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              
+          - name: Trigger consumer rewards distribution> ICS v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_changeover.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000ucon \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Rewards pool:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
+          - name: _Consumer rewards distribution> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_changeover.sh
+              ibc_denom=ibc/$(echo -n transfer/channel-2/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+              echo "> Denom: $ibc_denom"
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              val1_rewards=$(curl -s http://localhost:$whale_api/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+              echo "> val1_rewards: $val1_rewards"
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              echo "> val1_consumer_rewards: $val1_consumer_rewards"
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
+              else
+                echo "PASS: Consumer rewards distributed to val1."
+              fi
+
 
       # Test-13-expedited-proposals:
       #   runs-on: ubuntu-24.04
