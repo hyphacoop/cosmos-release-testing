@@ -4,7 +4,8 @@
 echo "Running with $CONSUMER_CHAIN_BINARY."
 
 PROVIDER_CHANNEL=$1
-consumer_expected_denom=ibc/$(echo -n transfer/channel-1/uatom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+CONSUMER_CHANNEL=$2
+consumer_expected_denom=ibc/$(echo -n transfer/$CONSUMER_CHANNEL/$DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 provider_expected_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 echo "expected denom in provider: $provider_expected_denom"
 echo "expected denom in consumer: $consumer_expected_denom"
