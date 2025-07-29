@@ -120,3 +120,5 @@ if [ $RELAYER == "hermes" ]; then
 elif [ $RELAYER == "rly" ]; then
     tmux new-session -d -s relayer "$HOME/.relayer/rly | tee relayer.log"
 fi
+sleep 5
+cat relayer.log
