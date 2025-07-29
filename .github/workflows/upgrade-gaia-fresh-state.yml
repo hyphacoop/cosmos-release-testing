@@ -2294,7 +2294,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_changeover.sh
-              scripts/update_consumer_rewards channel-0              
+              scripts/update_consumer_rewards.sh channel-0              
           
             #     last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
           #     echo "> Last channel: $last_channel"
