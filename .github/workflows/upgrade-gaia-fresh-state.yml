@@ -2275,7 +2275,7 @@
               source scripts/vars_changeover.sh
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
               echo "> Val1 outstanding rewards:"
-              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
               echo "> Send tx with high fees in consumer chain."
               $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
@@ -2291,7 +2291,7 @@
 
 
           # - name: Register consumer reward denoms
-          #   run: |
+            # run: |
           
           
             #     last_channel=$($CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.channels[-1].channel_id')
