@@ -234,6 +234,9 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
+          - name: Start relayer
+            run: scripts/start_relayer.sh
+
           - name: Add consumer chain with ICS v4.0.0
             run: |
               source scripts/vars.sh
@@ -819,6 +822,9 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
+          - name: Start relayer
+            run: scripts/start_relayer.sh
+
           - name: Add consumer chain with ICS v4.0.0 - top N
             run: |
               source scripts/vars.sh
@@ -1177,6 +1183,9 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
+          - name: Start relayer
+            run: scripts/start_relayer.sh
+
           - name: Start pfm1 chain
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
@@ -1318,6 +1327,9 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
+          - name: Start relayer
+            run: scripts/start_relayer.sh
+
           - name: Set up happy path LSM accounts
             run: |
               source scripts/vars.sh
@@ -1453,6 +1465,9 @@
               sleep 5
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Start relayer
+            run: scripts/start_relayer.sh
 
           - name: Add Stride chain - top N
             run: |
@@ -1760,18 +1775,9 @@
               sleep 5
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
-          # - name: Start chain
-          #   env:
-          #     START_VERSION: ${{matrix.start_version}}
-          #   run: |
-          #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-          #     scripts/start_chain_single_val.sh
-          # - name: Check Gaia log
-            # run: sudo journalctl -u $PROVIDER_SERVICE_1
-          # - name: Print Gaia version
-            # run: $CHAIN_BINARY version --long
-          # - name: Block production check
-            # run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 # 5 blocks
+
+          - name: Start relayer
+            run: scripts/start_relayer.sh
     
           - name: Start host chain
             run: |
@@ -2179,6 +2185,9 @@
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
     
+          - name: Start relayer
+            run: scripts/start_relayer.sh
+
           - name: Start sovereign chain
             run: |
               source scripts/vars_sovereign.sh
@@ -2427,7 +2436,10 @@
               sleep 5
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
-    
+
+          - name: Start relayer
+            run: scripts/start_relayer.sh
+              
           - name: Start sovereign chain
             run: |
               source scripts/vars_sovereign.sh

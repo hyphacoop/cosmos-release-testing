@@ -114,11 +114,11 @@ elif [ $RELAYER == "rly" ]; then
     rly keys restore pfm3 default "$MNEMONIC_RELAYER"
 fi
 
-echo "> Running relayer in a tmux session"
-if [ $RELAYER == "hermes" ]; then
-    tmux new-session -d -s relayer "$HOME/.hermes/hermes start | tee relayer.log"
-elif [ $RELAYER == "rly" ]; then
-    tmux new-session -d -s relayer "$HOME/.relayer/rly start | tee relayer.log"
-fi
-sleep 5
-cat relayer.log
+# echo "> Running relayer in a tmux session"
+# if [ $RELAYER == "hermes" ]; then
+#     tmux new-session -d -s relayer "$HOME/.hermes/hermes start | tee relayer.log"
+# elif [ $RELAYER == "rly" ]; then
+#     tmux new-session -d -s relayer "$HOME/.relayer/rly start | tee relayer.log"
+# fi
+# sleep 5
+# cat relayer.log
