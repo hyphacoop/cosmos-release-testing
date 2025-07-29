@@ -2,12 +2,13 @@
 set -e
 
 vesting_time="5 minutes"
-vesting_amount=100000000
+vesting_amount=103000000
+vesting_stake_amount=100000000
 
-# Create a vesting account with 100 atom
-echo "[INFO]: > Testing vesting account with $vesting_time"
+# Create a vesting account with $vesting_amount atom
+echo "[INFO]: > Testing vesting account with $vesting_time..."
 vesting_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add vesting-1 --output json)
-echo "[INFO]: feemarket_wallet1: $vesting_wallet1_json"
+echo "[INFO]: vesting_wallet1: $vesting_wallet1_json"
 vesting_wallet1_addr=$(echo $vesting_wallet1_json | jq -r '.address')
 
 echo "[INFO]: Creating vesting wallet: $vesting_wallet1_addr"
@@ -54,5 +55,42 @@ then
     echo "Spendable balance matches vesting end time"
 else
     echo "Spendable balance does not match end time"
+    exit 1
+fi
+
+# Create a permanently locked vesting account with 100 atom
+echo "[INFO]: > Testing permanent locked vesting account..."
+vesting_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add vesting-2 --output json)
+echo "[INFO]: vesting_wallet2: $vesting_wallet2_json"
+vesting_wallet2_addr=$(echo $vesting_wallet2_json | jq -r '.address')
+
+echo "[INFO]: create-permanent-locked-account wallet: $vesting_wallet2_addr"
+$CHAIN_BINARY --home $HOME_1 tx vesting create-permanent-locked-account $vesting_wallet2_addr $vesting_amount$DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+echo "[INFO]: Delegating $vesting_stake_amount$DENOM to "
+delgate_tx_json=$($CHAIN_BINARY tx staking delegate $VALOPER_1 $vesting_stake_amount$DENOM --home $HOME_1 --from vesting-2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+echo "[INFO]: Waiting for rewards to accumulate"
+sleep 600
+echo "[INFO]: Withdrawing rewards for test account..."
+starting_balance=$($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
+echo "[INFO]: Starting balance: $starting_balance"
+txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --home $HOME_1 --from $MONIKER_2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+# wait for 1 block
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+$CHAIN_BINARY q tx $txhash
+
+# Check the funds again
+echo $($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json)
+$CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1
+ending_balance=$($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
+echo "Ending balance: $ending_balance"
+delta=$[ $ending_balance - $starting_balance]
+if [ $delta -gt 0 ]; then
+    echo "$delta uatom were withdrawn successfully."
+else
+    echo "Rewards could not be withdrawn. Delta is: $delta"
     exit 1
 fi
