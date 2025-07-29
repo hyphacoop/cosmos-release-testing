@@ -1769,7 +1769,9 @@
               $CHAIN_BINARY keys add controller1 --home $whale_home
               controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
               $CHAIN_BINARY tx bank send $WALLET_1 $controller1 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-              sleep $COMMIT_TIMEOUT
+              sleep $(($COMMIT_TIMEOUT*2))
+              echo "> Controller account balances:"
+              $CHAIN_BINARY q bank balances $controller1 --home $whale_home
               txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
               sleep 60
               echo "txhash: $txhash"
