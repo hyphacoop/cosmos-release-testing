@@ -43,5 +43,9 @@ $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 $CHAIN_BINARY keys list --output json --home $whale_home | jq '.'
 echo "> Moniker: ${monikers[-1]}"
-wallet=$($CHAIN_BINARY keys list --output json | jq --arg name "${monikers[-1]}" '.[] | select(.name==$name).address')
+wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[-1]}" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
+bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
+echo "> Bytes: $bytes"
+valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
+echo "> Valoper: $valoper"
