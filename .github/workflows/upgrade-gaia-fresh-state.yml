@@ -2437,9 +2437,6 @@
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
-          - name: Start relayer
-            run: scripts/start_relayer.sh
-              
           - name: Start sovereign chain
             run: |
               source scripts/vars_sovereign.sh
@@ -2469,19 +2466,9 @@
             run: |
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
-
-          - name: List sovereign chain channels
-            run: |
-              source scripts/vars_sovereign.sh
-              $CHAIN_BINARY q ibc channel channels --node http://localhost:$whale_rpc
     
-          - name: Restart relayer
-            run: |
-              # sudo systemctl restart $RELAYER
-              tmux send-keys -t relayer C-c
-              sleep 5
-              scripts/start_relayer.sh
-              sleep 10
+          - name: Start relayer
+            run: scripts/start_relayer.sh
 
           - name: List sovereign chain channels
             run: |
