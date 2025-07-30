@@ -2193,9 +2193,6 @@
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
     
-          - name: Start relayer
-            run: scripts/start_relayer.sh
-
           - name: Start sovereign chain
             run: |
               source scripts/vars_sovereign.sh
@@ -2231,13 +2228,8 @@
               source scripts/vars_sovereign.sh
               $CHAIN_BINARY q ibc channel channels --node http://localhost:$whale_rpc
     
-          - name: Restart relayer
-            run: |
-              # sudo systemctl restart $RELAYER
-              tmux send-keys -t relayer C-c
-              sleep 5
-              scripts/start_relayer.sh
-              sleep 10
+          - name: Start relayer
+            run: scripts/start_relayer.sh
 
           - name: List sovereign chain channels
             run: |
@@ -2305,6 +2297,7 @@
               echo "Creating channel with Hermes..."
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
               # sudo systemctl start $RELAYER
+              sed -i -e "s|ccv_consumer_chain = false|ccv_consumer_chain = true|g" ~/.hermes/config.toml
               scripts/start_relayer.sh
               sleep 10
           - name: _Changeover CCV channel verified> ICS v6.4.0
@@ -2559,6 +2552,7 @@
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-1 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-1 --channel-version 1
               # sudo systemctl start $RELAYER
+              sed -i -e "s|ccv_consumer_chain = false|ccv_consumer_chain = true|g" ~/.hermes/config.toml
               scripts/start_relayer.sh
               sleep 10
           - name: _Changeover CCV channel verified> ICS v6.4.0
