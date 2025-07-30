@@ -3,7 +3,10 @@
 
 echo "> Running relayer in a tmux session"
 if [ $RELAYER == "hermes" ]; then
-    tmux new-session -d -s relayer "$HOME/.hermes/hermes | tee relayer.log"
+    tmux new-session -d -s relayer "$HOME/.hermes/hermes start | tee relayer.log"
 elif [ $RELAYER == "rly" ]; then
-    tmux new-session -d -s relayer "$HOME/.relayer/rly | tee relayer.log"
+    tmux new-session -d -s relayer "$HOME/.relayer/rly start | tee relayer.log"
 fi
+
+sleep 5
+cat relayer.log
