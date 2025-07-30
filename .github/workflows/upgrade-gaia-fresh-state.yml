@@ -382,11 +382,12 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v701_one.sh 
+              tmux send-keys -t relayer C-c
+              sleep 5
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
               sleep 10
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 1

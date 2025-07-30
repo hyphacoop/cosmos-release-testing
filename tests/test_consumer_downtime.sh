@@ -41,5 +41,5 @@ sleep $(($COMMIT_TIMEOUT*10))
 
 $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
-
+$CHAIN_BINARY keys list --output json | jq '.'
 
