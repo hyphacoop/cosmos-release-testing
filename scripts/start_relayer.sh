@@ -8,5 +8,5 @@ elif [ $RELAYER == "rly" ]; then
     tmux new-session -d -s relayer "$HOME/.relayer/rly start | tee relayer.log"
 fi
 
-sleep 5
+sleep 10
 cat relayer.log

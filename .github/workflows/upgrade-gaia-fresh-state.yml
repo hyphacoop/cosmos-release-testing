@@ -451,6 +451,7 @@
           - name: Restart relayer
             run: |
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
 
           - name: _CCV channel verified> ICS v4.0.0 chain 1
@@ -903,6 +904,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
     
           - name: _CCV channel verified> ICS v4.0.0 chain 1
@@ -1245,7 +1247,7 @@
                 rly transact channel pfm-path-2
                 rly transact channel pfm-path-3
               fi
-              sudo systemctl restart $RELAYER
+              # sudo systemctl restart $RELAYER
               # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
               # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
               # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
@@ -1538,6 +1540,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
     
           - name: _CCV channel verified> stride-test
@@ -1797,7 +1800,7 @@
               hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
               hermes create connection --a-chain $CHAIN_1 --a-client 07-tendermint-0 --b-client 07-tendermint-0
               # sudo systemctl start $RELAYER
-              scripts/start_relayer.sh
+              # scripts/start_relayer.sh
           - name: _Test ICA controller - register ICA with controller1
             run: |
               source scripts/vars.sh
@@ -1846,6 +1849,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
               sleep 1m
           - name: _Test ICA controller - register ICA with controller2
@@ -2227,6 +2231,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
               sleep 10
 
@@ -2479,6 +2484,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
               sleep 10
 
