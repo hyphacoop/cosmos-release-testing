@@ -1256,7 +1256,6 @@
           - name: _Test PFM transfers
             run: |
               source scripts/vars_pfm_3.sh
-
               tests/test_pfm_transfers.sh
           - name: Test software upgrade
             env:
@@ -1274,6 +1273,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
+              sleep 5
               scripts/start_relayer.sh
 
           - name: _Test PFM transfers
