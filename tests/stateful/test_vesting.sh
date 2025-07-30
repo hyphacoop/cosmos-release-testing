@@ -82,7 +82,7 @@ echo "[INFO]: Starting balance: $starting_balance"
 txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --home $HOME_1 --from vesting-2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
 # wait for 1 block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-$CHAIN_BINARY q tx $txhash
+$CHAIN_BINARY --home $HOME_1 q tx $txhash
 
 # Check the funds again
 echo $($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json)
