@@ -25,6 +25,11 @@
       cancel-in-progress: true
     
     env:
+      # All chain variables
+      # Consumer chain variables
+      RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+      PROVIDER_ICS: v6.4.0
+      TOPN: 0
       # Relayer variables
       RELAYER: hermes
       HERMES_VERSION: v1.13.2
@@ -1270,15 +1275,6 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          # Consumer chain variables
-          RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-          CONSUMER_ICS: v4.0.0
-          PROVIDER_ICS: v3.3.0
-          # Reference ICS chain variables
-          ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-          ICS_TRANSFORM_BINARY: cd-transform
-          STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-          STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
         steps:
           - name: Update PATH
             run: |
@@ -1386,9 +1382,7 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          # Consumer chain variables
-          RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-
+          
           # Reference ICS chain variables
           TOPN: 95
           ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
@@ -2113,11 +2107,6 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          # Consumer chain variables
-          RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-          CONSUMER_ICS: v6.3.0
-          PROVIDER_ICS: v6.4.0
-          TOPN: 0
         steps:
           - name: Update PATH
             run: |
@@ -2215,7 +2204,6 @@
     
           - name: Spawn changeover chain ICS v6.4.0
             env:
-              PROVIDER_ICS: v6.4.0
               REUSE_CONNECTION: true
             run: |
               source scripts/vars.sh  
@@ -2360,11 +2348,6 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          # Consumer chain variables
-          RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-          CONSUMER_ICS: v6.3.0
-          PROVIDER_ICS: v6.4.0
-          TOPN: 0
         steps:
           - name: Update PATH
             run: |
