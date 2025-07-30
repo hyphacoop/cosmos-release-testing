@@ -245,8 +245,6 @@ done
 echo "./$START_SCRIPT" >> $RESET_SCRIPT
 
 echo "sleep 3s" >> $START_SCRIPT
-# echo "echo \"tmux sessions:\"" >> $START_SCRIPT
-# echo "tmux list-sessions" >> $START_SCRIPT
 echo "echo \"tmux sessions:\"" >> $STOP_SCRIPT
 echo "tmux list-sessions" >> $STOP_SCRIPT
 

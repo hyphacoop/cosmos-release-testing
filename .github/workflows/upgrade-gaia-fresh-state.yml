@@ -25,13 +25,6 @@
       cancel-in-progress: true
     
     env:
-      # All chain variables
-      # Consumer chain variables
-      RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
-      PSS_ENABLED: true
-      PROVIDER_ICS: v6.4.0
-      TOPN: 0
-      
       # Relayer variables
       RELAYER: hermes
       HERMES_VERSION: v1.13.2
@@ -1832,7 +1825,7 @@
               $CHAIN_BINARY keys add controller2 --home $whale_home
               controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
               $CHAIN_BINARY tx bank send $WALLET_1 $controller2 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-              sleep $COMMIT_TIMEOUT
+              sleep $(($COMMIT_TIMEOUT*2))
               txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
               sleep 60
               echo "txhash: $txhash"
