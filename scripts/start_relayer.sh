@@ -9,4 +9,5 @@ elif [ $RELAYER == "rly" ]; then
 fi
 
 sleep 10
+echo "> Relayer log:"
 cat relayer.log
