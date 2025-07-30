@@ -2,8 +2,6 @@
 
     name: Gaia Upgrade - Fresh State
     on:
-      # repository_dispatch:
-        # types: [new_main_build]
       workflow_dispatch:
         inputs:
           from_version:
@@ -33,15 +31,7 @@
       PSS_ENABLED: true
       PROVIDER_ICS: v6.4.0
       TOPN: 0
-      ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
-      ICS_TRANSFORM_BINARY: cd-transform
-      # Stride chain variables
-      STRIDE_CHAIN_BINARY: strided
       
-      STRIDE_CHAIN_ID: stride-test
-      STRIDE_DENOM: ustrd
-      STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
-      STRIDE_WALLET_LIQUID: stride17n3vkvg6lwf98p3kanlhlyjk6zkrfla9zrhma6
       # Relayer variables
       RELAYER: hermes
       HERMES_VERSION: v1.13.2
@@ -942,12 +932,6 @@
               source scripts/vars_consumer_v400_one.sh
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
 
-          # - name: _CCV channel verified> ICS v4.0.0 chain 1
-          #   run: |
-          #     source scripts/vars.sh
-          #     source scripts/vars_consumer_v400_one.sh  
-          #     tests/test_ccv_channel.sh
-
           - name: _IBC transfer successful> ICS v4.0.0 chain 1
             run: |
               source scripts/vars.sh  
@@ -956,7 +940,6 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id channel-1
-
 
           - name: Add consumer chain with ICS v6.4.0 - top N
             run: |
@@ -1442,11 +1425,7 @@
             run: |
               source scripts/vars.sh
               scripts/setup_relayer.sh
-          # - name: Download consumer chain binaries
-          #   run: |
-          #     wget $ICS_TRANSFORM_BINARY_URL -O $HOME/go/bin/$ICS_TRANSFORM_BINARY -q
-          #     chmod +x $HOME/go/bin/$ICS_TRANSFORM_BINARY
-
+          
           - name: Install Stride binary
             run: |
               source scripts/vars_consumer_stride.sh
@@ -1456,11 +1435,6 @@
               git checkout $STRIDE_VERSION
               make install
               
-          # - name: Consumer chain binary URLs
-          #   run: |
-          #     echo "$NEUTRON_BINARY runs $($NEUTRON_BINARY version)"
-          #     echo "$STRIDE_BINARY runs off $($STRIDE_BINARY version)"
-
           - name: Start chain
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
@@ -1655,11 +1629,6 @@
               echo "vesting_start_time=$start_time" >> $GITHUB_ENV
               echo "vesting_end_time=$end_time" >> $GITHUB_ENV
               echo "vesting_duration=$duration" >> $GITHUB_ENV
-    
-          # - name: Set up bonding
-          #   run: |
-          #     source scripts/vars.sh
-          #     $CHAIN_BINARY tx staking validator-bond $VALOPER_1 --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
     
           - name: Delegate with vesting wallet
             run: |
