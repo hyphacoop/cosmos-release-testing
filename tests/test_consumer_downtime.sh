@@ -42,6 +42,6 @@ sleep $(($COMMIT_TIMEOUT*10))
 $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 $CHAIN_BINARY keys list --output json --home $whale_home | jq '.'
-echo "> Moniker: $session"
-wallet=$($CHAIN_BINARY keys list --output json | jq --arg name "$session" '.[] | select(.name==$name).address')
+echo "> Moniker: ${monikers[-1]}"
+wallet=$($CHAIN_BINARY keys list --output json | jq --arg name "${monikers[-1]}" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
