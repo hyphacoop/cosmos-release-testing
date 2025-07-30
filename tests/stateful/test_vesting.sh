@@ -69,7 +69,10 @@ $CHAIN_BINARY --home $HOME_1 tx vesting create-permanent-locked-account $vesting
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Delegating $vesting_stake_amount$DENOM to $VALOPER_1"
-delgate_txhash=$($CHAIN_BINARY tx staking delegate $VALOPER_1 $vesting_stake_amount$DENOM --home $HOME_1 --from vesting-2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
+delgate_json=$($CHAIN_BINARY tx staking delegate $VALOPER_1 $vesting_stake_amount$DENOM --home $HOME_1 --from vesting-2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync)
+echo "[INFO]: Delegation TX output:"
+echo "$delgate_json" | jq -r "."
+delgate_txhash=$(echo $delgate_json | jq -r '.txhash' | tr -d '"')
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 echo "[INFO]: TX info:"
 $CHAIN_BINARY --home $HOME_1 q tx $delgate_txhash
