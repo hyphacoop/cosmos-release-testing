@@ -138,10 +138,6 @@ echo "> Patching genesis file for slash meter period"
 jq -r '.app_state.provider.params.slash_meter_replenish_period = "60s"' ${homes[0]}/config/genesis.json  > temp/smp.json
 cp temp/smp.json ${homes[0]}/config/genesis.json
 
-echo "> Patching genesis file for max throttled packets"
-jq -r '.app_state.provider.params.max_throttled_packets = "10"' ${homes[0]}/config/genesis.json  > temp/mtp.json
-cp temp/mtp.json ${homes[0]}/config/genesis.json
-
 echo "> Patching genesis file for max consensus validators"
 jq -r '.app_state.provider.params.max_provider_consensus_validators = 50' ${homes[0]}/config/genesis.json  > temp/bpe.json
 cp temp/bpe.json ${homes[0]}/config/genesis.json
