@@ -287,7 +287,12 @@
               source scripts/vars_consumer_v400_one.sh
               tests/test_consumer_downtime.sh
               
-
+          - name: _Downtime test> ICS v4.0.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v400_one.sh
+              tests/test_consumer_downtime.sh
+              
           - name: Add consumer chain with ICS v6.4.0
             run: |
               source scripts/vars.sh

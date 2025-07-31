@@ -95,3 +95,5 @@ else
     echo "> FAIL: Validator has not been unjailed."
     exit 1
 fi
+
+$CHAIN_BINARY q provider throttle-state --home $whale_home -o json | jq '.'
