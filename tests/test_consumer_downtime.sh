@@ -55,17 +55,17 @@ if [[ "$status" == "BOND_STATUS_UNBONDING" ]]; then
     echo "> PASS: Validator has been jailed."
 else
     echo "> FAIL: Validator has not been jailed."
-    exit 0
+    exit 1
 fi
 
 # Unjailing
 
 echo "> Starting the last validator's consumer node again."
-tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${logs[-1]}"
+tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
 sleep $DOWNTIME_JAIL_DURATION
 cat ${logs[-1]}
 echo "> Submitting unjail transaction."
-$CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS -gas-adjustment -GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+$CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Wait for consumer chain to submit another downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
@@ -76,5 +76,5 @@ if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator has been unjailed."
 else
     echo "> FAIL: Validator has not been unjailed."
-    exit 0
+    exit 1
 fi
