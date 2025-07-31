@@ -44,16 +44,20 @@ echo "> Valoper: $valoper"
 
 echo "> Stopping the last validator's consumer node."
 session=${consumer_monikers[-1]}
+echo "> Session: $session"
 tmux send-keys -t $session C-c
+sleep 5
+tail ${logs[-1]} -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
 sleep $(($COMMIT_TIMEOUT*10))
 
 echo "> Consumer chain valset:"
 $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home -o json | jq '.'
-echo "> Provider chain slashing:"
+echo "> Consumer chain slashing:"
 $CONSUMER_CHAIN_BINARY q slashing signing-infos --home $consumer_whale_home -o json | jq '.'
-
+echo "> Consumer signatures:"
+curl -s http://localhost:${consumer_whale_rpc}/block | jq '.result.block.last_commit.signatures'
 
 echo "> Provider chain valset:"
 $CHAIN_BINARY q comet-validator-set --home $whale_home -o json | jq '.'
@@ -74,9 +78,9 @@ fi
 # Unjailing
 
 echo "> Starting the last validator's consumer node again."
-tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
+tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
 sleep $DOWNTIME_JAIL_DURATION
-cat ${logs[-1]}
+tail ${logs[-1]}
 echo "> Submitting unjail transaction."
 $CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
 sleep $(($COMMIT_TIMEOUT*2))
