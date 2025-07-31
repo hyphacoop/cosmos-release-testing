@@ -96,4 +96,5 @@ else
     exit 1
 fi
 
+echo "> Throttle state:"
 $CHAIN_BINARY q provider throttle-state --home $whale_home -o json | jq '.'
