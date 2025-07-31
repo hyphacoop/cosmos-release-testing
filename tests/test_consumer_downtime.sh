@@ -49,3 +49,12 @@ bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -
 echo "> Bytes: $bytes"
 valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
 echo "> Valoper: $valoper"
+
+status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
+echo "> Status: $status"
+if [[ "$status" == "BOND_STATUS_UNBONDING" ]]; then
+    echo "> PASS: Validator jailed."
+else
+    echo "> FAIL: Validator not jailed."
+    exit 0
+fi
