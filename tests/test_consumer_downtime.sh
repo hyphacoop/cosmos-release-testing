@@ -51,13 +51,14 @@ sleep $(($COMMIT_TIMEOUT*10))
 
 echo "> Consumer chain valset:"
 $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home -o json | jq '.'
+echo "> Provider chain slashing:"
+$CONSUMER_CHAIN_BINARY q slashing signing-infos --home $consumer_whale_home -o json | jq '.'
+
 
 echo "> Provider chain valset:"
 $CHAIN_BINARY q comet-validator-set --home $whale_home -o json | jq '.'
-
 echo "> Provider chain validators:"
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
-
 echo "> Provider chain slashing:"
 $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 
