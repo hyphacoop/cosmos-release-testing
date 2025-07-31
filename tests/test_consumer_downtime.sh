@@ -32,16 +32,6 @@ do
     logs+=($log)
 done
 
-echo "> Stopping the last validator's consumer node."
-session=${consumer_monikers[-1]}
-tmux send-keys -t $session C-c
-echo "> Waiting for the downtime infraction."
-sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
-sleep $(($COMMIT_TIMEOUT*10))
-
-$CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
-$CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
-$CHAIN_BINARY keys list --output json --home $whale_home | jq '.'
 echo "> Moniker: ${monikers[-1]}"
 wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[-1]}" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
@@ -50,11 +40,41 @@ echo "> Bytes: $bytes"
 valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
 echo "> Valoper: $valoper"
 
+# Jailing
+
+echo "> Stopping the last validator's consumer node."
+session=${consumer_monikers[-1]}
+tmux send-keys -t $session C-c
+echo "> Waiting for the downtime infraction."
+sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
+sleep $(($COMMIT_TIMEOUT*10))
+
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_UNBONDING" ]]; then
-    echo "> PASS: Validator jailed."
+    echo "> PASS: Validator has been jailed."
 else
-    echo "> FAIL: Validator not jailed."
+    echo "> FAIL: Validator has not been jailed."
+    exit 0
+fi
+
+# Unjailing
+
+echo "> Starting the last validator's consumer node again."
+tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${logs[-1]}"
+sleep $DOWNTIME_JAIL_DURATION
+cat ${logs[-1]}
+echo "> Submitting unjail transaction."
+$CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS -gas-adjustment -GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+sleep $(($COMMIT_TIMEOUT*2))
+echo "> Wait for consumer chain to submit another downtime infraction."
+sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
+sleep $(($COMMIT_TIMEOUT*10))
+status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
+echo "> Status: $status"
+if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
+    echo "> PASS: Validator has been unjailed."
+else
+    echo "> FAIL: Validator has not been unjailed."
     exit 0
 fi

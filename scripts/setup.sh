@@ -161,6 +161,9 @@ cp temp/blockgas.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for slashing block window"
 jq -r --arg WINDOW "$DOWNTIME_WINDOW" '.app_state.slashing.params.signed_blocks_window = $WINDOW' ${homes[0]}/config/genesis.json > temp/slashing.json
 cp temp/slashing.json ${homes[0]}/config/genesis.json
+echo "> Patching genesis for downtime jail duration"
+jq -r --arg duration "$DOWNTIME_JAIL_DURATION" '.app_state.slashing.params.downtime_jail_duration = $duration' ${homes[0]}/config/genesis.json > temp/slashing.json
+cp temp/slashing.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis for feemarket params"
 jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' ${homes[0]}/config/genesis.json > temp/feemarket-denom.json
