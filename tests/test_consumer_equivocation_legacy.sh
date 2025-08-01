@@ -123,17 +123,17 @@ do
     consumer_moniker=$consumer_moniker_prefix$i
     consumer_monikers+=($consumer_moniker)
     consumer_home=$consumer_home_prefix$i
-    consumer_homes+=($home)
+    consumer_homes+=($consumer_home)
     consumer_api_port=$consumer_api_prefix$i
-    consumer_api_ports+=($api_port)
+    consumer_api_ports+=($consumer_api_port)
     consumer_rpc_port=$consumer_rpc_prefix$i
-    consumer_rpc_ports+=($rpc_port)
+    consumer_rpc_ports+=($consumer_rpc_port)
     consumer_p2p_port=$consumer_p2p_prefix$i
-    consumer_p2p_ports+=($p2p_port)
+    consumer_p2p_ports+=($consumer_p2p_port)
     consumer_grpc_port=$consumer_grpc_prefix$i
-    consumer_grpc_ports+=($grpc_port)
+    consumer_grpc_ports+=($consumer_grpc_port)
     consumer_pprof_port=$consumer_pprof_prefix$i
-    consumer_pprof_ports+=($pprof_port)
+    consumer_pprof_ports+=($consumer_pprof_port)
     consumer_log=$consumer_log_prefix$i
     consumer_logs+=($consumer_log)
 done
@@ -191,13 +191,13 @@ cp ./state.bak ${consumer_homes[-2]}/data/priv_validator_state.json
 cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-1]}/config/genesis.json
 cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-2]}/config/genesis.json
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
-tmux new-session -d -s ${consumer_monikers[-1]} "$CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
-tmux new-session -d -s ${consumer_monikers[-2]} "$CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
+tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
+tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
 sleep 15
 echo "> Node A:"
-tail ${logs[-1]}
+tail ${consumer_logs[-1]}
 echo "> Node B:"
-tail ${logs[-2]}
+tail ${consumer_logs[-2]}
 
 exit 0
 
