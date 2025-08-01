@@ -34,7 +34,7 @@ done
 
 echo "> Configuring provider node"
 peer_id=$($CHAIN_BINARY comet show-node-id --home ${homes[1]})
-peer="$peer_a_id@127.0.0.1:${p2p_ports[1]}"
+peer="$peer_id@127.0.0.1:${p2p_ports[1]}"
 
 for (( i=$validator_count; i<$expanded_count; i++ ))
 do
@@ -78,7 +78,7 @@ tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | t
 tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
 sleep 5
 echo "> New provider node:"
-tail ${logs[-1]}
+cat ${logs[-1]}
 
 eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
 echo "> New wallet: $eqwallet"
