@@ -80,12 +80,17 @@ echo "> New provider node:"
 tail ${logs[-1]}
 
 echo "> Fund new validator"
-$CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq '.'
+eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
 pubkey=$($CHAIN_BINARY comet show-validator)
-jq --arg pubkey $pubkey '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
+jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
+jq '.moniker |= eqval' eqval.json > eqval-moniker.json
+cp eqval-moniker.json eqbal.json
+
 jq '.' eqval.json
+$CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+sleep $((COMMIT_TIMEOUT*2))
+$CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 exit 0
-# $CHAIN_BINARY tx staking create-validator eqval.json --from 
 
 monikers=()
 homes=()
