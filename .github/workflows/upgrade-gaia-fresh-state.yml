@@ -221,6 +221,13 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
+          - name: Test snapshot
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/test_consumer_equivocation
+              
+
           - name: Start relayer
             run: scripts/start_relayer.sh
 
