@@ -80,7 +80,7 @@ echo "> New provider node:"
 tail ${logs[-1]}
 
 echo "> Fund new validator"
-$CHAIN_BINARY keys add eqval --home ${homes[-1]} -o json | jq '.'
+$CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq '.'
 pubkey=$($CHAIN_BINARY comet show-validator)
 jq --arg pubkey $pubkey '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
 jq '.' eqval.json
