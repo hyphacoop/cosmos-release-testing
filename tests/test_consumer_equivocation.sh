@@ -97,7 +97,7 @@ cp eqval-stake.json eqval.json
 
 
 jq '.' eqval.json
-$CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+$CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
 sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 exit 0
