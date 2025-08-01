@@ -101,11 +101,21 @@ session=${monikers[0]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
 cp ${homes[-2]}/data/priv_validator_state.json ./state.bak
-cp -r ${homes[0]}/data ${homes[-2]}/
-cp ./state.bak ${homes[-2]}/data/priv_validator_state.json
-cp ${homes[0]}/config/genesis.json ${homes[-2]}/config/genesis.json
-tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[-1]}"
 
+cp -r ${homes[0]}/data ${homes[-2]}/
+cp -r ${homes[0]}/data ${homes[-1]}/
+cp ./state.bak ${homes[-2]}/data/priv_validator_state.json
+cp ./state.bak ${homes[-1]}/data/priv_validator_state.json
+cp ${homes[0]}/config/genesis.json ${homes[-2]}/config/genesis.json
+cp ${homes[0]}/config/genesis.json ${homes[-1]}/config/genesis.json
+tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[0]}"
+tmux new-session -d -s ${monikers[-2]} "$CHAIN_BINARY start --home ${homes[-2]} 2>&1 | tee ${logs[-2]}"
+tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
+sleep 15
+echo "> Node A:"
+tail ${logs[-2]}
+echo "> Node B:"
+tail ${logs[-1]}
 
 exit 0
 

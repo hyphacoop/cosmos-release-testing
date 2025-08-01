@@ -225,7 +225,7 @@
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
               source scripts/vars.sh
-              tests/test_consumer_equivocation
+              tests/test_consumer_equivocation.sh
               
 
           - name: Start relayer
