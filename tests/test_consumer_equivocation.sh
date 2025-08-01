@@ -81,14 +81,16 @@ tail ${logs[-1]}
 
 echo "> Fund new validator"
 eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
-pubkey=$($CHAIN_BINARY comet show-validator)
+$CHAIN_BINARY tx bank send $WALLET_1 $eqwallet $VAL_WHALE$DENOM --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --home $whale_home | jq '.'
+sleep $(($COMMIT_TIMEOUT*2))
+pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[-1]})
 jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
-jq '.moniker |= eqval' eqval.json > eqval-moniker.json
+jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
 cp eqval-moniker.json eqbal.json
 
 jq '.' eqval.json
 $CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
-sleep $((COMMIT_TIMEOUT*2))
+sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 exit 0
 
