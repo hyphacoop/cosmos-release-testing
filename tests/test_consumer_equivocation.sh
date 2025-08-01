@@ -77,25 +77,20 @@ cp ${homes[0]}/config/genesis.json ${homes[-1]}/config/genesis.json
 tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[0]}"
 tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
 sleep 10
-echo "> New provider node:"
-cat ${logs[-1]}
-echo "> Whale node:"
-cat ${logs[0]}
 
 eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
 echo "> New wallet: $eqwallet"
 echo "> Fund new validator"
-$CHAIN_BINARY keys list --home $whale_home
 $CHAIN_BINARY tx bank send $WALLET_1 $eqwallet $VAL_WHALE$DENOM --home $whale_home --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq '.'
 sleep $(($COMMIT_TIMEOUT*2))
 pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[-1]})
+amount=$VAL_STAKE$DENOM
 
 jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' templates/create-validator.json > eqval.json
 jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
 cp eqval-moniker.json eqval.json
 jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
 cp eqval-moniker.json eqval.json
-amount=$VAL_STAKE$DENOM
 jq --arg amount "$amount" '.amount |= $amount' eqval.json > eqval-stake.json
 cp eqval-stake.json eqval.json
 
@@ -103,7 +98,13 @@ jq '.' eqval.json
 echo "> Create validator"
 $CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
 sleep $(($COMMIT_TIMEOUT*2))
-$CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r '.validators[] | select(.description.moniker == "eqval").status')
+if [ $status == "BOND_STATUS_BONDED" ]; then
+  echo "> Validator was created successfully."
+else
+  echo "> Validator was not created successfully."
+  exit 1
+fi
 exit 0
 
 monikers=()
