@@ -76,9 +76,11 @@ cp ./state.bak ${homes[-1]}/data/priv_validator_state.json
 cp ${homes[0]}/config/genesis.json ${homes[-1]}/config/genesis.json
 tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[0]}"
 tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
-sleep 5
+sleep 10
 echo "> New provider node:"
 cat ${logs[-1]}
+echo "> Whale node:"
+cat ${logs[0]}
 
 eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
 echo "> New wallet: $eqwallet"
