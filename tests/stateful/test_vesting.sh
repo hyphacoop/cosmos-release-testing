@@ -84,7 +84,7 @@ $CHAIN_BINARY --home $HOME_1 q tx $delgate_txhash
 echo "[INFO]: Waiting for rewards to accumulate"
 sleep 600
 echo "[INFO]: Current distribution rewards:"
-$CHAIN_BINARY --home $HOME_1 q distribution rewards
+$CHAIN_BINARY --home $HOME_1 q distribution rewards $vesting_wallet2_addr
 echo "[INFO]: Withdrawing rewards for test account..."
 starting_balance=$($CHAIN_BINARY q bank spendable-balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
 echo "[INFO]: Starting balance: $starting_balance"
