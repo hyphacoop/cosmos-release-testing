@@ -76,15 +76,17 @@ cp ./state.bak ${homes[-1]}/data/priv_validator_state.json
 cp ${homes[0]}/config/genesis.json ${homes[-1]}/config/genesis.json
 tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[0]}"
 tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
+sleep 5
 echo "> New provider node:"
 tail ${logs[-1]}
 
-echo "> Fund new validator"
 eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
-$CHAIN_BINARY tx bank send $WALLET_1 $eqwallet $VAL_WHALE$DENOM --from $WALLET_1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --home $whale_home | jq '.'
+echo "> New wallet: $eqwallet"
+echo "> Fund new validator"
+$CHAIN_BINARY tx bank send $WALLET_1 $eqwallet $VAL_WHALE$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --home $whale_home -o json | jq '.'
 sleep $(($COMMIT_TIMEOUT*2))
 pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[-1]})
-jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
+jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' templates/create-validator.json > eqval.json
 jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
 cp eqval-moniker.json eqval.json
 jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
