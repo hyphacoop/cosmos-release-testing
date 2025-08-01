@@ -1,6 +1,6 @@
 #!/bin/bash
 
-expanded_count=$(( $validator_count+2 ))
+expanded_count=$(( $validator_count+1 ))
 
 echo "> Creating arrays"
 monikers=()
@@ -30,26 +30,110 @@ do
     pprof_ports+=($pprof_port)
     log=$consumer_log_prefix$i
     logs+=($log)
-
-    # consumer_moniker=$consumer_moniker_prefix$i
-    # consumer_monikers+=($consumer_moniker)
-    # consumer_home=$consumer_home_prefix$i
-    # consumer_homes+=($home)
-    # consumer_api_port=$consumer_api_prefix$i
-    # consumer_api_ports+=($api_port)
-    # consumer_rpc_port=$consumer_rpc_prefix$i
-    # consumer_rpc_ports+=($rpc_port)
-    # consumer_p2p_port=$consumer_p2p_prefix$i
-    # consumer_p2p_ports+=($p2p_port)
-    # consumer_grpc_port=$consumer_grpc_prefix$i
-    # consumer_grpc_ports+=($grpc_port)
-    # consumer_pprof_port=$consumer_pprof_prefix$i
-    # consumer_pprof_ports+=($pprof_port)
-    # consumer_log=$consumer_log_prefix$i
-    # consumer_logs+=($consumer_log)
 done
 
-echo "> Configuring homes"
+echo "> Configuring provider node"
+peer_id=$($CHAIN_BINARY comet show-node-id --home ${homes[1]})
+peer="$peer_a_id@127.0.0.1:${p2p_ports[1]}"
+
+for (( i=$validator_count; i<$expanded_count; i++ ))
+do
+    echo "> Home $i"
+    $CHAIN_BINARY config set client chain-id $CHAIN_ID --home ${homes[i]}
+    $CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
+    $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
+    $CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
+    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+
+    toml set --toml-path ${homes[i]}/config/app.toml minimum-gas-prices "$GAS_PRICE"
+    toml set --toml-path ${homes[i]}/config/app.toml api.enable true
+    toml set --toml-path ${homes[i]}/config/app.toml api.enabled-unsafe-cors true
+    toml set --toml-path ${homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${api_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/app.toml grpc.address "0.0.0.0:${grpc_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
+
+    toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${rpc_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${pprof_ports[i]}"
+    toml set --toml-path ${homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${p2p_ports[i]}"
+    sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' ${homes[i]}/config/config.toml
+    sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
+    toml set --toml-path ${homes[i]}/config/config.toml block_sync false
+    toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
+    toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers ""
+    
+    echo "> Set peer"
+    toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$peer"
+done
+
+echo "> Copy snapshot from whale"
+session=${monikers[0]}
+echo "> Session: $session"
+tmux send-keys -t $session C-c
+cp ${homes[-1]}/data/priv_validator_state.json ./state.bak
+
+cp -r ${homes[0]}/data ${homes[-1]}/
+cp ./state.bak ${homes[-1]}/data/priv_validator_state.json
+cp ${homes[0]}/config/genesis.json ${homes[-1]}/config/genesis.json
+tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[0]}"
+tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
+echo "> New provider node:"
+tail ${logs[-1]}
+
+echo "> Fund new validator"
+$CHAIN_BINARY keys add eqval --home ${homes[-1]} -o json | jq '.'
+pubkey=$($CHAIN_BINARY comet show-validator)
+jq --arg pubkey $pubkey '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
+jq '.' eqval.json
+exit 0
+# $CHAIN_BINARY tx staking create-validator eqval.json --from 
+
+monikers=()
+homes=()
+api_ports=()
+rpc_ports=()
+p2p_ports=()
+grpc_ports=()
+pprof_ports=()
+logs=()
+wallets=()
+for i in $(seq -w 01 $expanded_count)
+do
+    moniker=$moniker_prefix$i
+    monikers+=($moniker)
+    home=$home_prefix$i
+    homes+=($home)
+    api_port=$api_prefix$i
+    api_ports+=($api_port)
+    rpc_port=$rpc_prefix$i
+    rpc_ports+=($rpc_port)
+    p2p_port=$p2p_prefix$i
+    p2p_ports+=($p2p_port)
+    grpc_port=$grpc_prefix$i
+    grpc_ports+=($grpc_port)
+    pprof_port=$pprof_prefix$i
+    pprof_ports+=($pprof_port)
+    log=$consumer_log_prefix$i
+    logs+=($log)
+
+    consumer_moniker=$consumer_moniker_prefix$i
+    consumer_monikers+=($consumer_moniker)
+    consumer_home=$consumer_home_prefix$i
+    consumer_homes+=($home)
+    consumer_api_port=$consumer_api_prefix$i
+    consumer_api_ports+=($api_port)
+    consumer_rpc_port=$consumer_rpc_prefix$i
+    consumer_rpc_ports+=($rpc_port)
+    consumer_p2p_port=$consumer_p2p_prefix$i
+    consumer_p2p_ports+=($p2p_port)
+    consumer_grpc_port=$consumer_grpc_prefix$i
+    consumer_grpc_ports+=($grpc_port)
+    consumer_pprof_port=$consumer_pprof_prefix$i
+    consumer_pprof_ports+=($pprof_port)
+    consumer_log=$consumer_log_prefix$i
+    consumer_logs+=($consumer_log)
+done
+
+echo "> Configuring provider nodes"
 peer_a_id=$($CHAIN_BINARY comet show-node-id --home ${homes[1]})
 peer_a="$peer_a_id@127.0.0.1:${p2p_ports[1]}"
 peer_b_id=$($CHAIN_BINARY comet show-node-id --home ${homes[2]})
@@ -87,16 +171,9 @@ do
         echo "> Set peer B"
         toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$peer_b"
     fi
-
-
-    # $CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home ${consume_homes[i]}
-    # $CONSUMER_CHAIN_BINARY config set client keyring-backend test --home ${consumer_homes[i]}
-    # $CONSUMER_CHAIN_BINARY config set client broadcast-mode sync --home ${consumer_homes[i]}
-    # $CONSUMER_CHAIN_BINARY config set client node tcp://localhost:${consumer_rpc_ports[i]} --home ${consumer_homes[i]}
-    # $CONSUMER_CHAIN_BINARY init ${consumer_monikers[i]} --chain-id $CONSUMER_CHAIN_ID --home ${consumer_homes[i]} &> /dev/null
 done
 
-echo "> Copying snapshot from whale"
+echo "> Copy snapshot from whale"
 session=${monikers[0]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
