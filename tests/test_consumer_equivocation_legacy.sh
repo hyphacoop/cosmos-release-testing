@@ -105,36 +105,21 @@ else
   echo "> Validator was not created successfully."
   exit 1
 fi
-exit 0
 
-monikers=()
-homes=()
-api_ports=()
-rpc_ports=()
-p2p_ports=()
-grpc_ports=()
-pprof_ports=()
-logs=()
-wallets=()
+# Consumer nodes
+expanded_count=$(( $validator_count+2 ))
+
+consumer_monikers=()
+consumer_homes=()
+consumer_api_ports=()
+consumer_rpc_ports=()
+consumer_p2p_ports=()
+consumer_grpc_ports=()
+consumer_pprof_ports=()
+consumer_logs=()
+consumer_wallets=()
 for i in $(seq -w 01 $expanded_count)
 do
-    moniker=$moniker_prefix$i
-    monikers+=($moniker)
-    home=$home_prefix$i
-    homes+=($home)
-    api_port=$api_prefix$i
-    api_ports+=($api_port)
-    rpc_port=$rpc_prefix$i
-    rpc_ports+=($rpc_port)
-    p2p_port=$p2p_prefix$i
-    p2p_ports+=($p2p_port)
-    grpc_port=$grpc_prefix$i
-    grpc_ports+=($grpc_port)
-    pprof_port=$pprof_prefix$i
-    pprof_ports+=($pprof_port)
-    log=$consumer_log_prefix$i
-    logs+=($log)
-
     consumer_moniker=$consumer_moniker_prefix$i
     consumer_monikers+=($consumer_moniker)
     consumer_home=$consumer_home_prefix$i
@@ -153,66 +138,66 @@ do
     consumer_logs+=($consumer_log)
 done
 
-echo "> Configuring provider nodes"
-peer_a_id=$($CHAIN_BINARY comet show-node-id --home ${homes[1]})
-peer_a="$peer_a_id@127.0.0.1:${p2p_ports[1]}"
-peer_b_id=$($CHAIN_BINARY comet show-node-id --home ${homes[2]})
-peer_b="$peer_b_id@127.0.0.1:${p2p_ports[2]}"
+echo "> Configuring consumer nodes"
+peer_a_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${consumer_homes[1]})
+peer_a="$peer_a_id@127.0.0.1:${consumer_p2p_ports[1]}"
+peer_b_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${consumer_homes[2]})
+peer_b="$peer_b_id@127.0.0.1:${consumer_p2p_ports[2]}"
 
 
 for (( i=$validator_count; i<$expanded_count; i++ ))
 do
     echo "> Home $i"
-    $CHAIN_BINARY config set client chain-id $CHAIN_ID --home ${homes[i]}
-    $CHAIN_BINARY config set client keyring-backend test --home ${homes[i]}
-    $CHAIN_BINARY config set client broadcast-mode sync --home ${homes[i]}
-    $CHAIN_BINARY config set client node tcp://localhost:${rpc_ports[i]} --home ${homes[i]}
-    $CHAIN_BINARY init ${monikers[i]} --chain-id $CHAIN_ID --home ${homes[i]} &> /dev/null
+    $CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home ${consumer_homes[i]}
+    $CONSUMER_CHAIN_BINARY config keyring-backend test --home ${consumer_homes[i]}
+    $CONSUMER_CHAIN_BINARY config broadcast-mode sync --home ${consumer_homes[i]}
+    $CONSUMER_CHAIN_BINARY config node tcp://localhost:${consumer_rpc_ports[i]} --home ${consumer_homes[i]}
+    $CONSUMER_CHAIN_BINARY init ${consumer_monikers[i]} --chain-id $CONSUMER_CHAIN_ID --home ${consumer_homes[i]} &> /dev/null
 
-    toml set --toml-path ${homes[i]}/config/app.toml minimum-gas-prices "$GAS_PRICE"
-    toml set --toml-path ${homes[i]}/config/app.toml api.enable true
-    toml set --toml-path ${homes[i]}/config/app.toml api.enabled-unsafe-cors true
-    toml set --toml-path ${homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${api_ports[i]}"
-    toml set --toml-path ${homes[i]}/config/app.toml grpc.address "0.0.0.0:${grpc_ports[i]}"
-    toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
+    toml set --toml-path ${consumer_homes[i]}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE"
+    toml set --toml-path ${consumer_homes[i]}/config/app.toml api.enable true
+    toml set --toml-path ${consumer_homes[i]}/config/app.toml api.enabled-unsafe-cors true
+    toml set --toml-path ${consumer_homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${consumer_api_ports[i]}"
+    toml set --toml-path ${consumer_homes[i]}/config/app.toml grpc.address "0.0.0.0:${consumer_grpc_ports[i]}"
+    toml set --toml-path ${consumer_homes[i]}/config/app.toml grpc-web.enable false
 
-    toml set --toml-path ${homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${rpc_ports[i]}"
-    toml set --toml-path ${homes[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${pprof_ports[i]}"
-    toml set --toml-path ${homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${p2p_ports[i]}"
-    sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' ${homes[i]}/config/config.toml
-    sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${homes[i]}/config/config.toml
-    toml set --toml-path ${homes[i]}/config/config.toml block_sync false
-    toml set --toml-path ${homes[i]}/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
-    toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers ""
+    toml set --toml-path ${consumer_homes[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${consumer_rpc_ports[i]}"
+    toml set --toml-path ${consumer_homes[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${consumer_pprof_ports[i]}"
+    toml set --toml-path ${consumer_homes[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${consumer_p2p_ports[i]}"
+    sed -i -e '/allow_duplicate_ip =/ s/= .*/= true/' ${consumer_homes[i]}/config/config.toml
+    sed -i -e '/addr_book_strict =/ s/= .*/= false/' ${consumer_homes[i]}/config/config.toml
+    toml set --toml-path ${consumer_homes[i]}/config/config.toml block_sync false
+    toml set --toml-path ${consumer_homes[i]}/config/config.toml consensus.timeout_commit "${COMMIT_TIMEOUT}s"
+    toml set --toml-path ${consumer_homes[i]}/config/config.toml p2p.persistent_peers ""
     if [ $i == $validator_count ]; then
         echo "> Set peer A"
-        toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$peer_a"
+        toml set --toml-path ${consumer_homes[i]}/config/config.toml p2p.persistent_peers "$peer_a"
     else
         echo "> Set peer B"
-        toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$peer_b"
+        toml set --toml-path ${consumer_homes[i]}/config/config.toml p2p.persistent_peers "$peer_b"
     fi
 done
 
 echo "> Copy snapshot from whale"
-session=${monikers[0]}
+session=${consumer_monikers[0]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
-cp ${homes[-2]}/data/priv_validator_state.json ./state.bak
+cp ${consumer_homes[-1]}/data/priv_validator_state.json ./state.bak
 
-cp -r ${homes[0]}/data ${homes[-2]}/
-cp -r ${homes[0]}/data ${homes[-1]}/
-cp ./state.bak ${homes[-2]}/data/priv_validator_state.json
-cp ./state.bak ${homes[-1]}/data/priv_validator_state.json
-cp ${homes[0]}/config/genesis.json ${homes[-2]}/config/genesis.json
-cp ${homes[0]}/config/genesis.json ${homes[-1]}/config/genesis.json
-tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[0]}"
-tmux new-session -d -s ${monikers[-2]} "$CHAIN_BINARY start --home ${homes[-2]} 2>&1 | tee ${logs[-2]}"
-tmux new-session -d -s ${monikers[-1]} "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
+cp -r ${consumer_homes[0]}/data ${consumer_homes[-1]}/
+cp -r ${consumer_homes[0]}/data ${consumer_homes[-2]}/
+cp ./state.bak ${consumer_homes[-1]}/data/priv_validator_state.json
+cp ./state.bak ${consumer_homes[-2]}/data/priv_validator_state.json
+cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-1]}/config/genesis.json
+cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-2]}/config/genesis.json
+tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
+tmux new-session -d -s ${consumer_monikers[-1]} "$CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
+tmux new-session -d -s ${consumer_monikers[-2]} "$CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
 sleep 15
 echo "> Node A:"
-tail ${logs[-2]}
-echo "> Node B:"
 tail ${logs[-1]}
+echo "> Node B:"
+tail ${logs[-2]}
 
 exit 0
 
