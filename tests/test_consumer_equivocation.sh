@@ -83,9 +83,10 @@ cat ${logs[-1]}
 eqwallet=$($CHAIN_BINARY keys add eqval --home ${homes[-1]} --output json | jq -r '.address')
 echo "> New wallet: $eqwallet"
 echo "> Fund new validator"
-$CHAIN_BINARY tx bank send $WALLET_1 $eqwallet $VAL_WHALE$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --home $whale_home -o json | jq '.'
+$CHAIN_BINARY tx bank send $WALLET_1 $eqwallet $VAL_WHALE$DENOM  --home $whale_home --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq '.'
 sleep $(($COMMIT_TIMEOUT*2))
 pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[-1]})
+
 jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' templates/create-validator.json > eqval.json
 jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
 cp eqval-moniker.json eqval.json
@@ -95,8 +96,8 @@ amount=$VAL_STAKE$DENOM
 jq --arg amount "$amount" '.amount |= $amount' eqval.json > eqval-stake.json
 cp eqval-stake.json eqval.json
 
-
 jq '.' eqval.json
+echo "> Create validator"
 $CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
 sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
