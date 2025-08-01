@@ -55,6 +55,7 @@ peer_a="$peer_a_id@127.0.0.1:${p2p_ports[1]}"
 peer_b_id=$($CHAIN_BINARY comet show-node-id --home ${homes[2]})
 peer_b="$peer_b_id@127.0.0.1:${p2p_ports[2]}"
 
+
 for (( i=$validator_count; i<$expanded_count; i++ ))
 do
     echo "> Home $i"
@@ -87,6 +88,7 @@ do
         toml set --toml-path ${homes[i]}/config/config.toml p2p.persistent_peers "$peer_b"
     fi
 
+
     # $CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home ${consume_homes[i]}
     # $CONSUMER_CHAIN_BINARY config set client keyring-backend test --home ${consumer_homes[i]}
     # $CONSUMER_CHAIN_BINARY config set client broadcast-mode sync --home ${consumer_homes[i]}
@@ -103,6 +105,7 @@ cp -r ${homes[0]}/data ${homes[-2]}/
 cp ./state.bak ${homes[-2]}/data/priv_validator_state.json
 cp ${homes[0]}/config/genesis.json ${homes[-2]}/config/genesis.json
 tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[0]} 2>&1 | tee ${logs[-1]}"
+
 
 exit 0
 
