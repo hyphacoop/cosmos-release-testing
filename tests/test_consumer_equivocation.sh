@@ -86,7 +86,13 @@ sleep $(($COMMIT_TIMEOUT*2))
 pubkey=$($CHAIN_BINARY comet show-validator --home ${homes[-1]})
 jq --argjson pubkey "$pubkey" '.pubkey |= $pubkey' scripts/create-validator.json > eqval.json
 jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
-cp eqval-moniker.json eqbal.json
+cp eqval-moniker.json eqval.json
+jq '.moniker |= "eqval"' eqval.json > eqval-moniker.json
+cp eqval-moniker.json eqval.json
+amount=$VAL_STAKE$DENOM
+jq --arg amount "$amount" '.amount |= $amount' eqval.json > eqval-stake.json
+cp eqval-stake.json eqval.json
+
 
 jq '.' eqval.json
 $CHAIN_BINARY tx staking create-validator eqval.json --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
