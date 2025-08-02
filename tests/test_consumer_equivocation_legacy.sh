@@ -234,8 +234,7 @@ echo "> Evidence height: $height"
 echo "> Collecting evidence around the infraction height in consumer chain."
 evidence_block=$(($height+2))
 $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
-$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home
-$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
+$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
 jq '.' evidence.json
 scripts/prepare_evidence.sh evidence.json
 
@@ -244,6 +243,11 @@ $CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $consumer_wha
 echo "> IBC header JSON:"
 jq '.' ibc-header.json
 scripts/prepare_infraction_header.sh ibc-header.json
+
+$CHAIN_BINARY tx provider submit-consumer-double-voting $consumer_id evidence.json ibc-header.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
+sleep $(($COMMIT_TIMEOUT*2))
+echo "> Provider:"
+$CHAIN_BINARY q slashing signing-infos --home ${whale_home}
 exit 0
 
 # Test equivocation proposal for double-signing
