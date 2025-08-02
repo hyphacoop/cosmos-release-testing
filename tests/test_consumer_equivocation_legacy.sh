@@ -28,7 +28,7 @@ do
     grpc_ports+=($grpc_port)
     pprof_port=$pprof_prefix$i
     pprof_ports+=($pprof_port)
-    log=$consumer_log_prefix$i
+    log=$log_prefix$i
     logs+=($log)
 done
 
@@ -194,11 +194,11 @@ tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --
 tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
 sleep 15
 echo "> Whale node:"
-tail ${consumer_logs[0]}
+tail ${consumer_logs[0]} -n 50
 echo "> Node A (${consumer_monikers[-2]}):"
-tail ${consumer_logs[-2]}
+tail ${consumer_logs[-2]} -n 50
 echo "> Node B (${consumer_monikers[-1]}):"
-tail ${consumer_logs[-1]}
+tail ${consumer_logs[-1]} -n 50
 
 exit 0
 
