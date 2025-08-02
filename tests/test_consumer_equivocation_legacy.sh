@@ -217,6 +217,26 @@ $CONSUMER_CHAIN_BINARY q slashing signing-infos --home ${consumer_whale_home}
 echo "> Provider:"
 $CHAIN_BINARY q slashing signing-infos --home ${whale_home}
 
+consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home ${consumer_homes[-2]})
+echo "> Consensus address: $consensus_address"
+validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq '.' | grep $consensus_address)
+echo $validator_check
+if [ -z "$validator_check" ]; then
+  echo "No equivocation evidence found."
+  exit 1
+else
+  echo "Equivocation evidence found!"
+fi
+echo "> Collecting infraction height."
+height=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq -r '.evidence[0].height')
+echo "> Evidence height: $height"
+
+echo "> Collecting evidence around the infraction height in consumer chain."
+evidence_block=$(($height+2))
+$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
+jq '.' evidence.json
 exit 0
 
 # Test equivocation proposal for double-signing
