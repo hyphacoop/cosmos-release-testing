@@ -117,7 +117,6 @@ consumer_p2p_ports=()
 consumer_grpc_ports=()
 consumer_pprof_ports=()
 consumer_logs=()
-consumer_wallets=()
 for i in $(seq -w 01 $expanded_count)
 do
     consumer_moniker=$consumer_moniker_prefix$i
@@ -182,22 +181,24 @@ echo "> Copy snapshot from whale"
 session=${consumer_monikers[0]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
-cp ${consumer_homes[-1]}/data/priv_validator_state.json ./state.bak
+cp ${consumer_homes[-2]}/data/priv_validator_state.json ./state.bak
 
-cp -r ${consumer_homes[0]}/data ${consumer_homes[-1]}/
 cp -r ${consumer_homes[0]}/data ${consumer_homes[-2]}/
-cp ./state.bak ${consumer_homes[-1]}/data/priv_validator_state.json
+cp -r ${consumer_homes[0]}/data ${consumer_homes[-1]}/
 cp ./state.bak ${consumer_homes[-2]}/data/priv_validator_state.json
-cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-1]}/config/genesis.json
+cp ./state.bak ${consumer_homes[-1]}/data/priv_validator_state.json
 cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-2]}/config/genesis.json
+cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-1]}/config/genesis.json
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
-tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
 tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
+tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
 sleep 15
-echo "> Node A:"
-tail ${consumer_logs[-1]}
-echo "> Node B:"
+echo "> Whale node:"
+tail ${consumer_logs[0]}
+echo "> Node A (${consumer_monikers[-2]}):"
 tail ${consumer_logs[-2]}
+echo "> Node B (${consumer_monikers[-1]}):"
+tail ${consumer_logs[-1]}
 
 exit 0
 
