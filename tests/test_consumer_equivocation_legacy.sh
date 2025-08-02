@@ -181,7 +181,7 @@ echo "> Opt in with new validator."
 consumer_pubkey=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home ${consumer_homes[-2]})
 consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
 echo "> Consumer id: $consumer_id, pubkey: $consumer_pubkey"
-$CHAIN_BINARY tx provider opt-in $consumer_id $consumer_pubkey --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-price $GAS_PRICE --home ${homes[-1]} -y
+$CHAIN_BINARY tx provider opt-in $consumer_id $consumer_pubkey --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
 sleep $(($COMMIT_TIMEOUT*2))
 
 echo "> Copy snapshot from whale"
@@ -211,6 +211,11 @@ echo "> Node A (${consumer_monikers[-2]}):"
 tail ${consumer_logs[-2]} -n 100
 echo "> Node B (${consumer_monikers[-1]}):"
 tail ${consumer_logs[-1]} -n 100
+
+echo "> Consumer:"
+$CONSUMER_CHAIN_BINARY q slashing signing-infos --home ${consumer_whale_home}
+echo "> Provider:"
+$CHAIN_BINARY q slashing signing-infos --home ${whale_home}
 
 exit 0
 
