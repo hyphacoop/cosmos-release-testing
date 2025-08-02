@@ -177,6 +177,13 @@ do
     fi
 done
 
+echo "> Opt in with new validator."
+consumer_pubkey=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home ${consumer_homes[-2]})
+consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
+echo "> Consumer id: $consumer_id, pubkey: $consumer_pubkey"
+$CHAIN_BINARY tx provider opt-in $consumer_id $consumer_pubkey --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-price $GAS_PRICE --home ${homes[-1]} -y
+sleep $(($COMMIT_TIMEOUT*2))
+
 echo "> Copy snapshot from whale"
 session=${consumer_monikers[0]}
 echo "> Session: $session"
@@ -189,16 +196,21 @@ cp ./state.bak ${consumer_homes[-2]}/data/priv_validator_state.json
 cp ./state.bak ${consumer_homes[-1]}/data/priv_validator_state.json
 cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-2]}/config/genesis.json
 cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-1]}/config/genesis.json
+
+echo "> Duplicate validator key"
+cp ${consumer_homes[-2]}/config/priv_validator_key.json ${consumer_homes[-1]}/config/priv_validator_key.json
+
+
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
 tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
 tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
-sleep 15
+sleep 60
 echo "> Whale node:"
-tail ${consumer_logs[0]} -n 50
+tail ${consumer_logs[0]} -n 100
 echo "> Node A (${consumer_monikers[-2]}):"
-tail ${consumer_logs[-2]} -n 50
+tail ${consumer_logs[-2]} -n 100
 echo "> Node B (${consumer_monikers[-1]}):"
-tail ${consumer_logs[-1]} -n 50
+tail ${consumer_logs[-1]} -n 100
 
 exit 0
 
