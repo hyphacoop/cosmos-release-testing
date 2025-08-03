@@ -245,7 +245,7 @@ echo "> IBC header JSON:"
 jq '.' ibc-header.json
 scripts/prepare_infraction_header.sh ibc-header.json
 
-$CHAIN_BINARY tx provider submit-consumer-double-voting $consumer_id evidence.json ibc-header.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
+$CHAIN_BINARY tx provider submit-consumer-double-voting $consumer_id evidence.json ibc-header.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Provider:"
 $CHAIN_BINARY q slashing signing-infos --home ${whale_home}
