@@ -249,8 +249,17 @@ scripts/prepare_infraction_header.sh ibc-header.json
 $CHAIN_BINARY tx provider submit-consumer-double-voting $consumer_id evidence.json ibc-header.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[0]} -y
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Provider:"
-$CHAIN_BINARY q slashing signing-infos --home ${whale_home} -o json | jq '.'
 address=$($CHAIN_BINARY comet show-address --home ${homes[-1]})
+echo "> Address: $address"
+$CHAIN_BINARY q slashing signing-infos --home ${whale_home} -o json | jq '.'
+tombstoned=$($CHAIN_BINARY q slashing signing-infos --home ${whale_home} -o json | jq -r --arg addr "$address" '.info[] | select(.address=$addr).tombstoned')
+
+if [[ "$tombstoned" == "true" ]]; then
+    echo "> PASS: Validator has been tombstoned."
+else
+    echo "> FAIL: Validator has not been tombstoned."
+    exit 1
+fi
 exit 0
 
 # Test equivocation proposal for double-signing
