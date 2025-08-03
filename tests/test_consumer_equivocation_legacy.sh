@@ -203,7 +203,7 @@ cp ${consumer_homes[-2]}/config/priv_validator_key.json ${consumer_homes[-1]}/co
 
 tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
 tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
-sleep 30
+sleep 60
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
 sleep 90
 echo "> Whale node:"
@@ -219,7 +219,7 @@ echo "> Provider:"
 $CHAIN_BINARY q slashing signing-infos --home ${whale_home}
 
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home ${consumer_homes[-2]})
-echo "> Consensus address: $consensus_address"
+echo "> Consumer consensus address: $consensus_address"
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq '.' | grep $consensus_address)
 echo $validator_check
 if [ -z "$validator_check" ]; then
@@ -249,6 +249,7 @@ $CHAIN_BINARY tx provider submit-consumer-double-voting $consumer_id evidence.js
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Provider:"
 $CHAIN_BINARY q slashing signing-infos --home ${whale_home}
+$CHAIN_BINARY comet show-address --home --home ${homes[-1]}
 exit 0
 
 # Test equivocation proposal for double-signing
