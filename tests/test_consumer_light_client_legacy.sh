@@ -17,7 +17,7 @@ consumer_p2p_ports_lc=()
 consumer_grpc_ports_lc=()
 consumer_pprof_ports_lc=()
 consumer_logs_lc=()
-for i in $(seq -w 01 $validator_count)
+for i in $(seq -w 01 $[$validator_count-1])
 do
     consumer_moniker=$consumer_moniker_prefix$i
     consumer_monikers+=($consumer_moniker)
@@ -61,7 +61,7 @@ TRUSTED_HEIGHT=$($CHAIN_BINARY q ibc client consensus-state-heights $client_id -
 echo "> Trusted height: $TRUSTED_HEIGHT"
 
 
-for (( i=$validator_count-1; i<$expanded_count; i++ ))
+for (( i=0; i<$validator_count-1; i++ ))
 do
     session=${consumer_monikers[i]}
     echo "> Stopping session: $session"
@@ -80,16 +80,17 @@ done
 whale_peer_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${consumer_homes_lc[0]})
 whale_peeer="$peer_a_id@127.0.0.1:${consumer_p2p_ports_lc[0]}"
 
-for (( i=$validator_count-1; i<$expanded_count; i++ ))
+for (( i=1; i<$validator_count-1; i++ ))
 do
     toml set --toml-path ${consumer_homes_lc[i]}/config/config.toml p2p.persistent_peers "$whale_peer"
 done
 
-echo "> Restarting whale and secondary chain"
+echo "> Restarting original and secondary chain"
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
-for (( i=$validator_count-1; i<$expanded_count; i++ ))
+for (( i=0; i<$validator_count-1; i++ ))
 do
-    tmux new-session -d -s ${consumer_monikers_lc[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes_lc[0]} 2>&1 | tee ${consumer_logs_lc[0]}"
+    tmux new-session -d -s ${consumer_monikers[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[i]} 2>&1 | tee ${consumer_logs[i]}"
+    tmux new-session -d -s ${consumer_monikers_lc[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes_lc[i]} 2>&1 | tee ${consumer_logs_lc[i]}"
 done
 
 sleep 10
@@ -98,10 +99,11 @@ tail $consumer_logs[0] -n 50
 echo "> Duplicate chain:"
 tail $consumer_logs_lc[0] -n 50
 
+echo "> Keys in LC consumer:"
 $CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test
-echo "> Submit bank send on LC consumer"
+# echo "> Submit bank send on LC consumer"
 
-$CONSUMER_CHAIN_BINARY tx bank send $WALLET_1 $($CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y
+# $CONSUMER_CHAIN_BINARY tx bank send $WALLET_1 $($CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y
 
 exit 0
 
