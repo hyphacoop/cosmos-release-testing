@@ -86,7 +86,6 @@ do
 done
 
 echo "> Restarting original and secondary chain"
-tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
 for (( i=0; i<$validator_count-1; i++ ))
 do
     tmux new-session -d -s ${consumer_monikers[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[i]} 2>&1 | tee ${consumer_logs[i]}"
@@ -95,16 +94,61 @@ done
 
 sleep 10
 echo "> Original chain:"
-tail $consumer_logs[0] -n 50
+tail ${consumer_logs[0]} -n 50
 echo "> Duplicate chain:"
-tail $consumer_logs_lc[0] -n 50
+tail ${consumer_logs_lc[0]} -n 50
 
 echo "> Keys in LC consumer:"
 $CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test
-# echo "> Submit bank send on LC consumer"
+echo "> Submit bank send on LC consumer"
+$CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $($CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from ${consumer_monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${consumer_homes_lc[0]} -y
+sleep 30
 
-# $CONSUMER_CHAIN_BINARY tx bank send $WALLET_1 $($CONSUMER_CHAIN_BINARY keys list --home $LC_CONSUMER_HOME_1 --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$CONSUMER_DENOM --home $LC_CONSUMER_HOME_1 -y
+echo "> Get current height header from main consumer"
+$CONSUMER_CHAIN_BINARY status --home ${consumer_homes[0]}
+OG_HEIGHT=$($CONSUMER_CHAIN_BINARY status --home ${consumer_homes[0]} | jq -r '.SyncInfo.latest_block_height')
+echo "Height: $OG_HEIGHT"
+sleep 5
+echo "> Get IBC header from main consumer:"
+OG_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home ${consumer_homes[0]} -o json)
+echo "> Get IBC header from second consumer:"
+LC_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home ${consumer_homes_lc[0]} -o json)
 
+echo "> IBC header at trusted height + 1 from main consumer:"
+TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home ${consumer_homes[0]} -o json)
+
+echo "> Fill trusted valset and height"
+TRUSTED_VALS=$(echo $TRUSTED_HEADER | jq -r '.validator_set')
+OG_HEADER=$(echo $OG_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
+LC_HEADER=$(echo $LC_HEADER | jq --argjson vals "$TRUSTED_VALS" '.trusted_validators = $vals')
+
+OG_HEADER=$(echo $OG_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
+LC_HEADER=$(echo $LC_HEADER | jq --arg height $TRUSTED_HEIGHT '.trusted_height.revision_height = $height')
+
+tee lc_misbehaviour.json<<EOF
+{
+    "client_id": "$client_id",
+    "header_1": $OG_HEADER,
+    "header_2": $LC_HEADER
+}
+EOF
+
+jq '.' lc_misbehaviour.json
+
+echo "> Submit misbehaviour to provider"
+consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
+$CHAIN_BINARY tx provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y 
+sleep $(($COMMIT_TIMEOUT*3))
+
+echo "> Client $client_id status:"
+$CHAIN_BINARY q ibc client status $client_id --home $whale_home
+echo "> Client $client_id state:"
+$CHAIN_BINARY q ibc client state $client_id -o json --home $whale_home | jq '.'
+echo "> Client $client_id state frozen height:"
+$CHAIN_BINARY q ibc client state $client_id -o json --home $whale_home | jq -r '.client_state.frozen_height'
+
+echo "> Signing infos:"
+$CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 exit 0
 
 echo "> Opt in with new validator."
