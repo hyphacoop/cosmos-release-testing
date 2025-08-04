@@ -74,11 +74,12 @@ do
     toml set --toml-path ${consumer_homes_lc[i]}/config/config.toml rpc.laddr "tcp://0.0.0.0:${consumer_rpc_ports_lc[i]}"
     toml set --toml-path ${consumer_homes_lc[i]}/config/config.toml rpc.pprof_laddr "0.0.0.0:${consumer_pprof_ports_lc[i]}"
     toml set --toml-path ${consumer_homes_lc[i]}/config/config.toml p2p.laddr "tcp://0.0.0.0:${consumer_p2p_ports_lc[i]}"
+    toml set --toml-path ${consumer_homes_lc[i]}/config/client.toml node "http://127.0.0.1:${consumer_rpc_ports_lc[i]}"
     echo "{}" > ${consumer_homes_lc[i]}/config/addrbook.json
 done
 
 whale_peer_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${consumer_homes_lc[0]})
-whale_peeer="$whale_peer_id@127.0.0.1:${consumer_p2p_ports_lc[0]}"
+whale_peer="$whale_peer_id@127.0.0.1:${consumer_p2p_ports_lc[0]}"
 
 for (( i=1; i<$validator_count-1; i++ ))
 do
@@ -92,16 +93,18 @@ do
     tmux new-session -d -s ${consumer_monikers_lc[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes_lc[i]} 2>&1 | tee ${consumer_logs_lc[i]}"
 done
 
-sleep 15
+sleep 30
 echo "> Original chain:"
 tail ${consumer_logs[0]} -n 50
-echo "> Duplicate chain:"
-tail ${consumer_logs_lc[0]} -n 50
+echo "> Duplicate chain (node 1):"
+tail ${consumer_logs_lc[0]} -n 100
+echo "> Duplicate chain (node 2):"
+tail ${consumer_logs_lc[1]} -n 100
 
 echo "> Keys in LC consumer:"
 $CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test
 echo "> Submit bank send on LC consumer"
-$CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $($CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from ${consumer_monikers[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE --home ${consumer_homes_lc[0]} -y
+$CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $($CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from ${consumer_monikers[0]} --home ${consumer_homes_lc[0]} --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE -y
 sleep 30
 
 echo "> Get current height header from main consumer"
@@ -111,8 +114,10 @@ echo "Height: $OG_HEIGHT"
 sleep 30
 echo "> Get IBC header from main consumer:"
 OG_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home ${consumer_homes[0]} -o json)
+echo $OG_HEADER
 echo "> Get IBC header from second consumer:"
 LC_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $OG_HEIGHT --home ${consumer_homes_lc[0]} -o json)
+echo $LC_HEADER
 
 echo "> IBC header at trusted height + 1 from main consumer:"
 TRUSTED_HEADER=$($CONSUMER_CHAIN_BINARY q ibc client header --height $(($TRUSTED_HEIGHT +1)) --home ${consumer_homes[0]} -o json)

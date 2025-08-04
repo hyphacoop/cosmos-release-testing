@@ -221,9 +221,6 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
-          - name: Start relayer
-            run: scripts/start_relayer.sh
-
           - name: Add consumer chain with ICS v4.0.0
             run: |
               source scripts/vars.sh
@@ -264,7 +261,7 @@
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
               # sudo systemctl restart $RELAYER
-              tmux send-keys -t relayer C-c
+              # tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
               sleep 5
           - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
