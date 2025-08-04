@@ -93,16 +93,12 @@ do
     tmux new-session -d -s ${consumer_monikers_lc[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes_lc[i]} 2>&1 | tee ${consumer_logs_lc[i]}"
 done
 
-sleep 30
+sleep 15
 echo "> Original chain:"
 tail ${consumer_logs[0]} -n 50
 echo "> Duplicate chain (node 1):"
-tail ${consumer_logs_lc[0]} -n 100
-echo "> Duplicate chain (node 2):"
-tail ${consumer_logs_lc[1]} -n 100
+tail ${consumer_logs_lc[0]} -n 50
 
-echo "> Keys in LC consumer:"
-$CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test
 echo "> Submit bank send on LC consumer"
 $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $($CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from ${consumer_monikers[0]} --home ${consumer_homes_lc[0]} --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE -y
 sleep 30
@@ -143,7 +139,7 @@ jq '.' lc_misbehaviour.json
 echo "> Submit misbehaviour to provider"
 consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
 $CHAIN_BINARY tx provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y 
-sleep $(($COMMIT_TIMEOUT*3))
+sleep $(($COMMIT_TIMEOUT*10))
 
 echo "> Client $client_id status:"
 $CHAIN_BINARY q ibc client status $client_id --home $whale_home
@@ -153,96 +149,18 @@ echo "> Client $client_id state frozen height:"
 $CHAIN_BINARY q ibc client state $client_id -o json --home $whale_home | jq -r '.client_state.frozen_height'
 
 echo "> Signing infos:"
-$CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
+infos=$($CHAIN_BINARY q slashing signing-infos --home $whale_home -o json)
+echo "> Checking signing infos"
+for (( i=0; i<$validator_count-1; i++ ))
+do
+  consensus_address=$($CHAIN_BINARY comet show-address --home ${homes[i]})
+  tombstoned=$(echo $infos | jq -r --arg addr "$consensus_address" '.info[] | select(.address==$addr).tombstoned')
+  if [[ "$tombstoned" == "true" ]]; then
+      echo "> PASS: Validator has been tombstoned."
+  else
+      echo "> FAIL: Validator has not been tombstoned."
+      exit 1
+  fi
+done
+
 exit 0
-
-echo "> Opt in with new validator."
-consumer_pubkey=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home ${consumer_homes[-2]})
-consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
-echo "> Consumer id: $consumer_id, pubkey: $consumer_pubkey"
-$CHAIN_BINARY tx provider opt-in $consumer_id $consumer_pubkey --from $eqwallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home ${homes[-1]} -y
-sleep $(($COMMIT_TIMEOUT*3))
-
-echo "> Copy snapshot from whale"
-session=${consumer_monikers[0]}
-echo "> Session: $session"
-tmux send-keys -t $session C-c
-cp ${consumer_homes[-2]}/data/priv_validator_state.json ./state.bak
-
-cp -r ${consumer_homes[0]}/data ${consumer_homes[-2]}/
-cp -r ${consumer_homes[0]}/data ${consumer_homes[-1]}/
-cp ./state.bak ${consumer_homes[-2]}/data/priv_validator_state.json
-cp ./state.bak ${consumer_homes[-1]}/data/priv_validator_state.json
-cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-2]}/config/genesis.json
-cp ${consumer_homes[0]}/config/genesis.json ${consumer_homes[-1]}/config/genesis.json
-
-echo "> Duplicate validator key"
-cp ${consumer_homes[-2]}/config/priv_validator_key.json ${consumer_homes[-1]}/config/priv_validator_key.json
-
-
-tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
-tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
-sleep 60
-tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
-sleep 90
-echo "> Whale node:"
-tail ${consumer_logs[0]} -n 50
-echo "> Node A (${consumer_monikers[-2]}):"
-tail ${consumer_logs[-2]} -n 50
-echo "> Node B (${consumer_monikers[-1]}):"
-tail ${consumer_logs[-1]} -n 50
-
-echo "> Consumer:"
-$CONSUMER_CHAIN_BINARY q slashing signing-infos --home ${consumer_whale_home}
-echo "> Provider:"
-$CHAIN_BINARY q slashing signing-infos --home ${whale_home}
-
-consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home ${consumer_homes[-2]})
-echo "> Consumer consensus address: $consensus_address"
-validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq '.' | grep $consensus_address)
-echo $validator_check
-if [ -z "$validator_check" ]; then
-  echo "No equivocation evidence found."
-  exit 1
-else
-  echo "Equivocation evidence found!"
-fi
-echo "> Collecting infraction height."
-height=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq -r '.evidence[0].height')
-echo "> Evidence height: $height"
-
-echo "> Collecting evidence around the infraction height in consumer chain."
-evidence_block=$(($height+2))
-$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
-$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
-jq '.' evidence.json
-scripts/prepare_evidence.sh evidence.json
-
-echo "> Collecting IBC header at infraction height in consumer chain."
-$CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $consumer_whale_home -o json | jq '.' > ibc-header.json
-echo "> IBC header JSON:"
-jq '.' ibc-header.json
-scripts/prepare_infraction_header.sh ibc-header.json
-
-echo "> Submitting double voting evidence tx"
-$CHAIN_BINARY tx provider submit-consumer-double-voting $consumer_id evidence.json ibc-header.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE --home ${consumer_homes[0]} -y
-sleep $(($COMMIT_TIMEOUT*2))
-echo "> Provider:"
-address=$($CHAIN_BINARY comet show-address --home ${homes[-1]})
-echo "> Address: $address"
-$CHAIN_BINARY q slashing signing-infos --home ${whale_home} -o json | jq '.'
-tombstoned=$($CHAIN_BINARY q slashing signing-infos --home ${whale_home} -o json | jq -r --arg addr "$address" '.info[] | select(.address==$addr).tombstoned')
-echo "> Tombstoned: $tombstoned"
-tmux send-keys -t ${consumer_monikers[-1]} C-c
-tmux send-keys -t ${consumer_monikers[-2]} C-c
-tmux send-keys -t ${monikes[-1]} C-c
-rm -r ${consumer_homes[-2]}
-rm -r ${consumer_homes[-1]}
-rm -r ${homes[-1]}
-
-if [[ "$tombstoned" == "true" ]]; then
-    echo "> PASS: Validator has been tombstoned."
-else
-    echo "> FAIL: Validator has not been tombstoned."
-    exit 1
-fi
