@@ -37,7 +37,7 @@ do
     consumer_logs+=($consumer_log)
 
     consumer_moniker_lc=$consumer_moniker_prefix_lc$i
-    consumer_monikers+=($consumer_moniker_lc)
+    consumer_monikers_lc+=($consumer_moniker_lc)
     consumer_home_lc=$consumer_home_prefix_lc$i
     consumer_homes_lc+=($consumer_home_lc)
     consumer_api_port_lc=$consumer_api_prefix_lc$i
