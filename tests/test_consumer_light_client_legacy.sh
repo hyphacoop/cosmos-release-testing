@@ -137,8 +137,10 @@ EOF
 jq '.' lc_misbehaviour.json
 
 echo "> Submit misbehaviour to provider"
+echo "> Consumer chain: $CONSUMER_CHAIN_ID"
 consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
-$CHAIN_BINARY tx provider submit-consumer-misbehaviour $CONSUMER_ID lc_misbehaviour.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y 
+echo "> Consumer ID: $consumer_id"
+$CHAIN_BINARY tx provider submit-consumer-misbehaviour $consumer_id lc_misbehaviour.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y 
 sleep $(($COMMIT_TIMEOUT*10))
 
 echo "> Client $client_id status:"
