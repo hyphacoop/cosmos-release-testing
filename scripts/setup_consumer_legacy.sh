@@ -91,6 +91,7 @@ $CONSUMER_CHAIN_BINARY add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CO
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
 wallet=$(jq -r '.address' keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json)
 wallets+=($wallet)
+echo "Wallet: $wallet"
 for i in $(seq 1 $[$validator_count-1])
 do
     $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --home ${homes[0]} --output json > keys-${consumer_monikers[i]}-$CONSUMER_CHAIN_ID.json
@@ -101,7 +102,7 @@ do
 done
 
 echo "> Consumer keys:"
-$CONSUMER_CHAIN_BINARY keys list --home {homes[0]}
+$CONSUMER_CHAIN_BINARY keys list --home {homes[0]} --keyring-backend test
 
 echo "> Copying genesis to all other homes"
 for i in $(seq 1 $[$validator_count-1])
