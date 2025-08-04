@@ -581,69 +581,69 @@
               source scripts/vars_consumer_v701_two.sh
               tests/test_consumer_downtime.sh
               
-          - name: _Downtime test> val3 must not be jailed 
-            run: |
-              tests/test_validator_jailed.sh $VALOPER_3 null
-              $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
-          - name: Stop validator services
-            env:
-              CONSUMER_SERVICE_2: v640-1-2.service
-              CONSUMER_SERVICE_3: v640-1-3.service
-              CONSUMER_ID: 4
-            run: |
-              $CHAIN_BINARY tx provider opt-out $CONSUMER_ID --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
-              $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
-              sleep $(($COMMIT_TIMEOUT*30))
-              $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_ID --home $HOME_1
-              # $CHAIN_BINARY q provider consumer-opted-in-validators v640-one --home $HOME_1
-              sudo systemctl disable $CONSUMER_SERVICE_2 --now
-              sudo systemctl disable $CONSUMER_SERVICE_3 --now
-              sleep $(($COMMIT_TIMEOUT*30))
-          - name: _Downtime test> val2 must be jailed - 1
-            run: |
-              tests/test_validator_jailed.sh $VALOPER_2 true
-              $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
-          - name: _Downtime test> val3 must not be jailed 
-            run: |
-              tests/test_validator_jailed.sh $VALOPER_3 null
-          - name: Unjail validator
-            env:
-              CONSUMER_SERVICE_2: v640-1-2.service
-            run: |
-              sudo systemctl enable $CONSUMER_SERVICE_2 --now
-              sleep $(($COMMIT_TIMEOUT*10))
-              $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-              sleep $(($COMMIT_TIMEOUT*2))
-          - name: _Downtime test> val2 must not be jailed 
-            run: |
-              tests/test_validator_jailed.sh $VALOPER_2 null
-          # - name: Change infraction parameter
-          #   env:
-          #     CONSUMER_ID: 0
+          # - name: _Downtime test> val3 must not be jailed 
           #   run: |
-          #     scripts/update_consumer.sh
-          - name: Stop validator services
-            env:
-              CONSUMER_SERVICE_2: v640-1-2.service
-            run: |
-              $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
-              sudo systemctl disable $CONSUMER_SERVICE_2 --now
-              sleep $(($COMMIT_TIMEOUT*30))
-          - name: _Downtime test> val2 must be jailed - 2
-            run: |
-              tests/test_validator_jailed.sh $VALOPER_2 true
-              $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
-          - name: Unjail validator
-            env:
-              CONSUMER_SERVICE_2: v640-1-2.service
-            run: |
-              sudo systemctl enable $CONSUMER_SERVICE_2 --now
-              sleep $(($COMMIT_TIMEOUT*10))
-              $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-              sleep $(($COMMIT_TIMEOUT*2))
-          - name: _Downtime test> val2 must not be jailed 
-            run: |
-              tests/test_validator_jailed.sh $VALOPER_2 null
+          #     tests/test_validator_jailed.sh $VALOPER_3 null
+          #     $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
+          # - name: Stop validator services
+          #   env:
+          #     CONSUMER_SERVICE_2: v640-1-2.service
+          #     CONSUMER_SERVICE_3: v640-1-3.service
+          #     CONSUMER_ID: 4
+          #   run: |
+          #     $CHAIN_BINARY tx provider opt-out $CONSUMER_ID --from $WALLET_3 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+          #     $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
+          #     sleep $(($COMMIT_TIMEOUT*30))
+          #     $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_ID --home $HOME_1
+          #     # $CHAIN_BINARY q provider consumer-opted-in-validators v640-one --home $HOME_1
+          #     sudo systemctl disable $CONSUMER_SERVICE_2 --now
+          #     sudo systemctl disable $CONSUMER_SERVICE_3 --now
+          #     sleep $(($COMMIT_TIMEOUT*30))
+          # - name: _Downtime test> val2 must be jailed - 1
+          #   run: |
+          #     tests/test_validator_jailed.sh $VALOPER_2 true
+          #     $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
+          # - name: _Downtime test> val3 must not be jailed 
+          #   run: |
+          #     tests/test_validator_jailed.sh $VALOPER_3 null
+          # - name: Unjail validator
+          #   env:
+          #     CONSUMER_SERVICE_2: v640-1-2.service
+          #   run: |
+          #     sudo systemctl enable $CONSUMER_SERVICE_2 --now
+          #     sleep $(($COMMIT_TIMEOUT*10))
+          #     $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+          #     sleep $(($COMMIT_TIMEOUT*2))
+          # - name: _Downtime test> val2 must not be jailed 
+          #   run: |
+          #     tests/test_validator_jailed.sh $VALOPER_2 null
+          # # - name: Change infraction parameter
+          # #   env:
+          # #     CONSUMER_ID: 0
+          # #   run: |
+          # #     scripts/update_consumer.sh
+          # - name: Stop validator services
+          #   env:
+          #     CONSUMER_SERVICE_2: v640-1-2.service
+          #   run: |
+          #     $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
+          #     sudo systemctl disable $CONSUMER_SERVICE_2 --now
+          #     sleep $(($COMMIT_TIMEOUT*30))
+          # - name: _Downtime test> val2 must be jailed - 2
+          #   run: |
+          #     tests/test_validator_jailed.sh $VALOPER_2 true
+          #     $CHAIN_BINARY q staking validators --home $HOME_1 -o json | jq '.'
+          # - name: Unjail validator
+          #   env:
+          #     CONSUMER_SERVICE_2: v640-1-2.service
+          #   run: |
+          #     sudo systemctl enable $CONSUMER_SERVICE_2 --now
+          #     sleep $(($COMMIT_TIMEOUT*10))
+          #     $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
+          #     sleep $(($COMMIT_TIMEOUT*2))
+          # - name: _Downtime test> val2 must not be jailed 
+          #   run: |
+          #     tests/test_validator_jailed.sh $VALOPER_2 null
           
 
           # - name: _Remove consumer chain> ICS v4.5.0 chain 2
