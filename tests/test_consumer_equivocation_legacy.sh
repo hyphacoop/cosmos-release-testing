@@ -258,7 +258,7 @@ tombstoned=$($CHAIN_BINARY q slashing signing-infos --home ${whale_home} -o json
 echo "> Tombstoned: $tombstoned"
 tmux send-keys -t ${consumer_monikers[-1]} C-c
 tmux send-keys -t ${consumer_monikers[-2]} C-c
-tmux send-keys -t ${monikes[-1]} C-c
+tmux send-keys -t ${monikers[-1]} C-c
 rm -r ${consumer_homes[-2]}
 rm -r ${consumer_homes[-1]}
 rm -r ${homes[-1]}
