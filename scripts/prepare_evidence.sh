@@ -2,6 +2,7 @@
 
 evidence_filename=$1
 echo "***** EVIDENCE JSON MODIFICATION *****"
+echo "> Evidence filename: $evidence_filename"
 
 echo "> Cast vote a height as integer."
 jq '.vote_a.height |= tonumber' $evidence_filename > evidence-mod.json

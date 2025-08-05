@@ -603,7 +603,6 @@
               
           - name: _Test consumer equivocation
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
               source scripts/vars.sh
               source scripts/vars_consumer_v400_one.sh
               tests/test_consumer_equivocation_legacy.sh

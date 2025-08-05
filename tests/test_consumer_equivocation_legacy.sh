@@ -235,14 +235,15 @@ echo "> Evidence height: $height"
 
 echo "> Collecting evidence around the infraction height in consumer chain."
 evidence_block=$(($height+2))
-$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
+# $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
 $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
+echo "> Starting evidence JSON:"
 jq '.' evidence.json
 scripts/prepare_evidence.sh evidence.json
 
 echo "> Collecting IBC header at infraction height in consumer chain."
 $CONSUMER_CHAIN_BINARY q ibc client header --height $height --home $consumer_whale_home -o json | jq '.' > ibc-header.json
-echo "> IBC header JSON:"
+echo "> Starting IBC header JSON:"
 jq '.' ibc-header.json
 scripts/prepare_infraction_header.sh ibc-header.json
 
