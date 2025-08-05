@@ -13,12 +13,14 @@ jq '.vote_b.height |= tonumber' $evidence_filename > evidence-mod.json
 mv evidence-mod.json $evidence_filename
 
 echo "> Base64 encode vote a block id hash."
+jq -r '.vote_a.block_id.hash' $evidence_filename
 hash=$(jq -r '.vote_a.block_id.hash' $evidence_filename | xxd -r -p | base64)
 echo "Hash: >$hash<"
 jq --arg HASH "$hash" '.vote_a.block_id.hash |= $HASH' $evidence_filename > evidence-mod.json
 mv evidence-mod.json $evidence_filename
 
 echo "> Base64 encode vote a block id part hash."
+jq -r '.vote_a.block_id.parts.hash' $evidence_filename
 hash=$(jq -r '.vote_a.block_id.parts.hash' $evidence_filename | xxd -r -p | base64)
 echo "Hash: >$hash<"
 jq --arg HASH "$hash" '.vote_a.block_id.parts.hash |= $HASH' $evidence_filename > evidence-mod.json
