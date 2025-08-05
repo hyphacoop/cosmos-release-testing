@@ -96,11 +96,11 @@ do
     tmux new-session -d -s ${consumer_monikers[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[i]} 2>&1 | tee ${consumer_logs[i]}"
     tmux new-session -d -s ${consumer_monikers_lc[i]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes_lc[i]} 2>&1 | tee ${consumer_logs_lc[i]}"
 done
-sleep 15
-# echo "> Original chain:"
-# tail ${consumer_logs[0]} -n 50
-# echo "> Duplicate chain (node 1):"
-# tail ${consumer_logs_lc[0]} -n 50
+sleep 30
+echo "> Original chain:"
+tail ${consumer_logs[0]} -n 50
+echo "> Duplicate chain (node 1):"
+tail ${consumer_logs_lc[0]} -n 50
 
 echo "> Submit bank send on LC consumer"
 $CONSUMER_CHAIN_BINARY tx bank send $RECIPIENT $($CONSUMER_CHAIN_BINARY keys list --home ${consumer_homes_lc[0]} --keyring-backend test --output json | jq -r '.[1].address') 1000$CONSUMER_DENOM --from ${consumer_monikers[0]} --home ${consumer_homes_lc[0]} --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE -y
