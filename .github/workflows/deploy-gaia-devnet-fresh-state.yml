@@ -14,7 +14,7 @@ jobs:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       RPC_NODE: ${{ vars.RPC_NODE }}
       # RUNNING_VERSION: ${{ vars.RUNNING_VERSION }}
-      DEVNET_BRANCH: v24.0.0-rc0
+      DEVNET_BRANCH: v25.1.0
     steps:
       # Get system info
       - name: Install required packages
@@ -129,6 +129,7 @@ jobs:
           echo "[INFO]: Uploading genesis.json"
           scp -6 $NODE_HOME/config/genesis.json gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/genesis.json
           ssh -6 gh-actions@files.polypore.xyz chmod 644 /var/www/html/gaia-devnet/genesis.json
+          ssh -6 gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/index.html
       - name: Send faucet tokens
         run: |
           gaiad tx bank send val ${{ vars.FAUCET_ADDRESS }} 100000000000uatom --from val --gas 20000000 --gas-prices 0.005uatom -y
