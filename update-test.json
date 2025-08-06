@@ -1,0 +1,41 @@
+{
+  "messages": [
+    {
+      "@type": "/interchain_security.ccv.provider.v1.MsgUpdateConsumer",
+      "owner": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "consumer_id": "0",
+      "new_owner_address": null,
+      "metadata": null,
+      "initialization_parameters": {
+        "initial_height": {
+          "revision_number": "0",
+          "revision_height": "1"
+        },
+        "genesis_hash": "Z2VuX2hhc2g=",
+        "binary_hash": "YmluX2hhc2g=",
+        "spawn_time": "2025-07-16T17:48:33.045408841Z",
+        "unbonding_period": "1728000000000000ns",
+        "ccv_timeout_period": "2419200000000000ns",
+        "transfer_timeout_period": "1800000000000ns",
+        "consumer_redistribution_fraction": "0.75",
+        "blocks_per_distribution_transmission": "10",
+        "historical_entries": "10000",
+        "distribution_transmission_channel": ""
+      },
+      "power_shaping_parameters": {
+        "top_N": "95",
+        "validators_power_cap": "0",
+        "validator_set_cap": "0",
+        "allowlist": [],
+        "denylist": [],
+        "min_stake": "0",
+        "allow_inactive_vals": false
+      }
+    }
+  ],
+  "metadata": "ipfs://CID",
+  "deposit": "50000000uatom",
+  "title": "Set top N",
+  "summary": "Update power shaping parameters",
+  "expedited": false
+}

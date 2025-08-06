@@ -1,0 +1,31 @@
+#!/bin/bash
+# Initialize a consumer chain
+
+echo "Running with $CONSUMER_CHAIN_BINARY."
+
+echo "> Creating arrays"
+monikers=()
+for i in $(seq -w 01 $validator_count)
+do
+    moniker=$moniker_prefix$i
+    monikers+=($moniker)
+done
+
+$CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json --node http://localhost:$whale_rpc | jq -r '.chains[]'
+echo "Consumer ID: $CONSUMER_ID"
+
+echo "> Submitting opt-out txs"
+for i in $(seq 0 $[validator_count-2])
+do
+    echo "> Opting out with ${monikers[i]}."
+    txhash=$($CHAIN_BINARY tx provider opt-out $CONSUMER_ID --from ${monikers[i]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+done
+
+sleep $COMMIT_TIMEOUT
+echo "> Trigger CCV packet"
+last_wallet=$CHAIN_BINARY keys list -o json | jq -r '.'
+$CHAIN_BINARY keys list --output json --home $whale_home | jq -r '.'
+$CHAIN_BINARY q staking validators -o json --home $whale_home | jq -r '.'
+$CHAIN_BINARY tx staking delegate $VALOPER_1 1000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+# $CHAIN_BINARY tx staking unbond 
+sleep $(($COMMIT_TIMEOUT*3))

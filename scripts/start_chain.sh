@@ -65,8 +65,8 @@ jq -r --arg SLASH "10" '.app_state.slashing.params.signed_blocks_window |= $SLAS
 jq -r '.app_state.slashing.params.downtime_jail_duration |= "5s"' slashing.json > slashing-2.json
 mv slashing-2.json $HOME_1/config/genesis.json
 
-echo "Set max block gas to 100_000_000."
-jq -r '.consensus.params.block.max_gas = "100000000"' $HOME_1/config/genesis.json > block-max-gas.json
+echo "Set max block gas to 20_000_000."
+jq -r '.consensus.params.block.max_gas = "20000000"' $HOME_1/config/genesis.json > block-max-gas.json
 mv block-max-gas.json $HOME_1/config/genesis.json
 
 echo "Setting blocks_per_epoch to 1..."
@@ -87,6 +87,8 @@ mv ica_host.json $HOME_1/config/genesis.json
 echo "Patching genesis for feemarket params..."
 jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' $HOME_1/config/genesis.json > ./feemarket-denom.json
 mv feemarket-denom.json $HOME_1/config/genesis.json
+jq -r '.app_state.feemarket.params.max_block_utilization |= "20000000"' $HOME_1/config/genesis.json > ./feemarket-gas.json
+mv feemarket-gas.json $HOME_1/config/genesis.json
 jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $HOME_1/config/genesis.json > ./feemarket-min-base.json
 mv feemarket-min-base.json $HOME_1/config/genesis.json
 jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $HOME_1/config/genesis.json > ./feemarket-base.json
