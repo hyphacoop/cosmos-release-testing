@@ -131,7 +131,6 @@
             if: ${{ matrix.enable_cosmovisor == true }}
             run: |
               go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-              echo "$HOME_1/cosmovisor/current/bin" >> $GITHUB_PATH
           - name: Start chain
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
@@ -385,7 +384,7 @@
               source scripts/vars.sh
               source scripts/vars_consumer_v701_one.sh  
               tests/test_ccv_channel.sh
-              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+              $CHAIN_BINARY q ibc channel channels -o json --home $whale_home | jq -r '.'
           - name: _Pre-upgrade IBC transfer successful> ICS v7.0.1 chain 1
             run: |
               source scripts/vars.sh  
@@ -559,7 +558,7 @@
               source scripts/vars.sh
               source scripts/vars_consumer_v701_two.sh
               tests/test_ccv_channel.sh
-              $CHAIN_BINARY q ibc channel channels -o json --home $HOME_1 | jq -r '.'
+              $CHAIN_BINARY q ibc channel channels -o json --home $whale_home | jq -r '.'
           - name: _Pre-upgrade IBC transfer successful> ICS v7.0.1 chain 2
             run: |
               source scripts/vars.sh
@@ -914,48 +913,10 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id channel-1           
-
-
           - name: Query consumer chains
             run: |
               source scripts/vars.sh  
               $CHAIN_BINARY q provider list-consumer-chains --home $whale_home
-              
-          # - name: _Downtime test> val3 must not be jailed 
-          #   run: |
-          #     tests/test_validator_jailed.sh $VALOPER_3 null
-          # - name: Stop validator services
-          #   env:
-          #     CONSUMER_SERVICE_2: v450-2-2.service
-          #     CONSUMER_SERVICE_3: v450-2-3.service
-          #   run: |
-          #     sudo systemctl disable $CONSUMER_SERVICE_2 --now
-          #     sudo systemctl disable $CONSUMER_SERVICE_3 --now
-          #     sleep $(($COMMIT_TIMEOUT*30))
-          # - name: _Downtime test> val2 must be jailed - 1
-          #   run: tests/test_validator_jailed.sh $VALOPER_2 true
-          # - name: _Downtime test> val3 must not be jailed 
-          #   run: |
-          #     tests/test_validator_jailed.sh $VALOPER_3 null
-          # - name: Unjail validator
-          #   env:
-          #     CONSUMER_SERVICE_2: v450-2-2.service
-          #   run: |
-          #     sudo systemctl enable $CONSUMER_SERVICE_2 --now
-          #     sleep $(($COMMIT_TIMEOUT*10))
-          #     $CHAIN_BINARY tx slashing unjail --from $WALLET_2 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          # - name: _Downtime test> val2 must not be jailed
-          #   run: tests/test_validator_jailed.sh $VALOPER_2 null
-          # - name: Stop validator services
-          #   env:
-          #     CONSUMER_SERVICE_2: v450-2-2.service
-          #   run: |
-          #     sudo systemctl disable $CONSUMER_SERVICE_2 --now
-          #     sleep $(($COMMIT_TIMEOUT*30))
-          # - name: _Downtime test> val2 must be jailed - 2
-          #   run: tests/test_validator_jailed.sh $VALOPER_2 true
-
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
@@ -1177,10 +1138,8 @@
               echo "> Tokenizing."
               echo "> Command: $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
               $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
-              echo "> Command: $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
-              $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
-              $CHAIN_BINARY q bank balances $upgrade_wallet --home $HOME_1 -o json | jq '.'
+              $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
           
           - name: Test software upgrade
             env:
@@ -1518,7 +1477,6 @@
               echo "vested amount: $vested_amount"
     
               txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $vesting_wallet --from $vesting_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
-              txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
               echo "txhash: $txhash"
     
               sleep $COMMIT_TIMEOUT
