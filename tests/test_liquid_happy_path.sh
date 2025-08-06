@@ -141,6 +141,7 @@ echo "** HAPPY PATH> STEP 4: REDEEM TOKENS **"
     happy_liquid_2_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_2 --home $whale_home -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
     happy_liquid_3_delegation_balance=$($CHAIN_BINARY q staking delegations $happy_liquid_3 --home $whale_home -o json | jq -r --arg ADDRESS "$VALOPER_1" '.delegation_responses[] | select(.delegation.validator_address==$ADDRESS).balance.amount')
 
+
     echo "happy_liquid_1 delegation shares: ${happy_liquid_1_delegations_2%.*}"
     echo "happy_liquid_1 delegation shares increase: $happy_liquid_1_delegations_diff"
 

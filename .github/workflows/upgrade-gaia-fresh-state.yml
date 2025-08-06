@@ -1157,7 +1157,7 @@
           - name: Start relayer
             run: scripts/start_relayer.sh
 
-          - name: Set up happy path LSM accounts
+          - name: Set up happy path liquid accounts
             run: |
               source scripts/vars.sh
               scripts/lsm_account_setup.sh
@@ -1177,6 +1177,8 @@
               echo "> Tokenizing."
               echo "> Command: $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
               $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
+              echo "> Command: $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1"
+              $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $WALLET_5 --from $WALLET_5 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y --home $HOME_1
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $HOME_1 -o json | jq '.'
           
@@ -1411,6 +1413,8 @@
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           VESTING_AMOUNT: 110000000
           VESTING_DELEGATED_AMOUNT: 100000000
         steps:
@@ -1513,8 +1517,8 @@
               vested_amount=$(echo "($vested_ratio * $VESTING_DELEGATED_AMOUNT)/1" | bc)
               echo "vested amount: $vested_amount"
     
-              # $CHAIN_BINARY tx staking tokenize-share $VALOPER_1 $vested_amount$DENOM $vesting_wallet --from $vesting_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
               txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $vesting_wallet --from $vesting_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
+              txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $VESTING_WALLET --from $VESTING_WALLET --home $HOME_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM -y -o json | jq -r '.txhash')
               echo "txhash: $txhash"
     
               sleep $COMMIT_TIMEOUT
@@ -1525,7 +1529,7 @@
                 echo "PASS: Greater than zero amount in liquid tokens balance."
               else
                 echo "FAIL: No liquid tokens balance."
-                exit 0
+                exit 1
               fi
 
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
@@ -1551,6 +1555,8 @@
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           CHAIN_BINARY_SECONDARY: gaiad-ibc
           COMMIT_TIMEOUT: 1
           RELAYER: hermes

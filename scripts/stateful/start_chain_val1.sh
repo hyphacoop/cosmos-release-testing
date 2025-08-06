@@ -79,8 +79,16 @@ toml set --toml-path $HOME_1/config/client.toml chain-id "$CHAIN_ID"
 # Turn on Instrumentation
 toml set --toml-path $HOME_1/config/config.toml instrumentation.prometheus true
 
+# Turn off statesync
+toml set --toml-path $HOME_1/config/app.toml state-sync.snapshot-interval --to-int 0
+
 # Create self-delegation accounts
 echo $MNEMONIC_2 | $CHAIN_BINARY keys add $MONIKER_2 --keyring-backend test --home $HOME_1 --recover
+echo $MNEMONIC_3 | $CHAIN_BINARY keys add $MONIKER_3 --keyring-backend test --home $HOME_1 --recover
+echo $MNEMONIC_4 | $CHAIN_BINARY keys add $MONIKER_4 --keyring-backend test --home $HOME_1 --recover
+
+# rm addrbook
+rm $HOME_1/config/addrbook.json || true
 
 echo "Setting up services..."
 echo "Creating script for $CHAIN_BINARY"

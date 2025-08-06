@@ -134,8 +134,13 @@
                 "max_entries": 8,
                 "historical_entries": 15000,
                 "bond_denom": "uatom",
-                "min_commission_rate": "0.010000000000000000",
-                "validator_bond_factor": "200.000000000000000000",
+                "min_commission_rate": "0.010000000000000000"
+            }
+        },
+        {
+            "@type": "/gaia.liquid.v1beta1.MsgUpdateParams",
+            "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+            "params": {
                 "global_liquid_staking_cap": "0.200000000000000000",
                 "validator_liquid_staking_cap": "0.400000000000000000"
             }

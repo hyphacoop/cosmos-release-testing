@@ -134,7 +134,7 @@ jobs:
         run: mkdir -p /home/runner/artifact/config/provider
       - name: Start Chain
         run: |
-          screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+          screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: |
@@ -292,7 +292,7 @@ jobs:
   #       run: mkdir -p /home/runner/artifact/config/pion-1
   #     - name: Start Chain
   #       run: |
-  #         screen -L -Logfile /home/runner/artifact/neutrond_sync.log -S neutrond -d -m $CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $NODE_HOME
+  #         screen -L -Logfile /home/runner/artifact/neutrond_sync.log -S neutrond -d -m $CHAIN_BINARY start --home $NODE_HOME
   #         screen -r neutrond -p0 -X logfile flush 0
   #     - name: Wait for neutrond to start and stabilize
   #       run: |

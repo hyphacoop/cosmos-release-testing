@@ -1,0 +1,13 @@
+{
+ "messages": [
+  {
+   "@type": "/cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+   "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn"
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "500000000uatom",
+ "title": "Cancel software upgrade",
+ "summary": "This will cancel the software upgrade",
+ "expedited": false
+}

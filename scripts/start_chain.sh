@@ -69,12 +69,6 @@ echo "Set max block gas to 20_000_000."
 jq -r '.consensus.params.block.max_gas = "20000000"' $HOME_1/config/genesis.json > block-max-gas.json
 mv block-max-gas.json $HOME_1/config/genesis.json
 
-echo "Patching genesis file for LSM params..."
-jq -r '.app_state.staking.params.validator_bond_factor = "10.000000000000000000"' $HOME_1/config/genesis.json > lsm-1.json
-jq -r '.app_state.staking.params.global_liquid_staking_cap = "0.100000000000000000"' lsm-1.json > lsm-2.json
-jq -r '.app_state.staking.params.validator_liquid_staking_cap = "0.200000000000000000"' lsm-2.json > lsm-3.json
-mv lsm-3.json $HOME_1/config/genesis.json
-
 echo "Setting blocks_per_epoch to 1..."
 jq -r --arg BLOCKS "1" '.app_state.provider.params.blocks_per_epoch |= $BLOCKS' $HOME_1/config/genesis.json > ./blocks_per_epoch.json
 cp blocks_per_epoch.json $HOME_1/config/genesis.json
@@ -215,7 +209,7 @@ echo ""                                     | sudo tee /etc/systemd/system/$PROV
 echo "[Service]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 if [ "$COSMOVISOR" = true ]; then
-    echo "ExecStart=$HOME/go/bin/cosmovisor run start --x-crisis-skip-assert-invariants --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
+    echo "ExecStart=$HOME/go/bin/cosmovisor run start --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     echo "Environment=\"DAEMON_NAME=$CHAIN_BINARY\""               | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     echo "Environment=\"DAEMON_HOME=$HOME_1\""                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     echo "Environment=\"DAEMON_RESTART_AFTER_UPGRADE=true\""       | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
@@ -224,7 +218,7 @@ if [ "$COSMOVISOR" = true ]; then
         echo "Environment=\"DAEMON_ALLOW_DOWNLOAD_BINARIES=true\"" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
     fi
 else
-    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
+    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --home $HOME_1" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 fi
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_1 -a
@@ -240,7 +234,7 @@ echo ""                                     | sudo tee /etc/systemd/system/$PROV
 echo "[Service]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
 if [ "$COSMOVISOR" = true ]; then
-    echo "ExecStart=$HOME/go/bin/cosmovisor run start --x-crisis-skip-assert-invariants --home $HOME_2" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
+    echo "ExecStart=$HOME/go/bin/cosmovisor run start --home $HOME_2" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
     echo "Environment=\"DAEMON_NAME=$CHAIN_BINARY\""               | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
     echo "Environment=\"DAEMON_HOME=$HOME_2\""                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
     echo "Environment=\"DAEMON_RESTART_AFTER_UPGRADE=true\""       | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
@@ -249,7 +243,7 @@ if [ "$COSMOVISOR" = true ]; then
         echo "Environment=\"DAEMON_ALLOW_DOWNLOAD_BINARIES=true\"" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
     fi
 else
-    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $HOME_2" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
+    echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --home $HOME_2" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
 fi
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_2 -a
@@ -266,7 +260,7 @@ echo ""                                     | sudo tee /etc/systemd/system/$PROV
 echo "[Service]"                            | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
 if [ "$COSMOVISOR" = true ]; then
-    echo "ExecStart=$HOME/go/bin/cosmovisor run start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+    echo "ExecStart=$HOME/go/bin/cosmovisor run start --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     echo "Environment=\"DAEMON_NAME=$CHAIN_BINARY\""               | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     echo "Environment=\"DAEMON_HOME=$HOME_3\""                     | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     echo "Environment=\"DAEMON_RESTART_AFTER_UPGRADE=true\""       | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
@@ -276,9 +270,9 @@ if [ "$COSMOVISOR" = true ]; then
     fi
 else
     if [ "$PARTIAL_UPGRADE" = true ]; then
-        echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_PARTIAL start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+        echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY_PARTIAL start --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     else
-        echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
+        echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --home $HOME_3" | sudo tee /etc/systemd/system/$PROVIDER_SERVICE_3 -a
     fi
     
 fi
