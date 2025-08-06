@@ -18,7 +18,7 @@
             required: false
             type: string
             default: v25.1.0
-      # push:
+      push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +26,7 @@
     
     env:
       # All chain variables
+      COMMIT_TIMEOUT: 3
       # Consumer chain variables
       RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
       PROVIDER_ICS: v6.4.0
