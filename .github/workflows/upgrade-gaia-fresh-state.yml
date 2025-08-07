@@ -1421,8 +1421,7 @@
               $vesting_wallet $VESTING_AMOUNT$DENOM $end_time \
               --from $WALLET_1 --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-              sleep $COMMIT_TIMEOUT
-              sleep $COMMIT_TIMEOUT
+              sleep 1m
     
               echo "Saving vesting times..."
               duration=$(echo "$end_time - $start_time" | bc -l)
@@ -1439,10 +1438,7 @@
               echo "Delegating from vesting wallet..."
               $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
               --from $vesting_wallet --home $whale_home \
-              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-              sleep $COMMIT_TIMEOUT
-              sleep $COMMIT_TIMEOUT
-      
+              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y      
     
           - name: Test software upgrade
             env:
