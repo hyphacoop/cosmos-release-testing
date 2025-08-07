@@ -99,8 +99,8 @@ echo "> Throttle state:"
 $CHAIN_BINARY q provider throttle-state --home $whale_home -o json | jq '.'
 
 echo "> Opting out"
-consensus_provider=$($CONSUMER_CHAIN_BINARY tendermint show-address --home ${homes[-1]})
-echo "> Provider consensus address: $consensus_addess"
+consensus_provider=$($CHAIN_BINARY tendermint show-address --home ${homes[-1]})
+echo "> Provider consensus address: $consensus_address"
 consumer_pubkey=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home ${homes[-1]})
 echo "> Consumer pubkey: $consumer_pubkey"
 consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
