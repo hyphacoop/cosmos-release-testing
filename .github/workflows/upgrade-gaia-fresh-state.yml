@@ -26,7 +26,7 @@
     
     env:
       # All chain variables
-      COMMIT_TIMEOUT: 1
+      COMMIT_TIMEOUT: 2
       # Consumer chain variables
       RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
       PROVIDER_ICS: v6.4.0
