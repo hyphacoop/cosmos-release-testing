@@ -204,15 +204,15 @@ cp ${consumer_homes[-2]}/config/priv_validator_key.json ${consumer_homes[-1]}/co
 
 tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
 tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
-sleep 60
+sleep $(($COMMIT_TIMEOUT*10))
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
-sleep 90
+sleep $(($COMMIT_TIMEOUT*20))
 echo "> Whale node:"
 tail ${consumer_logs[0]} -n 50
 echo "> Node A (${consumer_monikers[-2]}):"
-tail ${consumer_logs[-2]} -n 50
+cat ${consumer_logs[-2]} -n 100
 echo "> Node B (${consumer_monikers[-1]}):"
-tail ${consumer_logs[-1]} -n 50
+tail ${consumer_logs[-1]} -n 100
 
 echo "> Consumer:"
 $CONSUMER_CHAIN_BINARY q slashing signing-infos --home ${consumer_whale_home}

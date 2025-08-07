@@ -22,7 +22,7 @@ echo "Consumer ID: $consumer_id"
 echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
 
 echo "Wait for spawn time without validators opting in..."
-sleep 10
+sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY q provider list-consumer-chains -o json --home $HOME_1 | jq '.'
 
 spawn_time=$(date -u --iso-8601=ns -d '30 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future

@@ -30,5 +30,5 @@ if [ -z "$chain_config" ]; then
 fi
 
 sudo $LOCAL_IC start $chain_config &
-sleep 30s
+sleep $(($COMMIT_TIMEOUT*5))
 curl -s http://localhost:26657/status | jq '.'
