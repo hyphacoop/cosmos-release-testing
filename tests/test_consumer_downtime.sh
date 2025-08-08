@@ -135,7 +135,7 @@ tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${homes[-1]
 sleep $DOWNTIME_JAIL_DURATION
 
 echo "> Opting in"
-$CHAIN_BINARY tx provider opt-in $consumer_id $consumer_pubkey --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+$CHAIN_BINARY tx provider opt-in $consumer_id --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Has to validate:"
 $CHAIN_BINARY q provider has-to-validate $consensus_provider --home $whale_home -o json | jq '.'
