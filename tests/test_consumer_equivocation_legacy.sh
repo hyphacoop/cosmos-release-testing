@@ -233,10 +233,11 @@ fi
 echo "> Collecting infraction height."
 height=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq -r '.evidence[0].height')
 echo "> Evidence height: $height"
+sleep $(($COMMIT_TIMEOUT*3))
 
 echo "> Collecting evidence around the infraction height in consumer chain."
 evidence_block=$(($height+2))
-# $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
 $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
 echo "> Starting evidence JSON:"
 jq '.' evidence.json
