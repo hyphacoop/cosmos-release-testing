@@ -1797,7 +1797,7 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          COMMIT_TIMEOUT: 4
+          COMMIT_TIMEOUT: 3
         steps:
           - name: Update PATH
             run: |
