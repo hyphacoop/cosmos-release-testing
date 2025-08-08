@@ -90,6 +90,8 @@ starting_spendable_balance=$($CHAIN_BINARY q bank spendable-balances $vesting_wa
 starting_balance=$($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
 echo "[INFO]: Starting bank spendable balance: $starting_spendable_balance"
 echo "[INFO]: Starting bank balance: $starting_balance"
+pending_reward=$(gaiad q distribution rewards $VALOPER_1 -o json | jq -r ".rewards[] | select(.validator_address=\"$VALOPER_1\") | .reward[]")
+echo "[INFO]: Current pending reward: $pending_reward"
 txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --home $HOME_1 --from vesting-2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
 # wait for 1 block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
