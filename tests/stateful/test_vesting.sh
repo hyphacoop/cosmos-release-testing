@@ -2,8 +2,8 @@
 set -e
 
 vesting_time="5 minutes"
-vesting_amount=503000000
-vesting_stake_amount=500000000
+vesting_amount=1003000000
+vesting_stake_amount=1000000000
 
 # Create a vesting account with $vesting_amount atom
 echo "[INFO]: > Testing vesting account with $vesting_time..."
