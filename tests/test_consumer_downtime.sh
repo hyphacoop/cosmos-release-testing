@@ -45,7 +45,7 @@ echo "> Stopping the last validator's consumer node."
 session=${consumer_monikers[-1]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
-sleep 5
+sleep 2
 tail ${logs[-1]} -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
@@ -85,7 +85,7 @@ $CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS --gas-adjustm
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Wait for consumer chain to submit another downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
-sleep $(($COMMIT_TIMEOUT*10))
+sleep $(($COMMIT_TIMEOUT*5))
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
@@ -119,7 +119,7 @@ sleep 5
 tail ${logs[-1]} -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
-sleep $(($COMMIT_TIMEOUT*10))
+sleep $(($COMMIT_TIMEOUT*5))
 
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
