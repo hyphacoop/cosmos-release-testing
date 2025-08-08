@@ -86,21 +86,24 @@ sleep 600
 echo "[INFO]: Current distribution rewards:"
 $CHAIN_BINARY --home $HOME_1 q distribution rewards $vesting_wallet2_addr
 echo "[INFO]: Withdrawing rewards for test account..."
-starting_balance=$($CHAIN_BINARY q bank spendable-balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
-echo "[INFO]: Starting balance: $starting_balance"
+starting_spendable_balance=$($CHAIN_BINARY q bank spendable-balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
+starting_balance=$($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
+echo "[INFO]: Starting bank spendable balance: $starting_spendable_balance"
+echo "[INFO]: Starting bank balance: $starting_balance"
 txhash=$($CHAIN_BINARY tx distribution withdraw-rewards $VALOPER_1 --home $HOME_1 --from vesting-2 --keyring-backend test --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --chain-id $CHAIN_ID -y -o json -b sync | jq '.txhash' | tr -d '"')
 # wait for 1 block
-tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 echo "[INFO]: withdraw-rewards TX:"
 $CHAIN_BINARY --home $HOME_1 q tx $txhash
 
 # Check the funds again
 echo "[INFO]: Spendable-balances:"
 echo $($CHAIN_BINARY q bank spendable-balances $vesting_wallet2_addr --home $HOME_1 -o json)
-$CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1
-ending_balance=$($CHAIN_BINARY q bank spendable-balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
-echo "Ending balance: $ending_balance"
-delta=$[ $ending_balance - $starting_balance]
+ending_spendable_balance=$($CHAIN_BINARY q bank spendable-balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
+ending_balance=$($CHAIN_BINARY q bank balances $vesting_wallet2_addr --home $HOME_1 -o json | jq -r '.balances[] | select(.denom=="uatom").amount')
+echo "[INFO]: Ending bank spendable balance: $ending_spendable_balance"
+echo "[INFO]: Ending bank balance: $ending_balance"
+delta=$[ $ending_spendable_balance - $starting_spendable_balance]
 if [ $delta -gt 0 ]; then
     echo "$delta $DENOM were withdrawn successfully."
 else
