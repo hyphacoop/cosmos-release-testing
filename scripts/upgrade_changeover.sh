@@ -80,13 +80,14 @@ revision=$(echo "$upgrade_height + 3" | bc )
 echo "revision_height: $revision"
 echo "revision_height=$revision" >> $GITHUB_ENV
 
-# current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
-# blocks_delta=$(($upgrade_height-$current_height))
+current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
+blocks_delta=$(($upgrade_height-$current_height))
 
-# # Wait until the right height is reached
-# echo "Waiting for the upgrade to take place at block height $upgrade_height..."
-# tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 50
+# Wait until the right height is reached
+echo "Waiting for the upgrade to take place at block height $upgrade_height..."
+tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 50
 
+tail $whale_log -n 50
 # echo "> Validator log:"
 # tail -n 50 ${logs[0]}
 

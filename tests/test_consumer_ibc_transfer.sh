@@ -30,7 +30,7 @@ command="$CHAIN_BINARY --home $whale_home tx ibc-transfer transfer transfer $PRO
 echo $command
 $command
 echo "Waiting for the transfer to reach the consumer chain..."
-sleep $(($COMMIT_TIMEOUT*15))
+sleep $(($COMMIT_TIMEOUT*10))
 $CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT
 
 consumer_end_balance=$($CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT -o json | jq -r --arg DENOM "$consumer_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
@@ -62,7 +62,7 @@ echo "Sending $CONSUMER_DENOM to $CHAIN_ID..."
 command="$CONSUMER_CHAIN_BINARY --home $consumer_whale_home tx ibc-transfer transfer transfer $CONSUMER_CHANNEL $WALLET_1 1000$CONSUMER_DENOM --from $RECIPIENT --keyring-backend test --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE -y -o json"
 txhash=$($command | jq -r .txhash)
 echo "Waiting for the transfer to reach the provider chain..."
-sleep $(($COMMIT_TIMEOUT*20))
+sleep $(($COMMIT_TIMEOUT*10))
 echo "tx hash: $txhash"
 $CONSUMER_CHAIN_BINARY q tx $txhash --home $consumer_whale_home
 

@@ -156,6 +156,7 @@ do
     toml set --toml-path ${consumer_homes[i]}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE"
     toml set --toml-path ${consumer_homes[i]}/config/app.toml api.enable true
     toml set --toml-path ${consumer_homes[i]}/config/app.toml api.enabled-unsafe-cors true
+    echo "> Consumer api: tcp://0.0.0.0:${consumer_api_ports[i]}"
     toml set --toml-path ${consumer_homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${consumer_api_ports[i]}"
     toml set --toml-path ${consumer_homes[i]}/config/app.toml grpc.address "0.0.0.0:${consumer_grpc_ports[i]}"
     toml set --toml-path ${consumer_homes[i]}/config/app.toml grpc-web.enable false
@@ -204,15 +205,15 @@ cp ${consumer_homes[-2]}/config/priv_validator_key.json ${consumer_homes[-1]}/co
 
 tmux new-session -d -s ${consumer_monikers[-2]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-2]} 2>&1 | tee ${consumer_logs[-2]}"
 tmux new-session -d -s ${consumer_monikers[-1]} "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[-1]} 2>&1 | tee ${consumer_logs[-1]}"
-sleep 60
+sleep $(($COMMIT_TIMEOUT*20))
 tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${consumer_homes[0]} 2>&1 | tee ${consumer_logs[0]}"
-sleep 90
+sleep $(($COMMIT_TIMEOUT*30))
 echo "> Whale node:"
 tail ${consumer_logs[0]} -n 50
 echo "> Node A (${consumer_monikers[-2]}):"
-tail ${consumer_logs[-2]} -n 50
+cat ${consumer_logs[-2]} -n 100
 echo "> Node B (${consumer_monikers[-1]}):"
-tail ${consumer_logs[-1]} -n 50
+tail ${consumer_logs[-1]} -n 100
 
 echo "> Consumer:"
 $CONSUMER_CHAIN_BINARY q slashing signing-infos --home ${consumer_whale_home}
@@ -232,10 +233,11 @@ fi
 echo "> Collecting infraction height."
 height=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq -r '.evidence[0].height')
 echo "> Evidence height: $height"
+sleep $(($COMMIT_TIMEOUT*3))
 
 echo "> Collecting evidence around the infraction height in consumer chain."
 evidence_block=$(($height+2))
-# $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home
 $CONSUMER_CHAIN_BINARY q block $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
 echo "> Starting evidence JSON:"
 jq '.' evidence.json

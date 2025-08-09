@@ -26,6 +26,7 @@
     
     env:
       # All chain variables
+      COMMIT_TIMEOUT: 2
       # Consumer chain variables
       RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
       PROVIDER_ICS: v6.4.0
@@ -137,7 +138,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $whale_log
               scripts/wait_for_block.sh 3
           
@@ -185,6 +186,7 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 3
         steps:
           - name: Update PATH
             run: |
@@ -216,7 +218,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -232,7 +234,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer_legacy.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain v400-one
             env:
               PROVIDER_ICS: v6.4.0
@@ -245,7 +247,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_v400_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
           - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
             run: |
@@ -262,7 +264,7 @@
               # sudo systemctl restart $RELAYER
               # tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
           - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
             run: |
               source scripts/vars.sh
@@ -290,7 +292,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain v640-one
             env:
               PROVIDER_ICS: v6.4.0
@@ -303,7 +305,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_v640_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
           - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
             run: |
@@ -320,7 +322,7 @@
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Pre-upgrade CCV channel verified> ICS v6.4.0 chain 1
             run: |
               source scripts/vars.sh
@@ -347,7 +349,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain v701-one
             env:
               PROVIDER_ICS: v6.4.0
@@ -360,7 +362,7 @@
               source scripts/vars.sh
               source scripts/vars_consumer_v701_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
           - name: _Pre-upgrade consumer chain produces blocks> ICS v7.0.1 chain 1
             run: |
@@ -372,13 +374,13 @@
               source scripts/vars.sh  
               source scripts/vars_consumer_v701_one.sh 
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 1
             run: |
               source scripts/vars.sh
@@ -464,7 +466,7 @@
           - name: Restart relayer
             run: |
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               scripts/start_relayer.sh
 
           - name: _CCV channel verified> ICS v4.0.0 chain 1
@@ -521,7 +523,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain v701-two
             env:
               PROVIDER_ICS: v6.4.0
@@ -534,7 +536,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_v701_two.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
           - name: _Pre-upgrade consumer chain produces blocks> ICS v7.0.1 chain 2
             run: |
@@ -552,7 +554,7 @@
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
               # sudo systemctl restart $RELAYER
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 2
             run: |
               source scripts/vars.sh
@@ -656,7 +658,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -678,7 +680,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer_legacy.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain v400-one
             env:
               PROVIDER_ICS: v6.4.0
@@ -691,7 +693,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_v400_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
 
           - name: _Pre-upgrade consumer chain produces blocks> ICS v4.0.0 chain 1
@@ -709,7 +711,7 @@
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Pre-upgrade CCV channel verified> ICS v4.0.0 chain 1
             run: |
               source scripts/vars.sh
@@ -741,7 +743,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               scripts/start_relayer.sh
     
           - name: _CCV channel verified> ICS v4.0.0 chain 1
@@ -803,7 +805,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
 
           - name: Spawn consumer chain v640-one
             env:
@@ -818,7 +820,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_v640_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
 
           - name: _Consumer chain produces blocks> ICS v6.4.0 chain 1
@@ -836,7 +838,7 @@
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _CCV channel verified> ICS v6.4.0 chain 1
             run: |
               source scripts/vars.sh
@@ -866,7 +868,7 @@
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
 
           - name: Spawn consumer chain v640-one
             env:
@@ -881,7 +883,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_v701_one.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
 
           - name: _Consumer chain produces blocks> ICS v7.0.1 chain 1
@@ -899,7 +901,7 @@
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _CCV channel verified> ICS v7.0.1 chain 1
             run: |
               source scripts/vars.sh
@@ -973,7 +975,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -986,7 +988,7 @@
               source scripts/vars_pfm_1.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -996,7 +998,7 @@
               source scripts/vars_pfm_2.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1006,7 +1008,7 @@
               source scripts/vars_pfm_3.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1029,12 +1031,12 @@
                 rly transact client testnet pfm1 pfm-path-1
                 rly transact client pfm1 pfm2 pfm-path-2
                 rly transact client pfm2 pfm3 pfm-path-3
-                sleep 5
+                sleep $(($COMMIT_TIMEOUT*2))
                 echo "Connections"
                 rly transact connection pfm-path-1
                 rly transact connection pfm-path-2
                 rly transact connection pfm-path-3
-                sleep 5
+                sleep $(($COMMIT_TIMEOUT*2))
                 echo "Channels"
                 rly transact channel pfm-path-1
                 rly transact channel pfm-path-2
@@ -1065,7 +1067,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               scripts/start_relayer.sh
 
           - name: _Test PFM transfers
@@ -1111,7 +1113,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1239,7 +1241,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1258,7 +1260,7 @@
               source scripts/vars.sh
               source scripts/vars_consumer_stride.sh
               scripts/setup_consumer_legacy.sh
-              sleep 20
+              sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain stride-test
             run: |
               source scripts/vars.sh  
@@ -1269,7 +1271,7 @@
               source scripts/vars.sh 
               source scripts/vars_consumer_stride.sh
               ./start-$CONSUMER_CHAIN_ID.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
           - name: Establish CCV channel for stride-test
             run: |
@@ -1282,7 +1284,7 @@
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Pre-upgrade CCV channel verified> Stride
             run: |
               source scripts/vars.sh
@@ -1315,7 +1317,7 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               scripts/start_relayer.sh
     
           - name: _CCV channel verified> stride-test
@@ -1402,7 +1404,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1420,8 +1422,7 @@
               $vesting_wallet $VESTING_AMOUNT$DENOM $end_time \
               --from $WALLET_1 --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-              sleep $COMMIT_TIMEOUT
-              sleep $COMMIT_TIMEOUT
+              sleep 1m
     
               echo "Saving vesting times..."
               duration=$(echo "$end_time - $start_time" | bc -l)
@@ -1438,10 +1439,7 @@
               echo "Delegating from vesting wallet..."
               $CHAIN_BINARY tx staking delegate $VALOPER_1 $VESTING_DELEGATED_AMOUNT$DENOM \
               --from $vesting_wallet --home $whale_home \
-              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-              sleep $COMMIT_TIMEOUT
-              sleep $COMMIT_TIMEOUT
-      
+              --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y      
     
           - name: Test software upgrade
             env:
@@ -1548,7 +1546,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1558,7 +1556,7 @@
               source scripts/vars_ica.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
           - name: Generate host connection
@@ -1583,17 +1581,17 @@
               $CHAIN_BINARY q bank balances $controller1 --home $whale_home
               echo "> Register controller"
               txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
-              sleep 60
+              sleep $(($COMMIT_TIMEOUT*15))
               echo "txhash: $txhash"
               $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
-              journalctl -u hermes
+              tail -n 100 relayer.log
               tail -n 100 $whale_log
               ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller1 connection-0 --home $whale_home -o json | jq -r '.address')
               echo "ICA address: $ica_address"
               echo "> Funding ICA."
               source scripts/vars_ica.sh
               $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
 
           - name: _Test ICA send
             run: |
@@ -1620,9 +1618,9 @@
             run: |
               # sudo systemctl restart $RELAYER
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               scripts/start_relayer.sh
-              sleep 1m
+              sleep $(($COMMIT_TIMEOUT*10))
           - name: _Test ICA controller - register ICA with controller2
             env:
               CONTROLLER_HOME: /home/runner/.val1
@@ -1635,7 +1633,7 @@
               $CHAIN_BINARY tx bank send $WALLET_1 $controller2 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
               sleep $(($COMMIT_TIMEOUT*2))
               txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
-              sleep 60
+              sleep $(($COMMIT_TIMEOUT*10))
               echo "txhash: $txhash"
               $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
               journalctl -u hermes
@@ -1645,7 +1643,7 @@
               echo "> Funding ICA."
               source scripts/vars_ica.sh
               $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Test ICA send with post-upgrade account
             run: |
               source scripts/vars.sh
@@ -1712,7 +1710,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1799,6 +1797,7 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 3
         steps:
           - name: Update PATH
             run: |
@@ -1825,7 +1824,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -1951,7 +1950,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
     
@@ -1960,7 +1959,7 @@
               source scripts/vars_sovereign.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
           - name: Create transfer channel with sovereign chain
@@ -1968,7 +1967,7 @@
               source scripts/vars.sh
               source scripts/vars_changeover.sh
               sed -i -e "s|ccv_consumer_chain = true|ccv_consumer_chain = false|g" ~/.hermes/config.toml
-              sleep 30s
+              sleep $(($COMMIT_TIMEOUT*5))
               hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
               hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
     
@@ -2033,7 +2032,7 @@
               chmod +x $CONSUMER_CHAIN_BINARY
               $CONSUMER_CHAIN_BINARY version --long
               ./$START_SCRIPT
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
 
           - name: _Post-changeover consumer chain produces blocks> ICS v6.4.0
@@ -2054,14 +2053,14 @@
               source scripts/vars_changeover.sh 
               # sudo systemctl stop $RELAYER
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
               # sudo systemctl start $RELAYER
               sed -i -e "s|ccv_consumer_chain = false|ccv_consumer_chain = true|g" ~/.hermes/config.toml
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Changeover CCV channel verified> ICS v6.4.0
             run: |
               source scripts/vars.sh
@@ -2192,7 +2191,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
@@ -2201,7 +2200,7 @@
               source scripts/vars_sovereign.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $log_prefix$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
           - name: Create transfer channel with sovereign chain
@@ -2209,7 +2208,7 @@
               source scripts/vars.sh
               source scripts/vars_changeover.sh
               sed -i -e "s|ccv_consumer_chain = true|ccv_consumer_chain = false|g" ~/.hermes/config.toml
-              sleep 30s
+              sleep $(($COMMIT_TIMEOUT*5))
               hermes create connection --a-chain $CHAIN_ID --b-chain $CONSUMER_CHAIN_ID
               hermes create channel --a-chain $CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer 
     
@@ -2270,7 +2269,7 @@
               chmod +x $CONSUMER_CHAIN_BINARY
               $CONSUMER_CHAIN_BINARY version --long
               ./$START_SCRIPT
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
 
           - name: _Post-changeover consumer chain produces blocks> ICS v6.4.0
@@ -2291,7 +2290,7 @@
               source scripts/vars_changeover.sh 
               # sudo systemctl stop $RELAYER
               tmux send-keys -t relayer C-c
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-1 --b-client $client_id
@@ -2299,7 +2298,7 @@
               # sudo systemctl start $RELAYER
               sed -i -e "s|ccv_consumer_chain = false|ccv_consumer_chain = true|g" ~/.hermes/config.toml
               scripts/start_relayer.sh
-              sleep 10
+              sleep $(($COMMIT_TIMEOUT*3))
           - name: _Changeover CCV channel verified> ICS v6.4.0
             run: |
               source scripts/vars.sh
@@ -2427,7 +2426,7 @@
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
           - name: Block production check
             run: |
@@ -2502,7 +2501,7 @@
               cp $whale_home/config/priv_validator_key.json /home/runner/.kms/secrets/
               tmkms softsign import /home/runner/.kms/secrets/priv_validator_key.json /home/runner/.kms/secrets/priv_validator_key
               tmux new-session -d -s tmkms "tmkms start -c templates/tmkms-config.toml 2>&1 | tee tmkms.log"
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 tmkms.log
           - name: Start chain with tmkms
             run: |
@@ -2512,7 +2511,7 @@
               sed -i -e "s/priv_validator_key_file/#priv_validator_key_file/" $whale_home/config/config.toml
               sed -i -e "s/priv_validator_key_file/#priv_validator_state_file/" $whale_home/config/config.toml
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 50 $whale_log
               echo "> Tmkms logs:"
               tail -n 50 tmkms.log
@@ -2591,7 +2590,7 @@
               source scripts/vars.sh
               export COMMIT_TIMEOUT=3
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $whale_log
               scripts/wait_for_block.sh 3
           
@@ -2626,5 +2625,5 @@
               source scripts/vars_state_sync.sh
               scripts/setup_state_sync.sh
               ./$START_SCRIPT
-              sleep 5
+              sleep $(($COMMIT_TIMEOUT*2))
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
