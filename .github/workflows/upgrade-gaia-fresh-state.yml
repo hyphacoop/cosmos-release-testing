@@ -1259,7 +1259,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_stride.sh
-              scripts/setup_consumer_legacy.sh
+              scripts/setup_consumer.sh
               sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain stride-test
             run: |
