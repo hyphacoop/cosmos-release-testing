@@ -24,7 +24,7 @@ sleep $(($COMMIT_TIMEOUT*8))
 echo "Querying provider valset:"
 $CHAIN_BINARY q comet-validator-set --home $whale_home
 echo "Querying consumer valset:"
-$CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
 echo "Querying provider params:"
 $CHAIN_BINARY q provider params --home $whale_home
 

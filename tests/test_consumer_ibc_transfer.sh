@@ -17,8 +17,8 @@ echo "Consumer home: $consumer_whale_home"
 # cat $consumer_whale_home/config/client.toml
 
 # $CONSUMER_CHAIN_BINARY version --long
-$CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT
-consumer_start_balance=$($CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT -o json | jq -r --arg DENOM "$consumer_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
+$CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT --node http://localhost:$consumer_whale_rpc
+consumer_start_balance=$($CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT -o json --node http://localhost:$consumer_whale_rpc | jq -r --arg DENOM "$consumer_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
 if [ -z "$consumer_start_balance" ]; then
   consumer_start_balance=0
 fi
@@ -31,9 +31,9 @@ echo $command
 $command
 echo "Waiting for the transfer to reach the consumer chain..."
 sleep $(($COMMIT_TIMEOUT*10))
-$CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT
+$CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT --node http://localhost:$consumer_whale_rpc
 
-consumer_end_balance=$($CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT -o json | jq -r --arg DENOM "$consumer_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
+consumer_end_balance=$($CONSUMER_CHAIN_BINARY --home $consumer_whale_home q bank balances $RECIPIENT -o json --node http://localhost:$consumer_whale_rpc | jq -r --arg DENOM "$consumer_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
 if [ -z "$consumer_end_balance" ]; then
   consumer_end_balance=0
 fi
@@ -59,12 +59,12 @@ $CHAIN_BINARY q tendermint-validator-set --home $whale_home
 $CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
 DENOM_BEFORE=$($CHAIN_BINARY --home $whale_home q bank balances $WALLET_1 -o json | jq -r '.balances | length')
 echo "Sending $CONSUMER_DENOM to $CHAIN_ID..."
-command="$CONSUMER_CHAIN_BINARY --home $consumer_whale_home tx ibc-transfer transfer transfer $CONSUMER_CHANNEL $WALLET_1 1000$CONSUMER_DENOM --from $RECIPIENT --keyring-backend test --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE -y -o json"
+command="$CONSUMER_CHAIN_BINARY --home $consumer_whale_home tx ibc-transfer transfer transfer $CONSUMER_CHANNEL $WALLET_1 1000$CONSUMER_DENOM --from $RECIPIENT --keyring-backend test --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $CONSUMER_GAS_PRICE -y -o json --node http://localhost:$consumer_whale_rpc"
 txhash=$($command | jq -r .txhash)
 echo "Waiting for the transfer to reach the provider chain..."
 sleep $(($COMMIT_TIMEOUT*10))
 echo "tx hash: $txhash"
-$CONSUMER_CHAIN_BINARY q tx $txhash --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q tx $txhash --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
 
 $CHAIN_BINARY --home $whale_home q bank balances $WALLET_1
 provider_end_balance=$($CHAIN_BINARY --home $whale_home q bank balances $WALLET_1 -o json | jq -r --arg DENOM "$provider_expected_denom" '.balances[] | select(.denom==$DENOM).amount')
