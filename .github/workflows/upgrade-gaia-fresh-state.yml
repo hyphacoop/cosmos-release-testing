@@ -1348,7 +1348,7 @@
               $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
               scripts/consumer_opt_out.sh
               $CHAIN_BINARY q comet-validator-set --home $whale_home
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
 
           - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0
             run: |
