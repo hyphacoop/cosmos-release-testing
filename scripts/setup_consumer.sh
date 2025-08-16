@@ -82,23 +82,27 @@ mv consumer-slashing-2.json ${homes[0]}/config/genesis.json
 
 echo "> Creating and funding wallets."
 echo "> Adding keys to first home"
-echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add relayer --home ${homes[0]} --output json --recover > keys-relayer-$CONSUMER_CHAIN_ID.json
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+echo "> Relayer"
+echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add relayer --keyring-backend test --home ${homes[0]} --output json --recover > keys-relayer-$CONSUMER_CHAIN_ID.json
+jq '.' keys-relayer-$CONSUMER_CHAIN_ID.json
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
 
-echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --home ${homes[0]} --output json --recover > keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+echo "> Whale validator"
+echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --keyring-backend test --home ${homes[0]} --output json --recover > keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
 wallet=$(jq -r '.address' keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json)
 wallets+=($wallet)
 for i in $(seq 1 $[$validator_count-1])
 do
-    $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --home ${homes[0]} --output json > keys-${consumer_monikers[i]}-$CONSUMER_CHAIN_ID.json
+    echo "> Val $i"
+    $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --keyring-backend test --home ${homes[0]} --output json > keys-${consumer_monikers[i]}-$CONSUMER_CHAIN_ID.json
     wallet=$(jq -r '.address' keys-${consumer_monikers[i]}-$CONSUMER_CHAIN_ID.json)
     wallets+=($wallet)
-    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]}
+    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
 done
 
 echo "> Consumer keys:"
-$CONSUMER_CHAIN_BINARY keys list --home ${homes[0]}
+$CONSUMER_CHAIN_BINARY keys list --keyring-backend test --home ${homes[0]}
 
 # # Update genesis file with right denom
 # if [ "$CONSUMER_CHAIN_BINARY" == "strided" ]; then
