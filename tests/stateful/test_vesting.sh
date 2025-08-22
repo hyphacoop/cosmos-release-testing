@@ -136,7 +136,7 @@ fi
 
 # test sending all spendable balances back
 echo "[INFO]: Send all spendable uatom back to $WALLET_1"
-let bank_send_amount=$current_spend_amount-$BASE_FEES
+let bank_send_amount=$ending_spendable_balance-$BASE_FEES
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx bank send $vesting_wallet2_addr $WALLET_1 $bank_send_amount$DENOM --from $vesting_wallet2_addr --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y -o json)
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 vw1_send_txhash=$(echo $tx_json | jq -r '.txhash' | tr -d '"')
@@ -146,8 +146,8 @@ echo "[INFO]: Current spendable balance after tx"
 $CHAIN_BINARY --home $HOME_1 q bank spendable-balances $vesting_wallet2_addr
 echo "[INFO]: Current bank balance after tx"
 $CHAIN_BINARY --home $HOME_1 q bank balances $vesting_wallet2_addr
-current_spend_amount=$($CHAIN_BINARY --home $HOME_1 q bank spendable-balances $vesting_wallet2_addr -o json | jq -r '.balances[] | select(.denom="uatom") | .amount')
-if [ ! -z $current_spend_amount ]
+ending_spendable_balance=$($CHAIN_BINARY --home $HOME_1 q bank spendable-balances $vesting_wallet2_addr -o json | jq -r '.balances[] | select(.denom="uatom") | .amount')
+if [ ! -z $ending_spendable_balance ]
 then
     echo "[ERROR]: Spendable amount is not empty"
     exit 1
