@@ -59,7 +59,8 @@ else
 fi
 
 # test sending all spendable balances back
-let bank_send_amount=$current_spend_amount-$BASE_FEES
+echo "[INFO]: Send all spendable uatom back to $WALLET_1"
+let bank_send_amount=$current_spend_amount-29000
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx bank send $vesting_wallet1_addr $WALLET_1 $bank_send_amount$DENOM --from $vesting_wallet1_addr --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y -o json)
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 vw1_send_txhash=$(echo $tx_json | jq -r '.txhash' | tr -d '"')
