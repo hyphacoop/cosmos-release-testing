@@ -58,6 +58,24 @@ else
     exit 1
 fi
 
+# test sending all spendable balances back
+let bank_send_amount=$current_spend_amount-$BASE_FEES
+tx_json=$($CHAIN_BINARY --home $HOME_1 tx bank send $vesting_wallet1_addr $WALLET_1 $bank_send_amount$DENOM --from $vesting_wallet1_addr --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y -o json)
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+vw1_send_txhash=$(echo $tx_json | jq -r '.txhash' | tr -d '"')
+echo "[INFO]: tx result:"
+$CHAIN_BINARY --home $HOME_1 q tx $vw1_send_txhash
+echo "[INFO]: Current spendable balance after tx"
+$CHAIN_BINARY --home $HOME_1 q bank spendable-balances $vesting_wallet1_addr
+current_spend_amount=$($CHAIN_BINARY --home $HOME_1 q bank spendable-balances $vesting_wallet1_addr -o json | jq -r '.balances[] | select(.denom="uatom") | .amount')
+if [ ! -z $current_spend_amount ]
+then
+    echo "[ERROR]: Spendable amount is not empty"
+    exit 1
+else
+    echo "[INFO]: Spendable amount have been sent back"
+fi
+
 # Create a permanently locked vesting account with 100 atom
 echo "[INFO]: > Testing permanent locked vesting account..."
 vesting_wallet2_json=$($CHAIN_BINARY --home $HOME_1 keys add vesting-2 --output json)
