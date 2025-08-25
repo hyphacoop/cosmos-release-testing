@@ -352,6 +352,15 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
+      - name: _Test vesting accounts
+        run: tests/stateful/test_vesting.sh
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 3
@@ -380,13 +389,6 @@ jobs:
           UPGRADE_NAME: v99
           UPGRADE_AFTER: 50
         run: tests/stateful/cancel-upgrade.sh
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: _Test commission rate
         run: |
           echo "[INFO]: Get current commission rate..."
