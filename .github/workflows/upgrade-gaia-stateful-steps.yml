@@ -354,13 +354,6 @@ jobs:
           fi
       - name: _Test vesting accounts
         run: tests/stateful/test_vesting.sh
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 3
@@ -654,12 +647,6 @@ jobs:
           sleep 30
           echo "[INFO]: Rewards trigger tx"
           $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
-      # - name: DEBUG
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: _Check validator outstanding rewards for consumer chain a
         run: |
           ls $HOME/artifact
@@ -688,7 +675,13 @@ jobs:
           else
             echo "[PASS] Denom is in validator's outstanding rewards: $denom"
           fi
-
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumerb
