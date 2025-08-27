@@ -414,8 +414,8 @@ jobs:
       # - name: _Provider RPC tests using localhost> gaiad
       #   run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
 
-      # - name: Set up relayer
-      #   run: scripts/stateful/setup_relayer.sh
+      - name: Set up relayer
+        run: scripts/stateful/setup_relayer.sh
       - name: Download consumer chain binaries
         run: |
           set -e
