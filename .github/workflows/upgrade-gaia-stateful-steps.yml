@@ -352,67 +352,67 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
-      # - name: _Test vesting accounts
-      #   run: tests/stateful/test_vesting.sh
-      # - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #   run: tests/stateful/test_tx.sh
-      # - name: Send funds to wallet 3
-      #   run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
-      # - name: Wait for 1 block to pass
-      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      # - name: Send funds to wallet 4
-      #   run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
-      # - name: Wait for 1 block to pass
-      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      # - name: Get list of wallets
-      #   run: |
-      #     $CHAIN_BINARY --home $HOME_1 keys list
-      # - name: Get wallet balances
-      #   run: |
-      #     set -e
-      #     wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
-      #     for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
-      # - name: Query current feemarket params
-      #   run: |
-      #     $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
-      # - name: _Test feemarket
-      #   run: tests/stateful/test_feemarket.sh
-      # - name: _Test cancelled upgrade
-      #   env:
-      #     UPGRADE_NAME: v99
-      #     UPGRADE_AFTER: 50
-      #   run: tests/stateful/cancel-upgrade.sh
-      # - name: _Test commission rate
-      #   run: |
-      #     echo "[INFO]: Get current commission rate..."
-      #     json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
-      #     echo "$json"
-      #     current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
-      #     echo "[INFO]: Current commission rate is: $current_commission_rate"
-      #     echo "[INFO]: Set commission to 0.05 higher"
-      #     set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
-      #     echo "[INFO]: Set commission to: $set_commission_rate"
-      #     $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
-      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      #     echo "[INFO]: Get latest comission rate..."
-      #     json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
-      #     echo "$json"
-      #     modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
-      #     echo "[INFO]: Current commission rate is: $modified_commission_rate"
-      #     if [ "$modified_commission_rate" != "$set_commission_rate" ]
-      #     then
-      #       echo "[ERROR]: commission rate not set!"
-      #       echo "Expected $set_commission_rate got $modified_commission_rate"
-      #     fi
+      - name: _Test vesting accounts
+        run: tests/stateful/test_vesting.sh
+      - name: _Transactions verified> bank send, delegate, and withdraw rewards
+        run: tests/stateful/test_tx.sh
+      - name: Send funds to wallet 3
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      - name: Wait for 1 block to pass
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Send funds to wallet 4
+        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      - name: Wait for 1 block to pass
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: Get list of wallets
+        run: |
+          $CHAIN_BINARY --home $HOME_1 keys list
+      - name: Get wallet balances
+        run: |
+          set -e
+          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
+          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+      - name: Query current feemarket params
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      - name: _Test feemarket
+        run: tests/stateful/test_feemarket.sh
+      - name: _Test cancelled upgrade
+        env:
+          UPGRADE_NAME: v99
+          UPGRADE_AFTER: 50
+        run: tests/stateful/cancel-upgrade.sh
+      - name: _Test commission rate
+        run: |
+          echo "[INFO]: Get current commission rate..."
+          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+          echo "$json"
+          current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+          echo "[INFO]: Current commission rate is: $current_commission_rate"
+          echo "[INFO]: Set commission to 0.05 higher"
+          set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
+          echo "[INFO]: Set commission to: $set_commission_rate"
+          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+          echo "[INFO]: Get latest comission rate..."
+          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+          echo "$json"
+          modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+          echo "[INFO]: Current commission rate is: $modified_commission_rate"
+          if [ "$modified_commission_rate" != "$set_commission_rate" ]
+          then
+            echo "[ERROR]: commission rate not set!"
+            echo "Expected $set_commission_rate got $modified_commission_rate"
+          fi
 
-      # - name: _Test permissioned cosmwasm
-      #   run: tests/stateful/test_cosmwasm.sh
-      # - name: Print netstat
-      #   run: netstat -ntap
-      # - name: _Provider API tests using localhost> gaiad
-      #   run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-      # - name: _Provider RPC tests using localhost> gaiad
-      #   run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+      - name: _Test permissioned cosmwasm
+        run: tests/stateful/test_cosmwasm.sh
+      - name: Print netstat
+        run: netstat -ntap
+      - name: _Provider API tests using localhost> gaiad
+        run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+      - name: _Provider RPC tests using localhost> gaiad
+        run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
 
       - name: Set up relayer
         run: scripts/stateful/setup_relayer.sh
@@ -424,77 +424,77 @@ jobs:
           wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
           chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
 
-      # - name: Installing secondary chain binaries
-      #   env:
-      #     START_VERSION: ${{ vars.ICA_CHAIN_GAIA_VERSION }}
-      #   run: |
-      #     set -e
-      #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
-      #     echo "Chain binary URL: $CHAIN_BINARY_URL"
-      #     echo "Installing secondary chain binary..."
-      #     wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
-      #     chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
-      # - name: Start secondary chain
-      #   env:
-      #     CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
-      #     CHAIN_SERVICE: ica-chain.service
-      #     CHAIN_HOME: /home/runner/.ica-chain
-      #     CHAIN_ID: ica-chain
-      #     VAL_STAKE: 100000000
-      #     API_PORT: 35011
-      #     GRPC_PORT: 36011
-      #     RPC_PORT: 37011
-      #     P2P_PORT: 38011
-      #     PPROF_PORT: 39011
-      #     GAS_PRICE: 0.0025
-      #     MONIKER_RELAYER: ${{ vars.MONIKER_2 }}
-      #     MNEMONIC_RELAYER: ${{ vars.MNEMONIC_2 }}
-      #   run: |
-      #     source ~/env/bin/activate
-      #     scripts/stateful/start_chain_secondary.sh
-      # - name: _ICA chain produces blocks> ica-chain
-      #   run: tests/test_block_production.sh 127.0.0.1 37011 10
-      # - name: Send funds to wallet 4 on ICA chain
-      #   env:
-      #     CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
-      #     CHAIN_SERVICE: ica-chain.service
-      #     CHAIN_HOME: /home/runner/.ica-chain
-      #   run: |
-      #     $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
-      #     sleep 60
-      #     $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
-      # - name: Establish Connection to ICA chain
-      #   env:
-      #     CHAIN_HOME: /home/runner/.val1
-      #   run: |
-      #     set -e
-      #     screen -XS hermes.service quit || true
-      #     killall hermes || true
-      #     sleep 1
-      #     echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
-      #     hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
-      #     echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
-      #     hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
-      #     sleep 30
-      #     # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
-      #     # client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
-      #     # echo "Client ID is: $client_id"
-      #     # hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
-      #     hermes create connection --a-chain ica-chain --b-chain $CHAIN_ID
-      #     echo "ica-chain connection-0 info:"
-      #     hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
-      #     echo "Starting Hermes"
-      #     screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
-      #     # set screen to flush log to 0
-      #     screen -r hermes.service -p0 -X logfile flush 0
-      #     echo "Wait for hermes to start..."
-      #     ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
-      #     sleep 60
-      # - name: Test ICA
-      #   env:
-      #     ICA_HOME: /home/runner/.ica-chain
-      #     CHAIN_HOME: /home/runner/.val1
-      #   run: tests/stateful/test_ica_controller.sh 
+      - name: Installing secondary chain binaries
+        env:
+          START_VERSION: ${{ vars.ICA_CHAIN_GAIA_VERSION }}
+        run: |
+          set -e
+          export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$START_VERSION/gaiad-$START_VERSION-linux-amd64
+          echo "Chain binary URL: $CHAIN_BINARY_URL"
+          echo "Installing secondary chain binary..."
+          wget $CHAIN_BINARY_URL -O $HOME/go/bin/$CHAIN_BINARY_SECONDARY -q
+          chmod +x $HOME/go/bin/$CHAIN_BINARY_SECONDARY
+      - name: Start secondary chain
+        env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+          CHAIN_SERVICE: ica-chain.service
+          CHAIN_HOME: /home/runner/.ica-chain
+          CHAIN_ID: ica-chain
+          VAL_STAKE: 100000000
+          API_PORT: 35011
+          GRPC_PORT: 36011
+          RPC_PORT: 37011
+          P2P_PORT: 38011
+          PPROF_PORT: 39011
+          GAS_PRICE: 0.0025
+          MONIKER_RELAYER: ${{ vars.MONIKER_2 }}
+          MNEMONIC_RELAYER: ${{ vars.MNEMONIC_2 }}
+        run: |
+          source ~/env/bin/activate
+          scripts/stateful/start_chain_secondary.sh
+      - name: _ICA chain produces blocks> ica-chain
+        run: tests/test_block_production.sh 127.0.0.1 37011 10
+      - name: Send funds to wallet 4 on ICA chain
+        env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+          CHAIN_SERVICE: ica-chain.service
+          CHAIN_HOME: /home/runner/.ica-chain
+        run: |
+          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
+          sleep 60
+          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
+      - name: Establish Connection to ICA chain
+        env:
+          CHAIN_HOME: /home/runner/.val1
+        run: |
+          set -e
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
+          hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
+          echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
+          hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
+          sleep 30
+          # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
+          # client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
+          # echo "Client ID is: $client_id"
+          # hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
+          hermes create connection --a-chain ica-chain --b-chain $CHAIN_ID
+          echo "ica-chain connection-0 info:"
+          hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      - name: Test ICA
+        env:
+          ICA_HOME: /home/runner/.ica-chain
+          CHAIN_HOME: /home/runner/.val1
+        run: tests/stateful/test_ica_controller.sh 
       - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
