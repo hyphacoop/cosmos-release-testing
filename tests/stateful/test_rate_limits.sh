@@ -16,7 +16,7 @@ supply_one_percent=$(printf %.0f $(echo "$total_uatom_supply*0.01" | bc -l))
 echo "[INFO]: 1% is: $supply_one_percent"
 
 echo "[INFO]: transfer 1% of total supply"
-tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer  $CONSUMERA_CHAN_ID $WALLET_1 10000000000000uatom --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -o json)
+tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer  $CONSUMERA_CHAN_ID $WALLET_1 $supply_one_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 
 # wait for tx block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
