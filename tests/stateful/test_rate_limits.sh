@@ -13,11 +13,15 @@ echo "$wallet1_bank_balance"
 
 echo "[INFO]: Calculate 1% of supply"
 supply_one_percent=$(printf %.0f $(echo "$total_uatom_supply*0.01" | bc -l))
+
+echo "[INFO]: Calculate 0.9% of supply"
+supply_09_percent=$(printf %.0f $(echo "$total_uatom_supply*0.009" | bc -l))
+
 echo "[INFO]: 1% is: $supply_one_percent"
 
-echo "[INFO]: transfer 1%+2 uatom of total supply"
+echo "[INFO]: transfer 1% uatom of total supply"
 set +e
-let tx_1_amount=$supply_one_percent+2000
+let tx_1_amount=$supply_one_percent
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $tx_1_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 if [ $? -eq 0 ]
 then
@@ -29,9 +33,7 @@ fi
 set -e
 
 echo "[INFO]: transfer 1%-1000 uatom of total supply"
-set +e
-let tx_2_amount=$supply_one_percent-3000
-tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $tx_2_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
+tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $supply_09_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 if [ $? -eq 0 ]
 then
     echo "[ERROR]: TX was successful"
