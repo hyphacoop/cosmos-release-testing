@@ -17,7 +17,7 @@ echo "[INFO]: 1% is: $supply_one_percent"
 
 echo "[INFO]: transfer 1%+2 uatom of total supply"
 set +e
-let tx_1_amount=$supply_one_percent+2
+let tx_1_amount=$supply_one_percent+2000
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $tx_1_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 if [ $? -eq 0 ]
 then
@@ -28,7 +28,7 @@ else
 fi
 set -e
 
-echo "[INFO]: transfer 1%-2 uatom of total supply"
+echo "[INFO]: transfer 1%-1000 uatom of total supply"
 set +e
 let tx_2_amount=$supply_one_percent-2
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $tx_2_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
