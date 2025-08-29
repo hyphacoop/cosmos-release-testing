@@ -32,11 +32,11 @@ else
 fi
 set -e
 
-echo "[INFO]: transfer 1%-1000 uatom of total supply"
+echo "[INFO]: transfer 0.9% uatom of total supply"
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $supply_09_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 if [ $? -eq 0 ]
 then
-    echo "[ERROR]: TX was successful"
+    echo "[PASS]: TX was successful"
 fi
 
 # wait for tx block
@@ -45,5 +45,5 @@ echo "[INFO]: tx_json"
 echo "$tx_json"
 txhash=$(echo $tx_json | jq -r '.txhash')
 
-$CHAIN_BINARY q tx $txhash
+$CHAIN_BINARY --home $HOME_1 q tx $txhash
 
