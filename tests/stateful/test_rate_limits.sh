@@ -49,4 +49,4 @@ then
 fi
 
 # query consumer chain balance
-$CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $CONSUMER_WALLET
+$CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $WALLET_1
