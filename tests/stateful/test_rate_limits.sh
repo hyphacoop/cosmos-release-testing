@@ -22,7 +22,7 @@ echo "[INFO]: 1% is: $supply_one_percent"
 echo "[INFO]: transfer 1% uatom of total supply"
 set +e
 let tx_1_amount=$supply_one_percent
-tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $tx_1_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
+tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_CONSUMER_1 $tx_1_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 if [ $? -eq 0 ]
 then
     echo "[ERROR]: TX was successful above the quota"
@@ -33,7 +33,7 @@ fi
 set -e
 
 echo "[INFO]: transfer 0.9% uatom of total supply"
-tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $supply_09_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
+tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_CONSUMER_1 $supply_09_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 
 # wait for tx block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
@@ -49,4 +49,4 @@ then
 fi
 
 # query consumer chain balance
-$CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $WALLET_1
+$CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $WALLET_CONSUMER_1
