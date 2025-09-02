@@ -47,3 +47,6 @@ if [ $code -eq 0 ]
 then
     echo "[PASS]: TX was successful"
 fi
+
+# query consumer chain balance
+$CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $CONSUMER_WALLET
