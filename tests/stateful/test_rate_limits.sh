@@ -13,9 +13,11 @@ echo "$wallet1_bank_balance"
 
 echo "[INFO]: Calculate 1% of supply"
 supply_one_percent=$(printf %.0f $(echo "$total_uatom_supply*0.01" | bc -l))
+echo "$supply_one_percent"
 
 echo "[INFO]: Calculate 0.9% of supply"
 supply_09_percent=$(printf %.0f $(echo "$total_uatom_supply*0.009" | bc -l))
+echo "$supply_09_percent"
 
 echo "[INFO]: 1% is: $supply_one_percent"
 
