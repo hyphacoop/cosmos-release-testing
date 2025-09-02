@@ -34,16 +34,16 @@ set -e
 
 echo "[INFO]: transfer 0.9% uatom of total supply"
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $WALLET_1 $supply_09_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
-if [ $? -eq 0 ]
-then
-    echo "[PASS]: TX was successful"
-fi
 
 # wait for tx block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
-echo "[INFO]: tx_json"
-echo "$tx_json"
+
+echo "[INFO]: Query tx"
 txhash=$(echo $tx_json | jq -r '.txhash')
 
-$CHAIN_BINARY --home $HOME_1 q tx $txhash
+code=$($CHAIN_BINARY --home $HOME_1 q tx $txhash -o json | jq '.code')
 
+if [ $code -eq 0 ]
+then
+    echo "[PASS]: TX was successful"
+fi
