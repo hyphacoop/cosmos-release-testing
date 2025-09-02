@@ -57,4 +57,14 @@ then
 fi
 
 # query consumer chain balance
-$CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $consumer_test_wallet1_addr
+current_amount=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $consumer_test_wallet1_addr -o json | jq -r '.balances[0].amount')
+
+echo "[INFO]: Consumer wallet $consumer_test_wallet1_addr amount $current_amount
+
+if [ $supply_09_percent -eq $current_amount  ]
+then
+    echo "[PASS]: $consumer_test_wallet1_addr received correct amount of tokens over IBC"
+else
+    echo "[ERROR]: $consumer_test_wallet1_addr received incorrect amount"
+    exit 1
+fi
