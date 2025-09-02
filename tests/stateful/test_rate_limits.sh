@@ -59,7 +59,7 @@ fi
 # query consumer chain balance
 current_amount=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q bank balances $consumer_test_wallet1_addr -o json | jq -r '.balances[0].amount')
 
-echo "[INFO]: Consumer wallet $consumer_test_wallet1_addr amount $current_amount
+echo "[INFO]: Consumer wallet $consumer_test_wallet1_addr amount $current_amount"
 
 if [ $supply_09_percent -eq $current_amount  ]
 then
