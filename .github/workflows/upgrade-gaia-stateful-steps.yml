@@ -228,7 +228,7 @@ jobs:
           latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          sleep 6
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           hash_val2=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           if [ $hash_val1 != $hash_val2 ]
           then
@@ -520,7 +520,7 @@ jobs:
           latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          sleep 6
+          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1 10
           hash_val2=$(curl -s 127.0.0.1:$CON2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           echo "[INFO]: cona1 $hash_val1"
           echo "[INFO]: cona2 $hash_val1"
@@ -739,7 +739,7 @@ jobs:
           latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          sleep 6
+          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 1 10
           hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           echo "[INFO]: conb1 $hash_val1"
           echo "[INFO]: conb2 $hash_val2"
