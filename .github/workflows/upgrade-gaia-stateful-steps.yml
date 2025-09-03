@@ -688,13 +688,6 @@ jobs:
           else
             echo "[PASS] Denom is in validator's outstanding rewards: $denom"
           fi
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumerb
@@ -1462,7 +1455,13 @@ jobs:
             echo "[ERROR]: No insufficient fee from log!"
             exit 1
           fi
-      # TX tests
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Stop services
         if: always()
         run: |
