@@ -729,7 +729,7 @@ jobs:
       - name: Check block hashes on both consumerb nodes
         run: |
           set -e
-          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.SyncInfo.latest_block_height')
+          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.sync_info.latest_block_height')
           echo "[INFO]: Block height is $latest_block"
           hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
           tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 1 10
@@ -1455,13 +1455,13 @@ jobs:
             echo "[ERROR]: No insufficient fee from log!"
             exit 1
           fi
-      - name: DEBUG
-        if: always() && !cancelled()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: Stop services
         if: always()
         run: |
