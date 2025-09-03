@@ -604,7 +604,7 @@ jobs:
           CONSUMER_CHAIN_ID: consumera
         run: |
           set -e
-          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1000
+          tests/stateful/test_consumer_ibc_transfer.sh ${{ env.CONSUMERA_CHAN_ID }} 2 $WALLET_1 $WALLET_CONSUMER_1 1000
           denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
           echo "consumera denom: $denom"
           echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
