@@ -33,7 +33,7 @@
       TOPN: 0
       # Relayer variables
       RELAYER: hermes
-      HERMES_VERSION: v1.13.2
+      HERMES_VERSION: v1.13.3
       RLY_VERSION: "2.5.0"
     jobs:
       set-versions:
