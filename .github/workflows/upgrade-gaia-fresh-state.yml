@@ -18,7 +18,7 @@
             required: false
             type: string
             default: v25.1.0
-      push:
+      # push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
