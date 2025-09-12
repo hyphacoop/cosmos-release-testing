@@ -495,6 +495,13 @@ jobs:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
         run: tests/stateful/test_ica_controller.sh 
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
@@ -688,13 +695,6 @@ jobs:
           else
             echo "[PASS] Denom is in validator's outstanding rewards: $denom"
           fi
-      - name: DEBUG
-        if: always() && !cancelled()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
       - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumerb

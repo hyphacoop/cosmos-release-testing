@@ -110,7 +110,7 @@ gas_price = { price = 0.005, denom = 'uatom' }
 gas_multiplier = 1.6
 max_gas = 10000000
 clock_drift = '10s'
-trusting_period = '1days'
+trusting_period = '300s'
 trust_threshold = { numerator = '1', denominator = '3' }
 type = "CosmosSdk"
 
