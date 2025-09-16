@@ -11,25 +11,26 @@ rm hermes*gz
 
 set -e
 
-# echo "Downloading Hermes..."
-# wget -O  hermes.tar.gz https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz
-# tar xfv hermes.tar.gz
-# mkdir -p ~/.hermes
-# cp ./hermes ~/.hermes/hermes
-
-echo "Building Hermes..."
-working_directory="$(pwd)"
-sudo apt install build-essential wget pkg-config musl-tools -y
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-source "$HOME/.cargo/env"
-cd "$HOME"
-git clone https://github.com/informalsystems/hermes.git
-cd hermes
-git checkout $HERMES_VERSION
-cargo build --release --bin hermes
+echo "Downloading Hermes..."
+wget -O  hermes.tar.gz https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz
+tar xfv hermes.tar.gz
 mkdir -p ~/.hermes
-cp target/release/hermes ~/.hermes/hermes
-cd $working_directory
+cp ./hermes ~/.hermes/hermes
+
+# echo "Building Hermes..."
+# working_directory="$(pwd)"
+# sudo apt install build-essential wget pkg-config musl-tools libclang-dev libssl-dev protobuf-compiler git-lfs -y
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# source "$HOME/.cargo/env"
+# cd "$HOME"
+# git clone https://github.com/informalsystems/hermes.git
+# cd hermes
+# git checkout $HERMES_VERSION
+# cargo build --release --bin hermes
+# cargo build --release --no-default-features --bin hermes
+# mkdir -p ~/.hermes
+# cp target/release/hermes ~/.hermes/hermes
+# cd $working_directory
 
 echo "Set hermes parth"
 export PATH="$PATH:~/.hermes"
