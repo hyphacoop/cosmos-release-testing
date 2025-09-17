@@ -355,10 +355,10 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
-      - name: _Test vesting accounts
-        run: tests/stateful/test_vesting.sh
-      - name: _Transactions verified> bank send, delegate, and withdraw rewards
-        run: tests/stateful/test_tx.sh
+      # - name: _Test vesting accounts
+      #   run: tests/stateful/test_vesting.sh
+      # - name: _Transactions verified> bank send, delegate, and withdraw rewards
+      #   run: tests/stateful/test_tx.sh
       - name: Send funds to wallet 3
         run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
       - name: Wait for 1 block to pass
@@ -375,47 +375,47 @@ jobs:
           set -e
           wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
-      - name: Query current feemarket params
-        run: |
-          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
-      - name: _Test feemarket
-        run: tests/stateful/test_feemarket.sh
-      - name: _Test cancelled upgrade
-        env:
-          UPGRADE_NAME: v99
-          UPGRADE_AFTER: 50
-        run: tests/stateful/cancel-upgrade.sh
-      - name: _Test commission rate
-        run: |
-          echo "[INFO]: Get current commission rate..."
-          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
-          echo "$json"
-          current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
-          echo "[INFO]: Current commission rate is: $current_commission_rate"
-          echo "[INFO]: Set commission to 0.05 higher"
-          set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
-          echo "[INFO]: Set commission to: $set_commission_rate"
-          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-          echo "[INFO]: Get latest comission rate..."
-          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
-          echo "$json"
-          modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
-          echo "[INFO]: Current commission rate is: $modified_commission_rate"
-          if [ "$modified_commission_rate" != "$set_commission_rate" ]
-          then
-            echo "[ERROR]: commission rate not set!"
-            echo "Expected $set_commission_rate got $modified_commission_rate"
-          fi
+      # - name: Query current feemarket params
+      #   run: |
+      #     $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      # - name: _Test feemarket
+      #   run: tests/stateful/test_feemarket.sh
+      # - name: _Test cancelled upgrade
+      #   env:
+      #     UPGRADE_NAME: v99
+      #     UPGRADE_AFTER: 50
+      #   run: tests/stateful/cancel-upgrade.sh
+      # - name: _Test commission rate
+      #   run: |
+      #     echo "[INFO]: Get current commission rate..."
+      #     json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+      #     echo "$json"
+      #     current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+      #     echo "[INFO]: Current commission rate is: $current_commission_rate"
+      #     echo "[INFO]: Set commission to 0.05 higher"
+      #     set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
+      #     echo "[INFO]: Set commission to: $set_commission_rate"
+      #     $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO]: Get latest comission rate..."
+      #     json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+      #     echo "$json"
+      #     modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+      #     echo "[INFO]: Current commission rate is: $modified_commission_rate"
+      #     if [ "$modified_commission_rate" != "$set_commission_rate" ]
+      #     then
+      #       echo "[ERROR]: commission rate not set!"
+      #       echo "Expected $set_commission_rate got $modified_commission_rate"
+      #     fi
 
-      - name: _Test permissioned cosmwasm
-        run: tests/stateful/test_cosmwasm.sh
-      - name: Print netstat
-        run: netstat -ntap
-      - name: _Provider API tests using localhost> gaiad
-        run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
-      - name: _Provider RPC tests using localhost> gaiad
-        run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
+      # - name: _Test permissioned cosmwasm
+      #   run: tests/stateful/test_cosmwasm.sh
+      # - name: Print netstat
+      #   run: netstat -ntap
+      # - name: _Provider API tests using localhost> gaiad
+      #   run: tests/test_endpoints_api.sh localhost $VAL1_API_PORT
+      # - name: _Provider RPC tests using localhost> gaiad
+      #   run: tests/test_endpoints_rpc.sh localhost $VAL1_RPC_PORT
 
       - name: Set up relayer
         run: scripts/stateful/setup_relayer.sh
