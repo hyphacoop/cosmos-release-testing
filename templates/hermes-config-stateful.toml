@@ -6,7 +6,7 @@ log_level = 'info'
 [mode.clients]
 enabled = true
 refresh = true
-misbehaviour = true
+misbehaviour = false
 
 [mode.connections]
 enabled = true
@@ -110,7 +110,7 @@ gas_price = { price = 0.005, denom = 'uatom' }
 gas_multiplier = 1.6
 max_gas = 10000000
 clock_drift = '10s'
-trusting_period = '600s'
+trusting_period = '300seconds'
 trust_threshold = '2/3'
 client_refresh_rate = '1/5'
 type = "CosmosSdk"
