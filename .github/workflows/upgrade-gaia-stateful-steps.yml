@@ -426,7 +426,76 @@ jobs:
           chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
           wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
           chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+      - name: Start Recovery chain
+        env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
+          CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY }}
+          CHAIN_SERVICE: recovery-chain.service
+          CHAIN_HOME: /home/runner/.recovery-chain
+          CHAIN_ID: recovery-chain-1
+          VAL_STAKE: 100000000
+          API_PORT: 35010
+          GRPC_PORT: 36010
+          RPC_PORT: 37010
+          P2P_PORT: 38010
+          PPROF_PORT: 39010
+          GAS_PRICE: 0.0025
+          MONIKER_RELAYER: ${{ vars.MONIKER_2 }}
+          MNEMONIC_RELAYER: ${{ vars.MNEMONIC_2 }}
+        run: |
+          source ~/env/bin/activate
+          scripts/stateful/start_chain_recovery.sh
+      - name: _recovery chain produces blocks> recovery-chain
+        run: tests/test_block_production.sh 127.0.0.1 37010 10
+      - name: Send funds to wallet 4 on recovery chain
+        env:
+          CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
+          CHAIN_SERVICE: recovery-chain.service
+          CHAIN_HOME: /home/runner/.recovery-chain
+        run: |
+          $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
+          tests/test_block_production.sh 127.0.0.1 37010 1 10
+          $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
+      # - name: Establish Connection to Recovery chain
+      #   env:
+      #     CHAIN_HOME: /home/runner/.val1
+      #   run: |
+      #     set -e
+      #     screen -XS hermes.service quit || true
+      #     killall hermes || true
+      #     sleep 1
+      #     echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
+      #     hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
+      #     echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
+      #     hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
+      #     sleep 30
+      #     # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
+      #     # client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
+      #     # echo "Client ID is: $client_id"
+      #     # hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
+      #     hermes create connection --a-chain ica-chain --b-chain $CHAIN_ID
+      #     echo "ica-chain connection-0 info:"
+      #     hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
+      #     echo "Starting Hermes"
+      #     screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+      #     # set screen to flush log to 0
+      #     screen -r hermes.service -p0 -X logfile flush 0
+      #     echo "Wait for hermes to start..."
+      #     ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+      #     sleep 60
 
+      # - name: Test Recovery
+      #   env:
+      #     ICA_HOME: /home/runner/.recovery-chain
+      #     CHAIN_HOME: /home/runner/.val1
+      #   run: tests/stateful/.sh
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Installing secondary chain binaries
         env:
           START_VERSION: ${{ vars.ICA_CHAIN_GAIA_VERSION }}
@@ -498,13 +567,7 @@ jobs:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
         run: tests/stateful/test_ica_controller.sh 
-      - name: DEBUG
-        if: always() && !cancelled()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      
       - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
