@@ -98,7 +98,7 @@ ccv_consumer_chain = true
 type = "CosmosSdk"
 
 [[chains]]
-id = 'recover-chain-1'
+id = 'recovery-chain-1'
 rpc_addr = 'http://localhost:37010'
 grpc_addr = 'http://localhost:36010'
 event_source = { mode = 'push', url = 'ws://localhost:37010/websocket', batch_delay = '500ms' }
