@@ -49,6 +49,7 @@ hermes keys add --chain consumerc --mnemonic-file mnemonic.txt
 hermes keys add --chain consumerd --mnemonic-file mnemonic.txt
 hermes keys add --chain consumerf --mnemonic-file mnemonic.txt
 hermes keys add --chain ica-chain --mnemonic-file mnemonic.txt
+hermes keys add --chain recovery-chain-1 --mnemonic-file mnemonic.txt
 set -e
 
 # echo "Creating connection..."

@@ -456,34 +456,36 @@ jobs:
           $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 10000000$DENOM --home $CHAIN_HOME --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
           tests/test_block_production.sh 127.0.0.1 37010 1 10
           $CHAIN_BINARY q bank balances $WALLET_4 --home $CHAIN_HOME
-      # - name: Establish Connection to Recovery chain
-      #   env:
-      #     CHAIN_HOME: /home/runner/.val1
-      #   run: |
-      #     set -e
-      #     screen -XS hermes.service quit || true
-      #     killall hermes || true
-      #     sleep 1
-      #     echo "Creating client on host-chain: $CHAIN_ID reference-chain ica-chain"
-      #     hermes create client --host-chain $CHAIN_ID --reference-chain ica-chain
-      #     echo "Creating client on host-chain: ica-chain Reference-chain: $CHAIN_ID"
-      #     hermes create client --reference-chain $CHAIN_ID --host-chain ica-chain
-      #     sleep 30
-      #     # client_id=$(hermes --json query clients --host-chain $CHAIN_ID | jq -r '.result[] | select(.chain_id == "ica-chain") | .client_id')
-      #     # client_id=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client states -o json | jq -r '.client_states[] | select (.client_state.chain_id == "ica-chain") | .client_id')
-      #     # echo "Client ID is: $client_id"
-      #     # hermes create connection --a-chain $CHAIN_ID --a-client $client_id --b-client 07-tendermint-0
-      #     hermes create connection --a-chain ica-chain --b-chain $CHAIN_ID
-      #     echo "ica-chain connection-0 info:"
-      #     hermes --json query connection end --chain ica-chain --connection connection-0 | tail -n 1 | jq '.result.counterparty'
-      #     echo "Starting Hermes"
-      #     screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
-      #     # set screen to flush log to 0
-      #     screen -r hermes.service -p0 -X logfile flush 0
-      #     echo "Wait for hermes to start..."
-      #     ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
-      #     sleep 60
-
+      - name: Establish Connection to Recovery chain
+        env:
+          CHAIN_HOME: /home/runner/.val1
+          SECONDARY_CHAIN_ID: recovery-chain-1
+        run: |
+          set -e
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          hermes create channel --a-chain $CHAIN_ID --b-chain $SECONDARY_CHAIN_ID --a-port transfer --b-port transfer --new-client-connection --yes
+          sleep 30
+          echo "Starting Hermes"
+          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+          # set screen to flush log to 0
+          screen -r hermes.service -p0 -X logfile flush 0
+          echo "Wait for hermes to start..."
+          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
+          sleep 60
+      - name: Get consumera chain info
+        env:
+          SECONDARY_CHAIN_ID: recovery-chain-1
+        run: |
+          set -e
+          client_id=$(hermes --json query connection end --chain $SECONDARY_CHAIN_ID --connection connection-0 | tail -n 1 | jq '.result.counterparty.client_id')
+          echo "Client ID: $client_id"
+          connection_id=$(hermes --json query connection end --chain $SECONDARY_CHAIN_ID --connection connection-0 | tail -n 1 | jq '.result.counterparty.connection_id')
+          echo "Connection ID: $connection_id"
+          channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
+          echo "Channel ID: $channel_id"
+          echo "RECOVERY_CHAN_ID=$channel_id" >> $GITHUB_ENV
       # - name: Test Recovery
       #   env:
       #     ICA_HOME: /home/runner/.recovery-chain
