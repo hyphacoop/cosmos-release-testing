@@ -1,0 +1,15 @@
+{
+ "messages": [
+  {
+   "@type": "/ibc.core.client.v1.MsgRecoverClient",
+   "subject_client_id": "07-tendermint-1423",
+   "substitute_client_id": "07-tendermint-1424",
+   "signer": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn"
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "recover expired IBC client",
+ "summary": "This will recover the IBC client",
+ "expedited": false
+}

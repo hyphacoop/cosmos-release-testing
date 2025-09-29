@@ -481,16 +481,18 @@ jobs:
           set -e
           client_id=$(hermes --json query connection end --chain $SECONDARY_CHAIN_ID --connection connection-0 | tail -n 1 | jq -r '.result.counterparty.client_id')
           echo "Client ID: $client_id"
+          echo "RECOVERY_CLIENT_ID=$client_id" >> $GITHUB_ENV
           connection_id=$(hermes --json query connection end --chain $SECONDARY_CHAIN_ID --connection connection-0 | tail -n 1 | jq -r '.result.counterparty.connection_id')
           echo "Connection ID: $connection_id"
+          echo "RECOVERY_CONNECTION_ID=$connection_id" >> $GITHUB_ENV
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
           echo "RECOVERY_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      # - name: Test Recovery
-      #   env:
-      #     ICA_HOME: /home/runner/.recovery-chain
-      #     CHAIN_HOME: /home/runner/.val1
-      #   run: tests/stateful/.sh
+      - name: _Test Recovery
+        env:
+          CHAIN_HOME: /home/runner/.val1
+          SECONDARY_CHAIN_HOME: /home/runner/.recovery-chain
+        run: tests/stateful/test_recover_client.sh ${{ env.RECOVERY_CLIENT_ID }} ${{ env.RECOVERY_CHAN_ID }}
       - name: DEBUG
         if: always() && !cancelled()
         run: |
