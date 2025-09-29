@@ -8,12 +8,12 @@ set -e
 
 echo "[INFO]: Creating new wallet on stateful chain..."
 test_wallet1_json=$($CHAIN_BINARY --home $CHAIN_HOME keys add stateful-recovery-wallet --output json)
-test_wallet1_addr=$(echo $consumer_test_wallet1_json | jq -r '.address')
+test_wallet1_addr=$(echo $test_wallet1_json | jq -r '.address')
 echo "test_wallet1_addr: $test_wallet1_addr"
 
 echo "[INFO]: Creating new wallet on recovery chain..."
-recovery_wallet1_json=$($CHAIN_BINARY --home $CHAIN_HOME keys add recovery-wallet --output json)
-recovery_wallet1_addr=$(echo $consumer_test_wallet1_json | jq -r '.address')
+recovery_wallet1_json=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME keys add recovery-wallet --output json)
+recovery_wallet1_addr=$(echo $recovery_wallet1_json | jq -r '.address')
 echo "recovery_wallet1_addr: $recovery_wallet1_addr"
 
 echo "[INFO]: Send tokens to recovery chain"
@@ -23,7 +23,7 @@ echo "[INFO]: Wait for 5 blocks"
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 
 echo "[INFO]: Check tokens in recovery chain"
-go/bin/gaiad --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr
+$CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr
 
 # echo "[INFO]: Stopping hermes..."
 # screen -XS hermes.service quit || true
