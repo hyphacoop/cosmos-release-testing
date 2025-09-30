@@ -474,7 +474,7 @@ jobs:
           echo "Wait for hermes to start..."
           ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
           sleep 60
-      - name: Get consumera chain info
+      - name: Get recovery-chain-1 chain info
         env:
           SECONDARY_CHAIN_ID: recovery-chain-1
         run: |
