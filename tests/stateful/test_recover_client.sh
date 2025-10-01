@@ -46,17 +46,17 @@ echo "[INFO]: Wait for 1 block..."
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Check tokens in recovery chain..."
-recovery_current_uatom=$($CHAIN_BINARY --home .recovery-chain q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
-recovery_current_ibc=$($CHAIN_BINARY --home .recovery-chain q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$recovery_wallet_denom\") | .amount")
+recovery_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+recovery_current_ibc=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$recovery_wallet_denom\") | .amount")
 echo "$recovery_current_uatom$DENOM"
 echo "$recovery_current_ibc$recovery_wallet_denom$"
 
 echo "[INFO]: Send IBC tokens back..."
-$CHAIN_BINARY --home .recovery-chain tx ibc-transfer transfer transfer channel-0 $test_wallet1_addr $tx_amount$recovery_wallet_denom --from recovery-wallet --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
+$CHAIN_BINARY --home $SECONDARY_CHAIN_HOME tx ibc-transfer transfer transfer channel-0 $test_wallet1_addr $tx_amount$recovery_wallet_denom --from recovery-wallet --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 
 echo "[INFO]: Check tokens in stateful chain..."
-stateful_current_uatom=$($CHAIN_BINARY --home .recovery-chain q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+stateful_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
 echo "$stateful_current_uatom$DENOM"
 
 # echo "[INFO]: Stopping hermes..."
