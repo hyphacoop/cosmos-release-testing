@@ -46,8 +46,8 @@ echo "[INFO]: Wait for 1 block..."
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Check tokens in recovery chain..."
-recovery_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
-recovery_current_ibc=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$recovery_wallet_denom\") | .amount")
+recovery_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+recovery_current_ibc=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$recovery_wallet_denom\") | .amount")
 echo "$recovery_current_uatom$DENOM"
 echo "$recovery_current_ibc$recovery_wallet_denom$"
 
@@ -56,7 +56,7 @@ $CHAIN_BINARY --home $SECONDARY_CHAIN_HOME tx ibc-transfer transfer transfer cha
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 
 echo "[INFO]: Check tokens in stateful chain..."
-stateful_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances cosmos1y96dngzpnr6pna3lea8mmuq0vllz38dfdrw5zx -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+stateful_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $test_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
 echo "$stateful_current_uatom$DENOM"
 
 # echo "[INFO]: Stopping hermes..."
