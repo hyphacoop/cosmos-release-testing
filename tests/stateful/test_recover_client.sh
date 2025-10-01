@@ -40,7 +40,7 @@ else
 fi
 
 echo "[INFO]: Send tokens for gas on recovery chain"
-$CHAIN_BINARY tx bank send $WALLET_1 $recovery_wallet_amount $gas_tokens$DENOM --home $CHAIN_HOME --from $MONIKER_1 --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
+$CHAIN_BINARY tx bank send $WALLET_1 $test_wallet1_addr $gas_tokens$DENOM --home $CHAIN_HOME --from $MONIKER_1 --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
 
 echo "[INFO]: Wait for 1 block..."
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
