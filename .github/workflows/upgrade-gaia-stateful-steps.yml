@@ -491,6 +491,7 @@ jobs:
       - name: _Test Recovery
         env:
           CHAIN_HOME: /home/runner/.val1
+          SECONDARY_CHAIN_ID: recovery-chain-1
           SECONDARY_CHAIN_HOME: /home/runner/.recovery-chain
         run: tests/stateful/test_recover_client.sh ${{ env.RECOVERY_CLIENT_ID }} ${{ env.RECOVERY_CHAN_ID }}
       - name: DEBUG

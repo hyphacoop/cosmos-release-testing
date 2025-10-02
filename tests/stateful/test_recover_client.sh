@@ -45,7 +45,7 @@ else
     echo "[PASS]: Tokens amount $recovery_wallet_amount matches $recovery_tokens"
 fi
 
-echo "[INFO]: Send tokens for gas on recovery chain"
+echo "[INFO]: Send tokens for gas on recovery chain..."
 $CHAIN_BINARY tx bank send $WALLET_1 $recovery_wallet1_addr $gas_tokens$DENOM --home $SECONDARY_CHAIN_HOME --from $MONIKER_1 --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
 
 echo "[INFO]: Wait for 1 block..."
@@ -72,16 +72,25 @@ else
     echo "[PASS]: Tokens amount $stateful_current_uatom on stateful chain matches $tx_amount"
 fi
 
-# echo "[INFO]: Stopping hermes..."
-# screen -XS hermes.service quit || true
-# killall hermes || true
-# sleep 1
+echo "[INFO]: Stopping hermes..."
+screen -XS hermes.service quit || true
+killall hermes || true
+sleep 1
 
-# echo "[INFO]: Waiting for $client_id to expire..."
-# current_client_status=$(go/bin/gaiad --home .val1 q ibc client status $client_id -o json | jq -r '.status')
-# while [ $current_client_status == "Active" ]
-# do
-#     current_client_status=$(go/bin/gaiad --home .val1 q ibc client status $client_id -o json | jq -r '.status')
-#     echo "Client $client_id status: $current_client_status"
-#     sleep 60
-# done
+echo "[INFO]: Waiting for $client_id to expire..."
+current_client_status=$(go/bin/gaiad --home .val1 q ibc client status $client_id -o json | jq -r '.status')
+while [ $current_client_status == "Active" ]
+do
+    current_client_status=$(go/bin/gaiad --home .val1 q ibc client status $client_id -o json | jq -r '.status')
+    echo "Client $client_id status: $current_client_status"
+    sleep 60
+done
+
+echo "[INFO]: Creating a substitute client..."
+hermes_output=$(hermes create client --host-chain $CHAIN_ID --reference-chain $SECONDARY_CHAIN_ID --trusting-period 300s --clock-drift 50s)
+echo $hermes_output
+substitute_client_id=$(echo $hermes_output | grep -oh "\07-tendermint-\w*")
+echo "[INFO]: substitute client ID: $substitute_client_id"
+
+echo "[INFO]: Starting hermes service..."
+screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
