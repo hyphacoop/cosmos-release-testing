@@ -97,7 +97,7 @@ jq -r --arg subject_client_id "$client_id" --arg substitute_client_id "$substitu
 jq -r '.' proposal-recover-client.json
 
 echo "[INFO]: Submitting recover proposal..."
-scripts/submit_proposal.sh proposal-cona-rate-limit.json
+scripts/submit_proposal.sh proposal-recover-client.json
 
 echo "[INFO]: Starting hermes service..."
 screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
