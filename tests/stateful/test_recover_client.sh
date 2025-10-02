@@ -93,8 +93,7 @@ substitute_client_id=$(echo $hermes_output | grep -oh "\07-tendermint-\w*")
 echo "[INFO]: substitute client ID: $substitute_client_id"
 
 echo "[INFO]: Creating proposal file..."
-jq -r --arg subject_client_id "$client_id" --arg substitute_client_id "$substitute_client_id" '.messages[0].subject_client_id=$subject_clie
-nt_id | .messages[0].substitute_client_id=$substitute_client_id' templates/proposal-recover-client.json > proposal-recover-client.json
+jq -r --arg subject_client_id "$client_id" --arg substitute_client_id "$substitute_client_id" '.messages[0].subject_client_id=$subject_client_id | .messages[0].substitute_client_id=$substitute_client_id' templates/proposal-recover-client.json > proposal-recover-client.json
 jq -r '.' proposal-recover-client.json
 
 echo "[INFO]: Submitting recover proposal..."
