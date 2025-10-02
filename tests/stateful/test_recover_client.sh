@@ -78,10 +78,10 @@ killall hermes || true
 sleep 1
 
 echo "[INFO]: Waiting for $client_id to expire..."
-current_client_status=$(go/bin/gaiad --home .val1 q ibc client status $client_id -o json | jq -r '.status')
+current_client_status=$($CHAIN_BINARY --home .val1 q ibc client status $client_id -o json | jq -r '.status')
 while [ $current_client_status == "Active" ]
 do
-    current_client_status=$(go/bin/gaiad --home .val1 q ibc client status $client_id -o json | jq -r '.status')
+    current_client_status=$($CHAIN_BINARY --home .val1 q ibc client status $client_id -o json | jq -r '.status')
     echo "Client $client_id status: $current_client_status"
     sleep 60
 done
