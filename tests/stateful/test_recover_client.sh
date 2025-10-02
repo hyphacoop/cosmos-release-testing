@@ -19,8 +19,8 @@ recovery_wallet1_addr=$(echo $recovery_wallet1_json | jq -r '.address')
 echo "recovery_wallet1_addr: $recovery_wallet1_addr"
 
 echo "[INFO]: Get client params"
-client_max_clock_drift=$($CHAIN_BINARY --home .val1 q ibc client state $client_id -o json | jq -r '.client_state.max_clock_drift')
-client_trusting_period=$($CHAIN_BINARY --home .val1 q ibc client state $client_id -o json | jq -r '.client_state.trusting_period')
+client_max_clock_drift=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client state $client_id -o json | jq -r '.client_state.max_clock_drift')
+client_trusting_period=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client state $client_id -o json | jq -r '.client_state.trusting_period')
 echo "$client_id max clock drift: $client_max_clock_drift"
 echo "$client_id trusting period: $client_trusting_period"
 
