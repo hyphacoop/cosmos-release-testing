@@ -18,6 +18,12 @@ recovery_wallet1_json=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME keys add reco
 recovery_wallet1_addr=$(echo $recovery_wallet1_json | jq -r '.address')
 echo "recovery_wallet1_addr: $recovery_wallet1_addr"
 
+echo "[INFO]: Get client params"
+client_max_clock_drift=$($CHAIN_BINARY --home .val1 q ibc client state $client_id -o json | jq -r '.client_state.max_clock_drift')
+client_trusting_period=$($CHAIN_BINARY --home .val1 q ibc client state $client_id -o json | jq -r '.client_state.trusting_period')
+echo "$client_id max clock drift: $client_max_clock_drift"
+echo "$client_id trusting period: $client_trusting_period"
+
 echo "[INFO]: Send tokens to recovery chain..."
 $CHAIN_BINARY --home $CHAIN_HOME tx ibc-transfer transfer transfer $recovery_chan_id $recovery_wallet1_addr $recovery_tokens$DENOM --from $MONIKER_1 --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
 
@@ -56,8 +62,15 @@ $CHAIN_BINARY --home $SECONDARY_CHAIN_HOME tx ibc-transfer transfer transfer cha
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 
 echo "[INFO]: Check tokens in stateful chain..."
-stateful_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $test_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+stateful_current_uatom=$($CHAIN_BINARY --home $CHAIN_HOME q bank balances $test_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
 echo "$stateful_current_uatom$DENOM"
+if [ "$stateful_current_uatom" != "$tx_amount" ]
+then
+    echo "[ERROR]: Tokens amount $stateful_current_uatom on stateful chain did not match $tx_amount"
+    exit 1
+else
+    echo "[PASS]: Tokens amount $stateful_current_uatom on stateful chain matches $tx_amount"
+fi
 
 # echo "[INFO]: Stopping hermes..."
 # screen -XS hermes.service quit || true
