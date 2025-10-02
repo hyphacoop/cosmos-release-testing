@@ -92,5 +92,24 @@ echo $hermes_output
 substitute_client_id=$(echo $hermes_output | grep -oh "\07-tendermint-\w*")
 echo "[INFO]: substitute client ID: $substitute_client_id"
 
+echo "[INFO]: Creating proposal file..."
+jq -r --arg subject_client_id "$client_id" --arg substitute_client_id "$substitute_client_id" '.messages[0].subject_client_id=$subject_clie
+nt_id | .messages[0].substitute_client_id=$substitute_client_id' templates/proposal-recover-client.json > proposal-recover-client.json
+jq -r '.' proposal-recover-client.json
+
+echo "[INFO]: Submitting recover proposal..."
+scripts/submit_proposal.sh proposal-cona-rate-limit.json
+
 echo "[INFO]: Starting hermes service..."
 screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
+
+echo "[INFO]: Check if $client_id is active again..."
+current_client_status=$($CHAIN_BINARY --home $CHAIN_HOME q ibc client status $client_id -o json | jq -r '.status')
+echo "Client $client_id status: $current_client_status"
+if [ "$current_client_status" != "Active" ]
+then
+    echo "[ERROR]: Client $client_id is NOT Active"
+    exit 1
+else
+    echo "[PASS]: Client $client_id is Active"
+fi

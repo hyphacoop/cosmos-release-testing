@@ -2,8 +2,8 @@
  "messages": [
   {
    "@type": "/ibc.core.client.v1.MsgRecoverClient",
-   "subject_client_id": "07-tendermint-1423",
-   "substitute_client_id": "07-tendermint-1424",
+   "subject_client_id": "07-tendermint-0",
+   "substitute_client_id": "07-tendermint-1",
    "signer": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn"
   }
  ],
