@@ -159,6 +159,7 @@ fi
 echo "[INFO]: Check tokens in stateful chain..."
 let expected_tokens=$stateful_current_uatom+$tx_amount
 stateful_current_uatom=$($CHAIN_BINARY --home $CHAIN_HOME q bank balances $test_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+echo "Tokens in $test_wallet1_addr"
 echo "$stateful_current_uatom$DENOM"
 if [ "$stateful_current_uatom" != "$expected_tokens" ]
 then
