@@ -112,3 +112,28 @@ then
 else
     echo "[PASS]: Client $client_id is Active"
 fi
+
+echo "[INFO] Post recovery tests..."
+echo "[INFO]: Check tokens in recovery chain..."
+recovery_current_uatom=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$DENOM\") | .amount")
+recovery_current_ibc=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$recovery_wallet_denom\") | .amount")
+echo "$recovery_current_uatom$DENOM"
+echo "$recovery_current_ibc$recovery_wallet_denom"
+
+echo "[INFO]: Send tokens to recovery chain..."
+$CHAIN_BINARY --home $CHAIN_HOME tx ibc-transfer transfer transfer $recovery_chan_id $recovery_wallet1_addr $tx_amount$DENOM --from $MONIKER_1 --gas $GAS --gas-prices $GAS_PRICES$DENOM --gas-adjustment  $GAS_ADJUSTMENT -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
+
+echo "[INFO]: Check if IBC tokens matches expected value..."
+let recovery_value=$recovery_current_ibc+tx_amount
+echo "Expected tokens $recovery_value$recovery_wallet_denom in recovery chain wallet"
+recovery_current_ibc=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $recovery_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$recovery_wallet_denom\") | .amount")
+echo "Current IBC tokens in recovery chain wallet $recovery_current_ibc$recovery_wallet_denom"
+
+if [ "$recovery_current_ibc" != "$recovery_value" ]
+then
+    echo "Recovery chain wallet have $recovery_current_ibc IBC tokens, does not match expected value of $recovery_value"
+    exit 1
+else
+    echo "Recovery chain wallet have $recovery_current_ibc IBC tokens, matches expected value of $recovery_value"
+fi
