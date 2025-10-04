@@ -488,7 +488,7 @@ jobs:
           channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
           echo "Channel ID: $channel_id"
           echo "RECOVERY_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      - name: _Test Recovery
+      - name: _Test IBC client recovery
         env:
           CHAIN_HOME: /home/runner/.val1
           SECONDARY_CHAIN_ID: recovery-chain-1
