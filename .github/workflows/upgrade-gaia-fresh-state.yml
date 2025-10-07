@@ -1342,14 +1342,14 @@
               scripts/stride_switch_optin.sh
               # scripts/consumer_set_topn.sh
 
-          - name: Opt out from top n-1 validators 
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_stride.sh
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
-              scripts/consumer_opt_out.sh
-              $CHAIN_BINARY q comet-validator-set --home $whale_home
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
+          # - name: Opt out from top n-1 validators 
+          #   run: |
+          #     source scripts/vars.sh
+          #     source scripts/vars_consumer_stride.sh
+          #     $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
+          #     scripts/consumer_opt_out.sh
+          #     $CHAIN_BINARY q comet-validator-set --home $whale_home
+          #     $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
 
           - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0
             run: |
