@@ -43,4 +43,4 @@ sleep 30s
 echo "> Stride validator set after switch to opt-in:"
 $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
 echo "> Stride block after switch to opt-in:"
-$CONSUMER_CHAIN_BINARY q block --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc -o json | jq -r '.'
+$CONSUMER_CHAIN_BINARY q block --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc -o json | tail -n 1 | jq -r '.'
