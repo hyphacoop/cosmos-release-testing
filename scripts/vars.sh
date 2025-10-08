@@ -1,4 +1,4 @@
-export validator_count=5
+export validator_count=10
 
 # Chain configuration
 export CHAIN_BINARY_NAME="gaiad"

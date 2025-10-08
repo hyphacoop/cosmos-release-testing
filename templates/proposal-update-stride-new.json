@@ -1,25 +1,32 @@
 {
- "messages": [
-  {
-   "@type": "/interchain_security.ccv.provider.v1.MsgUpdateConsumer",
-   "owner": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
-   "consumer_id": "0",
-   "new_owner_address": "cosmos1fduug6m38gyuqt3wcgc2kcgr9nnte0n7nmnk24",
-   "power_shaping_parameters": {
-      "top_N": 0,
-      "validators_power_cap": 1,
-      "validator_set_cap": 3,
-      "allowlist": [],
-      "denylist": [],
-      "min_stake": 0,
-      "allow_inactive_vals": false
+  "messages": [
+    {
+      "@type": "/interchain_security.ccv.provider.v1.MsgUpdateConsumer",
+      "owner": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+      "consumer_id": "0",
+      "new_owner_address": "cosmos1fduug6m38gyuqt3wcgc2kcgr9nnte0n7nmnk24",
+      "power_shaping_parameters": {
+        "top_N": 0,
+        "validators_power_cap": 1,
+        "validator_set_cap": 7,
+        "allowlist": [
+          "cosmosvalcons1m7fg8k39k2tyym5hgwrpf5wx9hqsr8vywuyrtm",
+          "cosmosvalcons1c5e86exd7jsyhcfqdejltdsagjfrvv8xv22368",
+          "cosmosvalcons1pdpwglc4fcjdzqvyhvfwxg684trpc6uqck5sxk",
+          "cosmosvalcons1px0zkz2cxvc6lh34uhafveea9jnaagckmrlsye",
+          "cosmosvalcons1vz42ewp04wwepjed7z4qenj925gpakgvap4q2u",
+          "cosmosvalcons1upc05nc9pwhhagnkr3f2dft327qxsxfeyvajsu",
+          "cosmosvalcons1f6cjsfn47ujttypx7gtncglsmjvndugc2zelqx"
+        ],
+        "denylist": [],
+        "min_stake": 0,
+        "allow_inactive_vals": false
+      }
     }
-  }
- ],
- "metadata": "ipfs://CID",
- "deposit": "1000000000uatom",
- "title": "Switch to opt-in",
- "summary": "Update power shaping parameters and transfer ownership",
- "expedited": false
+  ],
+  "metadata": "ipfs://CID",
+  "deposit": "1000000000uatom",
+  "title": "Switch to opt-in",
+  "summary": "Update power shaping parameters and transfer ownership",
+  "expedited": false
 }
-
