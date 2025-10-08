@@ -4,7 +4,7 @@
    "@type": "/interchain_security.ccv.provider.v1.MsgUpdateConsumer",
    "owner": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
    "consumer_id": "0",
-   "new_owner_address": "cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl",
+   "new_owner_address": "stride1fduug6m38gyuqt3wcgc2kcgr9nnte0n7ssn27e",
    "power_shaping_parameters": {
       "top_N": 0,
       "validators_power_cap": 1,
