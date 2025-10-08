@@ -1339,6 +1339,7 @@
               source scripts/vars.sh  
               source scripts/vars_consumer_stride.sh
               export TOPN=0
+              scripts/stride_switch_optin_cancel.sh
               scripts/stride_switch_optin.sh
               # scripts/consumer_set_topn.sh
 
