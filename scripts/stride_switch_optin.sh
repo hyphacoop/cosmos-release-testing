@@ -11,11 +11,11 @@ val2=$($CHAIN_BINARY comet show-address --home ${home_prefix}02)
 val3=$($CHAIN_BINARY comet show-address --home ${home_prefix}03)
 echo "Adding $val1, $val2, $val3 to the allowlist"
 
-jq -r --arg val1 "$val1" '.messages[0].power_shaping_parameters.allowlist += $val1' proposal-update.json > proposal-allowlist.json
+jq -r --arg val1 "$val1" '.messages[0].power_shaping_parameters.allowlist += [$val1]' proposal-update.json > proposal-allowlist.json
 cp proposal-allowlist.json proposal-update.json
-jq -r --arg val2 "$val2" '.messages[0].power_shaping_parameters.allowlist += $val2' proposal-update.json > proposal-allowlist.json
+jq -r --arg val2 "$val2" '.messages[0].power_shaping_parameters.allowlist += [$val2]' proposal-update.json > proposal-allowlist.json
 cp proposal-allowlist.json proposal-update.json
-jq -r --arg val3 "$val3" '.messages[0].power_shaping_parameters.allowlist += $val3' proposal-update.json > proposal-allowlist.json
+jq -r --arg val3 "$val3" '.messages[0].power_shaping_parameters.allowlist += [$val3]' proposal-update.json > proposal-allowlist.json
 cp proposal-allowlist.json proposal-update.json
 jq '.' proposal-update.json
 
