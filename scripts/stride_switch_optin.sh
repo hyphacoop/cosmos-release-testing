@@ -32,11 +32,14 @@ sleep $(($COMMIT_TIMEOUT+2))
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q gov tally $proposal_id --home $whale_home
 
+echo "> Query submitter balance after submitting proposal:"
+$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+
 echo "Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
 $CHAIN_BINARY q gov proposal $proposal_id --home $whale_home -o json | jq '.'
 
-echo "> Query submitter balance after proposal:"
+echo "> Query submitter balance after proposal fails:"
 $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
 
 echo "Querying consumer chains:"
