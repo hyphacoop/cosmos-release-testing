@@ -12,9 +12,9 @@ export WALLET_RELAYER=cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
 
 export CHAIN_ID=testnet
 export DENOM=uatom
-export VAL_FUNDS="10000000000"
-export VAL_WHALE="100000000"
-export VAL_STAKE="10000000"
+export VAL_FUNDS="100000000000"
+export VAL_WHALE="10000000000"
+export VAL_STAKE="100000000"
 export DOWNTIME_WINDOW="10"
 export DOWNTIME_JAIL_DURATION="30s"
 export EXPEDITED_VOTING_PERIOD="10"
