@@ -15,6 +15,9 @@ jq -r --arg val1 "$val1" --arg val2 "$val2" --arg val3 "$val3" '.messages[0].pow
 cp proposal-allowlist.json proposal-update.json
 jq '.' proposal-update.json
 
+echo "> Query submitter balance before proposal:"
+$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+
 echo "> Submitting proposal."
 tx="$CHAIN_BINARY tx gov submit-proposal proposal-update.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --from $WALLET_1 --keyring-backend test --home $whale_home --chain-id $CHAIN_ID -y -o json"
 txhash=$($tx | jq -r .txhash)
@@ -32,6 +35,9 @@ $CHAIN_BINARY q gov tally $proposal_id --home $whale_home
 echo "Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
 $CHAIN_BINARY q gov proposal $proposal_id --home $whale_home -o json | jq '.'
+
+echo "> Query submitter balance after proposal:"
+$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
 
 echo "Querying consumer chains:"
 $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
