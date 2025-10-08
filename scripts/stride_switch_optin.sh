@@ -44,7 +44,7 @@ echo "Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
 $CHAIN_BINARY q gov proposal $proposal_id --home $whale_home -o json | jq '.'
 
-echo "> Query submitter balance after proposal fails:"
+echo "> Query submitter balance after proposal passes:"
 $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
 
 echo "Querying consumer chains:"
