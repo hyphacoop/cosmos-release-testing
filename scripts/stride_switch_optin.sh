@@ -26,6 +26,24 @@ sleep $(($COMMIT_TIMEOUT+2))
 echo "Getting proposal ID from txhash..."
 $CHAIN_BINARY q tx $txhash --home $whale_home
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $whale_home --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+
+echo "> Query submitter balance after submitting proposal:"
+$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+
+echo "> Cancelling proposal."
+tx="$CHAIN_BINARY tx gov cancel-proposal $proposal_id --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --from $WALLET_1 --keyring-backend test --home $whale_home --chain-id $CHAIN_ID -y -o json"
+txhash=$($tx | jq -r .txhash)
+# Wait for the cancellation to go through
+sleep $(($COMMIT_TIMEOUT+2))
+
+echo "> Query submitter balance after cancelling proposal:"
+$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+
+echo "> Query proposal status:"
+$CHAIN_BINARY q gov proposal $proposal_id --home $whale_home -o json | jq '.'
+
+exit 0
+
 echo "Voting on proposal $proposal_id..."
 $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json
 sleep $(($COMMIT_TIMEOUT+2))
