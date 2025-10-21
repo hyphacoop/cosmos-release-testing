@@ -410,6 +410,13 @@ jobs:
 
       - name: _Test permissioned cosmwasm
         run: tests/stateful/test_cosmwasm.sh
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
       - name: Print netstat
         run: netstat -ntap
       - name: _Provider API tests using localhost> gaiad
@@ -494,13 +501,7 @@ jobs:
           SECONDARY_CHAIN_ID: recovery-chain-1
           SECONDARY_CHAIN_HOME: /home/runner/.recovery-chain
         run: tests/stateful/test_recover_client.sh ${{ env.RECOVERY_CLIENT_ID }} ${{ env.RECOVERY_CHAN_ID }}
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
+      
       - name: Installing secondary chain binaries
         env:
           START_VERSION: ${{ vars.ICA_CHAIN_GAIA_VERSION }}
