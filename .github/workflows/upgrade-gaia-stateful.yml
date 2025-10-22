@@ -28,15 +28,6 @@ on:
 concurrency:
   group: self-hosted-runners
 jobs:
-  provision-runner:
-    concurrency:
-      group: provision-vm-runner
-      cancel-in-progress: false
-    strategy:
-      fail-fast: true
-      max-parallel: 1
-    uses: ./.github/workflows/provision-runner-vm.yml
-    secrets: inherit
   set-version-matrix:
     env:
       START: ${{ github.event_name == 'push' && 'v25.1.1' || github.event_name == 'repository_dispatch' && 'v25.1.1' || inputs.from_version }}
@@ -78,6 +69,17 @@ jobs:
       gaia_version: ${{ steps.start.outputs.version }}
       upgrade_version: ${{ steps.target.outputs.version }}
       archive_url: ${{ steps.archive.outputs.url }}
+
+  provision-runner:
+    needs: set-version-matrix
+    concurrency:
+      group: provision-vm-runner
+      cancel-in-progress: false
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+    uses: ./.github/workflows/provision-runner-vm.yml
+    secrets: inherit
 
   test-upgrade-mainnet:
     needs: set-version-matrix
