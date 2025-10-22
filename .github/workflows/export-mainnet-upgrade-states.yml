@@ -205,15 +205,16 @@ jobs:
           screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
-      - name: Get min_deposit
-        run: |
-          gaiad q gov params -o json
-          min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
-          echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Restore val key
         run: |
           echo "Restoring validator key"
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
       - name: Stop gaiad
         run: |
           echo "exiting gaia and screen"
@@ -239,12 +240,13 @@ jobs:
           screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Get min_deposit
+        run: |
+          gaiad q gov params -o json
+          min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
+          echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
         run: |
-          echo "Delegate 10ATOM to validator."
-          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
-          echo "Wait for the delegation to go on chain..."
-          tests/test_block_production.sh 127.0.0.1 26657 1 10
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
