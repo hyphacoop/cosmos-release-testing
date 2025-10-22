@@ -29,7 +29,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 #     --home $HOME_1 -o json)
 
 echo "[INFO]:Submitting the instantiate tx..."
-$CHAIN_BINARY --home $HOME_1 tx wasm instantiate $code_id $INIT --label "my first contract" --no-admin --from val --gas 20000000 --gas-prices 0.005uatom
+$CHAIN_BINARY --home $HOME_1 tx wasm instantiate $code_id $INIT --label "my first contract" --no-admin --from val --gas 20000000 --gas-prices 0.005uatom -y
 
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 # echo "[DEBUG]: submit json output:"
