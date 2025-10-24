@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 on Monday.
     - cron: '30 5 * * 1'
-  # push:
+  push:
 # concurrency:
 #   group: self-hosted-runners
 
@@ -171,15 +171,18 @@ jobs:
         run: |
           echo "[INFO]: Compressing data and wasm..."
           cd /home/runner/.gaia
-          tar cfz ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz data wasm
+          # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz data wasm
+          tar cf - data wasm | lz4 ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4
           echo "[INFO]: Remove snapshots older than 30 days"
-          ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.gz" -mmin +43800 -delete -print || true
+          ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
           echo "[INFO]: Uploading snapshot to files.polypore.xyz"
-          scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4
+          scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4
+          echo "[INFO]: Uploading addrbook.json"
+          scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
           echo "[INFO]: Update latest file symlinks"
-          ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz /storage/snapshots/cosmoshub-4/latest.tar.gz
+          ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 /storage/snapshots/cosmoshub-4/latest.tar.lz4
           echo "[INFO]: Remove local snapshot archive"
-          rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz
+          rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
       - name: Install Go
         uses: actions/setup-go@v5
         with:
