@@ -187,6 +187,7 @@ jobs:
           scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
           echo "[INFO]: Update latest file symlinks"
           ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 /storage/snapshots/cosmoshub-4/latest.tar.lz4
+          ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt /storage/snapshots/cosmoshub-4/latest.tar.lz4.info.txt
           echo "[INFO]: Remove local snapshot archive"
           rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
       - name: Install Go
