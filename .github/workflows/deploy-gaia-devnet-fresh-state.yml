@@ -115,6 +115,9 @@ jobs:
           /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.enable true
           /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.swagger true
           /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml p2p.seed_mode false
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml instrumentation.prometheus --to-bool true
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml instrumentation.prometheus_listen_addr ":26660"
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml instrumentation.namespace "tendermint"
       - name: Start Chain
         env:
           NODE_HOME: /home/sysadmin/.gaia
