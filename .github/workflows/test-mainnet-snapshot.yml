@@ -1,0 +1,137 @@
+---
+name: Test mainnet snapshot
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Export Mainnet Upgrade States']
+    types: [completed]
+  # schedule:
+  #   # At 05:30 on Monday.
+  #   - cron: '30 5 * * 1'
+  push:
+# concurrency:
+#   group: self-hosted-runners
+
+jobs:
+  test-cosmoshub-snapshot:
+    runs-on: cosmos-runner-set
+    environment: test-mainnet-snapshot
+    env:
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
+      - name: Set SSH key
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s ${{ vars.RPC_NODE }}/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+      - name: Initializing chain to sync with mainnet
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: mainnet-export
+          SERVICE_NAME: mainnet-export
+          CHAIN_ID: cosmoshub-4
+          CHAIN_BINARY: 'gaiad'
+          GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          echo "Configuring state sync..."
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json.gz
+          gunzip genesis.json.gz
+          mv genesis.json $NODE_HOME/config/genesis.json
+      - name: Download snapshot
+        env:
+          ARCHIVE_URL: https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4
+        run: |
+          cd ~/.gaia
+          curl -o - -L $ARCHIVE_URL | lz4 -d | tar vx -C .
+      - name: Get addrbook
+        env:
+          ADDR_BOOK_URL: https://snapshots.polypore.xyz/cosmoshub-4/addrbook.json
+        run: curl -Ls $ADDR_BOOK_URL > /home/runner/.gaia/config/addrbook.json
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
+      - name: Syncing Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:26657/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-cosmos-hub-mainnet
+          path: ~/artifact/
+ 
