@@ -134,4 +134,3 @@ jobs:
         with:
           name: export-cosmos-hub-mainnet
           path: ~/artifact/
- 
