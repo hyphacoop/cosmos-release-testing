@@ -8,7 +8,7 @@ on:
   # schedule:
   #   # At 05:30 on Monday.
   #   - cron: '30 5 * * 1'
-  push:
+  # push:
 # concurrency:
 #   group: self-hosted-runners
 
@@ -106,7 +106,7 @@ jobs:
           ARCHIVE_URL: https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4
         run: |
           cd ~/.gaia
-          curl -o - -L $ARCHIVE_URL | lz4 -d | tar vx -C .
+          curl -o - -L $ARCHIVE_URL | lz4 -d | tar x -C .
       - name: Get addrbook
         env:
           ADDR_BOOK_URL: https://snapshots.polypore.xyz/cosmoshub-4/addrbook.json
