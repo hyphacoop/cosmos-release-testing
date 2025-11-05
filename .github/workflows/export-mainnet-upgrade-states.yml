@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 on Monday.
     - cron: '30 5 * * 1'
-  push:
+  # push:
 # concurrency:
 #   group: self-hosted-runners
 
@@ -142,7 +142,7 @@ jobs:
           echo "[INFO]: Cleanup..."
           rm archive.tar.lz4
       - name: Get addrbook
-        run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
+        run: curl -Ls ${{ env.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia

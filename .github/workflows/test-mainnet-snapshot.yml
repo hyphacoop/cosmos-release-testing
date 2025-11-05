@@ -3,7 +3,7 @@ name: Test mainnet snapshot
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ['Export Mainnet Upgrade States']
+    workflows: ['Export Mainnet Snapshot']
     types: [completed]
   # schedule:
   #   # At 05:30 on Monday.
