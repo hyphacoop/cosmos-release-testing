@@ -133,7 +133,7 @@ jobs:
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         env:
-          STATESYNC_ENABLED: ${{ vars.SSH_PUB_KEYS }}
+          STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
           if [ "$STATESYNC_ENABLED" == "1" ]
           then
