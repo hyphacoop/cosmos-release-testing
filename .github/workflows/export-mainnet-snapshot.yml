@@ -132,8 +132,10 @@ jobs:
           # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
+        env:
+          STATESYNC_ENABLED: ${{ vars.SSH_PUB_KEYS }}
         run: |
-          if [ ${{ env.STATESYNC_ENABLED }} == 1 ]
+          if [ "$STATESYNC_ENABLED" == "1" ]
           then
             echo "Statesync enabled, skip downloading snapshot..."
             exit 0
