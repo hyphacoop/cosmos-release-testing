@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 aria2
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 aria2 bc
       - run: ifconfig
       - run: lscpu
       - run: df -h
@@ -189,8 +189,8 @@ jobs:
           size=$(du -hs wasm data)
           echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
           echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
-          # echo "[INFO]: Remove snapshots older than 30 days"
-          # ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
+          echo "[INFO]: Remove snapshots older than 30 days"
+          ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
           echo "[INFO]: Remove old snapshots"
           ssh gh-actions@files.polypore.xyz cleanup-cosmoshub-4-snapshots.sh || true
           echo "[INFO]: Uploading snapshot to files.polypore.xyz"
