@@ -88,6 +88,7 @@ jobs:
           GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
           GAS_PRICES: "0.0025uatom"
         run: |
+          set -e
           echo "Initializing $NODE_HOME..."
           $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
           $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
@@ -96,7 +97,8 @@ jobs:
           sed -i -e "/^persistent_peers =/ s^= .*^= \"${{ vars.PERSISTENT_PEERS }}\"^" $NODE_HOME/config/config.toml
           echo "Configuring state sync..."
           CURRENT_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block | jq -r '.result.block.header.height')
-          TRUST_HEIGHT=$[$CURRENT_BLOCK-${{ vars.TRUST_HEIGHT_DELTA }}]
+          # TRUST_HEIGHT=$[$CURRENT_BLOCK-${{ vars.TRUST_HEIGHT_DELTA }}]
+          TRUST_HEIGHT=$(echo $CURRENT_BLOCK | awk '{printf "%d000-1000\n", $0 / 1000}' | bc)
           TRUST_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block\?height\=$TRUST_HEIGHT)
           TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
           sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
@@ -135,6 +137,7 @@ jobs:
         env:
           STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
+          set -e
           if [ "$STATESYNC_ENABLED" == "1" ]
           then
             echo "Statesync enabled, skip downloading snapshot..."
@@ -177,6 +180,7 @@ jobs:
           sleep 10s
       - name: Make current snapshot and upload
         run: |
+          set -e
           echo "[INFO]: Compressing data and wasm..."
           cd /home/runner/.gaia
           # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz data wasm
@@ -185,8 +189,10 @@ jobs:
           size=$(du -hs wasm data)
           echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
           echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
-          echo "[INFO]: Remove snapshots older than 30 days"
-          ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
+          # echo "[INFO]: Remove snapshots older than 30 days"
+          # ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
+          echo "[INFO]: Remove old snapshots"
+          ssh gh-actions@files.polypore.xyz cleanup-cosmoshub-4-snapshots.sh || true
           echo "[INFO]: Uploading snapshot to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
           echo "[INFO]: Uploading info file to files.polypore.xyz"
