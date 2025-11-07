@@ -163,7 +163,9 @@ jobs:
           CHAIN_BINARY: 'gaiad'
         run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
       - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
+        run: |
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 100000
       - name: Syncing Chain
         run: |
           catching_up="true"
