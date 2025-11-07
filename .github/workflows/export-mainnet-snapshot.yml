@@ -105,7 +105,7 @@ jobs:
           echo "[INFO]: Trust Height: $TRUST_HEIGHT"
           echo "[INFO]: Trust Hash: $TRUST_HASH"
           sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
-          sed -i -e '/trust_period =/ s/= .*/= "7h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
           sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"${{ vars.SYNC_RPC_1 }},${{ vars.SYNC_RPC_2 }}\"^" $NODE_HOME/config/config.toml
