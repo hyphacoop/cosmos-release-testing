@@ -7,7 +7,7 @@ on:
     - cron: '30 6 * * *'
   push:
 # concurrency:
-  group: export-mainnet-runner
+group: export-mainnet-runner
 
 jobs:
   export-cosmoshub-mainnet:
