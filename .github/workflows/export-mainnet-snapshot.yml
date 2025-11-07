@@ -98,7 +98,8 @@ jobs:
           echo "Configuring state sync..."
           CURRENT_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block | jq -r '.result.block.header.height')
           # TRUST_HEIGHT=$[$CURRENT_BLOCK-${{ vars.TRUST_HEIGHT_DELTA }}]
-          TRUST_HEIGHT=$(echo $CURRENT_BLOCK | awk '{printf "%d000-1000\n", $0 / 1000}' | bc)
+          # TRUST_HEIGHT=$(echo $CURRENT_BLOCK | awk '{printf "%d000-1000\n", $0 / 1000}' | bc)
+          TRUST_HEIGHT=$(echo $CURRENT_BLOCK | awk '{printf "%d000\n", $0 / 1000}')
           TRUST_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block\?height\=$TRUST_HEIGHT)
           TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
           echo "[INFO]: Trust Height: $TRUST_HEIGHT"
