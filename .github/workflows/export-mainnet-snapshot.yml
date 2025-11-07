@@ -6,8 +6,8 @@ on:
     # 06:30 daily.
     - cron: '30 6 * * *'
   push:
-# concurrency:
-group: export-mainnet-runner
+concurrency:
+  group: export-mainnet-runner
 
 jobs:
   export-cosmoshub-mainnet:
