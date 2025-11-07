@@ -5,7 +5,7 @@ on:
   schedule:
     # 06:30 daily.
     - cron: '30 6 * * *'
-  push:
+  # push:
 concurrency:
   group: export-mainnet-runner
 
