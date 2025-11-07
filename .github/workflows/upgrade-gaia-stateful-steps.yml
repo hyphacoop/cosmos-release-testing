@@ -408,7 +408,7 @@ jobs:
             echo "Expected $set_commission_rate got $modified_commission_rate"
           fi
 
-      - name: _Test permissioned cosmwasm
+      - name: _Test permissionless cosmwasm
         run: tests/stateful/test_cosmwasm.sh
       # - name: DEBUG
       #   if: always() && !cancelled()

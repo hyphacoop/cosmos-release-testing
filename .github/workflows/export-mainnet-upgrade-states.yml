@@ -88,6 +88,7 @@ jobs:
           GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
           GAS_PRICES: "0.0025uatom"
         run: |
+          set -e
           echo "Initializing $NODE_HOME..."
           $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
           $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
@@ -133,6 +134,7 @@ jobs:
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
         run: |
+          set -e
           cd ~/.gaia
           echo "[INFO]: Downloading archive ${{ env.ARCHIVE_URL }}"
           # curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
@@ -142,7 +144,7 @@ jobs:
           echo "[INFO]: Cleanup..."
           rm archive.tar.lz4
       - name: Get addrbook
-        run: curl -Ls https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json > /home/runner/.gaia/config/addrbook.json
+        run: curl -Ls ${{ env.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
@@ -167,29 +169,29 @@ jobs:
           echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
-      - name: Make current snapshot and upload
-        run: |
-          echo "[INFO]: Compressing data and wasm..."
-          cd /home/runner/.gaia
-          # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz data wasm
-          tar cf - data wasm | lz4 - ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4
-          echo "[INFO]: Get directory size"
-          size=$(du -hs wasm data)
-          echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
-          echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
-          echo "[INFO]: Remove snapshots older than 30 days"
-          ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
-          echo "[INFO]: Uploading snapshot to files.polypore.xyz"
-          scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
-          echo "[INFO]: Uploading info file to files.polypore.xyz"
-          scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
-          echo "[INFO]: Uploading addrbook.json"
-          scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
-          echo "[INFO]: Update latest file symlinks"
-          ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 /storage/snapshots/cosmoshub-4/latest.tar.lz4
-          ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt /storage/snapshots/cosmoshub-4/latest.tar.lz4.info.txt
-          echo "[INFO]: Remove local snapshot archive"
-          rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
+      # - name: Make current snapshot and upload
+      #   run: |
+      #     echo "[INFO]: Compressing data and wasm..."
+      #     cd /home/runner/.gaia
+      #     # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz data wasm
+      #     tar cf - data wasm | lz4 - ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4
+      #     echo "[INFO]: Get directory size"
+      #     size=$(du -hs wasm data)
+      #     echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
+      #     echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
+      #     echo "[INFO]: Remove snapshots older than 30 days"
+      #     ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
+      #     echo "[INFO]: Uploading snapshot to files.polypore.xyz"
+      #     scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
+      #     echo "[INFO]: Uploading info file to files.polypore.xyz"
+      #     scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
+      #     echo "[INFO]: Uploading addrbook.json"
+      #     scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
+      #     echo "[INFO]: Update latest file symlinks"
+      #     ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 /storage/snapshots/cosmoshub-4/latest.tar.lz4
+      #     ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt /storage/snapshots/cosmoshub-4/latest.tar.lz4.info.txt
+      #     echo "[INFO]: Remove local snapshot archive"
+      #     rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
       - name: Install Go
         uses: actions/setup-go@v5
         with:
@@ -207,6 +209,7 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
         run: |
+          set -e
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/node_key.json > /home/runner/.gaia/config/node_key.json
           pubkey=$(jq -r .pub_key.value /home/runner/.gaia/config/priv_validator_key.json)
@@ -256,6 +259,7 @@ jobs:
           sleep 10s
       - name: Make forked state archive and upload
         run: |
+          set -e
           echo "[INFO]: Compressing ~/.gaia ..."
           cd /home/runner/
           tar cfz ${{ env.RUNNING_VERSION }}_${{ env.FORK_HEIGHT }}-stateful-fork.tar.gz .gaia
@@ -274,11 +278,13 @@ jobs:
         run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Get min_deposit
         run: |
+          set -e
           gaiad q gov params -o json
           min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
           echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
         run: |
+          set -e
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
@@ -308,6 +314,7 @@ jobs:
         run: ls -al ~/.gaia/wasm/state/wasm/
       - name: Compress and upload files
         run: |
+          set -e
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
