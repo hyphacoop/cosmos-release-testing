@@ -6,7 +6,7 @@ on:
       sync_to_block:
         description: 'Block to sync to'
         required: true
-        type: string
+        type: number
         default: 1
       snapshot_url:
         description: 'Snapshot URL to sync from (unset will use statesync)'
