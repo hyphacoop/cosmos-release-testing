@@ -22,7 +22,7 @@ jobs:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
-      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '1' || github.event_name == 'repository_dispatch' && '1' || inputs.sync_to_block }}
+      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '1' || github.event_name == 'repository_dispatch' && '28396300' || inputs.sync_to_block }}
       SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.snapshot_url }}
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
@@ -142,7 +142,7 @@ jobs:
             cd ~/.gaia
             echo "[INFO]: Downloading archive ${{ env.SNAPSHOT_URL }}"
             # curl -o - -L ${{ env.SNAPSHOT_URL }} | lz4 -d | tar vx -C .
-            aria2c -x 8 -s 8 --out archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
+            aria2c -x 2 -s 2 --out archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
             echo "[INFO]: Extracting archive..."
             lz4 -dc archive.tar.lz4 | tar  -xaf -
             echo "[INFO]: Cleanup..."
@@ -157,13 +157,6 @@ jobs:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
         run: $CHAIN_BINARY start --home $NODE_HOME
-      - name: Stop gaiad
-        run: |
-          echo "exiting gaia and screen"
-          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
-          echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
-          killall gaiad screen
-          sleep 10s
       # - name: Make current snapshot and upload
       #   run: |
       #     set -e
