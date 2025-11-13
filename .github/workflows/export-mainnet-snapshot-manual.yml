@@ -134,15 +134,11 @@ jobs:
           NODE_HOME: /home/runner/.gaia
         run: mkdir -p /home/runner/artifact/config/cosmoshub-4 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/cosmoshub-4/
       - name: Download snapshot
-        env:
-          STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
           set -e
-          if [ "$STATESYNC_ENABLED" == "1" ]
+          if [ ! -z "$SNAPSHOT_URL" ]
           then
-            echo "Statesync enabled, skip downloading snapshot..."
-            exit 0
-          else
+            echo "Snapshot variable defined downloading snapshot..."
             cd ~/.gaia
             echo "[INFO]: Downloading archive ${{ env.SNAPSHOT_URL }}"
             # curl -o - -L ${{ env.SNAPSHOT_URL }} | lz4 -d | tar vx -C .
@@ -151,6 +147,8 @@ jobs:
             lz4 -dc archive.tar.lz4 | tar  -xaf -
             echo "[INFO]: Cleanup..."
             rm archive.tar.lz4
+          else
+            echo "Snapshot variable not defined..."
           fi
       - name: Get addrbook
         run: curl -Ls ${{ vars.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
