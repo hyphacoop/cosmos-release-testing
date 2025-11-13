@@ -22,7 +22,7 @@ jobs:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
-      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '1' || github.event_name == 'repository_dispatch' && '28396300' || inputs.sync_to_block }}
+      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '28396300' || github.event_name == 'repository_dispatch' && '28396300' || inputs.sync_to_block }}
       SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.snapshot_url }}
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
