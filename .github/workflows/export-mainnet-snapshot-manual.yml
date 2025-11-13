@@ -20,7 +20,7 @@ concurrency:
 jobs:
   env:
       SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '1' || github.event_name == 'repository_dispatch' && '1' || inputs.sync_to_block }}
-      SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.to_version }}
+      SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.snapshot_url }}
   export-cosmoshub-mainnet:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
