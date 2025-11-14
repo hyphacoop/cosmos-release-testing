@@ -22,7 +22,7 @@ jobs:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
-      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '28396300' || github.event_name == 'repository_dispatch' && '28396300' || inputs.sync_to_block }}
+      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '28410900' || github.event_name == 'repository_dispatch' && '28410900' || inputs.sync_to_block }}
       SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.snapshot_url }}
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
@@ -156,7 +156,11 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
-        run: $CHAIN_BINARY start --home $NODE_HOME
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          exit_string=$(( tail -f -n0 /home/runner/artifact/gaiad_sync.log & ) | grep -q "halt per configuration height")
+          echo "$exit_string"
       # - name: Make current snapshot and upload
       #   run: |
       #     set -e
