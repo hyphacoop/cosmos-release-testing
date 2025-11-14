@@ -159,7 +159,8 @@ jobs:
         run: |
           screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
           tail -f /home/runner/artifact/gaiad_sync.log &
-          exit_string=$(( tail -f -n0 /home/runner/artifact/gaiad_sync.log & ) | grep -q "halt per configuration height")
+          ( tail -f -n0 /home/runner/artifact/gaiad_sync.log & ) | grep -q "halt per configuration height"
+          exit_string=$(cat /home/runner/artifact/gaiad_sync.log | grep "halt per configuration height")
           echo "[DEBUG]: exit_string:"
           echo "$exit_string"
       # - name: Make current snapshot and upload
