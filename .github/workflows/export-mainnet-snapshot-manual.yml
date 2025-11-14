@@ -127,7 +127,7 @@ jobs:
           wget -nv $GENESIS_URL -O genesis.json.gz
           gunzip genesis.json.gz
           mv genesis.json $NODE_HOME/config/genesis.json
-          echo "[DEBUG]:"
+          echo "[DEBUG]: halt-height in config:"
           cat $NODE_HOME/config/app.toml | grep halt-height
       - name: Archive config files
         env:
@@ -160,6 +160,7 @@ jobs:
           screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
           tail -f /home/runner/artifact/gaiad_sync.log &
           exit_string=$(( tail -f -n0 /home/runner/artifact/gaiad_sync.log & ) | grep -q "halt per configuration height")
+          echo "[DEBUG]: exit_string:"
           echo "$exit_string"
       # - name: Make current snapshot and upload
       #   run: |
