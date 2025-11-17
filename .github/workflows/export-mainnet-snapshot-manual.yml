@@ -163,10 +163,10 @@ jobs:
           exit_string=$(cat /home/runner/artifact/gaiad_sync.log | grep "halt per configuration height")
           echo "[DEBUG]: exit_string:"
           echo "$exit_string"
-          last_commit_string=$(cat /home/runner/artifact/gaiad_sync.log | grep "INF committed state block_app_hash" | tail -1)
-          echo "[DEBUG]: last commit string:"
-          echo "$last_commit_string"
-          last_commit_block=$(echo "$last_commit_string" | sed -n 's/. height=\(.*\) module.*/\1/p')
+          last_indexed_string=$(cat /home/runner/artifact/gaiad_sync.log | grep "indexed block events" | tail -1)
+          echo "[DEBUG]: last indexed string:"
+          echo "$last_indexed_string"
+          last_commit_block=$(echo "$last_indexed_string" | sed -e 's/\x1b\[[0-9;]*m//g'| sed -n 's/. height=\(.*\) module.*/\1/p')
           echo "[DEBUG]: Last commited block: $last_commit_block"
           echo "LAST_COMMIT_BLOCK=$last_commit_block" >> $GITHUB_ENV
       # - name: Make current snapshot and upload
