@@ -136,9 +136,7 @@ jobs:
       - name: Download snapshot
         run: |
           set -e
-          echo "$SNAPSHOT_URL"
-          echo ${{ env.SNAPSHOT_URL }}
-          if [ ! -z "$SNAPSHOT_URL" ]
+          if [ ! -z "${{ env.SNAPSHOT_URL }}" ]
           then
             echo "Snapshot variable defined downloading snapshot..."
             cd ~/.gaia
@@ -174,6 +172,7 @@ jobs:
           echo "LAST_COMMIT_BLOCK=$last_commit_block" >> $GITHUB_ENV
       - name: Check values
         run: |
+          echo "${{ env.LAST_COMMIT_BLOCK }}"
           if [ -z $LAST_COMMIT_BLOCK]
           then
             echo "[ERROR]: Cannot find last indexed blocks"
