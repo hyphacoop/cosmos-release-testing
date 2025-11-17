@@ -173,7 +173,7 @@ jobs:
       - name: Check values
         run: |
           echo "${{ env.LAST_COMMIT_BLOCK }}"
-          if [ -z $LAST_COMMIT_BLOCK]
+          if [ -z "${{ env.LAST_COMMIT_BLOCK }}" ]
           then
             echo "[ERROR]: Cannot find last indexed blocks"
             echo "Please check if the defined height is after the snapshot or current height"
