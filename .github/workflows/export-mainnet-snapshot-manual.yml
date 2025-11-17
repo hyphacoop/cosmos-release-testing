@@ -136,6 +136,8 @@ jobs:
       - name: Download snapshot
         run: |
           set -e
+          echo "$SNAPSHOT_URL"
+          echo ${{ env.SNAPSHOT_URL }}
           if [ ! -z "$SNAPSHOT_URL" ]
           then
             echo "Snapshot variable defined downloading snapshot..."
