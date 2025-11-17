@@ -158,6 +158,7 @@ jobs:
           CHAIN_BINARY: 'gaiad'
         run: |
           screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+          sleep 1
           tail -f /home/runner/artifact/gaiad_sync.log &
           ( tail -f -n0 /home/runner/artifact/gaiad_sync.log & ) | grep -q "halt per configuration height"
           exit_string=$(cat /home/runner/artifact/gaiad_sync.log | grep "halt per configuration height")
@@ -169,6 +170,14 @@ jobs:
           last_commit_block=$(echo "$last_indexed_string" | sed -n 's/.*height=\(.*\) module.*/\1/p')
           echo "[DEBUG]: Last commited block: $last_commit_block"
           echo "LAST_COMMIT_BLOCK=$last_commit_block" >> $GITHUB_ENV
+      - name: Check values
+        run: |
+          if [ -z $LAST_COMMIT_BLOCK]
+          then
+            echo "[ERROR]: Cannot find last indexed blocks"
+            echo "Please check if the defined height is after the snapshot or current height"
+            exit 1
+          fi
       # - name: Make current snapshot and upload
       #   run: |
       #     set -e
