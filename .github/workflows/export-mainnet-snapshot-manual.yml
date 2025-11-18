@@ -195,8 +195,6 @@ jobs:
           scp ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
           echo "[INFO]: Uploading info file to files.polypore.xyz"
           scp ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
-          echo "[INFO]: Uploading addrbook.json"
-          scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
           echo "[INFO]: Remove local snapshot archive"
           rm ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.*
 
