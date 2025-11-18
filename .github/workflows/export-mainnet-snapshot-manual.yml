@@ -143,7 +143,7 @@ jobs:
             echo "[INFO]: Downloading archive ${{ env.SNAPSHOT_URL }}"
             # curl -o - -L ${{ env.SNAPSHOT_URL }} | lz4 -d | tar vx -C .
             # aria2c -x 2 -s 2 --out archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
-            curl -o archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
+            curl -6o archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
             echo "[INFO]: Extracting archive..."
             lz4 -dc archive.tar.lz4 | tar  -xaf -
             echo "[INFO]: Cleanup..."
