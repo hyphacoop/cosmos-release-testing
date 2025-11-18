@@ -12,7 +12,7 @@ on:
         description: 'Snapshot URL to sync from (unset will use statesync)'
         required: false
         type: string
-        default: https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4
+        default: https://snapshots-2.polypore.xyz/cosmoshub-4/v25.2.0_28366979-snapshot.tar.lz4
   push:
 concurrency:
   group: export-mainnet-runner
@@ -22,8 +22,8 @@ jobs:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
-      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '28410900' || github.event_name == 'repository_dispatch' && '28410900' || inputs.sync_to_block }}
-      SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.snapshot_url }}
+      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '28367000' || github.event_name == 'repository_dispatch' && '28367000' || inputs.sync_to_block }}
+      SNAPSHOT_URL: ${{ github.event_name == 'push' && 'hhttps://snapshots-2.polypore.xyz/cosmoshub-4/v25.2.0_28366979-snapshot.tar.lz4' || inputs.snapshot_url }}
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
       # Get system info
