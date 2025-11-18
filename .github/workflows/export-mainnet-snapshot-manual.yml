@@ -142,7 +142,8 @@ jobs:
             cd ~/.gaia
             echo "[INFO]: Downloading archive ${{ env.SNAPSHOT_URL }}"
             # curl -o - -L ${{ env.SNAPSHOT_URL }} | lz4 -d | tar vx -C .
-            aria2c -x 2 -s 2 --out archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
+            # aria2c -x 2 -s 2 --out archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
+            curl -o archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
             echo "[INFO]: Extracting archive..."
             lz4 -dc archive.tar.lz4 | tar  -xaf -
             echo "[INFO]: Cleanup..."
@@ -197,7 +198,7 @@ jobs:
           echo "[INFO]: Uploading addrbook.json"
           scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
           echo "[INFO]: Remove local snapshot archive"
-          rm ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-snapshot.tar.*
+          rm ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.*
 
       - name: Upload artifacts
         if: always()
