@@ -12,7 +12,7 @@ on:
         description: 'Snapshot URL to sync from (unset will use statesync)'
         required: false
         type: string
-        default: https://snapshots-2.polypore.xyz/cosmoshub-4/v25.2.0_28366979-snapshot.tar.lz4
+        # default: https://snapshots-2.polypore.xyz/cosmoshub-4/v25.2.0_28366979-snapshot.tar.lz4
   push:
 concurrency:
   group: export-mainnet-runner
@@ -22,8 +22,8 @@ jobs:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
-      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '28367000' || github.event_name == 'repository_dispatch' && '28367000' || inputs.sync_to_block }}
-      SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots-2.polypore.xyz/cosmoshub-4/v25.2.0_28366979-snapshot.tar.lz4' || inputs.snapshot_url }}
+      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '38367000' || github.event_name == 'repository_dispatch' && '38367000' || inputs.sync_to_block }}
+      # SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots-2.polypore.xyz/cosmoshub-4/v25.2.0_28366979-snapshot.tar.lz4' || inputs.snapshot_url }}
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
       # Get system info
@@ -184,27 +184,23 @@ jobs:
       #     set -e
       #     echo "[INFO]: Compressing data and wasm..."
       #     cd /home/runner/.gaia
-      #     # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.gz data wasm
-      #     tar cf - data wasm | lz4 - ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4
+      #     # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.gz data wasm
+      #     tar cf - data wasm | lz4 - ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4
       #     echo "[INFO]: Get directory size"
       #     size=$(du -hs wasm data)
-      #     echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
-      #     echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt
-      #     echo "[INFO]: Remove snapshots older than 30 days"
-      #     ssh gh-actions@files.polypore.xyz find /storage/snapshots/cosmoshub-4/ -name "*.tar.*" -mmin +43800 -delete -print || true
-      #     echo "[INFO]: Remove old snapshots"
-      #     ssh gh-actions@files.polypore.xyz cleanup-cosmoshub-4-snapshots.sh || true
+      #     echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt
+      #     echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt
       #     echo "[INFO]: Uploading snapshot to files.polypore.xyz"
-      #     scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
+      #     scp ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
       #     echo "[INFO]: Uploading info file to files.polypore.xyz"
-      #     scp ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
+      #     scp ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
       #     echo "[INFO]: Uploading addrbook.json"
       #     scp /home/runner/.gaia/config/addrbook.json gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/addrbook.json
       #     echo "[INFO]: Update latest file symlinks"
-      #     ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4 /storage/snapshots/cosmoshub-4/latest.tar.lz4
-      #     ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.lz4.info.txt /storage/snapshots/cosmoshub-4/latest.tar.lz4.info.txt
+      #     ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4 /storage/snapshots/cosmoshub-4/latest.tar.lz4
+      #     ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/cosmoshub-4/${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt /storage/snapshots/cosmoshub-4/latest.tar.lz4.info.txt
       #     echo "[INFO]: Remove local snapshot archive"
-      #     rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
+      #     rm ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-snapshot.tar.*
 
       - name: Upload artifacts
         if: always()
