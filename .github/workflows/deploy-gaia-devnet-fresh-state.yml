@@ -92,12 +92,13 @@ jobs:
           sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+          # echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
           echo "Restoring validator key"
           echo "${{ secrets.VAL_WALLET_KEY }}" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
-          gaiad --output json keys add val --keyring-backend test > ~/.gaia/validator.json
+          # gaiad --output json keys add val --keyring-backend test > ~/.gaia/validator.json
           validator_address=$(cat ~/.gaia/validator.json | jq -r '.address')
           echo "Create validator account"
           $CHAIN_BINARY genesis add-genesis-account $validator_address 1000000000000uatom --home $NODE_HOME
