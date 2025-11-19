@@ -1,0 +1,148 @@
+---
+name: Deploy gaia-devnet node
+concurrency:
+  group: gaia-devnet-deploy
+on:
+  workflow_dispatch:
+    inputs:
+      devnet_branch:
+        description: 'Block to sync to'
+        required: true
+        type: string
+        default: v25.2.0
+  # push:
+
+jobs:
+  gaia-devnet-deploy:
+    runs-on: gaia-devnet-node
+    environment: gaia-devnet-deploy
+    env:
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+      RPC_NODE: ${{ vars.RPC_NODE }}
+      # RUNNING_VERSION: ${{ vars.RUNNING_VERSION }}
+      DEVNET_BRANCH: ${{ github.event_name == 'push' && '0' || github.event_name == 'repository_dispatch' && 'v25.2.0' || inputs.devnet_branch }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 pigz
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
+
+      # Wipe chain
+      - name: Stop gaiad service
+        run: sudo systemctl disable --now gaiad
+      - name: Remove ~/.gaia
+        run: rm -rf /home/sysadmin/.gaia
+      - name: Remove repo ~/gaia
+        run: rm -rf /home/sysadmin/gaia
+      - name: Remove old artifacts
+        run: |
+          sudo rm -rf ~/artifact/
+          mkdir ~/artifact/
+      - name: Remove old archives on files.polypore.xyz
+        run: |
+          echo "[INFO]: Removing old archives from files.polypore.xyz"
+          ssh gh-actions@files.polypore.xyz rm /storage/www/html/gaia-devnet/*.tar.gz || true
+          echo "<html><head><title>Gaia Devnet Rebuilding...</title></head><body><h1>gaia-devnet is currently rebuilding...</h1></body></html>" > /tmp/status-index.html
+          scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/storage/www/html/gaia-devnet/index.html
+      # - name: Get current mainnet gaia version
+      #   run: |
+      #     RUNNING_VERSION=$(curl -s $RPC_NODE/abci_info | jq -r '.result.response.version')
+      #     echo "$RUNNING_VERSION"
+      #     echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Build gaiad from source
+        run: |
+          cd /home/sysadmin
+          git clone https://github.com/cosmos/gaia.git
+          cd gaia
+          git checkout ${{ env.DEVNET_BRANCH }}
+          make build
+          make install
+      - name: Initializing chain
+        env:
+          NODE_HOME: /home/sysadmin/.gaia
+          NODE_MONIKER: gaia-devnet-val1
+          SERVICE_NAME: gaia-devnet-val1
+          CHAIN_ID: gaia-devnet
+          CHAIN_BINARY: 'gaiad'
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          sed -i -e "/^persistent_peers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+          sed -i -e '/enable =/ s/= .*/= false/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+          echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
+          pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
+          privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
+          echo "Restoring validator key"
+          echo "${{ secrets.VAL_WALLET_KEY }}" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+          # gaiad --output json keys add val --keyring-backend test > ~/.gaia/validator.json
+          validator_address=$(cat ~/.gaia/validator.json | jq -r '.address')
+          echo "Create validator account"
+          $CHAIN_BINARY genesis add-genesis-account $validator_address 1000000000000uatom --home $NODE_HOME
+          echo "Creating validator"
+          $CHAIN_BINARY genesis gentx val 850000000000uatom --keyring-backend test --home $NODE_HOME --moniker $NODE_MONIKER --chain-id $CHAIN_ID
+          echo "Collect gentx"
+          $CHAIN_BINARY genesis collect-gentxs --home $NODE_HOME
+          echo "Patch genesis with uatom"
+          sed -i 's/\"stake\"/\"uatom\"/g' $NODE_HOME/config/genesis.json
+          jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $NODE_HOME/config/genesis.json > /tmp/feemarket-min-base.json
+          mv /tmp/feemarket-min-base.json $NODE_HOME/config/genesis.json
+      - name: Configure gaiad
+        run: |
+          source ~/env/bin/activate
+          pip install toml-cli
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.enable true
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/app.toml api.swagger true
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml p2p.seed_mode false
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml instrumentation.prometheus --to-bool true
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml instrumentation.prometheus_listen_addr ":26660"
+          /home/sysadmin/env/bin/toml set --toml-path /home/sysadmin/.gaia/config/config.toml instrumentation.namespace "tendermint"
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/sysadmin/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: sudo systemctl enable --now gaiad
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
+      - name: Compress and upload files
+        env:
+          NODE_HOME: /home/sysadmin/.gaia
+        run: |
+          echo "[INFO]: Uploading genesis.json"
+          scp -6 $NODE_HOME/config/genesis.json gh-actions@files.polypore.xyz:/storage/www/html/gaia-devnet/genesis.json
+          ssh -6 gh-actions@files.polypore.xyz chmod 644 /storage/www/html/gaia-devnet/genesis.json
+          ssh -6 gh-actions@files.polypore.xyz rm /storage/www/html/gaia-devnet/index.html
+      - name: Send faucet tokens
+        run: |
+          gaiad tx bank send val ${{ vars.FAUCET_ADDRESS }} 100000000000uatom --from val --gas 20000000 --gas-prices 0.005uatom -y
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Query faucet account
+        run: gaiad q bank balances ${{ vars.FAUCET_ADDRESS }}
