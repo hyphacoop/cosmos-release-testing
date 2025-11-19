@@ -4,7 +4,13 @@ concurrency:
   group: gaia-devnet-deploy
 on:
   workflow_dispatch:
-  push:
+    inputs:
+      devnet_branch:
+        description: 'Block to sync to'
+        required: true
+        type: string
+        default: v25.2.0
+  # push:
 
 jobs:
   gaia-devnet-deploy:
@@ -14,7 +20,7 @@ jobs:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
       RPC_NODE: ${{ vars.RPC_NODE }}
       # RUNNING_VERSION: ${{ vars.RUNNING_VERSION }}
-      DEVNET_BRANCH: v25.2.0
+      DEVNET_BRANCH: ${{ github.event_name == 'push' && '0' || github.event_name == 'repository_dispatch' && 'v25.2.0' || inputs.devnet_branch }}
     steps:
       # Get system info
       - name: Install required packages
