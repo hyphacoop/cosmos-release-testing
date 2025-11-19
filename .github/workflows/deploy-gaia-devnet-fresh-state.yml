@@ -56,9 +56,9 @@ jobs:
       - name: Remove old archives on files.polypore.xyz
         run: |
           echo "[INFO]: Removing old archives from files.polypore.xyz"
-          ssh gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/*.tar.gz || true
+          ssh gh-actions@files.polypore.xyz rm /storage/www/html/gaia-devnet/*.tar.gz || true
           echo "<html><head><title>Gaia Devnet Rebuilding...</title></head><body><h1>gaia-devnet is currently rebuilding...</h1></body></html>" > /tmp/status-index.html
-          scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/index.html
+          scp -6 /tmp/status-index.html gh-actions@files.polypore.xyz:/storage/www/html/gaia-devnet/index.html
       - name: Get current mainnet gaia version
         run: |
           RUNNING_VERSION=$(curl -s $RPC_NODE/abci_info | jq -r '.result.response.version')
@@ -130,9 +130,9 @@ jobs:
           NODE_HOME: /home/sysadmin/.gaia
         run: |
           echo "[INFO]: Uploading genesis.json"
-          scp -6 $NODE_HOME/config/genesis.json gh-actions@files.polypore.xyz:/var/www/html/gaia-devnet/genesis.json
-          ssh -6 gh-actions@files.polypore.xyz chmod 644 /var/www/html/gaia-devnet/genesis.json
-          ssh -6 gh-actions@files.polypore.xyz rm /var/www/html/gaia-devnet/index.html
+          scp -6 $NODE_HOME/config/genesis.json gh-actions@files.polypore.xyz:/storage/www/html/gaia-devnet/genesis.json
+          ssh -6 gh-actions@files.polypore.xyz chmod 644 /storage/www/html/gaia-devnet/genesis.json
+          ssh -6 gh-actions@files.polypore.xyz rm /storage/www/html/gaia-devnet/index.html
       - name: Send faucet tokens
         run: |
           gaiad tx bank send val ${{ vars.FAUCET_ADDRESS }} 100000000000uatom --from val --gas 20000000 --gas-prices 0.005uatom -y
