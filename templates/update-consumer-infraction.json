@@ -1,0 +1,9 @@
+{
+   "consumer_id": "0",
+   "infraction_parameters": {
+      "downtime": {
+        "slash_fraction": "0.1",
+        "jail_duration": 600000000000
+      }
+    }
+}

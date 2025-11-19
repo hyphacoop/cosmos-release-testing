@@ -20,7 +20,7 @@ submit_tx()
     # $2: binary
     # $3: home folder
     full_tx="$2 $1 --home $3"
-    echo $full_tx
+    # echo $full_tx
     hash=$($full_tx | jq -r '.txhash')
     sleep $(($COMMIT_TIMEOUT+6))
     check_hash $hash $2 $3
@@ -36,7 +36,7 @@ submit_ibc_tx()
     # $2: binary
     # $3: home folder
     full_tx="$2 $1 --home $3"
-    echo $full_tx
+    # echo $full_tx
     hash=$($full_tx | jq -r '.txhash')
     sleep $(($COMMIT_TIMEOUT*5))
     check_hash $hash $2 $3
@@ -52,7 +52,7 @@ submit_bad_tx()
     # $2: binary
     # $3: home folder
     full_tx="$2 $1 --home $3"
-    echo $full_tx
+    # echo $full_tx
     $full_tx
     if [[ $? -eq 0 ]]; then
       printf "Transaction succeeded:\n$1\n"

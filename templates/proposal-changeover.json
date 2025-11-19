@@ -1,0 +1,19 @@
+{
+	"messages": [
+		{
+			"@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+			"authority": "consumer10d07y265gmmuvt4z0w9aw880jnsr700jlh7295",
+			"plan": {
+				"name": "sovereign-changeover",
+				"height": "1",
+				"info": "my upgrade info",
+				"upgraded_client_state": null
+			}
+		}
+  	],
+	"metadata": "no",
+	"title": "Sovereign changeover",
+	"summary": "Sovereign changeover",
+	"deposit": "1000000000ucon",
+	"expedited": false
+}

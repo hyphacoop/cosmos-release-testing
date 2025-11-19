@@ -1,0 +1,276 @@
+---
+
+name: Test Gaia Stateful State Sync Steps
+on:
+  workflow_call:
+    inputs:
+      runs-on-os:
+        required: true
+        type: string
+      gaia_version:
+        required: true
+        type: string
+      upgrade_version:
+        required: true
+        type: string
+      env_name:
+        required: true
+        type: string
+      archive_url:
+        required: true
+        type: string
+      
+jobs:
+  test-upgrade:
+    runs-on: ${{ inputs.runs-on-os }}
+    environment: ${{ inputs.env_name }}
+    env:
+      SSH_KEYS: ${{ vars.SSH_KEYS }}
+      PROVIDER_SERVICE_1: ${{ vars.PROVIDER_SERVICE_1 }}
+      PROVIDER_SERVICE_2: ${{ vars.PROVIDER_SERVICE_2 }}
+      CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
+      CHAIN_BINARY_SECONDARY: ${{ vars.CHAIN_BINARY_SECONDARY }}
+      HOME_1: ${{ vars.HOME_1 }}
+      HOME_2: ${{ vars.HOME_2 }}
+      CHAIN_ID: ${{ vars.CHAIN_ID }}
+      MONIKER_1: ${{ vars.MONIKER_1 }}
+      MONIKER_2: ${{ vars.MONIKER_2 }}
+      MONIKER_4: ${{ vars.MONIKER_4 }}
+      MONIKER_5: ${{ vars.MONIKER_5 }}
+      MNEMONIC_1: ${{ vars.MNEMONIC_1 }}
+      MNEMONIC_2: ${{ vars.MNEMONIC_2 }}
+      MNEMONIC_4: ${{ vars.MNEMONIC_4 }}
+      MNEMONIC_5: ${{ vars.MNEMONIC_5 }}
+      DENOM: ${{ vars.DENOM }}
+      VAL_FUNDS: ${{ vars.VAL_FUNDS }}
+      VAL_STAKE: ${{ vars.VAL_STAKE }}
+      VAL_STAKE_STEP: ${{ vars.VAL_STAKE_STEP }}
+      VOTING_PERIOD: ${{ vars.VOTING_PERIOD }}
+      VAL1_RPC_PORT: 27001
+      VAL1_API_PORT: 25001
+      VAL1_GRPC_PORT: 26001
+      VAL1_P2P_PORT: 28001
+      VAL1_PPROF_PORT: 6061
+      VAL1_PROM_PORT: 26660
+      VAL2_RPC_PORT: 27002
+      VAL2_API_PORT: 25002
+      VAL2_GRPC_PORT: 26002
+      VAL2_P2P_PORT: 28002
+      VAL2_PPROF_PORT: 6062
+      VAL2_PROM_PORT: 26662
+      WALLET_1: ${{ vars.WALLET_1 }}
+      WALLET_2: ${{ vars.WALLET_2 }}
+      WALLET_4: ${{ vars.WALLET_4 }}
+      WALLET_5: ${{ vars.WALLET_5 }}
+      WALLET_CONSUMER_1: ${{ vars.WALLET_CONSUMER_1 }}
+      VALOPER_1: ${{ vars.VALOPER_1 }}
+      CONSUMER_CHAIN_BINARY_URL: ${{ vars.CONSUMER_CHAIN_BINARY_URL }}
+      CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY }}
+      CONSUMER_CHAIN_BINARY_URL_2: ${{ vars.CONSUMER_CHAIN_BINARY_URL_2 }}
+      CONSUMER_CHAIN_BINARY_2: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+      CONSUMER_DENOM: ${{ vars.CONSUMER_DENOM }}
+      CONSUMER_HOME_1: /home/runner/.cona1
+      CONSUMER_HOME_2: /home/runner/.cona2
+      CONSUMERB_HOME_1: /home/runner/.conb1
+      CONSUMERB_HOME_2: /home/runner/.conb2
+      SS_HOME_1: /home/runner/.statesync
+      SS_SERVICE_1: ss1.service
+      SS_API_1: 35001
+      SS_GRPC_1: 36001
+      SS_RPC_1: 37001
+      SS_P2P_1: 38001
+      SS_PPROF_1: 39001
+      BASE_FEES: 30000
+      HIGH_FEES: 25000
+      GAS: auto
+      GAS_ADJUSTMENT: 2.0
+      GAS_PRICES: 0.005
+      DELEGATE_1: ${{ vars.DELEGATE_1 }}
+      DELEGATE_1_AMOUNT: ${{ vars.DELEGATE_1_AMOUNT }}
+      DELEGATE_2_AMOUNT: ${{ vars.DELEGATE_2_AMOUNT }}
+      UPGRADE_VERSION: ${{ inputs.upgrade_version }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          mkdir -m 700 ~/.ssh
+          echo "$SSH_KEYS" > ~/.ssh/authorized_keys
+      - name: start-version
+        run: echo ${{inputs.gaia_version}}
+      - name: target-version
+        run: echo ${{inputs.upgrade_version}}
+      - name: target-commit
+        if: ${{ inputs.upgrade_version == 'main' }}
+        run: |
+          BUILD_TAG=gaiad-linux-${{inputs.upgrade_version}}
+          TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
+          echo TARGET_COMMIT: $TARGET_COMMIT
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
+      - name: Consumer chain binary URLs
+        run: echo "$CONSUMER_CHAIN_BINARY runs off $CONSUMER_CHAIN_BINARY_URL"
+      - name: Update PATH
+        run: |
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+          echo "$HOME/.hermes" >> $GITHUB_PATH
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli
+          python -m pip install graph-cli
+      - name: Print RPC port
+        run: echo $VAL1_RPC_PORT
+      - name: Test software upgrade for published releases
+        if: ${{ inputs.upgrade_version != 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ inputs.upgrade_version }}/gaiad-${{ inputs.upgrade_version }}-linux-amd64
+        run: |
+          echo "$DOWNLOAD_URL"
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+      - name: Test software upgrade for main branch
+        if: ${{ inputs.upgrade_version == 'main' }}
+        env:
+          DOWNLOAD_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/gaiad-linux-main/gaiad-linux
+        run: |
+          echo "$DOWNLOAD_URL"
+          echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+      - name: Set up memory monitor for provider
+        run: screen -S mem-$PROVIDER_SERVICE_1 -d -m bash scripts/mem-csv.sh $CHAIN_BINARY $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv
+      - name: Start chain val1 and link val2 node
+        env:
+          START_VERSION: ${{inputs.gaia_version}}
+          ARCHIVE_URL: ${{ inputs.archive_url }}
+        run: scripts/stateful/start_chain_val1.sh
+      - name: _Blocks produced after upgrade
+        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 12600
+      - name: _Blocks produced on val2
+        run: tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 12600
+      - name: Check block hashes on both nodes
+        run: |
+          set -e
+          latest_block=$(gaiad --home $HOME_1 status | jq -r '.sync_info.latest_block_height')
+          echo "[INFO]: Block height is $latest_block"
+          hash_val1=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 1 12600
+          hash_val2=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
+          if [ $hash_val1 != $hash_val2 ]
+          then
+            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+            exit 1
+          else
+            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
+          fi
+      - name: Flush "migration successful" lines
+        run: |
+          $CHAIN_BINARY keys list --home $HOME_1
+          $CHAIN_BINARY keys list --home $HOME_2
+      - name: Wait for snapshot to be created
+        run: |
+          echo "Wait for snapshot to be created..."
+          tail -f $HOME/artifact/gaia2.service.log | grep snapshot &
+          ( tail -f -n0 $HOME/artifact/gaia2.service.log & ) | grep -q "completed state snapshot"
+          sleep 60
+      - name: Start node with state sync
+        run: |
+          source ~/env/bin/activate
+          $CHAIN_BINARY init statesync --chain-id $CHAIN_ID --home $SS_HOME_1
+          cp $HOME_2/config/genesis.json $SS_HOME_1/config/genesis.json
+          cp $HOME_2/config/config.toml $SS_HOME_1/config/
+          cp $HOME_2/config/app.toml $SS_HOME_1/config/
+          cp $HOME_2/config/client.toml $SS_HOME_1/config/
+          toml set --toml-path $SS_HOME_1/config/config.toml rpc.laddr "tcp://0.0.0.0:$SS_RPC_1"
+          # Set different ports for rpc pprof
+          toml set --toml-path $SS_HOME_1/config/config.toml rpc.pprof_laddr "localhost:$SS_PPROF_1"
+          # Set different ports for p2p
+          toml set --toml-path $SS_HOME_1/config/config.toml p2p.laddr "tcp://0.0.0.0:$SS_P2P_1"
+          # Turn on Instrumentation
+          toml set --toml-path $SS_HOME_1/config/config.toml instrumentation.prometheus false
+          # Set client ports for rpc
+          toml set --toml-path $SS_HOME_1/config/client.toml node "tcp://localhost:$SS_RPC_1"
+          toml set --toml-path $SS_HOME_1/config/app.toml state-sync.snapshot-interval --to-int 0
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.enable true
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.rpc_servers "http://127.0.0.1:$VAL2_RPC_PORT,http://127.0.0.1:$VAL2_RPC_PORT"
+          # Get snapshot height
+          trust_block=$(cat ~/artifact/gaia2.service.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep "completed state snapshot" | grep -o -P '(?<=height=).*(?=module)')
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.trust_height --to-int $trust_block
+          # Get trust hash
+          trust_hash=$(curl -s 127.0.0.1:$VAL2_RPC_PORT/block?height=$trust_block | jq -r '.result.block_id.hash')
+          toml set --toml-path $SS_HOME_1/config/config.toml statesync.trust_hash "$trust_hash"
+          # Set persistent_peer
+          val1_node_id=$(gaiad --home $HOME_2 tendermint show-node-id)
+          toml set --toml-path $SS_HOME_1/config/config.toml p2p.persistent_peers "$val1_node_id@localhost:$VAL2_P2P_PORT"
+          echo "Starting node..."
+          echo "Setting up services..."
+          echo "Creating script for statesync node service"
+          echo "while true; do $HOME/go/bin/$CHAIN_BINARY start --home $SS_HOME_1; sleep 1; done" > $HOME/$SS_SERVICE_1.sh
+          chmod +x $HOME/$SS_SERVICE_1.sh
+          echo "Starting $CHAIN_BINARY"
+          screen -L -Logfile $HOME/artifact/$SS_SERVICE_1.log -S $SS_SERVICE_1 -d -m bash $HOME/$SS_SERVICE_1.sh
+          # set screen to flush log to 0
+          screen -r $SS_SERVICE_1 -p0 -X logfile flush 0
+      - name: Wait for statesync gaiad to start and stabilize
+        run: |
+          tail -f $HOME/artifact/$SS_SERVICE_1.log &
+          tests/test_block_production.sh 127.0.0.1 $SS_RPC_1 10 12600
+      - name: Syncing Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:$SS_RPC_1/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
+      - name: _Blocks on statesync node
+        run: tests/test_block_production.sh 127.0.0.1 $SS_RPC_1 10 12600
+      - name: Generate info graphs
+        if: always()
+        run: |
+          source ~/env/bin/activate
+          # Main gaia service
+          graph $HOME/artifact/mem-$PROVIDER_SERVICE_1.csv -o $HOME/artifact/mem-$PROVIDER_SERVICE_1.png --fill --time-format-input epoch --time-format-output %H:%M:%S --fontsize 8 --title "Gaiad RAM Usages" --ylabel "Memory Used (MB)" --xlabel Time --figsize 1920x1080
+      - name: Save config files
+        if: always()
+        run: |
+          mkdir ~/artifact/configs
+          cp -rp ${{ vars.HOME_1 }}/config/ ~/artifact/configs/val1 || true
+          cp -rp ${{ vars.HOME_2 }}/config/ ~/artifact/configs/val2 || true
+          cp -rp $SS_HOME_1/config/ ~/artifact/configs/statesync || true
+          mkdir ~/artifact/bin
+          cp -p ~/go/bin/* ~/artifact/bin/ || true
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          path: ~/artifact/
+          include-hidden-files: true

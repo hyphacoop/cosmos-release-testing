@@ -135,6 +135,8 @@ echo "[INFO] Collecting the CCV state..."
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 > ccv-pre.json
 $CHAIN_BINARY q provider consumer-genesis $consumer_id -o json --home $HOME_1 >  ~/artifact/$CONSUMER_CHAIN_ID-ccv-pre.txt
 jq '.params |= . + {"soft_opt_out_threshold": "0.05"}' ccv-pre.json > ccv.json
+jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM]' ccv.json > ccv-denom.json
+mv ccv-denom.json ccv.json
 jq '.' ccv.json
 
 if [ ! -z $transform ]

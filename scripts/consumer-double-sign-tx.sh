@@ -2,25 +2,25 @@
 # Test equivocation proposal for double-signing
 EQ_PROVIDER_HOME=/home/runner/.eqp
 EQ_PROVIDER_SERVICE=eq_provider.service
-EQ_PROV_API_PORT=50002
-EQ_PROV_GRPC_PORT=50012
-EQ_PROV_RPC_PORT=50022
-EQ_PROV_P2P_PORT=50032
-EQ_PROV_PPROF_PORT=50042
+EQ_PROV_API_PORT=20002
+EQ_PROV_GRPC_PORT=2012
+EQ_PROV_RPC_PORT=2022
+EQ_PROV_P2P_PORT=2032
+EQ_PROV_PPROF_PORT=2042
 EQ_CONSUMER_HOME_1=/home/runner/.eqc1
 EQ_CONSUMER_HOME_2=/home/runner/.eqc2
 EQ_CONSUMER_SERVICE_1=eq_consumer_1.service
 EQ_CONSUMER_SERVICE_2=eq_consumer_2.service
-EQ_CON_API_PORT_1=50102
-EQ_CON_API_PORT_2=51202
-EQ_CON_GRPC_PORT_1=50112
-EQ_CON_GRPC_PORT_2=50212
-EQ_CON_RPC_PORT_1=50122
-EQ_CON_RPC_PORT_2=50222
-EQ_CON_P2P_PORT_1=50132
-EQ_CON_P2P_PORT_2=51232
-EQ_CON_PPROF_PORT_1=50142
-EQ_CON_PPROF_PORT_2=50242
+EQ_CON_API_PORT_1=2102
+EQ_CON_API_PORT_2=2202
+EQ_CON_GRPC_PORT_1=2112
+EQ_CON_GRPC_PORT_2=2212
+EQ_CON_RPC_PORT_1=2122
+EQ_CON_RPC_PORT_2=2222
+EQ_CON_P2P_PORT_1=2132
+EQ_CON_P2P_PORT_2=2232
+EQ_CON_PPROF_PORT_1=2142
+EQ_CON_PPROF_PORT_2=2242
 
 FUND_AMOUNT=1000000000
 STAKE_AMOUNT=8000000
@@ -216,24 +216,31 @@ echo "Starting consumer service..."
 sudo systemctl enable $EQ_CONSUMER_SERVICE_1 --now
 
 sleep 30
-# journalctl -u $EQ_CONSUMER_SERVICE_1
+journalctl -u $EQ_CONSUMER_SERVICE_1
 
 echo "> Submitting opt-in transaction."
 key=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home $EQ_CONSUMER_HOME_1)
 echo "Consumer key: $key"
 echo "Consumer ID: $CONSUMER_ID"
-command="$CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $EQ_PROVIDER_HOME -y"
-echo $command
-$command
+txhash=$($CHAIN_BINARY tx provider opt-in $CONSUMER_ID $key --from $malval_det --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $EQ_PROVIDER_HOME -y -o json | jq -r '.txhash')
+sleep $COMMIT_TIMEOUT
+echo "> txhash: $txhash"
+echo "> Opt-in tx result:"
+$CHAIN_BINARY q tx $txhash --home $HOME_1 -o json | jq '.'
 
 sleep 30
+echo "> EQ Consumer key:"
 $CHAIN_BINARY q provider validator-consumer-key $CONSUMER_ID $($CHAIN_BINARY tendermint show-address --home $EQ_PROVIDER_HOME) --home $HOME_1
+echo "> EQ Consumer address:"
+$CONSUMER_CHAIN_BINARY tendermint show-address --home $EQ_CONSUMER_HOME_1
+echo "> EQ Consumer address (hex format):"
+jq '.address' $EQ_CONSUMER_HOME_1/config/priv_validator_key.json
 
-echo "Check validator is in the consumer chain..."
+echo "> Check validator is in the consumer chain."
 total_after=$(curl -s http://localhost:$CON1_RPC_PORT/validators | jq -r '.result.total')
-total=$(( $total_after - $total_before ))
+diff=$(( $total_after - $total_before ))
 
-if [ $total == 1 ]; then
+if [ $diff == 1 ]; then
   echo "Validator created!"
 else
   echo "Validator not created."
@@ -319,7 +326,7 @@ sleep 60
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 60
+sleep 180
 
 # Restart nodes again
 echo "Restarting nodes again..."
@@ -345,12 +352,12 @@ sleep 60
 sudo systemctl start $CONSUMER_SERVICE_1
 echo "> Restarting Hermes."
 sudo systemctl restart $RELAYER
-sleep 60
+sleep 180
 
 echo "> Node 1:"
-journalctl -u $EQ_CONSUMER_SERVICE_1
+journalctl -u $EQ_CONSUMER_SERVICE_1 | tail -n 10
 echo "> Node 2:"
-journalctl -u $EQ_CONSUMER_SERVICE_2
+journalctl -u $EQ_CONSUMER_SERVICE_2 | tail -n 10
 
 echo "> Consumer chain evidence:"
 $CONSUMER_CHAIN_BINARY q evidence --home $CONSUMER_HOME_1 -o json | jq '.'

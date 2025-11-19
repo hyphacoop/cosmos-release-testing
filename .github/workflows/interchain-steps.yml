@@ -1,0 +1,63 @@
+---
+
+name: Interchain Steps
+on:
+  workflow_call:
+    inputs:
+      runs-on-os:
+        required: true
+        type: string
+      
+jobs:
+  test-run:
+    runs-on: ${{ inputs.runs-on-os }}
+    steps:
+      # Get system info
+      - run: ip addr
+      - run: sudo dmidecode
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      
+      - name: Install build-essential
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.23.0
+      - name: groupadd docker
+        run: sudo groupadd -r -U runner docker
+      - name: Install docker
+        run: |
+          sudo apt update
+          sudo apt install -y ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          # Add the repository to Apt sources:
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt update
+          sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      
+      - name: Start chain
+        run: |
+          cd interchaintests
+          ./start_chain.sh gaia.json
+      # - name: DEBUG
+      #   if: always()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done

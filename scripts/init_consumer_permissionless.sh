@@ -94,9 +94,9 @@ echo $MNEMONIC_5 | $CONSUMER_CHAIN_BINARY keys add $MONIKER_5 --keyring-backend 
 echo $MNEMONIC_RELAYER | $CONSUMER_CHAIN_BINARY keys add $MONIKER_RELAYER --keyring-backend test --home $CONSUMER_HOME_1 --recover
 
 # Add funds to accounts
-$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
+$CONSUMER_CHAIN_BINARY add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1 --keyring-backend test
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_1 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_5 $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account $MONIKER_RELAYER $VAL_FUNDS$CONSUMER_DENOM --home $CONSUMER_HOME_1
@@ -118,6 +118,14 @@ if [ "$CONSUMER_CHAIN_BINARY" == "strided" ]; then
 elif [ "$CONSUMER_CHAIN_BINARY" == "neutrond" ]; then
     jq --arg DENOM "$CONSUMER_DENOM" -r '.app_state.globalfee.params.minimum_gas_prices[0] |= {"amount": "0.02", "denom": $DENOM}' $CONSUMER_HOME_1/config/genesis.json > consumer-globalfee.json
     mv consumer-globalfee.json $CONSUMER_HOME_1/config/genesis.json
+
+    echo "Patching genesis for feemarket params..."
+    jq -r '.app_state.feemarket.params.fee_denom |= "untrn"' $CONSUMER_HOME_1/config/genesis.json > ./feemarket-denom.json
+    mv feemarket-denom.json $CONSUMER_HOME_1/config/genesis.json
+    jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $CONSUMER_HOME_1/config/genesis.json > ./feemarket-min-base.json
+    mv feemarket-min-base.json $CONSUMER_HOME_1/config/genesis.json
+    jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' $CONSUMER_HOME_1/config/genesis.json > ./feemarket-base.json
+    mv feemarket-base.json $HOMCONSUMER_HOME_1E_1/config/genesis.json
 fi
 
 echo "Patching config files..."

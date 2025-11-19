@@ -1,0 +1,206 @@
+---
+name: Export Mainnet Snapshot Manual
+on:
+  workflow_dispatch:
+    inputs:
+      sync_to_block:
+        description: 'Block to sync to'
+        required: true
+        type: number
+        default: 1
+      snapshot_url:
+        description: 'Snapshot URL to sync from (unset will use statesync)'
+        required: false
+        type: string
+        default: https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4
+  # push:
+concurrency:
+  group: export-mainnet-runner
+
+jobs:
+  export-cosmoshub-mainnet:
+    runs-on: cosmos-runner-set
+    environment: export-cosmoshub-mainnet
+    env:
+      SYNC_TO_BLOCK: ${{ github.event_name == 'push' && '0' || github.event_name == 'repository_dispatch' && '1' || inputs.sync_to_block }}
+      SNAPSHOT_URL: ${{ github.event_name == 'push' && 'https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4' || inputs.snapshot_url }}
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 aria2 bc
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
+
+      - name: Set SSH key
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s ${{ vars.RPC_NODE }}/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+      - name: Initializing chain to sync with mainnet
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: mainnet-export
+          SERVICE_NAME: mainnet-export
+          CHAIN_ID: cosmoshub-4
+          CHAIN_BINARY: 'gaiad'
+          GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          set -e
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/^persistent_peers =/ s^= .*^= \"${{ vars.PERSISTENT_PEERS }}\"^" $NODE_HOME/config/config.toml
+          echo "Configuring state sync..."
+          CURRENT_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block | jq -r '.result.block.header.height')
+          # TRUST_HEIGHT=$[$CURRENT_BLOCK-${{ vars.TRUST_HEIGHT_DELTA }}]
+          TRUST_HEIGHT=$(echo $CURRENT_BLOCK | awk '{printf "%d000-1000\n", $0 / 1000}' | bc)
+          # TRUST_HEIGHT=$(echo $CURRENT_BLOCK | awk '{printf "%d000\n", $0 / 1000}')
+          TRUST_BLOCK=$(curl -s ${{ vars.SYNC_RPC_1 }}/block\?height\=$TRUST_HEIGHT)
+          TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
+          echo "[INFO]: Trust Height: $TRUST_HEIGHT"
+          echo "[INFO]: Trust Hash: $TRUST_HASH"
+          sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"${{ vars.SYNC_RPC_1 }},${{ vars.SYNC_RPC_2 }}\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          $CHAIN_BINARY config set app halt-height $SYNC_TO_BLOCK --home $NODE_HOME
+          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
+          echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json.gz
+          gunzip genesis.json.gz
+          mv genesis.json $NODE_HOME/config/genesis.json
+          echo "[DEBUG]: halt-height in config:"
+          cat $NODE_HOME/config/app.toml | grep halt-height
+      - name: Archive config files
+        env:
+          NODE_HOME: /home/runner/.gaia
+        run: mkdir -p /home/runner/artifact/config/cosmoshub-4 && cp -rvp $NODE_HOME/config /home/runner/artifact/config/cosmoshub-4/
+      - name: Download snapshot
+        run: |
+          set -e
+          if [ ! -z "${{ env.SNAPSHOT_URL }}" ]
+          then
+            echo "Snapshot variable defined downloading snapshot..."
+            cd ~/.gaia
+            echo "[INFO]: Downloading archive ${{ env.SNAPSHOT_URL }}"
+            # curl -o - -L ${{ env.SNAPSHOT_URL }} | lz4 -d | tar vx -C .
+            # aria2c -x 2 -s 2 --out archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
+            curl -6o archive.tar.lz4 ${{ env.SNAPSHOT_URL }}
+            echo "[INFO]: Extracting archive..."
+            lz4 -dc archive.tar.lz4 | tar  -xaf -
+            echo "[INFO]: Cleanup..."
+            rm archive.tar.lz4
+          else
+            echo "Snapshot variable not defined..."
+          fi
+      - name: Get addrbook
+        run: curl -Ls ${{ vars.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+          sleep 1
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          ( tail -f -n0 /home/runner/artifact/gaiad_sync.log & ) | grep -q "halt per configuration height"
+          exit_string=$(cat /home/runner/artifact/gaiad_sync.log | grep "halt per configuration height")
+          echo "[DEBUG]: exit_string:"
+          echo "$exit_string"
+          last_indexed_string=$(cat /home/runner/artifact/gaiad_sync.log | sed -e 's/\x1b\[[0-9;]*m//g' | grep "indexed block events" | tail -1)
+          echo "[DEBUG]: last indexed string:"
+          echo "$last_indexed_string"
+          last_commit_block=$(echo "$last_indexed_string" | sed -n 's/.*height=\(.*\) module.*/\1/p')
+          echo "[DEBUG]: Last commited block: $last_commit_block"
+          echo "LAST_COMMIT_BLOCK=$last_commit_block" >> $GITHUB_ENV
+      - name: Check values
+        run: |
+          echo "${{ env.LAST_COMMIT_BLOCK }}"
+          if [ -z "${{ env.LAST_COMMIT_BLOCK }}" ]
+          then
+            echo "[ERROR]: Cannot find last indexed blocks"
+            echo "Please check if the defined height is after the snapshot or current height"
+            exit 1
+          fi
+      - name: Make snapshot and upload
+        run: |
+          set -e
+          echo "[INFO]: Compressing data and wasm..."
+          cd /home/runner/.gaia
+          # tar cfz ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.gz data wasm
+          tar cf - data wasm | lz4 - ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4
+          echo "[INFO]: Get directory size"
+          size=$(du -hs wasm data)
+          echo "Extracted size:" > ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt
+          echo "$size" >> ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt
+          echo "[INFO]: Uploading snapshot to files.polypore.xyz"
+          scp ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4 gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
+          echo "[INFO]: Uploading info file to files.polypore.xyz"
+          scp ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.lz4.info.txt gh-actions@files.polypore.xyz:/storage/snapshots/cosmoshub-4/
+          echo "[INFO]: Remove local snapshot archive"
+          rm ${{ env.RUNNING_VERSION }}_${{ env.LAST_COMMIT_BLOCK }}-manual-snapshot.tar.*
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-cosmos-hub-mainnet
+          path: ~/artifact/

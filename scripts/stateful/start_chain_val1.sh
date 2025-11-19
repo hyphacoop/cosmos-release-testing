@@ -9,7 +9,7 @@ echo "Initializing node homes..."
 echo "Downloading and extracting archived state"
 mkdir -p $HOME_1 
 # wget -qO- $HOME/archived-state.gz $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
-curl -6 -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
+curl -6 -o - -L $ARCHIVE_URL | tar xz -C $HOME_1 --strip-components=1
 
 # echo "Patching genesis file for fast governance..."
 # jq -r ".app_state.gov.voting_params.voting_period = \"$VOTING_PERIOD\"" $HOME_1/config/genesis.json  > ./voting.json
@@ -24,13 +24,15 @@ curl -6 -o - -L $ARCHIVE_URL | tar vxz -C $HOME_1 --strip-components=1
 # chmod +x $HOME/go/bin/$CHAIN_BINARY
 
 # Build Gaia binary
+cwd=$(pwd)
+cd ~/
 echo "Building gaiad branch: $UPGRADE_VERSION"
 git clone https://github.com/cosmos/gaia.git
 cd gaia
 git checkout $UPGRADE_VERSION
 make build
 cp build/gaiad $HOME/go/bin/$CHAIN_BINARY
-cd ..
+cd $cwd
 
 # Printing Gaia binary checksum
 echo GAIA_CHECKSUM: $(sha256sum $HOME/go/bin/$CHAIN_BINARY)
@@ -44,10 +46,10 @@ sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0.0025$DENOM\"^" $HOME_1/config/app
 toml set --toml-path $HOME_1/config/app.toml api.enable true
 
 # Set different ports for api
-toml set --toml-path $HOME_1/config/app.toml api.address "tcp://0.0.0.0:$VAL1_API_PORT"
+toml set --toml-path $HOME_1/config/app.toml api.address "tcp://127.0.0.1:$VAL1_API_PORT"
 
 # Set different ports for grpc
-toml set --toml-path $HOME_1/config/app.toml grpc.address "0.0.0.0:$VAL1_GRPC_PORT"
+toml set --toml-path $HOME_1/config/app.toml grpc.address "127.0.0.1:$VAL1_GRPC_PORT"
 
 # Turn off grpc web
 toml set --toml-path $HOME_1/config/app.toml grpc-web.enable false
@@ -57,7 +59,7 @@ toml set --toml-path $HOME_1/config/app.toml grpc-web.enable false
 sed -i -e "s\fast_sync\block_sync\g" $HOME_1/config/config.toml
 
 # Set different ports for rpc
-toml set --toml-path $HOME_1/config/config.toml rpc.laddr "tcp://0.0.0.0:$VAL1_RPC_PORT"
+toml set --toml-path $HOME_1/config/config.toml rpc.laddr "tcp://127.0.0.1:$VAL1_RPC_PORT"
 
 # Set different ports for rpc pprof
 toml set --toml-path $HOME_1/config/config.toml rpc.pprof_laddr "localhost:$VAL1_PPROF_PORT"
@@ -77,8 +79,16 @@ toml set --toml-path $HOME_1/config/client.toml chain-id "$CHAIN_ID"
 # Turn on Instrumentation
 toml set --toml-path $HOME_1/config/config.toml instrumentation.prometheus true
 
+# Turn off statesync
+toml set --toml-path $HOME_1/config/app.toml state-sync.snapshot-interval --to-int 0
+
 # Create self-delegation accounts
 echo $MNEMONIC_2 | $CHAIN_BINARY keys add $MONIKER_2 --keyring-backend test --home $HOME_1 --recover
+echo $MNEMONIC_3 | $CHAIN_BINARY keys add $MONIKER_3 --keyring-backend test --home $HOME_1 --recover
+echo $MNEMONIC_4 | $CHAIN_BINARY keys add $MONIKER_4 --keyring-backend test --home $HOME_1 --recover
+
+# rm addrbook
+rm $HOME_1/config/addrbook.json || true
 
 echo "Setting up services..."
 echo "Creating script for $CHAIN_BINARY"

@@ -8,14 +8,14 @@ echo "Running with $CONSUMER_CHAIN_BINARY."
 
 # Initialize home directories
 echo "Initializing consumer home 1..."
-$CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
-$CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
+$CONSUMER_CHAIN_BINARY config set client keyring-backend test --home $CONSUMER_HOME_1
 toml set --toml-path $CONSUMER_HOME_1/config/client.toml node "tcp://localhost:$CON1_RPC_PORT"
 $CONSUMER_CHAIN_BINARY init $MONIKER_1 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_1
 
 echo "Initializing consumer home 2..."
-$CONSUMER_CHAIN_BINARY config chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_2
-$CONSUMER_CHAIN_BINARY config keyring-backend test --home $CONSUMER_HOME_2
+$CONSUMER_CHAIN_BINARY config set client chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_2
+$CONSUMER_CHAIN_BINARY config set client keyring-backend test --home $CONSUMER_HOME_2
 toml set --toml-path $CONSUMER_HOME_2/config/client.toml node "tcp://localhost:$CON2_RPC_PORT"
 $CONSUMER_CHAIN_BINARY init $MONIKER_2 --chain-id $CONSUMER_CHAIN_ID --home $CONSUMER_HOME_2
 
@@ -54,8 +54,8 @@ fi
 echo "Patching config files..."
 # app.toml
 # minimum_gas_prices
-sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0$CONSUMER_DENOM\"^" $CONSUMER_HOME_1/config/app.toml
-sed -i -e "/minimum-gas-prices =/ s^= .*^= \"0$CONSUMER_DENOM\"^" $CONSUMER_HOME_2/config/app.toml
+sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$CONSUMER_MIN_GAS_PRICES$CONSUMER_DENOM\"^" $CONSUMER_HOME_1/config/app.toml
+sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$CONSUMER_MIN_GAS_PRICES$CONSUMER_DENOM\"^" $CONSUMER_HOME_2/config/app.toml
 
 # Enable API
 toml set --toml-path $CONSUMER_HOME_1/config/app.toml api.enable true

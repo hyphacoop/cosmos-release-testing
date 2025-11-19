@@ -18,11 +18,12 @@
     VERSION_CUTOFF: v19.2.0
     TARGET_VERSION: v20
     # All chain variables
-    COMMIT_TIMEOUT: 3
+    COMMIT_TIMEOUT: 5
     DOWNTIME_BLOCKS: 10000
     # Provider chain variables
     CHAIN_BINARY: gaiad
-    BINARY_SOURCE: BUILD
+    # BINARY_SOURCE: BUILD
+    BINARY_SOURCE: DOWNLOAD
     CHAIN_ID: testnet
     DENOM: uatom
     BASE_FEES: 2000
@@ -580,8 +581,6 @@
             COSMOS_SDK: v50
           run: |
             scripts/add_consumer_optin.sh
-            echo "Consumer ID: $consumer_id"
-            echo "Consumer ID: $CONSUMER_ID"
         - name: Initialize consumer chain with ICS v4.0.0
           env:
             CONSUMER_CHAIN_ID: v400-two
@@ -680,6 +679,7 @@
             connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $HOME_1 | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
             channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $HOME_1 | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
             tests/test_consumer_ibc_transfer.sh $channel_id
+        
         - name: _Downtime test> val3 must not be jailed 
           run: |
             tests/test_validator_jailed.sh $VALOPER_3 null
@@ -747,6 +747,24 @@
           run: |
             export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
             scripts/consumer-double-sign-tx.sh
+
+        - name: _Test light client attack
+          env:
+            CONSUMER_CHAIN_ID: v400-two
+            CONSUMER_HOME_1: /home/runner/.v400-2-1
+            CONSUMER_HOME_2: /home/runner/.v400-2-2
+            CONSUMER_HOME_3: /home/runner/.v400-2-3
+            CONSUMER_SERVICE_1: v400-2-1.service
+            CONSUMER_SERVICE_2: v400-2-2.service
+            CONSUMER_SERVICE_3: v400-2-3.service
+            CON1_RPC_PORT: 40221
+            CON1_P2P_PORT: 40231
+            CON2_P2P_PORT: 40232
+            CON3_P2P_PORT: 40233
+          run: |
+            cp templates/hermes-config-lc.toml /home/runner/.hermes/config-lc.toml
+            export CONSUMER_CHAIN_BINARY=$CONSUMER_CHAIN_V400_BINARY
+            scripts/consumer-light-client-tx.sh
 
         - name: _Remove consumer chain> ICS v4.0.0 chain 2
           run: |
@@ -1668,6 +1686,7 @@
         CONSUMER_ICS: v4.0.0
         PROVIDER_ICS: v3.3.0
         # Reference ICS chain variables
+        TOPN: 95
         ICS_TRANSFORM_BINARY_URL: https://github.com/hyphacoop/cosmos-builds/releases/download/ics-v3.3.0-transform/interchain-security-cd
         ICS_TRANSFORM_BINARY: cd-transform
         STRIDE_WALLET_1: stride1r5v5srda7xfth3hn2s26txvrcrntldjucq88rn
@@ -1812,7 +1831,7 @@
             CONSUMER_SERVICE_3: neutron-3.service
           run: |
             sudo systemctl enable $CONSUMER_SERVICE_1 --now
-            sleep 5
+            sleep 10
             journalctl -u $CONSUMER_SERVICE_1
         - name: _Pre-upgrade consumer chain produces blocks> Neutron chain
           env:
@@ -2571,7 +2590,7 @@
           run: |
             tests/gaia-v19/test_cosmwasm.sh
 
-    Baseline-13-feemarket:
+    Baseline-11-feemarket:
       runs-on: ubuntu-22.04
       needs: set-version-matrix
       strategy:
@@ -2655,6 +2674,13 @@
           run: |
             tests/test_feemarket.sh
 
+        - name: Print consensus and feemarket params
+          run: |
+            echo "> consensus params:"
+            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+            echo "> feemarket params:"
+            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+
         - name: Test software upgrade for published releases
           if: ${{ matrix.upgrade_version != 'main' }}
           env:
@@ -2676,3 +2702,26 @@
         - name: _Test feemarket
           run: |
             tests/test_feemarket.sh
+
+        - name: Print consensus and feemarket params
+          run: |
+            echo "> consensus params:"
+            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+            echo "> feemarket params:"
+            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'
+        - name: Change consensus and feemarket params
+          run: |
+            txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y -o json | jq -r '.txhash')
+            echo "tx hash: $txhash"
+            sleep $(($COMMIT_TIMEOUT+2))
+            prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
+            echo "> Proposal ID: $prop_id"
+            $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE$DENOM --home $HOME_1 -y
+            sleep $VOTING_PERIOD
+            sleep $(($COMMIT_TIMEOUT+2))
+        - name: Print consensus and feemarket params
+          run: |
+            echo "> consensus params:"
+            $CHAIN_BINARY q consensus params --home $HOME_1 -o json | jq '.'
+            echo "> feemarket params:"
+            $CHAIN_BINARY q feemarket params --home $HOME_1 -o json | jq '.'

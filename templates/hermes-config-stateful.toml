@@ -6,7 +6,7 @@ log_level = 'info'
 [mode.clients]
 enabled = true
 refresh = true
-misbehaviour = true
+misbehaviour = false
 
 [mode.connections]
 enabled = true
@@ -34,7 +34,7 @@ rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'
 store_prefix = 'ibc'
-gas_price = { price = 0.0, denom = 'ucon' }
+gas_price = { price = 0.0025, denom = 'ucon' }
 gas_multiplier = 1.1
 max_gas = 10000000
 clock_drift = '10s'
@@ -52,7 +52,7 @@ rpc_timeout = '15s'
 account_prefix = 'consumer'
 key_name = 'wallet'
 store_prefix = 'ibc'
-gas_price = { price = 0.0, denom = 'ucon' }
+gas_price = { price = 0.0025, denom = 'ucon' }
 gas_multiplier = 1.1
 max_gas = 10000000
 clock_drift = '10s'
@@ -98,6 +98,24 @@ ccv_consumer_chain = true
 type = "CosmosSdk"
 
 [[chains]]
+id = 'recovery-chain-1'
+rpc_addr = 'http://localhost:37010'
+grpc_addr = 'http://localhost:36010'
+event_source = { mode = 'push', url = 'ws://localhost:37010/websocket', batch_delay = '500ms' }
+rpc_timeout = '15s'
+account_prefix = 'cosmos'
+key_name = 'wallet'
+store_prefix = 'ibc'
+gas_price = { price = 0.005, denom = 'uatom' }
+gas_multiplier = 1.6
+max_gas = 10000000
+clock_drift = '10s'
+trusting_period = '300seconds'
+trust_threshold = '2/3'
+client_refresh_rate = '1/5'
+type = "CosmosSdk"
+
+[[chains]]
 id = 'ica-chain'
 rpc_addr = 'http://localhost:37011'
 grpc_addr = 'http://localhost:36011'
@@ -111,7 +129,8 @@ gas_multiplier = 1.6
 max_gas = 10000000
 clock_drift = '10s'
 trusting_period = '1days'
-trust_threshold = { numerator = '1', denominator = '3' }
+trust_threshold = '2/3'
+client_refresh_rate = '1/5'
 type = "CosmosSdk"
 
 [[chains]]

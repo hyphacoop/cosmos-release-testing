@@ -1,0 +1,45 @@
+{
+    "messages": [
+        {
+            "@type": "/feemarket.feemarket.v1.MsgParams",
+            "params": {
+                "alpha": "0.000000000000000000",
+                "beta": "1.000000000000000000",
+                "gamma": "0.000000000000000000",
+                "delta": "0.000000000000000000",
+                "min_base_gas_price": "0.005000000000000000",
+                "min_learning_rate": "0.125000000000000000",
+                "max_learning_rate": "0.125000000000000000",
+                "max_block_utilization": "75000000",
+                "window": "1",
+                "fee_denom": "uatom",
+                "enabled": true,
+                "distribute_fees": false
+            },
+            "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn"
+        },
+        {
+            "@type": "/cosmos.consensus.v1.MsgUpdateParams",
+            "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+            "block": {
+                "max_bytes": "2000000",
+                "max_gas": "75000000"
+            },
+            "evidence": {
+                "max_age_num_blocks": "1000000",
+                "max_age_duration": "48h0m0s",
+                "max_bytes": "50000"
+            },
+            "validator": {
+                "pub_key_types": [
+                    "ed25519"
+                ]
+            }
+        }
+    ],
+    "metadata": "ipfs://CID",
+    "deposit": "100000000uatom",
+    "title": "Update consensus & feemarket params",
+    "summary": "Update consensus.block.max_gas and feemarket.params.max_block_utilization to 75M",
+    "expedited": false
+}

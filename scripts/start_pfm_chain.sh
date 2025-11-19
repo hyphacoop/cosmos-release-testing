@@ -114,7 +114,7 @@ echo "After=network-online.target"          | sudo tee /etc/systemd/system/$PFM_
 echo ""                                     | sudo tee /etc/systemd/system/$PFM_SERVICE -a
 echo "[Service]"                            | sudo tee /etc/systemd/system/$PFM_SERVICE -a
 echo "User=$USER"                           | sudo tee /etc/systemd/system/$PFM_SERVICE -a
-echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --x-crisis-skip-assert-invariants --home $PFM_HOME" | sudo tee /etc/systemd/system/$PFM_SERVICE -a
+echo "ExecStart=$HOME/go/bin/$CHAIN_BINARY start --home $PFM_HOME" | sudo tee /etc/systemd/system/$PFM_SERVICE -a
 echo "Restart=no"                           | sudo tee /etc/systemd/system/$PFM_SERVICE -a
 echo "LimitNOFILE=4096"                     | sudo tee /etc/systemd/system/$PFM_SERVICE -a
 echo ""                                     | sudo tee /etc/systemd/system/$PFM_SERVICE -a

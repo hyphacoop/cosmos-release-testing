@@ -12,7 +12,7 @@
       },
       "genesis_hash": "Z2VuX2hhc2g=",
       "binary_hash": "YmluX2hhc2g=",
-      "spawn_time": "2024-08-29T12:26:16.529913Z",
+      "spawn_time": null,
       "unbonding_period": 1728000000000000,
       "ccv_timeout_period": 2419200000000000,
       "transfer_timeout_period": 1800000000000,

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Patching add template with spawn time..."
-spawn_time=$(date -u --iso-8601=ns -d '60 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
+spawn_time=$(date -u --iso-8601=ns -d '80 secs' | sed s/+00:00/Z/ | sed s/,/./) # 30 seconds in the future
 jq -r --arg SPAWNTIME "$spawn_time" '.initialization_parameters.spawn_time |= $SPAWNTIME' templates/create-consumer.json > create-spawn.json
 
 # if [ $PSS_ENABLED == true ]; then
@@ -55,6 +55,8 @@ $CHAIN_BINARY q tx $txhash --home $HOME_1
 proposal_id=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "Voting on proposal $proposal_id..."
 $CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y
+$CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_2 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y
+$CHAIN_BINARY tx gov vote $proposal_id yes --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_3 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -y
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
 

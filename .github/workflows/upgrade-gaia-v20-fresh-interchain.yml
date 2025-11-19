@@ -3,10 +3,10 @@
 name: Gaia v20 Upgrade - Fresh State Interchain
 on:
     # push:
-    repository_dispatch:
-      types: [new_main_build]
-    schedule:
-      - cron: '0 10 * * 1-6'
+    # repository_dispatch:
+    #   types: [new_main_build]
+    # schedule:
+    #   - cron: '0 10 * * 1-6'
     workflow_dispatch:
     # push:
     
