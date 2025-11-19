@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       devnet_branch:
-        description: 'Block to sync to'
+        description: 'Gaia branch / version to deploy'
         required: true
         type: string
         default: v25.2.0
