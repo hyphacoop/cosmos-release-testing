@@ -92,7 +92,7 @@ jobs:
           sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
-          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
+          # echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
           echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           pubkey=$(jq -r .pub_key.value $NODE_HOME/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value $NODE_HOME/config/priv_validator_key.json)
