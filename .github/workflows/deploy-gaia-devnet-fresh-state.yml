@@ -115,6 +115,12 @@ jobs:
           sed -i 's/\"stake\"/\"uatom\"/g' $NODE_HOME/config/genesis.json
           jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' $NODE_HOME/config/genesis.json > /tmp/feemarket-min-base.json
           mv /tmp/feemarket-min-base.json $NODE_HOME/config/genesis.json
+          jq -r '.app_state.feemarket.params.max_block_utilization |= "75000000"' $NODE_HOME/config/genesis.json > /tmp/feemarket-block.json
+          mv /tmp/feemarket-block.json $NODE_HOME/config/genesis.json
+          jq -r '.consensus.params.block.max_gas = "75000000"' $NODE_HOME/config/genesis.json > /tmp/block-max-gas.json
+          mv /tmp/block-max-gas.json $NODE_HOME/config/genesis.json
+          jq -r '.consensus.params.block.max_bytes = "2000000"' $NODE_HOME/config/genesis.json > /tmp/block-max-bytes.json
+          mv /tmp/block-max-bytes.json $NODE_HOME/config/genesis.json
       - name: Configure gaiad
         run: |
           source ~/env/bin/activate
