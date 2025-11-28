@@ -133,16 +133,24 @@ jobs:
           # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
       - name: Download snapshot
+        env:
+          STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
           set -e
-          cd ~/.gaia
-          echo "[INFO]: Downloading archive ${{ env.ARCHIVE_URL }}"
-          # curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
-          aria2c -x 8 -s 8 --out archive.tar.lz4 ${{ env.ARCHIVE_URL }}
-          echo "[INFO]: Extracting archive..."
-          lz4 -dc archive.tar.lz4 | tar  -xaf -
-          echo "[INFO]: Cleanup..."
-          rm archive.tar.lz4
+          if [ "$STATESYNC_ENABLED" == "1" ]
+          then
+            echo "Statesync enabled, skip downloading snapshot..."
+            exit 0
+          else
+            cd ~/.gaia
+            echo "[INFO]: Downloading archive ${{ env.ARCHIVE_URL }}"
+            # curl -o - -L ${{ env.ARCHIVE_URL }} | lz4 -d | tar vx -C .
+            aria2c -x 8 -s 8 --out archive.tar.lz4 ${{ env.ARCHIVE_URL }}
+            echo "[INFO]: Extracting archive..."
+            lz4 -dc archive.tar.lz4 | tar  -xaf -
+            echo "[INFO]: Cleanup..."
+            rm archive.tar.lz4
+          fi
       - name: Get addrbook
         run: curl -Ls ${{ vars.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
