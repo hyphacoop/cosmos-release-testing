@@ -144,7 +144,7 @@ jobs:
           echo "[INFO]: Cleanup..."
           rm archive.tar.lz4
       - name: Get addrbook
-        run: curl -Ls ${{ env.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
+        run: curl -Ls ${{ vars.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
