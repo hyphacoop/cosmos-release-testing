@@ -137,7 +137,7 @@ jobs:
       - name: Download snapshot
         env:
           STATESYNC_ENABLED: 0
-          STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
+          # STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
           set -e
           if [ "$STATESYNC_ENABLED" == "1" ]
