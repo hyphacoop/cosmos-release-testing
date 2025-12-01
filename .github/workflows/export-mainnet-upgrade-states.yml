@@ -124,16 +124,19 @@ jobs:
       #     # Polkachu
       #     # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
       #     # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
-      - name: Get archive url (speed workaround)
+      - name: Get archive url
         run: |
-          # Node Stake
-          SNAP_NAME=$(curl -s https://ss-nodestake.eu-proxy.polypore.xyz/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
-          echo "ARCHIVE_URL=https://ss-nodestake.eu-proxy.polypore.xyz/${SNAP_NAME}" >> $GITHUB_ENV
+          # Node Stake (works)
+          # SNAP_NAME=$(curl -s https://ss-nodestake.eu-proxy.polypore.xyz/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+          # echo "ARCHIVE_URL=https://ss-nodestake.eu-proxy.polypore.xyz/${SNAP_NAME}" >> $GITHUB_ENV
           # Polkachu
           # SNAP_NAME=$(curl -s https://www.polkachu.com/tendermint_snapshots/cosmos | egrep -o "cosmos_20.*\.tar.lz4 https" | awk -F " " '{ print $1 }')
           # echo "ARCHIVE_URL=https://snapshots.polkachu.com/snapshots/cosmos/${SNAP_NAME}" >> $GITHUB_ENV
+          # Hypha
+          echo "ARCHIVE_URL=https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4"
       - name: Download snapshot
         env:
+          STATESYNC_ENABLED: 0
           STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
           set -e
@@ -240,7 +243,7 @@ jobs:
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: |
-          tail -f /home/runner/artifact/gaiad_sync.log &
+          /home/runner/artifact/gaiad_fork.log &
           tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Stop fork tool
         run: |
@@ -252,7 +255,7 @@ jobs:
           screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
         run: |
-          tail -f /home/runner/artifact/gaiad_sync.log &
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
           tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Restore val key
         run: |
