@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 on Monday.
     - cron: '30 5 * * 1'
-  # push:
+  push:
 # concurrency:
 #   group: self-hosted-runners
 
@@ -159,7 +159,9 @@ jobs:
           CHAIN_BINARY: 'gaiad'
         run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
       - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
+        run: |
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 100000
       - name: Syncing Chain
         run: |
           catching_up="true"
@@ -237,7 +239,9 @@ jobs:
           --replaced-consensus-address="${{ vars.VALIDATOR_TO_REPLACE_CONSENSUS }}"
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+        run: |
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Stop fork tool
         run: |
           echo "exiting gaia and screen"
@@ -247,7 +251,9 @@ jobs:
         run: |
           screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
       - name: Wait for gaiad to start and stabilize
-        run: tests/test_block_production.sh 127.0.0.1 26657 50 1000
+        run: |
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Restore val key
         run: |
           echo "Restoring validator key"
