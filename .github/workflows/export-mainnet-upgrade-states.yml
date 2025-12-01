@@ -5,9 +5,9 @@ on:
   schedule:
     # At 05:30 on Monday.
     - cron: '30 5 * * 1'
-  push:
+  # push:
 # concurrency:
-#   group: self-hosted-runners
+  group: self-hosted-runners
 
 jobs:
   export-cosmoshub-mainnet:
@@ -136,8 +136,7 @@ jobs:
           echo "ARCHIVE_URL=https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4"  >> $GITHUB_ENV
       - name: Download snapshot
         env:
-          STATESYNC_ENABLED: 0
-          # STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
+          STATESYNC_ENABLED: ${{ vars.STATESYNC_ENABLED }}
         run: |
           set -e
           if [ "$STATESYNC_ENABLED" == "1" ]
