@@ -1,32 +1,40 @@
 #!/bin/bash
 $CHAIN_BINARY q bank balances $WALLET_3 --home $HOME_1 -o json | jq '.'
 
-echo "Submitting the store proposal..."
-txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
-    tests/contracts/cw3_fixed_multisig.wasm \
-    --title "Store and instantiate CW template" \
-    --summary "This proposal will store the cw template contract" \
-    --authority cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn \
-    --deposit 10000000$DENOM -y \
+$CHAIN_BINARY tx wasm store tests/contracts/cw3_fixed_multisig.wasm \
     --from $WALLET_1 \
+    --keyring-backend test \
     --chain-id $CHAIN_ID \
-    --gas 30000000 --gas-prices 0.005$DENOM \
-    --home $HOME_1 -o json | jq -r '.txhash')
-echo "Tx hash: $txhash"
-sleep $(($COMMIT_TIMEOUT+2))
+    --gas 30000000 \
+    --gas-prices $GAS_PRICE \
+    -y \
+    --home $whale_home -o json | jq '.'
+# echo "Submitting the store proposal..."
+# txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
+#     tests/contracts/cw3_fixed_multisig.wasm \
+#     --title "Store and instantiate CW template" \
+#     --summary "This proposal will store the cw template contract" \
+#     --authority cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn \
+#     --deposit 10000000$DENOM -y \
+#     --from $WALLET_1 \
+#     --chain-id $CHAIN_ID \
+#     --gas 30000000 --gas-prices 0.005$DENOM \
+#     --home $HOME_1 -o json | jq -r '.txhash')
+# echo "Tx hash: $txhash"
+# sleep $(($COMMIT_TIMEOUT+2))
 
-echo "Getting proposal ID from txhash..."
-proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-echo "Proposal ID: $proposal_id"
+# echo "Getting proposal ID from txhash..."
+# proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $HOME_1 | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+# echo "Proposal ID: $proposal_id"
 
-echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
-$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
-$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
-sleep $(($COMMIT_TIMEOUT+2))
+# echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+# $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+# $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+# $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_3 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices 0.006$DENOM --gas-adjustment 4 -y --home $HOME_1 -o json
+# sleep $(($COMMIT_TIMEOUT+2))
 
-echo "Waiting for the voting period to end..."
-sleep $VOTING_PERIOD
+# echo "Waiting for the voting period to end..."
+# sleep $VOTING_PERIOD
 
 echo "> List code"
 $CHAIN_BINARY q wasm list-code --home $HOME_1 -o json | jq -r '.'
