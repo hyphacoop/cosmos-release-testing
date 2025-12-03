@@ -129,7 +129,7 @@ else
         rm -rf gaia
         git clone https://github.com/cosmos/gaia.git
         # cd gaia
-        pushd gaiad
+        pushd gaia
         git checkout $TARGET_VERSION
         make install
         # cd ..
