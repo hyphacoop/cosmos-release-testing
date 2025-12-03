@@ -121,6 +121,12 @@ jobs:
           mv /tmp/block-max-gas.json $NODE_HOME/config/genesis.json
           jq -r '.consensus.params.block.max_bytes = "2000000"' $NODE_HOME/config/genesis.json > /tmp/block-max-bytes.json
           mv /tmp/block-max-bytes.json $NODE_HOME/config/genesis.json
+          # Set voting period to 30 minutes
+          jq -r '.app_state.gov.params.voting_period = "30m"' $NODE_HOME/config/genesis.json > /tmp/gov-voting-period.json
+          mv /tmp/gov-voting-period.json $NODE_HOME/config/genesis.json
+          # Set expedited voting period to 10 minutes
+          jq -r '.app_state.gov.params.expedited_voting_period = "10m"' $NODE_HOME/config/genesis.json > /tmp/gov-exp-voting-period.json
+          mv /tmp/gov-exp-voting-period.json $NODE_HOME/config/genesis.json
       - name: Configure gaiad
         run: |
           source ~/env/bin/activate
