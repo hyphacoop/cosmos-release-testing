@@ -256,9 +256,9 @@ jobs:
       - name: Query default validator description
         run: |
           set -e
-          $CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker
-          moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker)
-          website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website)
+          $CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker'
+          moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker')
+          website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website')
           echo "Moniker: $moniker"
           echo "Website: $website"
       - name: Set validator description
@@ -268,8 +268,8 @@ jobs:
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
       - name: _Verify validator description is set
         run: |
-          moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker)
-          website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website)
+          moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker')
+          website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website')
           echo "Moniker: $moniker"
           echo "Website: $website"
           error=0
