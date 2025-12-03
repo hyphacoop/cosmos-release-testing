@@ -1,5 +1,11 @@
 #!/bin/bash
+WALLET_2=$(jq -r '.address' temp/keys-val_02.json)
+WALLET_3=$(jq -r '.address' temp/keys-val_03.json)
+echo "> Balances before multisig contract test:"
+$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q bank balances $WALLET_2 --home $whale_home -o json | jq '.'
 $CHAIN_BINARY q bank balances $WALLET_3 --home $whale_home -o json | jq '.'
+
 
 $CHAIN_BINARY tx wasm store tests/contracts/cw3_fixed_multisig.wasm \
     --from $WALLET_1 \
@@ -9,6 +15,7 @@ $CHAIN_BINARY tx wasm store tests/contracts/cw3_fixed_multisig.wasm \
     --gas-prices $GAS_PRICE \
     -y \
     --home $whale_home -o json | jq '.'
+sleep $(($COMMIT_TIMEOUT+2))
 # echo "Submitting the store proposal..."
 # txhash=$($CHAIN_BINARY tx wasm submit-proposal wasm-store \
 #     tests/contracts/cw3_fixed_multisig.wasm \
