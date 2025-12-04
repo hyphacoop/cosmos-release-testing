@@ -256,7 +256,6 @@ jobs:
       - name: Query default validator description
         run: |
           set -e
-          $CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker'
           moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker')
           website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website')
           echo "Moniker: $moniker"
