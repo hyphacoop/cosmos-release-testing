@@ -253,6 +253,39 @@ jobs:
           echo "[INFO] val2:"
           wallets=$(gaiad --home $HOME_2 keys list --output json | jq -r '.[].address ')
           for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_2 q bank balances $i; done
+      - name: Query default validator description
+        run: |
+          set -e
+          moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker')
+          website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website')
+          echo "Moniker: $moniker"
+          echo "Website: $website"
+      - name: Set validator description
+        run: |
+          set -e
+          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --new-moniker "Hypha Test Validator" --website "https://hypha.coop" --from val --gas auto --gas-adjustment 3 --gas-prices 1000uatom -y
+          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      - name: _Verify validator description is set
+        run: |
+          moniker=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.moniker')
+          website=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json | jq -r '.validator.description.website')
+          echo "Moniker: $moniker"
+          echo "Website: $website"
+          error=0
+          if [ "$moniker" != "Hypha Test Validator" ]
+          then
+            echo "[ERROR]: Expected moniker Hypha Test Validator got: $moniker"
+            error=1
+          fi
+          if [ "$website" != "https://hypha.coop" ]
+          then
+            echo "[ERROR]: Expected website https://hypha.coop got: $website"
+            error=1
+          fi
+          if [ $error == 1 ]
+          then
+            exit 1
+          fi
       - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
