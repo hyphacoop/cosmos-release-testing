@@ -127,3 +127,49 @@ else
     echo "[FAILED]: Incorrect minted tokens in $WALLET_1 expected $expected_val_token$tf_token1 got $val_mint_token$tf_token1"
     exit 1
 fi
+
+echo "[INFO]: > Test burn-from (this tx should fail)"
+set +e
+$CHAIN_BINARY --home $HOME_1 tx tokenfactory burn-from $tokenfactory_wallet1_addr $tf_burn_amount$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+set -e
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+if [ $? == 0 ]
+then
+    echo "[PASS]: TX failed"
+else
+    echo "[FAILED]: TX successful but burn-from should be disabled"
+fi
+echo "[INFO]: Verify token value didn't change"
+tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+echo "[DEBUG]: expecting: $expected_tokenfactory_wallet1_token"
+if [ $tokenfactory_wallet1_mint_token == $expected_tokenfactory_wallet1_token ]
+then
+    echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $tokenfactory_wallet1_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $expected_tokenfactory_wallet1_token$tf_token1 got $tokenfactory_wallet1_mint_token$tf_token1"
+    exit 1
+fi
+
+echo "[INFO]: > Test force-transfer (this tx should fail)"
+set +e
+$CHAIN_BINARY --home $HOME_1 tx tokenfactory force-transfer $tf_burn_amount$tf_token1 $tokenfactory_wallet1_addr $WALLET_1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+set -e
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+if [ $? == 0 ]
+then
+    echo "[PASS]: TX failed"
+else
+    echo "[FAILED]: TX successful but burn-from should be disabled"
+fi
+echo "[INFO]: Verify token value didn't change"
+tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+echo "[DEBUG]: expecting: $expected_tokenfactory_wallet1_token"
+if [ $tokenfactory_wallet1_mint_token == $expected_tokenfactory_wallet1_token ]
+then
+    echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $tokenfactory_wallet1_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $expected_tokenfactory_wallet1_token$tf_token1 got $tokenfactory_wallet1_mint_token$tf_token1"
+    exit 1
+fi
