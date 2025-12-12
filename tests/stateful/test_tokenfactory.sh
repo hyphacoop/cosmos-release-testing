@@ -182,7 +182,7 @@ denom_metadata=$($CHAIN_BINARY --home $HOME_1 q bank denom-metadata $tf_token1 -
 echo "[INFO]: Current meta for $tf_token1"
 echo "$denom_metadata"
 
-$CHAIN_BINARY tx tokenfactory modify-metadata $tf_token1 $tf_denom_name "$tf_metadata_description" 6 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+$CHAIN_BINARY --home $HOME_1 tx tokenfactory modify-metadata $tf_token1 $tf_denom_name "$tf_metadata_description" 6 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 echo "[INFO]: Current meta for $tf_token1"
