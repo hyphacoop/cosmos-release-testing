@@ -3,6 +3,7 @@ set -e
 
 mint_token=1000000000000000
 bank_send=2000000000$DENOM
+tf_bank_send=10000
 tf_denom_name="cake"
 
 # Create a tokenfactory wallet
@@ -21,7 +22,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 echo "[INFO]: Get denom by admin"
 $CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1
 tf_token1=$($CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1 -o json | jq -r '.denoms[0]')
-echo "[DEBUG]: tf_token: $tf_token1"
+echo "[DEBUG]: tf_token1: $tf_token1"
 
 # Mint token to tokenfactory-1
 echo "[INFO]: Mint tokens to tokenfactory-1: $tokenfactory_wallet1_addr"
@@ -44,12 +45,38 @@ else
     exit 1
 fi
 
-echo "[INFO]: Verify minted tokens in $tokenfactory_wallet1_addr"
+echo "[INFO]: > Verify minted tokens in $tokenfactory_wallet1_addr"
 tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
 if [ $tokenfactory_wallet1_mint_token == $mint_token ]
 then
     echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $val_mint_token$tf_token1"
 else
     echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $mint_token$tf_token1 got $val_mint_token$tf_token1"
+    exit 1
+fi
+
+echo "[INFO]: > Test bank send minted tokens"
+$CHAIN_BINARY --home $HOME_1 tx bank send $WALLET_1 $tokenfactory_wallet1_addr $tf_bank_send$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+echo "[DEBUG]: verifying val wallet"
+val_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+let expected_val_token=$mint_token-$tf_bank_send
+if [ $val_mint_token == $expected_val_token ]
+then
+    echo "[PASS]: Correct minted tokens in $WALLET_1: $val_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $WALLET_1 expected $expected_val_token$tf_token1 got $val_mint_token$tf_token1"
+    exit 1
+fi
+
+echo "[DEBUG]: verifying tokenfatory wallet"
+tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+let expected_tokenfactory_wallet1_token=$mint_token+$tf_bank_send
+if [ $tokenfactory_wallet1_mint_token == $expected_tokenfactory_wallet1_token ]
+then
+    echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $tokenfactory_wallet1_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $expected_tokenfactory_wallet1_token$tf_token1 got $tokenfactory_wallet1_mint_token$tf_token1"
     exit 1
 fi
