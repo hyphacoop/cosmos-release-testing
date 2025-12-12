@@ -3,8 +3,9 @@ set -e
 
 mint_token=1000000000000000
 bank_send=2000000000$DENOM
-tf_bank_send=10000
 tf_denom_name="cake"
+tf_bank_send=10000
+tf_burn_amount=1000
 
 # Create a tokenfactory wallet
 echo "[INFO]: Creating wallet for tokenfactory..."
@@ -55,6 +56,7 @@ else
     exit 1
 fi
 
+# test bank send of minted tokens
 echo "[INFO]: > Test bank send minted tokens"
 $CHAIN_BINARY --home $HOME_1 tx bank send $WALLET_1 $tokenfactory_wallet1_addr $tf_bank_send$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
@@ -62,6 +64,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 echo "[DEBUG]: verifying val wallet"
 val_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
 let expected_val_token=$mint_token-$tf_bank_send
+echo "[DEBUG]: expecting: $expected_val_token"
 if [ $val_mint_token == $expected_val_token ]
 then
     echo "[PASS]: Correct minted tokens in $WALLET_1: $val_mint_token$tf_token1"
@@ -73,6 +76,7 @@ fi
 echo "[DEBUG]: verifying tokenfatory wallet"
 tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
 let expected_tokenfactory_wallet1_token=$mint_token+$tf_bank_send
+echo "[DEBUG]: expecting: $expected_tokenfactory_wallet1_token"
 if [ $tokenfactory_wallet1_mint_token == $expected_tokenfactory_wallet1_token ]
 then
     echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $tokenfactory_wallet1_mint_token$tf_token1"
@@ -80,3 +84,27 @@ else
     echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $expected_tokenfactory_wallet1_token$tf_token1 got $tokenfactory_wallet1_mint_token$tf_token1"
     exit 1
 fi
+
+# Test tokenfactory burn denom
+echo "[INFO]: > Test tokenfactory burn denom"
+echo "[DEBUG]: Try burning from non token admin"
+$CHAIN_BINARY --home $HOME_1 tx tokenfactory burn $tf_burn_amount$tf_token1 --from $tokenfactory_wallet1_addr --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+if [ $? == 0 ]
+then
+    echo "[PASS]: TX failed from token non-admin"
+else
+    echo "[FAILED]: TX successful from token non-admin account"
+fi
+echo "[INFO]: Verify token value didn't change"
+tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+let expected_tokenfactory_wallet1_token=$mint_token+$tf_bank_send
+echo "[DEBUG]: expecting: $expected_tokenfactory_wallet1_token"
+if [ $tokenfactory_wallet1_mint_token == $expected_tokenfactory_wallet1_token ]
+then
+    echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $tokenfactory_wallet1_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $expected_tokenfactory_wallet1_token$tf_token1 got $tokenfactory_wallet1_mint_token$tf_token1"
+    exit 1
+fi
+
+# $CHAIN_BINARY --home $HOME_1 tx tokenfactory burn $tf_burn_amount$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
