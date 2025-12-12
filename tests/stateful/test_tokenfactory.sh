@@ -128,6 +128,7 @@ else
     exit 1
 fi
 
+# Test disabled burn-from tx
 echo "[INFO]: > Test burn-from (this tx should fail)"
 set +e
 $CHAIN_BINARY --home $HOME_1 tx tokenfactory burn-from $tokenfactory_wallet1_addr $tf_burn_amount$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
@@ -151,6 +152,7 @@ else
     exit 1
 fi
 
+# Test disabled force-transfer tx
 echo "[INFO]: > Test force-transfer (this tx should fail)"
 set +e
 $CHAIN_BINARY --home $HOME_1 tx tokenfactory force-transfer $tf_burn_amount$tf_token1 $tokenfactory_wallet1_addr $WALLET_1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
@@ -173,3 +175,7 @@ else
     echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $expected_tokenfactory_wallet1_token$tf_token1 got $tokenfactory_wallet1_mint_token$tf_token1"
     exit 1
 fi
+
+echo "[INFO]: > Test denom-metadata"
+denom_metadata=$($CHAIN_BINARY --home $HOME_1 q bank denom-metadata $tf_token1 -o json | jq -r '.')
+echo "$denom_metadata"
