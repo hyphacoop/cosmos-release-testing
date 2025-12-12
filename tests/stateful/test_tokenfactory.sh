@@ -21,7 +21,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 echo "[INFO]: Get denom by admin"
 $CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1
 tf_token1=$($CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1 -o json | jq -r '.denoms[0]')
-echo "[DEBUG]: tf_token: $tf_token"
+echo "[DEBUG]: tf_token: $tf_token1"
 
 # Mint token to tokenfactory-1
 echo "[INFO]: Mint tokens to tokenfactory-1: $tokenfactory_wallet1_addr"
@@ -36,6 +36,20 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 # Verify tokens in wallets
 echo "[INFO]: Verify minted tokens in $WALLET_1"
 val_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+if [ $val_mint_token == $mint_token ]
+then
+    echo "[PASS]: Correct minted tokens in $WALLET_1: $val_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $WALLET_1 expected $mint_token$tf_token1 got $val_mint_token$tf_token1"
+    exit 1
+fi
 
 echo "[INFO]: Verify minted tokens in $tokenfactory_wallet1_addr"
 tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+if [ $tokenfactory_wallet1_mint_token == $mint_token ]
+then
+    echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $val_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $mint_token$tf_token1 got $val_mint_token$tf_token1"
+    exit 1
+fi
