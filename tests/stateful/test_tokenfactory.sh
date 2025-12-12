@@ -88,7 +88,11 @@ fi
 # Test tokenfactory burn denom
 echo "[INFO]: > Test tokenfactory burn denom"
 echo "[DEBUG]: Try burning from non token admin"
+set +e
 $CHAIN_BINARY --home $HOME_1 tx tokenfactory burn $tf_burn_amount$tf_token1 --from $tokenfactory_wallet1_addr --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+set -e
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
 if [ $? == 0 ]
 then
     echo "[PASS]: TX failed from token non-admin"
@@ -107,4 +111,19 @@ else
     exit 1
 fi
 
-# $CHAIN_BINARY --home $HOME_1 tx tokenfactory burn $tf_burn_amount$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+echo "[DEBUG]: Try burning from token admin"
+last_val_mint_token=$val_mint_token
+$CHAIN_BINARY --home $HOME_1 tx tokenfactory burn $tf_burn_amount$tf_token1 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+echo "[INFO]: Verify token value changed"
+val_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+let expected_val_token=$last_val_mint_token-$tf_burn_amount
+echo "[DEBUG]: expecting: $expected_val_token"
+if [ $val_mint_token == $expected_val_token ]
+then
+    echo "[PASS]: Correct minted tokens in $WALLET_1: $val_mint_token$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $WALLET_1 expected $expected_val_token$tf_token1 got $val_mint_token$tf_token1"
+    exit 1
+fi
