@@ -19,7 +19,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 # query denom by admin
 echo "[INFO]: Get denom by admin"
-gaiad q tokenfactory denoms-from-admin $WALLET_1
+$CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1
 tf_token1=$($CHAIN_BINARY q tokenfactory denoms-from-admin $$WALLET_1 -o json | jq -r '.denoms[0]')
 echo "[DEBUG]: tf_token: $tf_token"
 
@@ -35,7 +35,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
 # Verify tokens in wallets
 echo "[INFO]: Verify minted tokens in $WALLET_1"
-val_mint_token=$(gaiad q bank balances $WALLET_1 -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+val_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
 
 echo "[INFO]: Verify minted tokens in $tokenfactory_wallet1_addr"
-tokenfactory_wallet1_mint_token=$(gaiad q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+tokenfactory_wallet1_mint_token=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
