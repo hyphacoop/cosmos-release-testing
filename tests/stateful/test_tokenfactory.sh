@@ -4,6 +4,7 @@ set -e
 mint_token=1000000000000000
 bank_send=2000000000$DENOM
 tf_denom_name="cake"
+tf_metadata_description="Tokens for cake"
 tf_bank_send=10000
 tf_burn_amount=1000
 
@@ -178,4 +179,11 @@ fi
 
 echo "[INFO]: > Test denom-metadata"
 denom_metadata=$($CHAIN_BINARY --home $HOME_1 q bank denom-metadata $tf_token1 -o json | jq -r '.')
+echo "[INFO]: Current meta for $tf_token1"
+echo "$denom_metadata"
+
+$CHAIN_BINARY tx tokenfactory modify-metadata $tf_token1 $tf_denom_name "$tf_metadata_description" 6 --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+echo "[INFO]: Current meta for $tf_token1"
 echo "$denom_metadata"
