@@ -20,7 +20,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 # query denom by admin
 echo "[INFO]: Get denom by admin"
 $CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1
-tf_token1=$($CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $$WALLET_1 -o json | jq -r '.denoms[0]')
+tf_token1=$($CHAIN_BINARY --home $HOME_1 q tokenfactory denoms-from-admin $WALLET_1 -o json | jq -r '.denoms[0]')
 echo "[DEBUG]: tf_token: $tf_token"
 
 # Mint token to tokenfactory-1
