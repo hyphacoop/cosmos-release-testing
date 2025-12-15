@@ -8,6 +8,10 @@ tf_metadata_description="Tokens for cake"
 tf_bank_send=10000
 tf_burn_amount=1000
 
+# Get gov address
+gov_address=$($CHAIN_BINARY --home $HOME_1 gaiad q auth module-account gov -o json | jq -r '.account.value.address')
+echo "[INFO]: Gov addressis : $gov_address" 
+
 # Create a tokenfactory wallet
 echo "[INFO]: Creating wallet for tokenfactory..."
 tokenfactory_wallet1_json=$($CHAIN_BINARY --home $HOME_1 keys add tokenfactory-1 --output json)
@@ -177,6 +181,7 @@ else
     exit 1
 fi
 
+# Test setting denom metadata
 echo "[INFO]: > Test denom-metadata"
 denom_metadata=$($CHAIN_BINARY --home $HOME_1 q bank denom-metadata $tf_token1 -o json | jq -r '.')
 echo "[INFO]: Current meta for $tf_token1"
@@ -196,6 +201,26 @@ if [ "$denom_description_query" == "$tf_metadata_description" ]
 then
     echo "[PASS]: Description matches"
 else
-    echo "[ERROR]: Description does not match expected: $tf_metadata_description got $denom_description_query"
+    echo "[ERROR]: Description does not match. Expected: $tf_metadata_description got $denom_description_query"
+    exit 1
+fi
+
+# Test changing token to new owner
+echo "[INFO]: > Test change token to new owner (to gov address)"
+current_tf_token1_admin=$($CHAIN_BINARY --home $HOME_1 tokenfactory denom-authority-metadata $tf_token1 -o json | jq -r '.authority_metadata.admin')
+echo "[INFO]: Current admin for token $tf_token1: $current_tf_token1_admin"
+
+echo "[DEBUG]: Submitting chain-admin tx"
+$CHAIN_BINARY --home $HOME_1 tx tokenfactory change-admin $tf_token1 $gov_address --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+
+current_tf_token1_admin=$($CHAIN_BINARY --home $HOME_1 tokenfactory denom-authority-metadata $tf_token1 -o json | jq -r '.authority_metadata.admin')
+echo "[INFO]: Current admin for token $tf_token1: $current_tf_token1_admin"
+
+if [ "$current_tf_token1_admin" == "$gov_address" ]
+then
+    echo "[PASS]: Token admin changed"
+else
+    echo "[ERROR]: Token admin does not match. Expected: $gov_address got $current_tf_token1_admin"
     exit 1
 fi
