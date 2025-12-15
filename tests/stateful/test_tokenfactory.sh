@@ -188,3 +188,14 @@ denom_metadata=$($CHAIN_BINARY --home $HOME_1 q bank denom-metadata $tf_token1 -
 
 echo "[INFO]: Current meta for $tf_token1"
 echo "$denom_metadata"
+
+echo "[INFO]: Verify metadata"
+denom_description_query=$(echo $denom_metadata | jq -r '.metadata.description')
+echo "[DEBUG]: metadata from query: $denom_description_query"
+if [ "$denom_description_query" == "$tf_metadata_description" ]
+then
+    echo "[PASS]: Description matches"
+else
+    echo "[ERROR]: Description does not match expected: $tf_metadata_description got $denom_description_query"
+    exit 1
+fi
