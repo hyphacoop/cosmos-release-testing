@@ -227,9 +227,13 @@ fi
 
 # Test disabled burn token
 echo "[INFO]: > Test disabled MsgBurn proposal"
+echo "Set sender address..."
 jq -r --arg SENDER $gov_address '.messages[0].sender |= $SENDER' templates/proposal-tokenfactory-burn-token.json > proposal-tokenfactory-burn-token_sender.json
+echo "Set burn amount..."
 jq -r --arg BURN $tf_burn_amount '.messages[0].amount.amount |= $BURN' proposal-tokenfactory-burn-token_sender.json > proposal-tokenfactory-burn-token_burn.json
+echo "Set denom..."
 jq -r --arg DENOM $tf_token1 '.messages[0].amount.denom |= $DENOM' proposal-tokenfactory-burn-token_burn.json > proposal-tokenfactory-burn-token_denom.json
+echo "Set brun from address..."
 jq -r --arg BURNFROM $tokenfactory_wallet1_json '.messages[0].burnFromAddress |= $BURNFROM' proposal-tokenfactory-burn-token_denom.json > proposal-tokenfactory-burn-token.json
 echo "[DEBUG]: Proposal file:"
 cat proposal-tokenfactory-burn-token.json | jq -r '.'
