@@ -241,4 +241,16 @@ cat proposal-tokenfactory-burn-token.json | jq -r '.'
 echo "[Debug]: Submitting proposal..."
 source scripts/submit_proposal.sh proposal-tokenfactory-burn-token.json yes
 
-echo $PROPOSAL_TX_JSON | jq -r '.'
+echo "[INFO]: Check proposal status"
+status=$(echo "$PROPOSAL_STATUS" | jq -r '.proposal.status')
+if [ "$status" == "PROPOSAL_STATUS_FAILED" ]
+then
+    echo "[PASS]: Proposal failed as expected"
+    echo "Fail reason:"
+    echo "$PROPOSAL_STATUS" | jq -r '.proposal.failed_reason'
+else
+    echo "[FAILED]: Proposal passed"
+    echo "Proposal result json:"
+    echo "$PROPOSAL_STATUS" | jq -r '.'
+    exit 1
+fi

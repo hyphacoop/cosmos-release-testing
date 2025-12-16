@@ -79,4 +79,6 @@ echo "[INFO] Waiting for proposal to pass..."
 sleep $VOTING_PERIOD
 
 echo "[INFO] Proposal status:"
-$CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json
+proposal_status=$($CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json)
+echo $proposal_status
+export PROPOSAL_STATUS=$proposal_status
