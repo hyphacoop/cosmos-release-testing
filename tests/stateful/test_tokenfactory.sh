@@ -241,4 +241,4 @@ cat proposal-tokenfactory-burn-token.json | jq -r '.'
 echo "[Debug]: Submitting proposal..."
 source scripts/submit_proposal.sh proposal-tokenfactory-burn-token.json yes
 
-echo $VOTE_TX_JSON
+echo $PROPOSAL_TX_JSON | jq -r '.'
