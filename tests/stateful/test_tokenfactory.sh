@@ -9,7 +9,7 @@ tf_bank_send=10000
 tf_burn_amount=1000
 
 # Get gov address
-gov_address=$($CHAIN_BINARY --home $HOME_1 gaiad q auth module-account gov -o json | jq -r '.account.value.address')
+gov_address=$($CHAIN_BINARY --home $HOME_1 q auth module-account gov -o json | jq -r '.account.value.address')
 echo "[INFO]: Gov addressis : $gov_address" 
 
 # Create a tokenfactory wallet
@@ -207,14 +207,14 @@ fi
 
 # Test changing token to new owner
 echo "[INFO]: > Test change token to new owner (to gov address)"
-current_tf_token1_admin=$($CHAIN_BINARY --home $HOME_1 tokenfactory denom-authority-metadata $tf_token1 -o json | jq -r '.authority_metadata.admin')
+current_tf_token1_admin=$($CHAIN_BINARY --home $HOME_1 q tokenfactory denom-authority-metadata $tf_token1 -o json | jq -r '.authority_metadata.admin')
 echo "[INFO]: Current admin for token $tf_token1: $current_tf_token1_admin"
 
 echo "[DEBUG]: Submitting chain-admin tx"
 $CHAIN_BINARY --home $HOME_1 tx tokenfactory change-admin $tf_token1 $gov_address --from $MONIKER_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM -y
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
 
-current_tf_token1_admin=$($CHAIN_BINARY --home $HOME_1 tokenfactory denom-authority-metadata $tf_token1 -o json | jq -r '.authority_metadata.admin')
+current_tf_token1_admin=$($CHAIN_BINARY --home $HOME_1 q tokenfactory denom-authority-metadata $tf_token1 -o json | jq -r '.authority_metadata.admin')
 echo "[INFO]: Current admin for token $tf_token1: $current_tf_token1_admin"
 
 if [ "$current_tf_token1_admin" == "$gov_address" ]
@@ -224,3 +224,17 @@ else
     echo "[ERROR]: Token admin does not match. Expected: $gov_address got $current_tf_token1_admin"
     exit 1
 fi
+
+# Test disabled burn token
+echo "[INFO]: > Test disabled MsgBurn proposal
+jq -r --arg SENDER $gov_address '.messages[0].sender |= $SENDER' templates/proposal-tokenfactory-burn-token.json > proposal-tokenfactory-burn-token_sender.json
+jq -r --arg BURN $tf_burn_amount '.messages[0].amount.amount |= $BURN' proposal-tokenfactory-burn-token_sender.json > proposal-tokenfactory-burn-token_burn.json
+jq -r --arg BURN $tf_token1 '.messages[0].amount.denom |= $DENOM' proposal-tokenfactory-burn-token_burn.json > proposal-tokenfactory-burn-token_denom.json
+jq -r --arg BURNFROM $tokenfactory_wallet1_json '.messages[0].burnFromAddress |= $BURNFROM' proposal-tokenfactory-burn-token_denom.json > proposal-tokenfactory-burn-token.json
+echo "[DEBUG]: Proposal file:"
+cat proposal-tokenfactory-burn-token.json | jq -r '.'
+
+echo "[Debug]: Submitting proposal..."
+source scripts/submit_proposal.sh proposal-tokenfactory-burn-token.json yes
+
+echo $VOTE_TX_JSON

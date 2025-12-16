@@ -1,0 +1,18 @@
+{
+ "messages": [
+  {
+   "@type": "/osmosis.tokenfactory.v1beta1.MsgBurn",
+   "sender": "",
+   "amount": {
+    "denom": "",
+    "amount": "0"
+   },
+   "burnFromAddress": ""
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "Test burn tokenfactory token",
+ "summary": "test burn of tokenfactory token",
+ "expedited": false
+}

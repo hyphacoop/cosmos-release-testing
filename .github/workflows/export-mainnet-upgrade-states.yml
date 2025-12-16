@@ -242,7 +242,7 @@ jobs:
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: |
-          /home/runner/artifact/gaiad_fork.log &
+          tail -f /home/runner/artifact/gaiad_fork.log &
           tests/test_block_production.sh 127.0.0.1 26657 50 1000
       - name: Stop fork tool
         run: |
