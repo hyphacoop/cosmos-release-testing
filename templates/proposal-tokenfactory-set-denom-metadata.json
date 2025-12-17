@@ -4,26 +4,26 @@
       "@type": "/osmosis.tokenfactory.v1beta1.MsgSetDenomMetadata",
       "sender": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
       "metadata": {
-        "description": "",
+        "description": "Tokens for potato",
         "denom_units": [
             {
                 "denom": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/cake",
                 "aliases": [
-                    "POTATOE"
+                    "POTATO"
                 ]
             },
             {
-                "denom": "POTATOE",
+                "denom": "POTATO",
                 "exponent": 6,
                 "aliases": [
-                    "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/potatoe"
+                    "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/potato"
                 ]
             }
         ],
-        "base": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/potatoe",
-        "display": "POTATOE",
-        "name": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/potatoe",
-        "symbol": "POTATOE",
+        "base": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/cake",
+        "display": "POTATO",
+        "name": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/cake",
+        "symbol": "POTATO",
         "uri": "",
         "uri_hash": ""
       }
@@ -31,7 +31,7 @@
   ],
   "metadata": "ipfs://CID",
   "deposit": "1000000000uatom",
-  "title": "This will change the metadata of the cake denom to potatoe",
-  "summary": "This will change the metadata of the denom factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/cake to factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/potatoe",
+  "title": "This will add the alias potato to the cake denom",
+  "summary": "This will add the alias potato to the factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/cake denom",
   "expedited": false
 }
