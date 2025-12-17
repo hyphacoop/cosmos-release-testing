@@ -7,7 +7,7 @@
         "description": "",
         "denom_units": [
             {
-                "denom": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/potatoe",
+                "denom": "factory/cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl/cake",
                 "aliases": [
                     "POTATOE"
                 ]
