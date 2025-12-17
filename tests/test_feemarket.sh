@@ -1,6 +1,6 @@
 #!/bin/bash
 max_block_utilization=$($CHAIN_BINARY q feemarket params --home $whale_home -o json | jq -r '.max_block_utilization')
-payload_size=$(echo "$max_block_utilization / 900" | bc)
+payload_size=$(echo "$max_block_utilization / 500" | bc)
 echo "Max block utilization: $max_block_utilization"
 echo "Payload size: $payload_size"
 
@@ -16,7 +16,7 @@ jq --rawfile PAYLOAD payload.txt '.summary |= $PAYLOAD' templates/proposal-text.
 # echo "> Proposal JSON:"
 # jq '.' proposal.json
 echo "> Submitting proposal."
-gas=$(echo "($max_block_utilization / 2) - 1000000" | bc)
+gas=$(echo "($max_block_utilization) - 1000000" | bc)
 txhash_1=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_1 --gas $gas --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 txhash_2=$($CHAIN_BINARY tx gov submit-proposal proposal.json --from $WALLET_RELAYER --gas $gas --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
 sleep $(($COMMIT_TIMEOUT*2))
