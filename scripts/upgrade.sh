@@ -119,8 +119,9 @@ if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
 
 else
+    cat $STOP_SCRIPT
     ./$STOP_SCRIPT
-    sleep 5
+    sleep 6
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
         # Build
         sudo apt install build-essential -y
@@ -149,4 +150,4 @@ fi
 sleep 10
 
 echo "> Validator log:"
-tail -n 50 ${logs[0]}
+tail -n 100 ${logs[0]}
