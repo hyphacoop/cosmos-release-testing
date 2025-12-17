@@ -122,6 +122,7 @@ else
     cat $STOP_SCRIPT
     ./$STOP_SCRIPT
     sleep 6
+    tmux list-sessions
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
         # Build
         sudo apt install build-essential -y
