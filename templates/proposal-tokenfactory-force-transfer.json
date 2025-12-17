@@ -1,0 +1,19 @@
+{
+ "messages": [
+  {
+   "@type": "/osmosis.tokenfactory.v1beta1.MsgForceTransfer",
+   "sender": "",
+   "amount": {
+    "denom": "",
+    "amount": "0"
+   },
+   "transferFromAddress": "",
+   "transferToAddress": ""
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1uatom",
+ "title": "Force transfer",
+ "summary": "this will force transfer",
+ "expedited": false
+}

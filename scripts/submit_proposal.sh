@@ -80,5 +80,5 @@ sleep $VOTING_PERIOD
 
 echo "[INFO] Proposal status:"
 proposal_status=$($CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json)
-echo $proposal_status
+echo $proposal_status | jq -r '.'
 export PROPOSAL_STATUS=$proposal_status

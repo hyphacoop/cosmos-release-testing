@@ -7,6 +7,7 @@ tf_denom_name="cake"
 tf_metadata_description="Tokens for cake"
 tf_bank_send=10000
 tf_burn_amount=1000
+tf_transfer_amount=1000
 
 # Get gov address
 gov_address=$($CHAIN_BINARY --home $HOME_1 q auth module-account gov -o json | jq -r '.account.value.address')
@@ -238,8 +239,40 @@ jq -r --arg BURNFROM $tokenfactory_wallet1_addr '.messages[0].burnFromAddress |=
 echo "[DEBUG]: Proposal file:"
 cat proposal-tokenfactory-burn-token.json | jq -r '.'
 
-echo "[Debug]: Submitting proposal..."
+echo "[DEBUG]: Submitting proposal..."
 source scripts/submit_proposal.sh proposal-tokenfactory-burn-token.json yes
+
+echo "[INFO]: Check proposal status"
+status=$(echo "$PROPOSAL_STATUS" | jq -r '.proposal.status')
+if [ "$status" == "PROPOSAL_STATUS_FAILED" ]
+then
+    echo "[PASS]: Proposal failed as expected"
+    echo "Fail reason:"
+    echo "$PROPOSAL_STATUS" | jq -r '.proposal.failed_reason'
+else
+    echo "[FAILED]: Proposal passed"
+    echo "Proposal result json:"
+    echo "$PROPOSAL_STATUS" | jq -r '.'
+    exit 1
+fi
+
+# Test disabled force transfer
+echo "[INFO]: > Test disabled MsgForceTransfer proposal"
+echo "Set sender address..."
+jq -r --arg SENDER $gov_address '.messages[0].sender |= $SENDER' templates/proposal-tokenfactory-force-transfer.json > proposal-tokenfactory-force-transfer-token_sender.json
+echo "Set transfer amount..."
+jq -r --arg TRANSFER $tf_transfer_amount '.messages[0].amount.amount |= $TRANSFER' proposal-tokenfactory-force-transfer-token_sender.json > proposal-tokenfactory-force-transfer-transfer-amount.json
+echo "Set denom..."
+jq -r --arg DENOM $tf_token1 '.messages[0].amount.denom |= $DENOM' proposal-tokenfactory-force-transfer-transfer-amount.json > proposal-tokenfactory-force-transfer-denom.json
+echo "Set transfer from address..."
+jq -r --arg TRANSFERFROM $tokenfactory_wallet1_addr '.messages[0].transferFromAddress |= $TRANSFERFROM' proposal-tokenfactory-force-transfer-denom.json > proposal-tokenfactory-force-transfer-transfer-from.json
+echo "Set transfer to address..."
+jq -r --arg TRANSFERTO $tokenfactory_wallet1_addr '.messages[0].transferToAddress |= $TRANSFERTO' proposal-tokenfactory-force-transfer-transfer-from.json > proposal-tokenfactory-force-transfer.json
+echo "[DEBUG]: Proposal file:"
+cat proposal-tokenfactory-force-transfer.json | jq -r '.'
+
+echo "[DEBUG]: Submitting proposal..."
+source scripts/submit_proposal.sh proposal-tokenfactory-force-transfer.json
 
 echo "[INFO]: Check proposal status"
 status=$(echo "$PROPOSAL_STATUS" | jq -r '.proposal.status')
