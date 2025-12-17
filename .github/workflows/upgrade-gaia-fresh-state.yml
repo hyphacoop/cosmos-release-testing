@@ -2463,7 +2463,6 @@
           fail-fast: false
         env:
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          GO_VERSION: 1.24.1
         steps:
           - name: Update PATH
             run: |
@@ -2487,6 +2486,7 @@
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/setup.sh
           
           - name: Set up tmkms
@@ -2507,6 +2507,7 @@
           - name: Start chain with tmkms
             run: |
               source scripts/vars.sh
+              export validator_count=1
               echo "> Configure config.toml for tmkms"
               toml set --toml-path $whale_home/config/config.toml priv_validator_laddr "tcp://127.0.0.1:24001"
               sed -i -e "s/priv_validator_key_file/#priv_validator_key_file/" $whale_home/config/config.toml
@@ -2521,6 +2522,7 @@
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_tx.sh
 
           - name: Test software upgrade
@@ -2529,24 +2531,29 @@
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
                   
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_tx.sh
           - name: _API endpoints check
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_endpoints_rpc.sh localhost $whale_rpc
 
       Test-15-state-sync:

@@ -22,5 +22,5 @@ path = "/home/runner/.kms/secrets/priv_validator_key"
 chain_id = "testnet"
 addr = "tcp://localhost:24001"
 secret_key = "/home/runner/.kms/secrets/secret_connection_key"
-protocol_version = "v0.34"
+protocol_version = "v0.38"
 reconnect = true
