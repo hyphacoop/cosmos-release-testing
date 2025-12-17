@@ -12,7 +12,7 @@
   }
  ],
  "metadata": "ipfs://CID",
- "deposit": "1uatom",
+ "deposit": "1000000000uatom",
  "title": "Force transfer",
  "summary": "this will force transfer",
  "expedited": false
