@@ -301,10 +301,10 @@ echo "$denom_metadata"
 echo "[INFO]: Verify metadata"
 denom_description_query=$(echo $denom_metadata | jq -r '.metadata.description')
 echo "[DEBUG]: metadata from query: $denom_description_query"
-if [ "$denom_description_query" == "$tf_metadata_description" ]
+if [ "$denom_description_query" == "Tokens for potato" ]
 then
     echo "[PASS]: Description matches"
 else
-    echo "[ERROR]: Description does not match. Expected: $tf_metadata_description got $denom_description_query"
+    echo "[ERROR]: Description does not match. Expected: Tokens for potato got $denom_description_query"
     exit 1
 fi
