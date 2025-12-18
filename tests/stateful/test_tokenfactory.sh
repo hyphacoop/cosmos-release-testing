@@ -315,9 +315,9 @@ echo "[INFO]: > Test MsgMint proposal"
 echo "Set sender address..."
 jq -r --arg SENDER $gov_address '.messages[0].sender |= $SENDER' templates/proposal-tokenfactory-mint.json > proposal-tokenfactory-mint-sender.json
 echo "Set mint amount..."
-jq -r --arg MINT $mint_token '.messages[0].amount.amount |= $MINT' proposal-tokenfactory-mint-sender.json > proposal-tokenfactory-mint-amount.json
+jq -r --arg MINT $mint_token '.messages[0].amount.amount |= $MINT' proposal-tokenfactory-mint-sender.json > proposal-tokenfactory-mint-token.json
 echo "Set mint denom..."
-jq -r --arg MINTDENOM $tf_token1 '.messages[0].amount.denom |= $MINTDENOM' proposal-tokenfactory-mint-sender.json > proposal-tokenfactory-mint-amount.json
+jq -r --arg MINTDENOM $tf_token1 '.messages[0].amount.denom |= $MINTDENOM' proposal-tokenfactory-mint-token.json > proposal-tokenfactory-mint-amount.json
 echo "Set mint to address..."
 jq -r --arg MINTTO $tokenfactory_wallet1_addr '.messages[0].mintToAddress |= $MINTTO' proposal-tokenfactory-mint-amount.json > proposal-tokenfactory-mint.json
 
