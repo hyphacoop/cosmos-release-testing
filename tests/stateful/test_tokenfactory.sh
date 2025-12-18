@@ -308,3 +308,29 @@ else
     echo "[ERROR]: Description does not match. Expected: Tokens for potato got $denom_description_query"
     exit 1
 fi
+
+# Mint token to tokenfactory-1 using MsgMint
+pre_mint_tokens=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+echo "[INFO]: > Test MsgMint proposal"
+echo "Set sender address..."
+jq -r --arg SENDER $gov_address '.messages[0].sender |= $SENDER' templates/proposal-tokenfactory-mint.json > proposal-tokenfactory-mint-sender.json
+echo "Set mint amount..."
+jq -r --arg MINT $mint_token '.messages[0].amount.amount |= $MINT' proposal-tokenfactory-mint-sender.json > proposal-tokenfactory-mint-amount.json
+echo "Set mint to address..."
+jq -r --arg MINTTO $tokenfactory_wallet1_addr '.messages[0].mintToAddress |= $MINTTO' proposal-tokenfactory-mint-amount.json > proposal-tokenfactory-mint.json
+
+echo "[DEBUG]: Submitting proposal..."
+source scripts/submit_proposal.sh proposal-tokenfactory-force-transfer.json
+
+# Verify tokens in wallet
+echo "[INFO]: Verify minted tokens in $tokenfactory_wallet1_addr"
+post_mint_tokens=$($CHAIN_BINARY --home $HOME_1 q bank balances $tokenfactory_wallet1_addr -o json | jq -r ".balances[] | select(.denom==\"$tf_token1\") | .amount")
+echo "[DEBUG]: $tokenfactory_wallet1_addr started with $pre_mint_tokens now it have $post_mint_tokens"
+let differences=$pre_mint_tokens+$mint_token
+if [ $differences == $post_mint_tokens ]
+then
+    echo "[PASS]: Correct minted tokens in $tokenfactory_wallet1_addr: $post_mint_tokens$tf_token1"
+else
+    echo "[FAILED]: Incorrect minted tokens in $tokenfactory_wallet1_addr expected $differences$tf_token1 got $post_mint_tokens$tf_token1"
+    exit 1
+fi

@@ -1,0 +1,18 @@
+{
+ "messages": [
+  {
+   "@type": "/osmosis.tokenfactory.v1beta1.MsgMint",
+   "sender": "",
+   "amount": {
+    "denom": "",
+    "amount": ""
+   },
+   "mintToAddress": ""
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "Mint some tokens",
+ "summary": "yes",
+ "expedited": false
+}
