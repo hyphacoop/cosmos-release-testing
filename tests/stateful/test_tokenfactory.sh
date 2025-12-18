@@ -320,7 +320,7 @@ echo "Set mint to address..."
 jq -r --arg MINTTO $tokenfactory_wallet1_addr '.messages[0].mintToAddress |= $MINTTO' proposal-tokenfactory-mint-amount.json > proposal-tokenfactory-mint.json
 
 echo "[DEBUG]: Submitting proposal..."
-source scripts/submit_proposal.sh proposal-tokenfactory-force-transfer.json
+source scripts/submit_proposal.sh proposal-tokenfactory-mint.json
 
 # Verify tokens in wallet
 echo "[INFO]: Verify minted tokens in $tokenfactory_wallet1_addr"
