@@ -1610,7 +1610,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-artifact
           path: ~/artifact/
           include-hidden-files: true
       # Upload states to artifats
