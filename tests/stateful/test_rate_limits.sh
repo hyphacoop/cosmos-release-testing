@@ -2,7 +2,10 @@
 set -e
 
 echo "[INFO]: Creating new consumer wallet..."
-consumer_test_wallet1_json=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 keys add vesting-1 --output json)
+
+number=$(date +%s)
+wallet_name=$(echo "vesting-$number")
+consumer_test_wallet1_json=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 keys add $wallet_name --output json)
 consumer_test_wallet1_addr=$(echo $consumer_test_wallet1_json | jq -r '.address')
 
 echo "[INFO]: Consumer test wallet: $consumer_test_wallet1_addr"
