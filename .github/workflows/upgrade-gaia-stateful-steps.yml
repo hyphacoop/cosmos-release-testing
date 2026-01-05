@@ -711,6 +711,13 @@ jobs:
       - name: _Test rate limit
         run: |
           tests/stateful/test_rate_limits.sh
+      - name: Submit reset rate limit proposal
+        run: |
+          jq -r ".messages[0].channel_or_client_id=\"${{ env.CONSUMERA_CHAN_ID }}\"" templates/proposal-stateful-reset-rate-limit.json > proposal-cona-reset-rate-limit.json
+          scripts/submit_proposal.sh proposal-cona-reset-rate-limit.json
+      - name: _Test rate limit after reset
+        run: |
+          tests/stateful/test_rate_limits.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera

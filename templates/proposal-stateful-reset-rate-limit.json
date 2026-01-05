@@ -1,0 +1,15 @@
+{
+ "messages": [
+  {
+   "@type": "/ratelimit.v1.MsgResetRateLimit",
+   "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "denom": "uatom",
+   "channel_or_client_id": "_CHANNEL_ID_"
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "test resetting rate limit",
+ "summary": "test resetting rate limit",
+ "expedited": false
+}
