@@ -7,7 +7,7 @@ on:
     - cron: '30 5 * * 1'
   # push:
 # concurrency:
-  group: self-hosted-runners
+  # group: self-hosted-runners
 
 jobs:
   export-cosmoshub-mainnet:
