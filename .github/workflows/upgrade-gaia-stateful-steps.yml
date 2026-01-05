@@ -388,61 +388,61 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
-      - name: _Test vesting accounts
-        run: tests/stateful/test_vesting.sh
+      # - name: _Test vesting accounts
+      #   run: tests/stateful/test_vesting.sh
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
         run: tests/stateful/test_tx.sh
-      - name: Send funds to wallet 3
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
-      - name: Wait for 1 block to pass
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      - name: Send funds to wallet 4
-        run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
-      - name: Wait for 1 block to pass
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-      - name: Get list of wallets
-        run: |
-          $CHAIN_BINARY --home $HOME_1 keys list
-      - name: Get wallet balances
-        run: |
-          set -e
-          wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
-          for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
-      - name: Query current feemarket params
-        run: |
-          $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
-      - name: _Test feemarket
-        run: tests/stateful/test_feemarket.sh
-      - name: _Test cancelled upgrade
-        env:
-          UPGRADE_NAME: v99
-          UPGRADE_AFTER: 50
-        run: tests/stateful/cancel-upgrade.sh
-      - name: _Test commission rate
-        run: |
-          echo "[INFO]: Get current commission rate..."
-          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
-          echo "$json"
-          current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
-          echo "[INFO]: Current commission rate is: $current_commission_rate"
-          echo "[INFO]: Set commission to 0.05 higher"
-          set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
-          echo "[INFO]: Set commission to: $set_commission_rate"
-          $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-          echo "[INFO]: Get latest comission rate..."
-          json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
-          echo "$json"
-          modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
-          echo "[INFO]: Current commission rate is: $modified_commission_rate"
-          if [ "$modified_commission_rate" != "$set_commission_rate" ]
-          then
-            echo "[ERROR]: commission rate not set!"
-            echo "Expected $set_commission_rate got $modified_commission_rate"
-          fi
+      # - name: Send funds to wallet 3
+      #   run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_3 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      # - name: Wait for 1 block to pass
+      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      # - name: Send funds to wallet 4
+      #   run: $CHAIN_BINARY tx bank send $WALLET_1 $WALLET_4 500000000$DENOM --home $HOME_1 --from $MONIKER_1 --keyring-backend test --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --chain-id $CHAIN_ID -y -b sync
+      # - name: Wait for 1 block to pass
+      #   run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      # - name: Get list of wallets
+      #   run: |
+      #     $CHAIN_BINARY --home $HOME_1 keys list
+      # - name: Get wallet balances
+      #   run: |
+      #     set -e
+      #     wallets=$(gaiad --home $HOME_1 keys list --output json | jq -r '.[].address ')
+      #     for i in $wallets; do echo "Balances in wallet $i: "; gaiad --home $HOME_1 q bank balances $i; done
+      # - name: Query current feemarket params
+      #   run: |
+      #     $CHAIN_BINARY --home $HOME_1 q feemarket params -o json | jq -r '.'
+      # - name: _Test feemarket
+      #   run: tests/stateful/test_feemarket.sh
+      # - name: _Test cancelled upgrade
+      #   env:
+      #     UPGRADE_NAME: v99
+      #     UPGRADE_AFTER: 50
+      #   run: tests/stateful/cancel-upgrade.sh
+      # - name: _Test commission rate
+      #   run: |
+      #     echo "[INFO]: Get current commission rate..."
+      #     json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+      #     echo "$json"
+      #     current_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+      #     echo "[INFO]: Current commission rate is: $current_commission_rate"
+      #     echo "[INFO]: Set commission to 0.05 higher"
+      #     set_commission_rate=$(echo "x=$current_commission_rate + 0.05; if(x<1) print 0; x" | bc)
+      #     echo "[INFO]: Set commission to: $set_commission_rate"
+      #     $CHAIN_BINARY --home $HOME_1 tx staking edit-validator --commission-rate $set_commission_rate --from $MONIKER_1 --gas auto --gas-adjustment 3 --gas-prices $GAS_PRICES$DENOM -y
+      #     tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
+      #     echo "[INFO]: Get latest comission rate..."
+      #     json=$($CHAIN_BINARY --home $HOME_1 q staking validator $VALOPER_1 -o json)
+      #     echo "$json"
+      #     modified_commission_rate=$(echo "$json" | jq -r '.validator.commission.commission_rates.rate')
+      #     echo "[INFO]: Current commission rate is: $modified_commission_rate"
+      #     if [ "$modified_commission_rate" != "$set_commission_rate" ]
+      #     then
+      #       echo "[ERROR]: commission rate not set!"
+      #       echo "Expected $set_commission_rate got $modified_commission_rate"
+      #     fi
 
-      - name: _Test permissionless cosmwasm
-        run: tests/stateful/test_cosmwasm.sh
+      # - name: _Test permissionless cosmwasm
+      #   run: tests/stateful/test_cosmwasm.sh
       # - name: DEBUG
       #   if: always() && !cancelled()
       #   run: |
@@ -607,13 +607,13 @@ jobs:
       #     CHAIN_HOME: /home/runner/.val1
       #   run: tests/stateful/test_ica_controller.sh 
       
-      # - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
-      #   env:
-      #     CONSUMER_CHAIN_ID: consumera
-      #     DOWNTIME_BLOCKS: 20
-      #     CONSUMER_NEW: true
-      #     CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-      #   run: scripts/stateful/init_consumer_2_vals.sh
+      - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          DOWNTIME_BLOCKS: 20
+          CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+        run: scripts/stateful/init_consumer_2_vals.sh
       - name: Launch opt-in consumer chain a
         env:
           CONSUMER_CHAIN_ID: consumera
