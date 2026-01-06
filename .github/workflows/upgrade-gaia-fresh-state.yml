@@ -1080,7 +1080,7 @@
           - name: Create and mint factory denom
             run: |
               source scripts/vars.sh
-              tests/factory_create_mint_denom.sh
+              scripts/factory_create_mint_denom.sh
 
       # Test-05-liquid-staking:
       #   runs-on: ubuntu-24.04
