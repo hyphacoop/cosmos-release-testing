@@ -1077,10 +1077,16 @@
             run: |
               tests/test_pfm_transfers.sh
 
+          # tokenfactory
+          
           - name: Create and mint factory denom
             run: |
               source scripts/vars.sh
               scripts/factory_create_mint_denom.sh
+          
+          - name: Test factory denom transfer with PFM
+            run: |
+              tests/test_factory_pfm_transfer.sh
 
       # Test-05-liquid-staking:
       #   runs-on: ubuntu-24.04
