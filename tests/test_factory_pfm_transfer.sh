@@ -1,11 +1,11 @@
 #!/bin/bash
-source scripts/vars_pfm_3.sh
+source scripts/vars.sh
 
 factory_denom="factory/$WALLET_1/test"
-
 pre_transfer_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r --arg DENOM "$factory_denom" '.balances[] | select(.denom == $DENOM) | .amount')
 echo "> Pre-transfer balance of $factory_denom on chain A: $pre_transfer_balance"  
 
+source scripts/vars_pfm_3.sh
 echo "Provider chain channel ID: channel-0"
 # provider -> channel-0 chain a -> channel-0 chain b -> channel-0 chain c (A->D)
 target_denom_a_d=ibc/$(echo -n transfer/channel-0/transfer/channel-0/transfer/channel-0/$factory_denom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
