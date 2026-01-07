@@ -2866,11 +2866,34 @@
                 rly transact channel pfm-path-2
                 rly transact channel pfm-path-3
               fi
-              # sudo systemctl restart $RELAYER
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
-              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
-              scripts/start_relayer.sh    
+              
+              echo "> Storing channel IDs"
+              # provider->pfm1
+              pfm_ab_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r '.client_states[] | select(.client_state.chain_id=="pfm1").client_id')
+              echo "> A-B client ID: $pfm_ab_client_id"
+              pfm_ab_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              echo "> A-B connection ID: $pfm_ab_connection_id"
+              pfm_ab_channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              echo "> A-B channel ID: $pfm_ab_channel_id"
+              
+              # pfm1->pfm2
+              source scripts/vars_pfm_1.sh
+              pfm_bc_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r '.client_states[] | select(.client_state.chain_id=="pfm2").client_id')
+              echo "> B-C client ID: $pfm_bc_client_id"
+              pfm_bc_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              echo "> B-C connection ID: $pfm_bc_connection_id"
+              pfm_bc_channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              echo "> B-C channel ID: $pfm_bc_channel_id"
+
+              # pfm2->pfm3
+              source scripts/vars_pfm_2.sh
+              pfm_cd_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r '.client_states[] | select(.client_state.chain_id=="pfm3").client_id')
+              echo "> C-D client ID: $pfm_cd_client_id"
+              pfm_cd_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              echo "> C-D connection ID: $pfm_cd_connection_id"
+              pfm_cd_channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              echo "> C-D channel ID: $pfm_cd_channel_id"
+
           - name: _Test PFM transfers
             run: |
               source scripts/vars_pfm_3.sh
