@@ -1,7 +1,7 @@
 #!/bin/bash
 source scripts/vars.sh
 
-factory_denom="factory/$WALLET_1/test"
+factory_denom="factory/$WALLET_1/12345678901234567890123456789012345678901234"
 pre_transfer_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r --arg DENOM "$factory_denom" '.balances[] | select(.denom == $DENOM) | .amount')
 echo "> Pre-transfer balance of $factory_denom on chain A: $pre_transfer_balance"  
 
