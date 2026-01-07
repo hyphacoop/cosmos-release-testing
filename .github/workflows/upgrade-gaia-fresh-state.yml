@@ -2920,7 +2920,13 @@
               echo "> B-A connection ID: $pfm_ba_connection_id"
               pfm_ba_channel_id=$($CHAIN_BINARY q ibc channel connections $pfm_ba_connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               echo "> B-A channel ID: $pfm_ba_channel_id"
-
+              
+              echo "pfm_ab_channel_id=$pfm_ab_channel_id" >> $GITHUB_ENV
+              echo "pfm_bc_channel_id=$pfm_bc_channel_id" >> $GITHUB_ENV
+              echo "pfm_cd_channel_id=$pfm_cd_channel_id" >> $GITHUB_ENV
+              echo "pfm_dc_channel_id=$pfm_dc_channel_id" >> $GITHUB_ENV
+              echo "pfm_cb_channel_id=$pfm_cb_channel_id" >> $GITHUB_ENV
+              echo "pfm_ba_channel_id=$pfm_ba_channel_id" >> $GITHUB_ENV
 
           - name: _Test PFM transfers
             run: |
