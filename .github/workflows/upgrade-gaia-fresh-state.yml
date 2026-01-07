@@ -2688,7 +2688,12 @@
               sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3              
-          
+
+          - name: Start relayer
+            run: |
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+              
           - name: Add consumer chain with ICS v7.0.1
             run: |
               source scripts/vars.sh
