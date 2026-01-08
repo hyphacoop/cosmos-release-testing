@@ -725,14 +725,13 @@ jobs:
       - name: _Test rate limit after update
         run: |
           tests/stateful/test_rate_limits_2_percent.sh
-      - name: Submit update rate limit proposal
-        run: |
-          jq -r ".messages[0].channel_or_client_id=\"${{ env.CONSUMERA_CHAN_ID }}\"" templates/proposal-stateful-rate-limit-update.json > proposal-cona-update-rate-limit.json
-          scripts/submit_proposal.sh proposal-cona-update-rate-limit.json
       - name: Submit remove rate limit proposal
         run: |
-          jq -r ".messages[0].channel_or_client_id=\"${{ env.CONSUMERA_CHAN_ID }}\"" templates/proposal-stateful-rate-limit-update.json > proposal-cona-update-rate-limit.json
-          scripts/submit_proposal.sh templates/proposal-stateful-rate-limit-remove.json
+          jq -r ".messages[0].channel_or_client_id=\"${{ env.CONSUMERA_CHAN_ID }}\"" templates/proposal-stateful-rate-limit-remove.json > proposal-cona-remove-rate-limit.json
+          scripts/submit_proposal.sh proposal-cona-remove-rate-limit.json
+      - name: _Test rate limit after remove
+        run: |
+          tests/stateful/test_rate_limits_2_percent.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
