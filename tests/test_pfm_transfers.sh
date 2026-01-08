@@ -37,6 +37,7 @@ source scripts/vars.sh
 # 1. Sending channel in provider (transfer channel)
 # 2. Sending channel in pfm1 (first forward)
 # 3. Sending channel in pfm2 (second forward)
+echo "> Transfer $pfm_ab_channel_id -> $pfm_bc_channel_id -> $pfm_cd_channel_id"
 txhash=$($CHAIN_BINARY tx ibc-transfer transfer transfer $pfm_ab_channel_id "pfm" --memo "{\"forward\": {\"receiver\": \"pfm\",\"port\": \"transfer\",\"channel\": \"$pfm_bc_channel_id\",\"timeout\": \"10m\",\"next\": {\"forward\": {\"receiver\": \"$WALLET_1\",\"port\": \"transfer\",\"channel\":\"$pfm_cd_channel_id\",\"timeout\":\"10m\"}}}}" 1000000$DENOM --from $WALLET_1 --gas auto --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json | jq -r '.txhash')
 echo "Waiting for the transfer to reach chain D..."
 date

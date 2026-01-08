@@ -2741,7 +2741,6 @@
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
               hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-              scripts/start_relayer.sh
               sleep $(($COMMIT_TIMEOUT*3))
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 1
             run: |
@@ -2872,13 +2871,18 @@
                 rly transact channel pfm-path-3
               fi
 
+          - name: Restart relayer
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
+
           - name: Store channel IDs for PFM test
             run: |
               scripts/store_pfm_channel_ids.sh
 
           - name: _Test PFM transfers
             run: |
-              source scripts/vars_pfm_3.sh
               tests/test_pfm_transfers.sh
 
           - name: Create and mint factory denom
