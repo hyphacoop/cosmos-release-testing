@@ -731,7 +731,7 @@ jobs:
           scripts/submit_proposal.sh proposal-cona-remove-rate-limit.json
       - name: _Test rate limit after remove
         run: |
-          tests/stateful/test_rate_limits_2_percent.sh
+          tests/stateful/test_rate_limits_removed.sh
       - name: _IBC transfer successful> Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera
