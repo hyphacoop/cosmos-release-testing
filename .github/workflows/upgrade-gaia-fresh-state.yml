@@ -2734,8 +2734,7 @@
           - name: Establish CCV channel for v701-one
             run: |
               source scripts/vars.sh  
-              source scripts/vars_consumer_v701_one.sh 
-              tmux send-keys -t relayer C-c
+              source scripts/vars_consumer_v701_one.sh
               sleep $(($COMMIT_TIMEOUT*2))
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
@@ -2748,7 +2747,7 @@
               tmux send-keys -t relayer C-c
               sleep $(($COMMIT_TIMEOUT*2))
               scripts/start_relayer.sh
-                
+
           - name: _Pre-upgrade CCV channel verified> ICS v7.0.1 chain 1
             run: |
               source scripts/vars.sh
