@@ -30,7 +30,7 @@ echo "$supply_19_percent"
 
 echo "[INFO]: 2% is: $supply_two_percent"
 
-echo "[INFO]: transfer 1% uatom of total supply"
+echo "[INFO]: transfer 2% uatom of total supply"
 set +e
 let tx_1_amount=$supply_two_percent
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $consumer_test_wallet1_addr $tx_1_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
@@ -43,7 +43,7 @@ else
 fi
 set -e
 
-echo "[INFO]: transfer 0.9% uatom of total supply"
+echo "[INFO]: transfer 1.9% uatom of total supply"
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $consumer_test_wallet1_addr $supply_19_percent$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 
 # wait for tx block
