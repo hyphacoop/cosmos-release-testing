@@ -5,6 +5,9 @@ source scripts/vars_pfm_3.sh
 echo "Provider chain channel ID: $pfm_ab_channel_id"
 
 # provider -> pfm 1 -> pfm 2 -> pfm-3 chain c (A->D)
+ad_path=transfer/$pfm_ab_channel_id/transfer/$pfm_bc_channel_id/transfer/$pfm_cd_channel_id/uatom
+echo "A-D path: $ad_path"
+
 target_denom_a_d=ibc/$(echo -n transfer/$pfm_ab_channel_id/transfer/$pfm_bc_channel_id/transfer/$pfm_cd_channel_id/uatom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 # pfm 3 -> pfm 2 -> pfm 1 -> provider (D->A)
 target_denom_d_a=ibc/$(echo -n transfer/$pfm_dc_channel_id/transfer/$pfm_cb_channel_id/transfer/$pfm_ba_channel_id/uatom | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
