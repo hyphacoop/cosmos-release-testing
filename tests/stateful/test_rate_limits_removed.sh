@@ -33,6 +33,10 @@ echo "[INFO]: 5% is: $supply_five_percent"
 echo "[INFO]: transfer 5% uatom of total supply"
 let tx_1_amount=$supply_five_percent
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx ibc-transfer transfer transfer $CONSUMERA_CHAN_ID $consumer_test_wallet1_addr $tx_1_amount$DENOM --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
+
+# wait for tx block
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
+
 if [ $? -eq 0 ]
 then
     echo "[PASS]: TX was successful"
