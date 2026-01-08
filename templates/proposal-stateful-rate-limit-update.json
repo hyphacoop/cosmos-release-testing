@@ -1,0 +1,18 @@
+{
+ "messages": [
+  {
+   "@type": "/ratelimit.v1.MsgUpdateRateLimit",
+   "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "denom": "uatom",
+   "channel_or_client_id": "_CHANNEL_ID_",
+   "max_percent_send": "2",
+   "max_percent_recv": "2",
+   "duration_hours": "24"
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "This will update the rate-limit",
+ "summary": "This will update the rate-limit",
+ "expedited": false
+}
