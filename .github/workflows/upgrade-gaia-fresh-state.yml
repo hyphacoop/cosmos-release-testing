@@ -2849,7 +2849,6 @@
           - name: Create transfer channels for PFM test
             run: |
               source scripts/vars.sh
-              tmux send-keys -t relayer C-c
               if [ $RELAYER == "hermes" ]; then
                 echo "Creating channels with Hermes..."
                 hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
