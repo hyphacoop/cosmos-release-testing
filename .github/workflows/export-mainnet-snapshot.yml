@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt dist-upgrade -y
-          sudo apt -y install python-is-python3 python3-distutils screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 aria2 bc
+          sudo apt -y install python-is-python3 screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4 aria2 bc
       - run: ifconfig
       - run: lscpu
       - run: df -h
