@@ -18,7 +18,7 @@ on:
       archive_url:
         description: 'URL for archive file'
         required: true
-        default: 'https://files.polypore.xyz/forked-state/cosmoshub-4/latest_v25.tar.gz'
+        default: 'https://files.polypore.xyz/archived-state/latest_v25.tar.gz'
 
   # schedule:
   #   # Once a day at 13:15
@@ -31,7 +31,7 @@ jobs:
     env:
       START: ${{ github.event_name == 'push' && 'v25.3.0' || github.event_name == 'repository_dispatch' && 'v25.3.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'feature/tokenfactory-integration' || inputs.to_version }}
-      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/forked-state/cosmoshub-4/latest_v25.tar.gz' || inputs.archive_url }}
+      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v25.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-24.04
     steps:
       # Get system info
