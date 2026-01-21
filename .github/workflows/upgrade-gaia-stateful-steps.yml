@@ -388,6 +388,8 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
+      - name: _Test Tokenfactory
+        run: tests/stateful/test_tokenfactory.sh
       - name: _Test vesting accounts
         run: tests/stateful/test_vesting.sh
       - name: _Transactions verified> bank send, delegate, and withdraw rewards
@@ -1608,7 +1610,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
+          name: archived-upgrade-${{ vars.CHAIN_ID }}-artifact
           path: ~/artifact/
           include-hidden-files: true
       # Upload states to artifats
