@@ -238,7 +238,7 @@ jobs:
   #         name: export-release-testnet
   #         path: ~/artifact/
 
-  export-ics-testnet-provider:
+  export-hub-testnet-provider:
     runs-on: cosmos-runner-set
     environment: export-rs-testnet
     env:
@@ -303,21 +303,21 @@ jobs:
 
       - name: Get current running gaiad version
         run: |
-          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.ics-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.hub-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
           echo "Running gaiad version: $RUNNING_VERSION"
           echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
       - name: Download binary from cosmos/gaia repo
         run: |
           sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
-      - name: Initializing chain to sync with RS Testnet
+      - name: Initializing chain to sync with Hub Testnet
         env:
           NODE_MONIKER: provider
           SERVICE_NAME: provider
-          GENESIS_URL: https://github.com/cosmos/testnets/raw/master/interchain-security/provider/provider-genesis.json
-          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.ics-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.ics-testnet.polypore.xyz:26656"
-          SYNC_RPC_1: https://rpc.provider-state-sync-01.ics-testnet.polypore.xyz:443
-          SYNC_RPC_2: https://rpc.provider-state-sync-02.ics-testnet.polypore.xyz:443
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
+          SYNC_RPC_1: https://rpc.provider-state-sync-01.hub-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz:443
           GAS_PRICES: "0.0025uatom"
         run: |
           echo "Initializing $NODE_HOME..."
@@ -462,5 +462,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: export-ics-testnet-provider
+          name: export-hub-testnet-provider
           path: ~/artifact/
