@@ -5,7 +5,7 @@ on:
   schedule:
     # At 05:30 everyday.
     - cron: '0 3 * * *'
-  push:
+  # push:
 concurrency:
   group: export-hub-snapshot
 
