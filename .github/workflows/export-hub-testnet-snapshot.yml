@@ -1,0 +1,178 @@
+---
+name: Export Hub Testnet Snapshot
+on:
+  workflow_dispatch:
+  schedule:
+    # At 05:30 everyday.
+    - cron: '0 3 * * *'
+  push:
+concurrency:
+  group: export-hub-snapshot
+
+jobs:
+  export-hub-testnet-snapshot:
+    runs-on: cosmos-runner-set
+    environment: export-ics-testnet-provider-snapshot
+    env:
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+      NODE_HOME: /home/runner/.gaia
+      CHAIN_ID: provider
+      CHAIN_BINARY: 'gaiad'
+
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools pigz
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
+
+      - name: Set SSH key
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ vars.GO_VER }}
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s https://rpc.provider-sentry-01.hub-testnet.polypore.xyz/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      # - name: Download binary from cosmos/gaia repo
+      #   run: |
+      #     sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+      #     sudo chmod +x /usr/local/bin/gaiad
+      - name: Build gaia from source
+        run: |
+          cd /home/runner
+          git clone https://github.com/cosmos/gaia.git
+          cd gaia
+          echo "Checking out branch ${{ env.RUNNING_VERSION }}"
+          git checkout ${{ env.RUNNING_VERSION }}
+          echo "git branch:"
+          git branch
+          echo "make build..."
+          make build
+          echo "Installing gaiad..."
+          sudo cp build/gaiad /usr/local/bin/gaiad
+          echo "gaiad version:"
+          gaiad version
+      - name: Initializing chain to sync with Hub Testnet
+        env:
+          NODE_MONIKER: provider
+          SERVICE_NAME: provider
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
+          SYNC_RPC_1: https://rpc.provider-state-sync-01.hub-testnet.polypore.xyz:443
+          SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz:443
+          GAS_PRICES: "0.0025uatom"
+        run: |
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
+          echo "Configuring state sync..."
+          CURRENT_BLOCK=$(curl -s $SYNC_RPC_1/block | jq -r '.result.block.header.height')
+          TRUST_HEIGHT=$[$CURRENT_BLOCK-1000]
+          TRUST_BLOCK=$(curl -s $SYNC_RPC_1/block\?height\=$TRUST_HEIGHT)
+          TRUST_HASH=$(echo $TRUST_BLOCK | jq -r '.result.block_id.hash')
+          sed -i -e '/enable =/ s/= .*/= true/' $NODE_HOME/config/config.toml
+          sed -i -e '/trust_period =/ s/= .*/= "8h0m0s"/' $NODE_HOME/config/config.toml
+          sed -i -e "/trust_height =/ s/= .*/= $TRUST_HEIGHT/" $NODE_HOME/config/config.toml
+          sed -i -e "/trust_hash =/ s/= .*/= \"$TRUST_HASH\"/" $NODE_HOME/config/config.toml
+          sed -i -e "/rpc_servers =/ s^= .*^= \"$SYNC_RPC_1,$SYNC_RPC_2\"^" $NODE_HOME/config/config.toml
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json
+          mv genesis.json $NODE_HOME/config/genesis.json
+      - name: Create artifact directory
+        run: mkdir -p /home/runner/artifact/config/provider
+      - name: Start Chain
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+          screen -r gaiad -p0 -X logfile flush 0
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_sync.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Syncing Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:26657/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
+      - name: Stop gaiad
+        run: |
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
+          echo "synced_block=$synced_block" >> $GITHUB_ENV
+          killall gaiad screen
+          sleep 10s
+      - name: Create snapshot
+        run: |
+          cd $NODE_HOME
+          mkdir ~/snapshot
+          tar --use-compress-program="pigz -k " -cf ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
+      - name: Upload snapshot
+        run: |
+          echo "Clear directory on server..."
+          cd /home/runner/
+          ssh gh-actions@files.polypore.xyz rm /storage/snapshots/hub-testnet/provider/* || true
+          echo "Uploading ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz..."
+          scp ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz gh-actions@files.polypore.xyz:/storage/snapshots/hub-testnet/provider/
+          echo "Update latest file symlinks..."
+          ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/hub-testnet/provider/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz /storage/snapshots/hub-testnet/provider/latest.tar.gz
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-hub-testnet-provider
+          path: ~/artifact/
