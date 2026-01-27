@@ -52,6 +52,8 @@ pfm_ba_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home 
 echo "> B-A client ID: $pfm_ba_client_id"
 pfm_ba_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$pfm_ba_client_id" '.connections[] | select(.client_id==$client).id')
 echo "> B-A connection ID: $pfm_ba_connection_id"
+printf "Printing B-A connection info:\n"
+$CHAIN_BINARY q ibc channel connections $pfm_ba_connection_id --home $whale_home -o json | jq '.'
 pfm_ba_channel_id=$($CHAIN_BINARY q ibc channel connections $pfm_ba_connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
 echo "> B-A channel ID: $pfm_ba_channel_id"
               
