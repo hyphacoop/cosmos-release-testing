@@ -226,9 +226,9 @@ dynamic_gas_price = { enabled=true, multiplier = 1.5, max = 0.2 }
 
 [[chains]]
 id = 'ica'
-rpc_addr = 'http://localhost:37001'
-grpc_addr = 'http://localhost:38001'
-event_source = { mode = 'push', url = 'ws://localhost:37001/websocket', batch_delay = '500ms' }
+rpc_addr = 'http://localhost:37101'
+grpc_addr = 'http://localhost:38101'
+event_source = { mode = 'push', url = 'ws://localhost:37101/websocket', batch_delay = '500ms' }
 rpc_timeout = '15s'
 account_prefix = 'cosmos'
 key_name = 'wallet'
