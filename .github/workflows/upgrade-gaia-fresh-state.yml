@@ -2977,7 +2977,15 @@
               tmux send-keys -t relayer C-c
               hermes create client --host-chain $CHAIN_1 --reference-chain $CHAIN_2
               hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
-              hermes create connection --a-chain $CHAIN_1 --a-client 07-tendermint-0 --b-client 07-tendermint-0
+              source scripts/vars.sh
+              ica_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r --arg chain "$CHAIN_2" '.client_states[] | select(.client_state.chain_id==$chain).client_id')
+              echo "> Creating connection with Hermes"
+              hermes create connection --a-chain $CHAIN_1 --a-client $ica_client_id --b-client 07-tendermint-0
+              ica_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$ica_client_id" '.connections[] | select((.client_id==$client) and (.state=="STATE_OPEN")).id')
+              
+              printf ">Saving variables to GITHUB_ENV.\n"
+              echo "ica_client_id=$ica_client_id" >> $GITHUB_ENV
+              echo "ica_connection_id=$ica_connection_id" >> $GITHUB_ENV
               scripts/start_relayer.sh
 
           - name: _Test ICA controller - register ICA with controller1
@@ -2991,13 +2999,13 @@
               echo "> Controller account balances:"
               $CHAIN_BINARY q bank balances $controller1 --home $whale_home
               echo "> Register controller"
-              txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
+              txhash=$($CHAIN_BINARY tx interchain-accounts controller register $ica_connection_id --ordering ORDER_ORDERED --version "" --from $controller1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*15))
               echo "txhash: $txhash"
               $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
               tail -n 100 relayer.log
               tail -n 100 $whale_log
-              ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller1 connection-0 --home $whale_home -o json | jq -r '.address')
+              ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller1 $ica_connection_id --home $whale_home -o json | jq -r '.address')
               echo "ICA address: $ica_address"
               echo "> Funding ICA."
               source scripts/vars_ica.sh
