@@ -40,7 +40,7 @@
       set-versions:
         env:
           START: ${{ github.event_name == 'push' && 'v25.3.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'feature/tokenfactory-integration' || inputs.to_version }}
+          TARGET: ${{ github.event_name == 'push' && 'v26.0.0-rc0' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v26.0.0' || inputs.upgrade_name }}
         runs-on: ubuntu-24.04
         steps:
@@ -2892,14 +2892,14 @@
             run: |
               tests/test_pfm_transfers.sh
 
-          - name: Create and mint factory denom
-            run: |
-              source scripts/vars.sh
-              scripts/factory_create_mint_denom.sh
+          # - name: Create and mint factory denom
+          #   run: |
+          #     source scripts/vars.sh
+          #     scripts/factory_create_mint_denom.sh
           
-          - name: Test factory denom transfer with PFM
-            run: |
-              tests/test_factory_pfm_transfer.sh
+          # - name: Test factory denom transfer with PFM
+          #   run: |
+          #     tests/test_factory_pfm_transfer.sh
 
           - name: Set up happy path liquid accounts
             run: |
