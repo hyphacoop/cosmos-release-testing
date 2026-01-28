@@ -50,6 +50,7 @@ echo "> C-B channel ID: $pfm_cb_channel_id"
 source scripts/vars_pfm_1.sh
 pfm_ba_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r '.client_states[] | select(.client_state.chain_id=="testnet").client_id')
 echo "> B-A client ID: $pfm_ba_client_id"
+$CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$pfm_ba_client_id" '.connections[] | select(.client_id==$client)'
 pfm_ba_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$pfm_ba_client_id" '.connections[] | select(.client_id==$client).id')
 echo "> B-A connection ID: $pfm_ba_connection_id"
 printf "Printing B-A connection info:\n"
