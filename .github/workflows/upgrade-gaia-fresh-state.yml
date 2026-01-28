@@ -2659,6 +2659,8 @@
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           COMMIT_TIMEOUT: 3
+          VESTING_AMOUNT: 110000000
+          VESTING_DELEGATED_AMOUNT: 100000000
         steps:
           - name: Update PATH
             run: |
