@@ -3034,3 +3034,24 @@
             run: |
               source scripts/vars.sh
               tests/test_feemarket.sh
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: "${{ matrix.target_version }}"
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}  
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: Restart relayer
+            run: |
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
+
+              
