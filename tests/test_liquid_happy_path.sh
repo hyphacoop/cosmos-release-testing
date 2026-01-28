@@ -57,8 +57,11 @@ echo "** HAPPY PATH> STEP 1: TOKENIZE **"
         exit 1 
     fi
 
+    printf "Balances:\n"
     $CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home
-    liquid_denom=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r '.balances[-2].denom')
+    printf "Last denom with VALOPER prefix:\n"
+    $CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r --arg VALOPER "$VALOPER_1" '[.balances[] | select(.denom | startswith($VALOPER))][-1].denom'
+    liquid_denom=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r --arg VALOPER "$VALOPER_1" '[.balances[] | select(.denom | startswith($VALOPER))][-1].denom')
     liquid_balance=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r --arg DENOM "$liquid_denom" '.balances[] | select(.denom==$DENOM).amount')
     echo "Liquid balance: ${liquid_balance%.*}"
     if [[ ${liquid_balance%.*} -ne $tokenize ]]; then
@@ -102,16 +105,16 @@ echo "** HAPPY PATH> STEP 3: TRANSFER TOKENS  **"
 echo "** HAPPY PATH> STEP 4: REDEEM TOKENS **"
     echo "Redeeming tokens from happy_liquid_1..."
     $CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq '.'
-    liquid_denom_1=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r '.balances[-2].denom')
-    liquid_balance_1=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r '.balances[-2].amount')
+    liquid_denom_1=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r --arg VALOPER "$VALOPER_1" '[.balances[] | select(.denom | startswith($VALOPER))][-1].denom')
+    liquid_balance_1=$($CHAIN_BINARY q bank balances $happy_liquid_1 --home $whale_home -o json | jq -r --arg VALOPER "$VALOPER_1" '[.balances[] | select(.denom | startswith($VALOPER))][-1].amount')
     echo "> Liquid denom 1: $liquid_denom"
     echo "> Liquid balance 1: $liquid_balance_1"
     submit_tx "tx liquid redeem-tokens $liquid_balance_1$liquid_denom_1 --from $happy_liquid_1 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y" $CHAIN_BINARY $whale_home
     sleep $(($COMMIT_TIMEOUT*2))
     echo "Redeeming tokens from happy_liquid_2..."
     $CHAIN_BINARY q bank balances $happy_liquid_2 --home $whale_home -o json | jq '.'
-    liquid_denom_2=$($CHAIN_BINARY q bank balances $happy_liquid_2 --home $whale_home -o json | jq -r '.balances[-2].denom')
-    liquid_balance_2=$($CHAIN_BINARY q bank balances $happy_liquid_2 --home $whale_home -o json | jq -r '.balances[-2].amount')
+    liquid_denom_2=$($CHAIN_BINARY q bank balances $happy_liquid_2 --home $whale_home -o json | jq -r --arg VALOPER "$VALOPER_1" '[.balances[] | select(.denom | startswith($VALOPER))][-1].denom')
+    liquid_balance_2=$($CHAIN_BINARY q bank balances $happy_liquid_2 --home $whale_home -o json | jq -r --arg VALOPER "$VALOPER_1" '[.balances[] | select(.denom | startswith($VALOPER))][-1].amount')
     echo "> Liquid denom 2: $liquid_denom_2"
     echo "> Liquid balance 2: $liquid_balance_2"
     submit_tx "tx liquid redeem-tokens $liquid_balance_2$liquid_denom_2 --from $happy_liquid_2 -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y" $CHAIN_BINARY $whale_home
