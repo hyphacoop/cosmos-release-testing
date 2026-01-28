@@ -2848,6 +2848,7 @@
 
           - name: Create transfer channels for PFM test
             run: |
+              tmux send-keys -t relayer C-c
               source scripts/vars.sh
               if [ $RELAYER == "hermes" ]; then
                 echo "Creating channels with Hermes..."
@@ -2875,6 +2876,7 @@
                 rly transact channel pfm-path-2
                 rly transact channel pfm-path-3
               fi
+              scripts/start_relayer.sh
 
           - name: Restart relayer
             run: |
