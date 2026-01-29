@@ -2916,7 +2916,7 @@
               $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
-          
+    
           - name: Set up vesting account
             run: |
               source scripts/vars.sh
@@ -3121,3 +3121,17 @@
             run: |
               source scripts/vars.sh
               tests/test_liquid_happy_path.sh
+
+          - name: Tokenize with upgrade_wallet
+            run: |
+              source scripts/vars.sh
+              upgrade_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="upgrade_wallet").address')
+              echo "> Delegating."
+              $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000uatom --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
+              sleep $(($COMMIT_TIMEOUT+2))
+              echo "> Tokenizing."
+              echo "> Command: $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
+              $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
+              sleep $(($COMMIT_TIMEOUT+2))
+              $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
+          
