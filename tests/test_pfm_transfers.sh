@@ -3,7 +3,6 @@ source scripts/vars_pfm_3.sh
 # channel_provider=$($CHAIN_BINARY q ibc channel end transfer channel-0 --home $whale_home --output json | jq -r '.channel.counterparty.channel_id')
 
 echo "Provider chain channel ID: $pfm_ab_channel_id"
-
 # IBC denom derivation
 # A-D: provider -> pfm 1 -> pfm 2 -> pfm-3 (A->D)
 # 1. Receiving channel in pfm3
