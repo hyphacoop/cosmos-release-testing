@@ -1577,6 +1577,12 @@
               sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Start relayer
+            run: |
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+              
           - name: Generate host connection
             env:
               CHAIN_1: testnet
@@ -2936,15 +2942,16 @@
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
               liquid_denom=$($CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq -r --arg valoper "$VALOPER_1" '.balances | map(select(.denom | startswith($valoper))) | .[-1].denom')
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
+              starting_delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
               echo "> Denom: $liquid_denom"
               echo "> Command: $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $whale_home -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
               $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
-              delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
-              echo "> Delegation_amount: $delegation_amount"
-              if [[ "$delegation_amount" == "1000000" ]]; then
+              ending_delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
+              echo "> Delegation_amount: $ending_delegation_amount"
+              if [[ "$((ending_delegation_amount - starting_delegation_amount))" == "1000000" ]]; then
                   echo "Token redemption succeeded."
               else
                   echo "Token redemption failed."
@@ -3187,8 +3194,8 @@
             run: |
               source scripts/vars.sh
               controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-              $CHAIN_BINARY keys add recipient1 --home $whale_home
-              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient1").address')
+              $CHAIN_BINARY keys add recipient2 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient2").address')
               tests/test_ica_send.sh $controller1 $recipient_wallet
 
           - name: _Test counter contract
