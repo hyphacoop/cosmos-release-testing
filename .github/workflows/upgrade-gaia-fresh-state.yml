@@ -2894,15 +2894,6 @@
             run: |
               tests/test_pfm_transfers.sh
 
-          # - name: Create and mint factory denom
-          #   run: |
-          #     source scripts/vars.sh
-          #     scripts/factory_create_mint_denom.sh
-          
-          # - name: Test factory denom transfer with PFM
-          #   run: |
-          #     tests/test_factory_pfm_transfer.sh
-
           - name: Set up happy path liquid accounts
             run: |
               source scripts/vars.sh
@@ -3116,3 +3107,17 @@
           - name: _Test PFM transfers
             run: |
               tests/test_pfm_transfers.sh
+
+          - name: Create and mint factory denom
+            run: |
+              source scripts/vars.sh
+              scripts/factory_create_mint_denom.sh
+          
+          - name: Test factory denom transfer with PFM
+            run: |
+              tests/test_factory_pfm_transfer.sh
+
+          - name: Post-upgrade x/liquid happy path
+            run: |
+              source scripts/vars.sh
+              tests/test_liquid_happy_path.sh
