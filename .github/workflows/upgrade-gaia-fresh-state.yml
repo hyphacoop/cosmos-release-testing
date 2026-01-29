@@ -2922,7 +2922,7 @@
               source scripts/vars.sh
               upgrade_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="upgrade_wallet").address')
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
-              liquid_denom=$($CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq -r '.balances[-2].denom')
+              liquid_denom=$($CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq -r --arg valoper "$VALOPER_1" '.balances | map(select(.denom | startswith($valoper))) | .[-1].denom')
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
               echo "> Denom: $liquid_denom"
               echo "> Command: $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $whale_home -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
@@ -2938,8 +2938,6 @@
                   echo "Token redemption failed."
                   exit 0
               fi
-
-
     
           - name: Set up vesting account
             run: |
@@ -3164,7 +3162,7 @@
               source scripts/vars.sh
               upgrade_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="upgrade_wallet").address')
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
-              liquid_denom=$($CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq -r '.balances[-2].denom')
+              liquid_denom=$($CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq -r --arg valoper "$VALOPER_1" '.balances | map(select(.denom | startswith($valoper))) | .[-1].denom')
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
               echo "> Denom: $liquid_denom"
               echo "> Command: $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $whale_home -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
