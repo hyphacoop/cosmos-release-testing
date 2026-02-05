@@ -445,13 +445,6 @@ jobs:
 
       - name: _Test permissionless cosmwasm
         run: tests/stateful/test_cosmwasm.sh
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: Print netstat
         run: netstat -ntap
       - name: _Provider API tests using localhost> gaiad
@@ -609,6 +602,22 @@ jobs:
           CHAIN_HOME: /home/runner/.val1
         run: tests/stateful/test_ica_controller.sh 
       
+      - name: _block create consumer
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          DOWNTIME_BLOCKS: 20
+          CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+        run: tests/stateful/test_removed_ics.sh
+
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
+
       - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
         env:
           CONSUMER_CHAIN_ID: consumera

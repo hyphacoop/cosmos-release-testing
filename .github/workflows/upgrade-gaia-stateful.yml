@@ -10,11 +10,11 @@ on:
         description: 'Gaia version to upgrade from'
         required: true
         type: string
-        default: v25.3.0
+        default: v25.3.2
       to_version:
         description: 'Gaia version to upgrade to'
         required: true
-        default: feature/tokenfactory-integration
+        default: feat/block-create-consumer
       archive_url:
         description: 'URL for archive file'
         required: true
@@ -23,14 +23,14 @@ on:
   # schedule:
   #   # Once a day at 13:15
   #   - cron: '15 13 * * 1'
-  # push:
+  push:
 # concurrency:
 #   group: self-hosted-runners
 jobs:
   set-version-matrix:
     env:
-      START: ${{ github.event_name == 'push' && 'v25.3.0' || github.event_name == 'repository_dispatch' && 'v25.3.0' || inputs.from_version }}
-      TARGET: ${{ github.event_name == 'push' && 'feature/tokenfactory-integration' || inputs.to_version }}
+      START: ${{ github.event_name == 'push' && 'v25.3.2' || github.event_name == 'repository_dispatch' && 'v25.3.0' || inputs.from_version }}
+      TARGET: ${{ github.event_name == 'push' && 'feat/block-create-consumer' || inputs.to_version }}
       ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v25.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-24.04
     steps:
