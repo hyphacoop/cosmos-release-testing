@@ -44,8 +44,8 @@ $CHAIN_BINARY tx provider create-consumer create-$CONSUMER_CHAIN_ID.json --gas $
 
 if [ $? -eq 0 ]
 then
-    echo "[PASS]: create-consumer TX failed as expected"
-else
-    echo "[FAIL]: create-consumer TX passed!"
+    echo "[ERROR]: TX was successful"
     exit 1
+else
+    echo "[PASS]: TX was not successful"
 fi
