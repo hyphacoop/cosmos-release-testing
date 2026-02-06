@@ -42,9 +42,6 @@ echo "[INFO] Submitting transection..."
 set +e
 output=$($CHAIN_BINARY tx provider create-consumer create-$CONSUMER_CHAIN_ID.json --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --fees $BASE_FEES$DENOM --from $WALLET_1 --keyring-backend test --home $HOME_1 --chain-id $CHAIN_ID -b sync -y -o json )
 
-echo "[INFO]: Gaiad output:"
-echo $output
-
 if [ $? -eq 0 ]
 then
     echo "[ERROR]: TX was successful"
@@ -52,6 +49,9 @@ then
 else
     echo "[PASS]: TX was not successful"
 fi
+
+echo "[INFO]: Gaiad output:"
+echo $output
 
 echo $output | grep "MsgCreateConsumer is disabled"
 if [ $? -eq 0 ]
