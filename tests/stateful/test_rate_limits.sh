@@ -14,11 +14,11 @@ echo "[INFO]: Current uatom supply"
 echo $total_uatom_supply
 
 echo "[INFO]: Get bank balance of $WALLET_1"
-wallet1_bank_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.denom="uatom") | .amount')
+wallet1_bank_balance=$($CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.denom=="uatom") | .amount')
 echo "$wallet1_bank_balance"
 
-echo "[DEBUG]: $CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.'"
-$CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.'
+# echo "[DEBUG]: $CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.'"
+# $CHAIN_BINARY --home $HOME_1 q bank balances $WALLET_1 -o json | jq -r '.'
 
 echo "[INFO]: Calculate 1% of supply"
 supply_one_percent=$(printf %.0f $(echo "$total_uatom_supply*0.01" | bc -l))
