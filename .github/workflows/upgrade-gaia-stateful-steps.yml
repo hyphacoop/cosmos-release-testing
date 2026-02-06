@@ -555,7 +555,7 @@ jobs:
           CHAIN_HOME: /home/runner/.val1
           SECONDARY_CHAIN_ID: recovery-chain-1
           SECONDARY_CHAIN_HOME: /home/runner/.recovery-chain
-          SECONDARY_CHAN_ID: ${{ vars.RECOVERY_CHAN_ID }}
+          SECONDARY_CHAN_ID: ${{ env.RECOVERY_CHAN_ID }}
         run: |
           tests/stateful/test_rate_limits.sh
       
