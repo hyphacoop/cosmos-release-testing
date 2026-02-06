@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "[INFO]: Creating new consumer wallet..."
+echo "[INFO]: Creating new wallet on secondary chain..."
 secondary_test_wallet1_json=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME keys add rate-limit-1 --output json)
 secondary_test_wallet1_addr=$(echo $secondary_test_wallet1_json | jq -r '.address')
 
-echo "[INFO]: Consumer test wallet: $secondary_test_wallet1_addr"
+echo "[INFO]: Secondary chain test wallet: $secondary_test_wallet1_addr"
 
 echo "[INFO]: Get current total supply"
 total_uatom_supply=$($CHAIN_BINARY --home $HOME_1 q bank total-supply-of uatom -o json | jq -r '.amount.amount')
@@ -60,10 +60,10 @@ then
     echo "[PASS]: TX was successful"
 fi
 
-# query consumer chain balance
+# query secondary chain balance
 current_amount=$($CHAIN_BINARY --home $SECONDARY_CHAIN_HOME q bank balances $secondary_test_wallet1_addr -o json | jq -r '.balances[0].amount')
 
-echo "[INFO]: Consumer wallet $secondary_test_wallet1_addr amount $current_amount"
+echo "[INFO]: Secondary chain wallet $secondary_test_wallet1_addr amount $current_amount"
 
 if [ $supply_09_percent -eq $current_amount  ]
 then
