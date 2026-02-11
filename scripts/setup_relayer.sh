@@ -25,7 +25,7 @@ if [ $RELAYER == "hermes" ]; then
     echo $MNEMONIC_RELAYER > mnemonic.txt
     hermes keys add --chain $CHAIN_ID --mnemonic-file mnemonic.txt
     hermes keys add --chain v400-one --mnemonic-file mnemonic.txt
-    hermes keys add --chain v640-one --mnemonic-file mnemonic.txt
+    hermes keys add --chain v641-one --mnemonic-file mnemonic.txt
     hermes keys add --chain v640-two --mnemonic-file mnemonic.txt
     hermes keys add --chain v701-one --mnemonic-file mnemonic.txt
     hermes keys add --chain v701-two --mnemonic-file mnemonic.txt
