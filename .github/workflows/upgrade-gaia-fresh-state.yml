@@ -301,7 +301,7 @@
               sleep $(($COMMIT_TIMEOUT*4))
           - name: Spawn consumer chain v641-one
             env:
-              PROVIDER_ICS: v6.4.1
+              PROVIDER_ICS: v6.4.0
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v641_one.sh
