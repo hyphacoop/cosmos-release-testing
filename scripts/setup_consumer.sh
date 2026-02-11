@@ -91,8 +91,6 @@ echo "> Whale validator"
 echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --keyring-backend test --home ${homes[0]} --output json --recover > keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json
 # $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
 $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM,1000000000utoken1,1000000000utoken2,1000000000000000000000atoken3 --home ${homes[0]} --keyring-backend test
-toml set --toml-path ${consumer_whale_home}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE,0.02utoken1,0.02utoken2,0.02atoken3"
-
 
 wallet=$(jq -r '.address' keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json)
 wallets+=($wallet)
@@ -151,6 +149,8 @@ do
     toml set --toml-path ${homes[i]}/config/app.toml grpc.address "0.0.0.0:${grpc_ports[i]}"
     toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
 done
+
+toml set --toml-path ${consumer_whale_home}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE,0.02utoken1,0.02utoken2,0.02atoken3"
 
 echo "> Configuring config.toml"
 val1_node_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
