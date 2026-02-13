@@ -196,8 +196,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install toml-cli
-          python -m pip install graph-cli
+          python -m pip install toml-cli graph-cli cosmospy
+
       - name: Print RPC port
         run: echo $VAL1_RPC_PORT
       - name: Test software upgrade for published releases
@@ -286,6 +286,11 @@ jobs:
           then
             exit 1
           fi
+      - name: _Test bank multi-send
+        run : |
+          source ~/env/bin/activate
+          # tests/stateful/test_multi-send_gas.sh <50 wallets> <10> <uatom>
+          tests/stateful/test_multi-send_gas.sh 50 10 uatom
       - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
