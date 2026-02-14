@@ -289,16 +289,16 @@ jobs:
       - name: _Test bank multi-send to 50 wallets
         run : |
           source ~/env/bin/activate
-          # tests/stateful/test_multi-send_gas.sh <50 wallets> <10> <uatom>
-          tests/stateful/test_multi-send_gas.sh 50 10 uatom
+          # tests/stateful/test_multi-send_gas.sh <50 wallets> <10> <uatom> <gas-adjustment>
+          tests/stateful/test_multi-send_gas.sh 50 10 uatom 5
       - name: _Test bank multi-send to 100 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 100 10 uatom
+          tests/stateful/test_multi-send_gas.sh 100 10 uatom 5 
       - name: _Test bank multi-send to 1000 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 1000 10 uatom
+          tests/stateful/test_multi-send_gas.sh 1000 10 uatom 10
       - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
