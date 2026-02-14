@@ -12,6 +12,9 @@ wallets=$(jq -r '.[].address' cosmos_wallets.json | xargs)
 tx_json=$($CHAIN_BINARY --home $HOME_1 tx bank multi-send $WALLET_1 $wallets $tx_amount$tx_denom --from val --gas auto --gas-adjustment 5 --gas-prices 3000uatom -y -o json)
 txhash=$(echo $tx_json | jq -r '.txhash')
 
+# wait for tx block
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
+
 echo "Query TX output:"
 $CHAIN_BINARY --home $HOME_1 q tx $txhash -o json | jq '.'
 
