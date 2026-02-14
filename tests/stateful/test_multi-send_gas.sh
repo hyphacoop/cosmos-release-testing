@@ -15,11 +15,18 @@ txhash=$(echo $tx_json | jq -r '.txhash')
 # wait for tx block
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 
-echo "Query TX output:"
-$CHAIN_BINARY --home $HOME_1 q tx $txhash -o json | jq '.'
-
-code=$($CHAIN_BINARY --home $HOME_1 q tx $txhash -o json | jq '.code')
+tx_json=$($CHAIN_BINARY --home $HOME_1 q tx $txhash -o json)
+code=$(echo $tx_json | jq -r '.code')
 if [ $code -eq 0 ]
 then
     echo "[PASS]: TX was successful"
 fi
+
+# Query gas wanted
+tx_gas_wanted=$(echo $tx_json | jq -r '.gas_wanted')
+
+# Query gas used
+tx_gas_used=$(echo $tx_json | jq -r '.gas_used')
+
+echo "Gas wanted: $tx_gas_wanted"
+echo "Gas used: $tx_gas_used"
