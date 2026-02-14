@@ -18,7 +18,7 @@ tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 5 10
 
 set +e
 tx_query=$($CHAIN_BINARY --home $HOME_1 q tx $txhash -o json)
-if [ $? != 1 ]
+if [ $? -ne 0 ]
 then
     echo "[ERROR]: TX Failed, TX JSON output:"
     echo "$tx_json" | jq -r '.'
