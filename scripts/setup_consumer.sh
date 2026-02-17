@@ -90,7 +90,7 @@ $CONSUMER_CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$CONSUMER_D
 echo "> Whale validator"
 echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --keyring-backend test --home ${homes[0]} --output json --recover > keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json
 # $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM,1000000000utoken1,1000000000utoken2,1000000000000000000000atoken3 --home ${homes[0]} --keyring-backend test
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM,1000000000utoken1,1000000000utoken2,1000000000000000000000atoken3,1000000000utoken4,1000000000utoken5,1000000000000000000000atoken6 --home ${homes[0]} --keyring-backend test
 
 wallet=$(jq -r '.address' keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json)
 wallets+=($wallet)

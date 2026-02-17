@@ -378,6 +378,21 @@
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --fees 1000000000atoken3 \
               --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*3))
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 10000000utoken4 \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*3))
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 10000000utoken5 \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*3))
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000000atoken6 \
+              --home $consumer_whale_home -o json -y | jq '.'
               sleep $(($COMMIT_TIMEOUT*10))
               echo "> Balance in consumer chain recipient:"
               $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
@@ -389,7 +404,7 @@
               echo "> IBC denom trace:"
               $CHAIN_BINARY q ibc-transfer denom $first_denom --home $whale_home -o json | jq -r '.'
 
-          - name: Add consumer rewards to allowlist
+          - name: Add consumer rewards to allowlist, round 1
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v641_one.sh
@@ -402,6 +417,21 @@
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
               echo "> Rewards pool:"
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              
+          - name: Add consumer rewards to allowlist, round 2
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v641_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              scripts/update_consumer_rewards_2.sh $channel_id
+              sleep $(($COMMIT_TIMEOUT*3))
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Rewards pool:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
 
           # - name: _Consumer rewards distribution> ICS v7.0.1
           #   run: |
