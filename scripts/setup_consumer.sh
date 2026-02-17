@@ -150,7 +150,7 @@ do
     toml set --toml-path ${homes[i]}/config/app.toml grpc-web.enable false
 done
 
-toml set --toml-path ${consumer_whale_home}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE,0.02utoken1,0.02utoken2,0.02atoken3"
+toml set --toml-path ${consumer_whale_home}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE,0.02utoken1,0.02utoken2,0.02atoken3,0.02utoken4,0.02utoken5,0.02atoken6"
 
 echo "> Configuring config.toml"
 val1_node_id=$($CONSUMER_CHAIN_BINARY tendermint show-node-id --home ${homes[0]})
