@@ -5,11 +5,10 @@ echo "Patching update template with consumer id..."
 jq -r --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' templates/update-consumer-allowlisted-denoms.json > update.json
 
 echo "> Set denom allowlist"
-provider_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
-utoken1_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/utoken4 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
-utoken2_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/utoken5 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
-atoken3_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/atoken6 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
-jq --arg denom "$provider_denom" --arg denom2 "$utoken1_denom" --arg denom4 "$atoken3_denom" '.allowlisted_reward_denoms |= { "denoms":[$denom,$denom2,$denom4] }' update.json > update-denom.json
+utoken4_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/utoken4 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+utoken5_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/utoken5 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+atoken6_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/atoken6 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+jq --arg denom4 "$utoken4_denom" --arg denom5 "$utoken5_denom" --arg denom6 "$atoken6_denom" '.allowlisted_reward_denoms |= { "denoms":[$denom4,$denom5,$denom6] }' update.json > update-denom.json
 cp update-denom.json update.json
 
 jq '.' update.json
