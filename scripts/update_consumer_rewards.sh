@@ -9,7 +9,7 @@ provider_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/$CONSUMER_DENOM | shasum
 utoken1_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/utoken1 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 utoken2_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/utoken2 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
 atoken3_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/atoken3 | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
-jq --arg denom "$provider_denom" --arg denom1 "$utoken1_denom" --arg denom2 "$utoken2_denom" --arg denom3 "$atoken3_denom" '.allowlisted_reward_denoms |= { "denoms":[$denom,$denom1,$denom2,$denom3] }' update.json > update-denom.json
+jq --arg denom1 "$utoken1_denom" --arg denom2 "$utoken2_denom" --arg denom3 "$atoken3_denom" '.allowlisted_reward_denoms |= { "denoms":[$denom1,$denom2,$denom3] }' update.json > update-denom.json
 cp update-denom.json update.json
 
 jq '.' update.json

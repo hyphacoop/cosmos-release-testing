@@ -393,7 +393,7 @@
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --fees 1000000000atoken6 \
               --home $consumer_whale_home -o json -y | jq '.'
-              sleep $(($COMMIT_TIMEOUT*10))
+              sleep $(($COMMIT_TIMEOUT*20))
               echo "> Balance in consumer chain recipient:"
               $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
               echo "> Val1 outstanding rewards:"
