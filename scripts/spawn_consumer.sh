@@ -35,7 +35,7 @@ $CHAIN_BINARY q provider consumer-genesis $CONSUMER_ID -o json --home $whale_hom
 jq '.' ccv.json
 
 echo "> Patching the CCV state with the provider reward denom"
-jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM,"utoken1","utoken2","atoken3"]' ccv.json > ccv-reward.json
+jq --arg DENOM "$CONSUMER_DENOM" '.params.reward_denoms = [$DENOM,"utoken1","utoken2","atoken3","utoken3","utoken5","atoken6"]' ccv.json > ccv-reward.json
 cp ccv-reward.json ccv.json
 
 if [ "$CONSUMER_ICS" == "v4.0.0" ]; then
