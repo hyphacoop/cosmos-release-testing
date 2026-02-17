@@ -406,8 +406,12 @@
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
               echo "> Query distribution account"
               $CONSUMER_CHAIN_BINARY q bank balances consumer17xpfvakm2amg962yls6f84z3kell8c5l4vw0c6 --home $consumer_whale_home -o json | jq '.'
-              $CONSUMER_CHAIN_BINARY q ccvconsumer
-
+              $CONSUMER_CHAIN_BINARY q ccvconsumer next-fee-distribution --home $consumer_whale_home -o json | jq '.'
+              $CONSUMER_CHAIN_BINARY q ccvconsumer params --home $consumer_whale_home -o json | jq '.'
+              $CONSUMER_CHAIN_BINARY q ccvconsumer provider-info --home $consumer_whale_home -o json | jq '.'
+              
+              printf "> Check relayer logs for any errors\n"
+              cat relayer.log
 
           - name: Add consumer rewards to allowlist, round 1
             run: |
