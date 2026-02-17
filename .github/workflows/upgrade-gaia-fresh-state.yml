@@ -379,11 +379,13 @@
               --gas auto --fees 1000000000atoken3 \
               --home $consumer_whale_home -o json -y | jq '.'
               sleep $(($COMMIT_TIMEOUT*5))
-              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              txhash=$($CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --fees 10000000utoken4 \
-              --home $consumer_whale_home -o json -y | jq '.'
+              --home $consumer_whale_home -o json -y | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*5))
+              printf "> Check tx %s in consumer chain\n" "$txhash"
+              $CONSUMER_CHAIN_BINARY q tx $txhash --home $consumer_whale_home -o json | jq '.'
               $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --fees 10000000utoken5 \
