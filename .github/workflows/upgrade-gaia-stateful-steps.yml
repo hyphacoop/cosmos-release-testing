@@ -290,56 +290,56 @@ jobs:
         run : |
           source ~/env/bin/activate
           # tests/stateful/test_multi-send_gas.sh <1 wallets> <number of tokens to send> <denom> <gas-adjustment> <gas-prices>
-          tests/stateful/test_multi-send_gas.sh 50 1 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 50 1 uatom 2 3000uatom
       - name: _Test bank multi-send to 5 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 5 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 5 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 10 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 10 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 10 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 50 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 50 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 50 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 100 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 100 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 100 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 150 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 150 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 150 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 200 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 200 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 200 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 250 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 250 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 250 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 300 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 300 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 300 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 350 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 350 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 350 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 400 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 400 10 uatom 5 3000uatom
+          tests/stateful/test_multi-send_gas.sh 400 10 uatom 2 3000uatom
       - name: _Test bank multi-send to 450 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 450 10 uatom 5 12000uatom
+          tests/stateful/test_multi-send_gas.sh 450 10 uatom 2 12000uatom
       - name: _Test bank multi-send to 501 wallets
         run : |
           source ~/env/bin/activate
           set +e
-          tests/stateful/test_multi-send_gas.sh 501 10 uatom 5 12000uatom
+          tests/stateful/test_multi-send_gas.sh 501 10 uatom 2 12000uatom
           if [ $? -eq 0 ]
           then
               echo "[FAIL]: TX was successful"
