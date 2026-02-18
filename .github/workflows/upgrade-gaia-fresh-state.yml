@@ -355,6 +355,8 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v641_one.sh
+              echo "> Print consumer chain settings"
+              $CHAIN_BINARY q provider consumer-chain 0 -o json --home $whale_home | jq '.'
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
               echo "> Val1 outstanding rewards:"
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
