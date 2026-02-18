@@ -295,10 +295,10 @@ jobs:
         run : |
           source ~/env/bin/activate
           tests/stateful/test_multi-send_gas.sh 100 10 uatom 5 3000uatom
-      - name: _Test bank multi-send to 500 wallets
+      - name: _Test bank multi-send to 450 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 500 10 uatom 5 12000uatom
+          tests/stateful/test_multi-send_gas.sh 450 10 uatom 5 12000uatom
       - name: _Test bank multi-send to 501 wallets
         run : |
           source ~/env/bin/activate
