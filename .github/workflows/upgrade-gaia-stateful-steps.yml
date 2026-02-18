@@ -326,20 +326,20 @@ jobs:
       - name: _Test bank multi-send to 350 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 350 10 uatom 2 3000uatom
+          tests/stateful/test_multi-send_gas.sh 350 10 uatom 1.5 3000uatom
       - name: _Test bank multi-send to 400 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 400 10 uatom 2 3000uatom
+          tests/stateful/test_multi-send_gas.sh 400 10 uatom 1 3000uatom
       - name: _Test bank multi-send to 450 wallets
         run : |
           source ~/env/bin/activate
-          tests/stateful/test_multi-send_gas.sh 450 10 uatom 2 12000uatom
+          tests/stateful/test_multi-send_gas.sh 450 10 uatom 1 12000uatom
       - name: _Test bank multi-send to 501 wallets
         run : |
           source ~/env/bin/activate
           set +e
-          tests/stateful/test_multi-send_gas.sh 501 10 uatom 2 12000uatom
+          tests/stateful/test_multi-send_gas.sh 501 10 uatom 1 12000uatom
           if [ $? -eq 0 ]
           then
               echo "[FAIL]: TX was successful"
