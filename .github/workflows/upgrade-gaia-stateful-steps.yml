@@ -286,10 +286,18 @@ jobs:
           then
             exit 1
           fi
+      - name: _Test bank multi-send to 1 wallet
+        run : |
+          source ~/env/bin/activate
+          # tests/stateful/test_multi-send_gas.sh <1 wallets> <send 10 tokens> <denom> <gas-adjustment> <gas-prices>
+          tests/stateful/test_multi-send_gas.sh 50 1 uatom 5 3000uatom
+      - name: _Test bank multi-send to 10 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 10 10 uatom 5 3000uatom
       - name: _Test bank multi-send to 50 wallets
         run : |
           source ~/env/bin/activate
-          # tests/stateful/test_multi-send_gas.sh <50 wallets> <10> <uatom> <gas-adjustment> <gas-prices>
           tests/stateful/test_multi-send_gas.sh 50 10 uatom 5 3000uatom
       - name: _Test bank multi-send to 100 wallets
         run : |
