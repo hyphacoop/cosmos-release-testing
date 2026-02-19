@@ -151,7 +151,7 @@
           - name: Test create-consumer is disabled
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY tx provider t --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY tx provider create-consumer templates/create-consumer.json --home $whale_home -o json | jq '.'
 
       Test-01-cosmovisor-upgrade:
         runs-on: ubuntu-24.04
