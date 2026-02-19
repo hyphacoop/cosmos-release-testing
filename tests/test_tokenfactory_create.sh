@@ -6,10 +6,10 @@ check_code()
 {
   txhash=$1
   echo "Querying hash $txhash..."
-  code=$($CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.code')
+  code=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq '.code')
   if [ $code -ne 0 ]; then
     echo "tx was unsuccessful."
-    $CHAIN_BINARY q tx $txhash -o json --home $HOME_1 | jq '.'
+    $CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq '.'
     exit 1
   fi
 }

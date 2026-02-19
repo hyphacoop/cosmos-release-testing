@@ -2106,16 +2106,12 @@
               sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
-
-          - name: Query consensus params
-            run: |
-              source scripts/vars.sh
-              curl -s http://localhost:$whale_api/cosmos/consensus/v1/params | jq '.'
-          
+         
           - name: Query tokenfactory params
             run: |
               source scripts/vars.sh
-              curl -s http://localhost:$whale_api/tokenfactory/v1/params | jq '.'          
+              curl -s http://localhost:$whale_api/osmosis/tokenfactory/v1beta1/params | jq '.'    
+              $CHAIN_BINARY q tokenfactory params --home $whale_home -o json | jq '.'      
 
           - name: _Test tokenfactory - create a new denom
             run: |
