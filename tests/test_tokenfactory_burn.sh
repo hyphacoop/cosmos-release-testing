@@ -6,10 +6,10 @@ amount=$2
 check_code()
 {
   txhash=$1
-  echo "Querying hash $txhash..."
+  echo "> Querying hash $txhash"
   code=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq '.code')
   if [ $code -ne 0 ]; then
-    echo "tx was unsuccessful."
+    echo "> Transaction was unsuccessful."
     $CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq '.'
     exit 1
   fi
@@ -35,7 +35,7 @@ txhash=$($CHAIN_BINARY tx tokenfactory burn $amount$factory_denom --from $WALLET
 sleep $(($COMMIT_TIMEOUT*2))
 check_code $txhash
 
-balance_after=$($CHAIN_BINARY q bank balances $WALLET_1 --home $HOME_1 -o json | jq -r --arg DENOM "$factory_denom" '.balances[] | select(.denom == $DENOM) | .amount')
+balance_after=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r --arg DENOM "$factory_denom" '.balances[] | select(.denom == $DENOM) | .amount')
 echo "> Balance after burning: $balance_after"
 # Exit with code 1 if the balance after is not less than the balance before
 if [ "$balance_after" -ge "$balance_before" ]; then
