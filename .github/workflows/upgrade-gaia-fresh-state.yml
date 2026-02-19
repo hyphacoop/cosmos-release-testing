@@ -2120,13 +2120,17 @@
           - name: _Test tokenfactory - create a new denom
             run: |
               source scripts/vars.sh
-              tests/test_tokenfactory_create.sh
+              tests/test_tokenfactory_create.sh preupgrade
 
           - name: _Test tokenfactory - mint a denom
             run: |
               source scripts/vars.sh
-              tests/test_tokenfactory_mint.sh
-              
+              tests/test_tokenfactory_mint.sh preupgrade 10000000
+
+          - name: _Test tokenfactory - burn a denom
+            run: |
+              source scripts/vars.sh
+              tests/test_tokenfactory_burn.sh preupgrade 5000000
               
           - name: Test software upgrade
             env:
@@ -2155,6 +2159,30 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost $whale_rpc
   
+          - name: _Test tokenfactory - mint a pre-upgrade denom
+            run: |
+              source scripts/vars.sh
+              tests/test_tokenfactory_mint.sh preupgrade 10000000
+
+          - name: _Test tokenfactory - burn a denom
+            run: |
+              source scripts/vars.sh
+              tests/test_tokenfactory_burn.sh preupgrade 10000000
+              
+          - name: _Test tokenfactory - create a new denom
+            run: |
+              source scripts/vars.sh
+              tests/test_tokenfactory_create.sh postupgrade
+
+          - name: _Test tokenfactory - mint a denom
+            run: |
+              source scripts/vars.sh
+              tests/test_tokenfactory_mint.sh postupgrade 10000000
+
+          - name: _Test tokenfactory - burn a denom
+            run: |
+              source scripts/vars.sh
+              tests/test_tokenfactory_burn.sh postupgrade 5000000
 
       Test-All:
         runs-on: ubuntu-24.04
