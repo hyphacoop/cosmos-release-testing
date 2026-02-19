@@ -17,7 +17,10 @@ check_code()
 
 # Get the pre-burn balance for the factory denom
 factory_denom="factory/$WALLET_1/$subdenom"
+echo "> Checking balance for $factory_denom"
 
+command="$CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json"
+echo "> Running command: $command"
 balance_before=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r --arg DENOM "$factory_denom" '.balances[] | select(.denom == $DENOM) | .amount')
 # Set to 0 if the denom is not found in the balances
 if [ -z "$balance_before" ]; then
