@@ -10,7 +10,7 @@ on:
         description: 'Gaia version to upgrade from'
         required: true
         type: string
-        default: v25.3.2
+        default: v26.0.0
       to_version:
         description: 'Gaia version to upgrade to'
         required: true
@@ -18,7 +18,7 @@ on:
       archive_url:
         description: 'URL for archive file'
         required: true
-        default: 'https://files.polypore.xyz/archived-state/latest_v25.tar.gz'
+        default: 'https://files.polypore.xyz/archived-state/latest_v26.tar.gz'
 
   # schedule:
   #   # Once a day at 13:15
@@ -29,7 +29,7 @@ on:
 jobs:
   set-version-matrix:
     env:
-      START: ${{ github.event_name == 'push' && 'v25.3.2' || github.event_name == 'repository_dispatch' && 'v25.3.0' || inputs.from_version }}
+      START: ${{ github.event_name == 'push' && 'v26.0.0' || github.event_name == 'repository_dispatch' && 'v26.0.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
       ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v25.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-24.04
