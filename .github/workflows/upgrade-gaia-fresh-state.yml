@@ -158,7 +158,12 @@
               source scripts/vars.sh
               # Populate template with chain id
               jq -r '.chain_id |= "mychain"' templates/create-consumer.json > create.json
-              $CHAIN_BINARY tx provider create-consumer create.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -o json | jq '.'
+              if $CHAIN_BINARY tx provider create-consumer create.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -o json 2>&1 | grep -q "MsgCreateConsumer is disabled"; then
+                echo "> PASS: create-consumer is disabled as expected"
+              else
+                echo "> FAIL: create-consumer is not disabled"
+                exit 1
+              fi
 
           - name: Test multi-send gas consumption is within expected range
             run: |
