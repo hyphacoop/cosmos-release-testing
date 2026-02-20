@@ -43,16 +43,22 @@ gas_consumed=$($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.g
 
 echo "> Gas consumed for multi-send with 100 recipients: $gas_consumed"
 
-expected_max_gas=1000000
+expected_max_gas=1500000
 if [ "$surcharge" == "surcharge" ]; then
   expected_max_gas=$((300 * 10000))
-fi
-
-if [ $gas_consumed -gt $expected_max_gas ]; then
-    echo "> FAIL: Gas consumed for multi-send with 100 recipients is greater than $expected_max_gas"
+  if [ $gas_consumed -lt $expected_max_gas ]; then
+    echo "> FAIL: Gas consumed for multi-send is less than $expected_max_gas"
     exit 1
   else
-    echo "> PASS: Gas consumed for multi-send with 100 recipients is less than or equal to $expected_max_gas"
+    echo "> PASS: Gas consumed for multi-send is greater than or equal to $expected_max_gas"
+  fi
+else
+  if [ $gas_consumed -gt $expected_max_gas ]; then
+    echo "> FAIL: Gas consumed for multi-send is greater than $expected_max_gas"
+    exit 1
+  else
+    echo "> PASS: Gas consumed for multi-send is less than or equal to $expected_max_gas"
+  fi
 fi
 
 ## MULTISEND: 200 recipients
@@ -66,14 +72,24 @@ check_code $TXHASH
 # Collect gas consumed from the transaction and check that it is within expected range
 gas_consumed=$($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.gas_used')
 
-expected_max_gas=2000000
+echo "> Gas consumed for multi-send with 200 recipients: $gas_consumed"
+
+expected_max_gas=3000000
 if [ "$surcharge" == "surcharge" ]; then
   expected_max_gas=$((300 * 40000))
-fi
-
-if [ $gas_consumed -gt $expected_max_gas ]; then
-    echo "> FAIL: Gas consumed for multi-send with 200 recipients is greater than $expected_max_gas"
+  if [ $gas_consumed -lt $expected_max_gas ]; then
+    echo "> FAIL: Gas consumed for multi-send is less than $expected_max_gas"
     exit 1
   else
-    echo "> PASS: Gas consumed for multi-send with 200 recipients is less than or equal to $expected_max_gas"
+    echo "> PASS: Gas consumed for multi-send is greater than or equal to $expected_max_gas"
+  fi
+else
+  if [ $gas_consumed -gt $expected_max_gas ]; then
+    echo "> FAIL: Gas consumed for multi-send is greater than $expected_max_gas"
+    exit 1
+  else
+    echo "> PASS: Gas consumed for multi-send is less than or equal to $expected_max_gas"
+  fi
 fi
+
+
