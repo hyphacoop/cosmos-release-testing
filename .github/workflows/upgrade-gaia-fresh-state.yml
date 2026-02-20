@@ -156,7 +156,9 @@
           - name: Test create-consumer is disabled
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY tx provider create-consumer templates/create-consumer.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -o json | jq '.'
+              # Populate template with chain id
+              jq -r '.chain_id |= "mychain"' templates/create-consumer.json > create.json
+              $CHAIN_BINARY tx provider create-consumer create.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -o json | jq '.'
 
           - name: Test multi-send gas consumption is within expected range
             run: |
