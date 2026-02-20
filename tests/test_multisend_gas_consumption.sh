@@ -32,7 +32,7 @@ check_code()
 
 ## MULTISEND: 100 recipients
 echo "> Sending funds with tx bank multi-send"
-command="$CHAIN_BINARY tx bank multi-send $WALLET_1 $recipients_100 $SEND_AMOUNT$DENOM --home ${homes[0]} --from ${wallets[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
+command="$CHAIN_BINARY tx bank multi-send $WALLET_1 $recipients_100 1$DENOM --home $whale_home --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
 echo $command
 TXHASH=$($command | jq -r '.txhash')
 echo "Tx hash: $TXHASH"
@@ -57,7 +57,7 @@ fi
 
 ## MULTISEND: 200 recipients
 echo "> Sending funds with tx bank multi-send"
-command="$CHAIN_BINARY tx bank multi-send $WALLET_1 $recipients_200 $SEND_AMOUNT$DENOM --home ${homes[0]} --from ${wallets[0]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
+command="$CHAIN_BINARY tx bank multi-send $WALLET_1 $recipients_200 1$DENOM --home $whale_home --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
 echo $command
 TXHASH=$($command | jq -r '.txhash')
 echo "Tx hash: $TXHASH"
