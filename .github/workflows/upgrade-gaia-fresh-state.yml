@@ -306,6 +306,11 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
+          - name: Start relayer
+            run: |
+              source scripts/vars.sh
+              scripts/start_relayer.sh
+
           # - name: Add consumer chain with ICS v4.0.0
           #   run: |
           #     source scripts/vars.sh
