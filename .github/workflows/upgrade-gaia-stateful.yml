@@ -31,7 +31,7 @@ jobs:
     env:
       START: ${{ github.event_name == 'push' && 'v26.0.0' || github.event_name == 'repository_dispatch' && 'v26.0.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'main' || inputs.to_version }}
-      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v25.tar.gz' || inputs.archive_url }}
+      ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v26.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-24.04
     steps:
       # Get system info
