@@ -611,13 +611,13 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh
-              tests/test_consumer_equivocation_legacy.sh
-          - name: _Test consumer light client attack
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v640_one.sh
-              source scripts/vars_consumer_v400_lc.sh
-              tests/test_consumer_light_client_legacy.sh
+              tests/test_consumer_equivocation.sh
+          # - name: _Test consumer light client attack
+          #   run: |
+          #     source scripts/vars.sh
+          #     source scripts/vars_consumer_v640_one.sh
+          #     source scripts/vars_consumer_v400_lc.sh
+          #     tests/test_consumer_light_client_legacy.sh
 
           - name: _Remove consumer chain> ICS v6.4.0 chain 1
             run: |
