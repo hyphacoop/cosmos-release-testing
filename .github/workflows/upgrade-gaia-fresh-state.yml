@@ -608,7 +608,7 @@
               source scripts/vars_consumer_v400_one.sh
               echo "Consumer chains:"
               $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
-              consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).consumer_id')
+              consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).consumer_id')
               echo "Removing v400-one (consumer_id = $consumer_id):"
               txhash=$($CHAIN_BINARY tx provider remove-consumer $consumer_id --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home -o json | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*2))
