@@ -183,7 +183,7 @@ jobs:
           let halt_height=$current_block+50
           echo "[INFO]: Set halt-height to $halt_height"
           echo "[INFO]: Start gaiad with halt-height"
-          $CHAIN_BINARY start --home $NODE_HOME --halt-height $halt_height
+          gaiad start --home $NODE_HOME --halt-height $halt_height
           current_block=$halt_height
           echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           sleep 10s
