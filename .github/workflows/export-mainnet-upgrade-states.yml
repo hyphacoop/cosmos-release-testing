@@ -178,8 +178,14 @@ jobs:
         run: |
           echo "exiting gaia and screen"
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
-          echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           killall gaiad screen
+          sleep 10s
+          let halt_height=$current_block+50
+          echo "[INFO]: Set halt-height to $halt_height"
+          echo "[INFO]: Start gaiad with halt-height"
+          $CHAIN_BINARY start --home $NODE_HOME --halt-height $halt_height
+          current_block=$halt_height
+          echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           sleep 10s
       # - name: Make current snapshot and upload
       #   run: |
