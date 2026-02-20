@@ -196,8 +196,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install toml-cli
-          python -m pip install graph-cli
+          python -m pip install toml-cli graph-cli cosmospy
+
       - name: Print RPC port
         run: echo $VAL1_RPC_PORT
       - name: Test software upgrade for published releases
@@ -285,6 +285,79 @@ jobs:
           if [ $error == 1 ]
           then
             exit 1
+          fi
+      - name: _Test bank multi-send to 1 wallet
+        run : |
+          source ~/env/bin/activate
+          # tests/stateful/test_multi-send_gas.sh <1 wallets> <number of tokens to send> <denom> <gas-adjustment> <gas-prices>
+          tests/stateful/test_multi-send_gas.sh 50 1 uatom 2 3000uatom
+      - name: _Test bank multi-send to 5 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 5 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 10 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 10 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 50 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 50 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 100 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 100 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 150 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 150 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 200 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 200 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 250 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 250 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 300 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 300 10 uatom 2 3000uatom
+      - name: _Test bank multi-send to 350 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 350 10 uatom 1.5 3000uatom
+      - name: _Test bank multi-send to 400 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 400 10 uatom 1 3000uatom
+      - name: _Test bank multi-send to 450 wallets
+        run : |
+          source ~/env/bin/activate
+          tests/stateful/test_multi-send_gas.sh 450 10 uatom 1 12000uatom
+      - name: _Test bank multi-send to 500 wallets
+        run : |
+          source ~/env/bin/activate
+          set +e
+          tests/stateful/test_multi-send_gas.sh 500 10 uatom 1 80000uatom
+          if [ $? -eq 0 ]
+          then
+              echo "[FAIL]: TX was successful"
+              exit 1
+          else
+            echo "[PASS]: TX was not successful"
+          fi
+      - name: _Test bank multi-send to 501 wallets
+        run : |
+          source ~/env/bin/activate
+          set +e
+          tests/stateful/test_multi-send_gas.sh 501 10 uatom 1 80000uatom
+          if [ $? -eq 0 ]
+          then
+              echo "[FAIL]: TX was successful"
+              exit 1
+          else
+            echo "[PASS]: TX was not successful"
           fi
       - name: Query staking params
         run: |
@@ -388,6 +461,21 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
             exit 1
           fi
+      - name: _Test disabled command provider create-consumer
+        env:
+          CONSUMER_CHAIN_ID: consumera
+          DOWNTIME_BLOCKS: 20
+          CONSUMER_NEW: true
+          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
+        run: tests/stateful/test_removed_ics.sh
+
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       - name: _Test Tokenfactory
         run: tests/stateful/test_tokenfactory.sh
       - name: _Test vesting accounts
@@ -445,13 +533,6 @@ jobs:
 
       - name: _Test permissionless cosmwasm
         run: tests/stateful/test_cosmwasm.sh
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
       - name: Print netstat
         run: netstat -ntap
       - name: _Provider API tests using localhost> gaiad
@@ -461,13 +542,13 @@ jobs:
 
       - name: Set up relayer
         run: scripts/stateful/setup_relayer.sh
-      - name: Download consumer chain binaries
-        run: |
-          set -e
-          wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
-          wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
-          chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+      # - name: Download consumer chain binaries
+      #   run: |
+      #     set -e
+      #     wget -nv $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+      #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+      #     wget -nv $CONSUMER_CHAIN_BINARY_URL_2 -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
+      #     chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY_2
       - name: Start Recovery chain
         env:
           CHAIN_BINARY: ${{ vars.CHAIN_BINARY }}
@@ -536,6 +617,20 @@ jobs:
           SECONDARY_CHAIN_ID: recovery-chain-1
           SECONDARY_CHAIN_HOME: /home/runner/.recovery-chain
         run: tests/stateful/test_recover_client.sh ${{ env.RECOVERY_CLIENT_ID }} ${{ env.RECOVERY_CHAN_ID }}
+      
+      - name: Submit rate limit proposal
+        run: |
+          jq -r ".messages[0].channel_or_client_id=\"${{ env.RECOVERY_CHAN_ID }}\"" templates/proposal-stateful-rate-limit.json > proposal-cona-rate-limit.json
+          scripts/submit_proposal.sh proposal-cona-rate-limit.json
+          $CHAIN_BINARY --home $HOME_1 q ratelimit rate-limit ${{ env.RECOVERY_CHAN_ID }}
+      - name: _Test rate limit
+        env:
+          CHAIN_HOME: /home/runner/.val1
+          SECONDARY_CHAIN_ID: recovery-chain-1
+          SECONDARY_CHAIN_HOME: /home/runner/.recovery-chain
+          SECONDARY_CHAN_ID: ${{ env.RECOVERY_CHAN_ID }}
+        run: |
+          tests/stateful/test_rate_limits.sh
       
       - name: Installing secondary chain binaries
         env:
@@ -608,499 +703,44 @@ jobs:
           ICA_HOME: /home/runner/.ica-chain
           CHAIN_HOME: /home/runner/.val1
         run: tests/stateful/test_ica_controller.sh 
-      
-      - name: Initialize consumer chain a with Interchain Security (Consumer) PSS
-        env:
-          CONSUMER_CHAIN_ID: consumera
-          DOWNTIME_BLOCKS: 20
-          CONSUMER_NEW: true
-          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-        run: scripts/stateful/init_consumer_2_vals.sh
-      - name: Launch opt-in consumer chain a
-        env:
-          CONSUMER_CHAIN_ID: consumera
-          CONSUMER_CHAIN_BINARY: ${{ vars.CONSUMER_CHAIN_BINARY_2 }}
-          PSS_ENABLED: true
-          TOPN: 0
-        run: scripts/stateful/launch_consumer_2_vals_optin.sh
-      - name: _Opt-in consumer chain produces blocks val1> ICS v4.0.0
-        run: tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 10
-      - name: _Opt-in consumer chain produces blocks val2> ICS v4.0.0
-        run: tests/test_block_production.sh 127.0.0.1 $CON2_RPC_PORT 10
-      - name: Check block hashes on both consumer nodes
-        run: |
-          set -e
-          # $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status
-          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 status | jq -r '.sync_info.latest_block_height')
-          echo "[INFO]: Block height is $latest_block"
-          hash_val1=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1 10
-          hash_val2=$(curl -s 127.0.0.1:$CON2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          echo "[INFO]: cona1 $hash_val1"
-          echo "[INFO]: cona2 $hash_val1"
-          if [ $hash_val1 != $hash_val2 ]
-          then
-            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-            exit 1
-          else
-            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-          fi
-      - name: Get consumer consumer_id
-        env:
-          CONSUMER_CHAIN_ID: consumera
-          STORE_ENV_VAR_NAME: CONSUMERA_CONSUMER_ID
-        run: |
-          consumer_id=$($CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains -o json | jq -r ".chains[] | select(.chain_id==\"$CONSUMER_CHAIN_ID\") | .consumer_id")
-          echo "$STORE_ENV_VAR_NAME=$consumer_id" >> $GITHUB_ENV
-      - name: Print opt-in consumer tendermint validators
-        env:
-          CONSUMER_ID: ${{ env.CONSUMERA_CONSUMER_ID }}
-        run: |
-          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators $CONSUMER_ID"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators $CONSUMER_ID -o json | jq -r '.'
-      - name: Check number of signatures on consumera
-        run: |
-          set -e
-          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 2 ]
-          then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
-            exit 1
-          else
-            echo "Expected correct number of validators: $total_signatures"
-          fi
-      - name: Establish CCV channel for consumer a
-        run: |
-          set -e
-          screen -XS hermes.service quit || true
-          killall hermes || true
-          sleep 1
-          echo "[DEBUG]: gaiad q provider list-consumer-chains"
-          gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
-          hermes create connection --a-chain consumera --a-client 07-tendermint-0 --b-client $client_id
-          hermes create channel --a-chain consumera --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-          echo "Starting Hermes"
-          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
-          # set screen to flush log to 0
-          screen -r hermes.service -p0 -X logfile flush 0
-          echo "Wait for hermes to start..."
-          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
-          sleep 60
-      - name: _VSC successful> Interchain Security (Consumer) PSS
-        run: tests/stateful/test_ccv.sh
-      - name: Get consumera chain info
-        env:
-          CONSUMER_CHAIN_ID: consumera
-        run: |
-          set -e
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json --reverse | jq -r '.chains[] | select(.chain_id=="consumera").client_id')
-          echo "Client ID: $client_id"
-          connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
-          echo "Connection ID: $connection_id"
-          channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
-          echo "Channel ID: $channel_id"
-          echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-      - name: Submit rate limit proposal
-        run: |
-          jq -r ".messages[0].channel_or_client_id=\"${{ env.CONSUMERA_CHAN_ID }}\"" templates/proposal-stateful-rate-limit.json > proposal-cona-rate-limit.json
-          scripts/submit_proposal.sh proposal-cona-rate-limit.json
-          $CHAIN_BINARY --home $HOME_1 q ratelimit rate-limit ${{ env.CONSUMERA_CHAN_ID }}
-      - name: _Test rate limit
-        run: |
-          tests/stateful/test_rate_limits.sh
-      - name: _IBC transfer successful> Interchain Security (Consumer) PSS
-        env:
-          CONSUMER_CHAIN_ID: consumera
-        run: |
-          set -e
-          tests/stateful/test_consumer_ibc_transfer.sh ${{ env.CONSUMERA_CHAN_ID }} 2 $WALLET_1 $WALLET_CONSUMER_1 1000
-          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1000") | .denom')
-          echo "consumera denom: $denom"
-          echo "CONSUMERA_DENOM=$denom" >> $GITHUB_ENV
-      # - name: Send tx on consumer with huge gas (not needed keep commented out)
-      #   run: |
-      #     json=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --gas-prices 5000ucon --gas-adjustment 2 -y -o json)
-      #     echo "[INFO]: Transaction Result..."
-      #     echo "$json"
-      #     echo "[INFO]: Wait for 1 block to pass..."
-      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 1
-      #     txhash=$(echo "$json" | jq -r .txhash)
-      #     echo "[INFO]: TX result..."
-      #     $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
-      - name: _Check consumera rewards in rewards pool balances
-        run: |
-          echo "[INFO]: Wait for 20 blocks to pass"
-          tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
-          echo "[INFO]: Rewards pool balances:"
-          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
-          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.balances[] | select(.denom==$CONSUMERA_DENOM) | .denom')
-          echo "[INFO]: Looking for denom: $denom"
-          if [ "$denom" != "$CONSUMERA_DENOM" ]
-          then
-            echo "[ERROR] Consumer denom not found in rewards pool"
-            exit 1
-          else
-            echo "[PASS] Denom is in rewards pool: $denom"
-          fi
-      # - name: Register reward denom for consumer a using proposal (keep commented out)
-      #   run: |
-      #     jq -r --arg DENOMTOADD "$CONSUMERA_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
-      #     scripts/submit_proposal.sh proposal-denom-hash.json
-      #     tests/test_block_production.sh 127.0.0.1 $CON1_RPC_PORT 20
-      - name: Register reward denom for consumer a using update consumer
-        env:
-          CONSUMER_CHAIN_ID: consumera
-          CONSUMER_DENOM: ${{ env.CONSUMERA_DENOM }}
-        run: |
-          jq -r --arg denom1 "$CONSUMER_DENOM" '.allowlisted_reward_denoms.denoms |= [$denom1]' templates/update-consumer-params.json > $CONSUMER_CHAIN_ID-set-allowed-denoms.json
-          jq -r --arg chain_id "$CONSUMER_CHAIN_ID" '.chain_id=$chain_id' $CONSUMER_CHAIN_ID-set-allowed-denoms.json > $CONSUMER_CHAIN_ID-set-chain_id.json
-          jq -r --arg consumer_id "$CONSUMER_ID" '.consumer_id=$consumer_id' $CONSUMER_CHAIN_ID-set-chain_id.json > $CONSUMER_CHAIN_ID-register-denoms.json
-          echo "[INFO]: Update consumer json:"
-          cat $CONSUMER_CHAIN_ID-register-denoms.json
-          echo "[INFO]: Create and submit update-consumer"
-          $CHAIN_BINARY --home $HOME_1 tx provider update-consumer $CONSUMER_CHAIN_ID-register-denoms.json --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 -y
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 30 600
-          echo "[INFO]: Query consumer-chain consumera"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-chain $CONSUMER_ID -o json | jq
-          echo "[INFO]: Query consumer chains list"
-          $CHAIN_BINARY --home $HOME_1 q provider list-consumer-chains --reverse --output json | jq
-          echo "[INFO]: Trigger additional rewards"
-          txhash=$($CONSUMER_CHAIN_BINARY --home $HOME/.cona1 tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ty2qlurqsxj6sgs378hxmzyxh0ds8ukcm6rgxj 1ucon --gas auto --fees 10000000ucon --gas-adjustment 2 -y -o json | jq -r '.txhash')
-          sleep 30
-          echo "[INFO]: Rewards trigger tx"
-          $CONSUMER_CHAIN_BINARY --home $HOME/.cona1 q tx $txhash
-      - name: _Check validator outstanding rewards for consumer chain a
-        run: |
-          ls $HOME/artifact
-          echo "[INFO]: Hermes log"
-          tail -n 100 $HOME/artifact/hermes.service.log
-          echo "[INFO]: Gaia log"
-          tail -n 100 $HOME/artifact/gaia1.service.log
-          echo "[INFO]: Rewards pool balances:"
-          $CHAIN_BINARY --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
-          echo "[INFO]: Rewards for val1 self-delegation wallet:"
-          $CHAIN_BINARY --home $HOME_1 q distribution rewards $WALLET_1 -o json | jq
-          echo "[INFO]: Rewards for val2 self-delegation wallet:"
-          $CHAIN_BINARY --home $HOME_1 q distribution rewards ${{ env.VAL2_SELF_DELEGATION }} -o json | jq
-          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
-          echo "[INFO]: val1 balances:"
-          $CHAIN_BINARY --home ~/.val1 q bank balances $WALLET_1 -o json | jq
-          echo "[INFO]: Current validator outstanding rewards:"
-          echo "$outstanding_rewards"
-          echo "[INFO]: Checking if expected reward listed..."
-          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERA_DENOM "$CONSUMERA_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERA_DENOM) | .denom' )
-          echo "[INFO]: Looking for denom: $denom"
-          if [ "$denom" != "$CONSUMERA_DENOM" ]
-          then
-            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
-            exit 1
-          else
-            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
-          fi
-      - name: Initialize consumer chain B with Interchain Security (Consumer) PSS
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          DOWNTIME_BLOCKS: 20
-          CONSUMER_NEW: true
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-          CON1_API_PORT: ${{ env.CONB1_API_PORT }}
-          CON1_GRPC_PORT: ${{ env.CONB1_GRPC_PORT }}
-          CON1_RPC_PORT: ${{ env.CONB1_RPC_PORT }}
-          CON1_P2P_PORT: ${{ env.CONB1_P2P_PORT }}
-          CON1_PPROF_PORT: ${{ env.CONB1_PPROF_PORT }}
-          CON2_API_PORT: ${{ env.CONB2_API_PORT }}
-          CON2_GRPC_PORT: ${{ env.CONB2_GRPC_PORT }}
-          CON2_RPC_PORT: ${{ env.CONB2_RPC_PORT }}
-          CON2_P2P_PORT: ${{ env.CONB2_P2P_PORT }}
-          CON2_PPROF_PORT: ${{ env.CONB2_PPROF_PORT }}
-          CONSUMER_SERVICE_1: conb1.service
-          CONSUMER_SERVICE_2: conb2.service
-        run: scripts/stateful/init_consumer_2_vals.sh
-      - name: Launch TopN consumer chain b
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-          CONSUMER_SERVICE_1: conb1.service
-          CONSUMER_SERVICE_2: conb2.service
-          CONSUMER_MIN_GAS_PRICES: ${{ env.CONSUMERB_MIN_GAS_PRICES }}
-          PSS_ENABLED: true
-          TOPN: 95
-        run: |
-          scripts/stateful/launch_consumer_2_vals_topn.sh
-      - name: _TopN consumer chain produces blocks val1> ICS v4.0.0
-        run: tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 10
-      - name: _TopN consumer chain produces blocks val2> ICS v4.0.0
-        run: tests/test_block_production.sh 127.0.0.1 $CONB2_RPC_PORT 10
-      - name: Check block hashes on both consumerb nodes
-        run: |
-          set -e
-          latest_block=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_1 status | jq -r '.sync_info.latest_block_height')
-          echo "[INFO]: Block height is $latest_block"
-          hash_val1=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 1 10
-          hash_val2=$(curl -s 127.0.0.1:$CONB2_RPC_PORT/block?height=$latest_block | jq -r '.result.block_id.hash')
-          echo "[INFO]: conb1 $hash_val1"
-          echo "[INFO]: conb2 $hash_val2"
-          if [ $hash_val1 != $hash_val2 ]
-          then
-            echo "[ERROR]: Block hash does not match. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-            exit 1
-          else
-            echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
-          fi
-      - name: Check number of signatures on consumerb
-        run: |
-          set -e
-          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 1 ]
-          then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
-            exit 1
-          else
-            echo "Expected correct number of validators: $total_signatures"
-          fi
-      - name: Establish CCV channel for consumerb
-        run: |
-          set -e
-          screen -XS hermes.service quit || true
-          killall hermes || true
-          sleep 1
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
-          hermes create connection --a-chain consumerb --a-client 07-tendermint-0 --b-client $client_id
-          hermes create channel --a-chain consumerb --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
-          echo "Starting Hermes"
-          screen -L -Logfile $HOME/artifact/hermes.service.log -S hermes.service -d -m bash $HOME/hermes.service.sh
-          # set screen to flush log to 0
-          screen -r hermes.service -p0 -X logfile flush 0
-          echo "Wait for hermes to start..."
-          ( tail -f -n0 $HOME/artifact/hermes.service.log & ) | grep -q "Hermes has started"
-          sleep 60
-      - name: _VSC successful> Interchain Security (Consumer) PSS
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-          CON1_RPC_PORT: ${{ env.CONB1_RPC_PORT }}
-        run: tests/stateful/test_ccv.sh
-      - name: _IBC transfer successful> Interchain Security (Consumer) PSS consumerb
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-          CONSUMER_SERVICE_1: conb1.service
-          CONSUMER_SERVICE_2: conb2.service
-        run: |
-          set -e
-          client_id=$(gaiad --home $HOME/.val1 q provider list-consumer-chains --reverse --output json | jq -r '.chains[] | select(.chain_id=="consumerb").client_id')
-          echo "Client ID: $client_id"
-          connection_id=$(hermes --json query client connections --chain $CHAIN_ID --client $client_id | jq -r '. | select(.result).result[]')
-          echo "Connection ID: $connection_id"
-          channel_id=$(hermes --json query connection channels --chain $CHAIN_ID --connection $connection_id | jq -r '. | select(.result).result[] | select(.port_id=="transfer").channel_id')
-          echo "Channel ID: $channel_id"
-          tests/stateful/test_consumer_ibc_transfer.sh $channel_id 2 $WALLET_1 $WALLET_CONSUMER_1 1002
-          echo "CONSUMERA_CHAN_ID=$channel_id" >> $GITHUB_ENV
-          denom=$(gaiad --home $HOME/.val1 q bank balances $WALLET_1 -o json | jq -r '.balances[] | select(.amount=="1002") | .denom')
-          echo "consumerb denom: $denom"
-          echo "CONSUMERB_DENOM=$denom" >> $GITHUB_ENV
-      - name: Print opt-in consumer tendermint validators consumerb
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-        run: |
-          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
-      - name: Opt-in second validator to consumerb
-        run: |
-          set -e
-          echo "[INFO] Optin second validator"
-          node_key2=$($CONSUMER_CHAIN_BINARY --home $CONSUMERB_HOME_2 tendermint show-validator)
-          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-in ${{ env.CONSUMER_ID_TOPN }} "$node_key2" --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from val2 -y -o json)
-          txhash=$(echo "$json" | jq -r .txhash)
-          echo "$json" | jq -r '.'
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
-      - name: Wait for 20 block
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
-      - name: Print opt-in consumer tendermint validators consumerb after opt-in
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-        run: |
-          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
-      - name: _Check number of signatures on consumerb
-        run: |
-          set -e
-          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 2 ]
-          then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
-            exit 1
-          else
-            echo "Expected correct number of validators: $total_signatures"
-          fi
-      - name: _Check consumer b rewards in rewards pool balances
-        run: |
-          echo "[INFO]: Wait for 20 blocks to pass"
-          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 20
-          echo "[INFO]: Rewards pool balances:"
-          ~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq
-          denom=$(~/go/bin/gaiad --home ~/.val1 q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd -o json | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.balances[] | select(.denom==$CONSUMERB_DENOM) | .denom')
-          echo "[INFO]: Looking for denom: $denom"
-          if [ "$denom" != "$CONSUMERB_DENOM" ]
-          then
-            echo "[ERROR] Consumer denom not found in rewards pool"
-            exit 1
-          else
-            echo "[PASS] Denom is in rewards pool: $denom"
-          fi
-      - name: Register reward denom for consumer b using proposal
-        run: |
-          jq -r --arg DENOMTOADD "$CONSUMERB_DENOM" '.messages[0].denoms_to_add |= [$DENOMTOADD]' templates/proposal-change-reward-denoms-permissionless.json > proposal-denom-hash.json
-          scripts/submit_proposal.sh proposal-denom-hash.json
-          tests/test_block_production.sh 127.0.0.1 $CONB1_RPC_PORT 20
-      - name: _Check validator outstanding rewards for consumer chain b
-        run: |
-          outstanding_rewards=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards[]')
-          echo "[INFO]: Current validator outstanding rewards:"
-          echo "$outstanding_rewards"
-          echo "[INFO]: Checking if expected reward listed..."
-          denom=$(curl -s http://localhost:$VAL1_API_PORT/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r --arg CONSUMERB_DENOM "$CONSUMERB_DENOM" '.rewards.rewards[] | select(.denom==$CONSUMERB_DENOM) | .denom' )
-          echo "[INFO]: Looking for denom: $denom"
-          if [ "$denom" != "$CONSUMERB_DENOM" ]
-          then
-            echo "[ERROR] Consumer denom not found in validator's outstanding rewards"
-            exit 1
-          else
-            echo "[PASS] Denom is in validator's outstanding rewards: $denom"
-          fi
-      # Opt-out consumerb
-      - name: Opt-out second validator to consumerb
-        run: |
-          set -e
-          echo "[INFO] Opt-out second validator"
-          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID_TOPN }} --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from val2 -y -o json)
-          txhash=$(echo "$json" | jq -r .txhash)
-          echo "$json" | jq -r '.'
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
-      - name: Wait for 20 block
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
-      - name: Print opt-in consumer tendermint validators consumerb after opt-out
-        env:
-          CONSUMER_CHAIN_ID: consumerb
-          CONSUMER_CHAIN_BINARY: ${{ env.CONSUMER_CHAIN_BINARY_2 }}
-          CONSUMER_HOME_1: ${{ env.CONSUMERB_HOME_1 }}
-          CONSUMER_HOME_2: ${{ env.CONSUMERB_HOME_2 }}
-        run: |
-          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }}"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID_TOPN }} -o json | jq -r '.'
-      - name: _Check number of signatures on consumerb after opt-out
-        run: |
-          set -e
-          total_signatures=$(curl -s 127.0.0.1:$CONB1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 1 ]
-          then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
-            exit 1
-          else
-            echo "Expected correct number of validators: $total_signatures"
-          fi
-      # Opt-out consumera
-      - name: Opt-out second validator to consumera
-        run: |
-          set -e
-          echo "[INFO] Opt-out second validator"
-          json=$($CHAIN_BINARY --home $HOME_2 tx provider opt-out ${{ env.CONSUMER_ID }} --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT  --from val2 -y -o json)
-          txhash=$(echo "$json" | jq -r .txhash)
-          echo "$json" | jq -r '.'
-          tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
-          $CHAIN_BINARY --home $HOME_1 q tx --type=hash $txhash
-      - name: Wait for 20 block
-        run: tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 200
-      - name: Print opt-in consumer tendermint validators consumera after opt-out
-        run: |
-          echo "[INFO]: $CONSUMER_CHAIN_BINARY q tendermint-validator-set"
-          $CONSUMER_CHAIN_BINARY --home $CONSUMER_HOME_1 q tendermint-validator-set -o json | jq -r '.'
-          # echo "[INFO]: $CHAIN_BINARY q provider has-to-validate"
-          # $CHAIN_BINARY --home $HOME_1 q provider has-to-validate -o json | jq -r '.'
-          echo "[INFO]: $CHAIN_BINARY q provider consumer-opted-in-validators ${{ env.CONSUMER_ID }}"
-          $CHAIN_BINARY --home $HOME_1 q provider consumer-opted-in-validators ${{ env.CONSUMER_ID }} -o json | jq -r '.'
-      - name: _Check number of signatures on consumera after opt-out
-        run: |
-          set -e
-          total_signatures=$(curl -s 127.0.0.1:$CON1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 1 ]
-          then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
-            exit 1
-          else
-            echo "Expected correct number of validators: $total_signatures"
-          fi
+
       - name: Set BlocksPerEpoch to 100
         run: scripts/submit_proposal.sh templates/proposal-blocks-per-epoch-100.json
-      - name: Check BlocksPerEpoch is 100
-        run: |
-          BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
-          echo "BlocksPerEpoch is: $BPE"
-          if [ $BPE != 100 ]
-          then
-            echo "BlocksPerEpoch is not 100"
-            exit 1
-          fi
-      - name: Waiting for 100th block
-        run: |
-          cur_height=0
-          echo_height=1
-          height=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
-          to_height=$(scripts/stateful/roundup-100.py $height)
-          echo "[INFO] waiting to reach height $to_height"
-          until [[ "${cur_height}" -gt "${to_height}" ]]
-          do
-              cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
-              if [ $echo_height -ne $cur_height ]
-              then
-                echo "[INFO] Current height: $cur_height"
-                echo_height=$cur_height
-              fi
-              sleep 1
-          done
-      - name: _VSC successful epoch> ICS cona1
-        # env:
-        #   CON1_RPC_PORT: 27201
-        run: tests/stateful/test_ccv_epoch.sh 100
-      - name: _Test expedited proposal
-        run: |
-          export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
-          echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
-          tests/stateful/gaia-v18/test_expedited_proposal.sh
+      # - name: Check BlocksPerEpoch is 100
+      #   run: |
+      #     BPE=$($CHAIN_BINARY --home $HOME_1 q provider params --output json |  jq -r '.blocks_per_epoch')
+      #     echo "BlocksPerEpoch is: $BPE"
+      #     if [ $BPE != 100 ]
+      #     then
+      #       echo "BlocksPerEpoch is not 100"
+      #       exit 1
+      #     fi
+      # - name: Waiting for 100th block
+      #   run: |
+      #     cur_height=0
+      #     echo_height=1
+      #     height=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.header.height')
+      #     to_height=$(scripts/stateful/roundup-100.py $height)
+      #     echo "[INFO] waiting to reach height $to_height"
+      #     until [[ "${cur_height}" -gt "${to_height}" ]]
+      #     do
+      #         cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+      #         if [ $echo_height -ne $cur_height ]
+      #         then
+      #           echo "[INFO] Current height: $cur_height"
+      #           echo_height=$cur_height
+      #         fi
+      #         sleep 1
+      #     done
+      # - name: _VSC successful epoch> ICS cona1
+      #   # env:
+      #   #   CON1_RPC_PORT: 27201
+      #   run: tests/stateful/test_ccv_epoch.sh 100
+      # - name: _Test expedited proposal
+      #   run: |
+      #     export EXPEDITED_PERIOD=$($CHAIN_BINARY --home $HOME_1 q gov params -o json | jq -r '.params.expedited_voting_period')
+      #     echo "EXPEDITED_PERIOD set to: $EXPEDITED_PERIOD"
+      #     tests/stateful/gaia-v18/test_expedited_proposal.sh
 
       - name: _TX load tests
         run: tests/test_load_tx.sh --rpc-host 127.0.0.1 --rpc-port $VAL1_RPC_PORT --home $HOME_1 --from-wallet $WALLET_1 --to-wallet $WALLET_2 --valoper_address_1 $VALOPER_1 --liquid-transfer-to cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp
