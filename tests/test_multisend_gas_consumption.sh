@@ -39,7 +39,7 @@ echo "Tx hash: $TXHASH"
 sleep $(($COMMIT_TIMEOUT+2))
 check_code $TXHASH
 # Collect gas consumed from the transaction and check that it is within expected range
-gas_consumed=$(($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.gas_used'))
+gas_consumed=$($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.gas_used')
 
 echo "> Gas consumed for multi-send with 100 recipients: $gas_consumed"
 
@@ -64,7 +64,7 @@ echo "Tx hash: $TXHASH"
 sleep $(($COMMIT_TIMEOUT+2))
 check_code $TXHASH
 # Collect gas consumed from the transaction and check that it is within expected range
-gas_consumed=$(($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.gas_used'))
+gas_consumed=$($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.gas_used')
 
 expected_max_gas=500000
 if [ "$surcharge" == "surcharge" ]; then
