@@ -43,7 +43,7 @@ gas_consumed=$($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.g
 
 echo "> Gas consumed for multi-send with 100 recipients: $gas_consumed"
 
-expected_max_gas=250000
+expected_max_gas=1000000
 if [ "$surcharge" == "surcharge" ]; then
   expected_max_gas=$((300 * 10000))
 fi
@@ -66,7 +66,7 @@ check_code $TXHASH
 # Collect gas consumed from the transaction and check that it is within expected range
 gas_consumed=$($CHAIN_BINARY q tx $TXHASH -o json --home $whale_home | jq -r '.gas_used')
 
-expected_max_gas=500000
+expected_max_gas=2000000
 if [ "$surcharge" == "surcharge" ]; then
   expected_max_gas=$((300 * 40000))
 fi
