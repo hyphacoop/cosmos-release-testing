@@ -187,6 +187,12 @@ jobs:
           sed -i -e "/halt-height =/ s^= .*^= $halt_height^" $NODE_HOME/config/app.toml
           echo "[INFO]: Start gaiad with halt-height"
           gaiad start --home $NODE_HOME
+          screen -L -Logfile /home/runner/artifact/gaiad_sync2.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+          sleep 1
+          tail -f /home/runner/artifact/gaiad_sync2.log &
+          ( tail -f -n0 /home/runner/artifact/gaiad_sync2.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
           echo "[INFO]: Reset halt-height"
           sed -i -e "/halt-height =/ s^= .*^= 0^" $NODE_HOME/config/app.toml
           current_block=$halt_height
