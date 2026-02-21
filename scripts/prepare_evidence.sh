@@ -59,17 +59,17 @@ echo "Base64-encoded: $addr"
 jq --arg ADDR "$addr" '.vote_b.validator_address |= $ADDR' $evidence_filename > evidence-mod.json
 mv evidence-mod.json $evidence_filename
 
-echo "> Rename total voting power."
-jq '.TotalVotingPower as $p | .total_voting_power = $p | del(.TotalVotingPower)' $evidence_filename > evidence-mod.json
-mv evidence-mod.json $evidence_filename
+# echo "> Rename total voting power."
+# jq '.TotalVotingPower as $p | .total_voting_power = $p | del(.TotalVotingPower)' $evidence_filename > evidence-mod.json
+# mv evidence-mod.json $evidence_filename
 
-echo "> Rename validator power key."
-jq '.ValidatorPower as $p | .validator_power = $p | del(.ValidatorPower)' $evidence_filename > evidence-mod.json
-mv evidence-mod.json $evidence_filename
+# echo "> Rename validator power key."
+# jq '.ValidatorPower as $p | .validator_power = $p | del(.ValidatorPower)' $evidence_filename > evidence-mod.json
+# mv evidence-mod.json $evidence_filename
 
-echo "> Rename timestamp key."
-jq '.Timestamp as $p | .timestamp = $p | del(.Timestamp)' $evidence_filename > evidence-mod.json
-mv evidence-mod.json $evidence_filename
+# echo "> Rename timestamp key."
+# jq '.Timestamp as $p | .timestamp = $p | del(.Timestamp)' $evidence_filename > evidence-mod.json
+# mv evidence-mod.json $evidence_filename
 
 echo "> Cast total voting power as integer."
 jq '.total_voting_power |= tonumber' $evidence_filename > evidence-mod.json
