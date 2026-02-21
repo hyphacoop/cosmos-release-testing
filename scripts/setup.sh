@@ -183,6 +183,12 @@ mv temp/feemarket-min-base.json ${homes[0]}/config/genesis.json
 jq -r '.app_state.feemarket.state.base_gas_price |= "0.005"' ${homes[0]}/config/genesis.json > temp/feemarket-base.json
 mv temp/feemarket-base.json ${homes[0]}/config/genesis.json
 
+echo "> Patching genesis for tokenfactory params"
+jq -r '.app_state.tokenfactory.params.denom_creation_fee |= [{"denom":"uatom","amount":"10000000"}]' ${homes[0]}/config/genesis.json > temp/tokenfactory-fee.json
+mv temp/tokenfactory-fee.json ${homes[0]}/config/genesis.json
+jq -r '.app_state.tokenfactory.params.denom_creation_gas_consume |= "2000000"' ${homes[0]}/config/genesis.json > temp/tokenfactory-max.json
+mv temp/tokenfactory-max.json ${homes[0]}/config/genesis.json
+
 jq '.' ${homes[0]}/config/genesis.json
 
 echo "> Copying genesis to all other homes"
