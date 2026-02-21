@@ -245,9 +245,9 @@ $CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_wh
 echo "> 3"
 $CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence.evidence'
 echo "> 4"
-$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence.evidence.duplicate_vote_evidence'
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence.evidence[0].duplicate_vote_evidence'
 
-$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.block.evidence.evidence[0].value' > evidence.json
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence.evidence[0].duplicate_vote_evidence' > evidence.json
 echo "> Starting evidence JSON:"
 jq '.' evidence.json
 scripts/prepare_evidence.sh evidence.json
