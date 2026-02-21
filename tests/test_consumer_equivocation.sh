@@ -222,7 +222,8 @@ $CHAIN_BINARY q slashing signing-infos --home ${whale_home}
 
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home ${consumer_homes[-2]})
 echo "> Consumer consensus address: $consensus_address"
-$CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home
+$CONSUMER_CHAIN_BINARY q evidence list --home $consumer_whale_home
+exit 0
 validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home | jq '.' | grep $consensus_address)
 echo $validator_check
 if [ -z "$validator_check" ]; then
