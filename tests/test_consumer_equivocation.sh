@@ -238,8 +238,16 @@ sleep $(($COMMIT_TIMEOUT*3))
 
 echo "> Collecting evidence around the infraction height in consumer chain."
 evidence_block=$(($height+2))
-$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home
-$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home | jq '.block.evidence.evidence[0].value' > evidence.json
+echo "> 1"
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.'
+echo "> 2"
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence'
+echo "> 3"
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence.evidence'
+echo "> 4"
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.evidence.evidence.duplicate_vote_evidence'
+
+$CONSUMER_CHAIN_BINARY q block --type=height $evidence_block --home $consumer_whale_home -o json | jq '.block.evidence.evidence[0].value' > evidence.json
 echo "> Starting evidence JSON:"
 jq '.' evidence.json
 scripts/prepare_evidence.sh evidence.json
