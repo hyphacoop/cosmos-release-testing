@@ -175,6 +175,8 @@ jobs:
           done
           echo "Done Syncing"
       - name: Stop gaiad
+        env:
+          NODE_HOME: /home/runner/.gaia
         run: |
           echo "exiting gaia and screen"
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
