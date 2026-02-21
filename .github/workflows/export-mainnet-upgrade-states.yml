@@ -182,8 +182,11 @@ jobs:
           sleep 10s
           let halt_height=$current_block+50
           echo "[INFO]: Set halt-height to $halt_height"
+          sed -i -e "/halt-height =/ s^= .*^= $halt_height^" $NODE_HOME/config/app.toml
           echo "[INFO]: Start gaiad with halt-height"
-          gaiad start --home $NODE_HOME --halt-height $halt_height
+          gaiad start --home $NODE_HOME
+          echo "[INFO]: Reset halt-height"
+          sed -i -e "/halt-height =/ s^= .*^= 0^" $NODE_HOME/config/app.toml
           current_block=$halt_height
           echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           sleep 10s
