@@ -222,9 +222,8 @@ $CHAIN_BINARY q slashing signing-infos --home ${whale_home}
 
 consensus_address=$($CONSUMER_CHAIN_BINARY tendermint show-address --home ${consumer_homes[-2]})
 echo "> Consumer consensus address: $consensus_address"
-$CONSUMER_CHAIN_BINARY q evidence list --home $consumer_whale_home
-exit 0
-validator_check=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home | jq '.' | grep $consensus_address)
+$CONSUMER_CHAIN_BINARY q evidence list --home $consumer_whale_home -o json | jq '.'
+validator_check=$($CONSUMER_CHAIN_BINARY q evidence list --home $consumer_whale_home -o json | jq '.' | grep $consensus_address)
 echo $validator_check
 if [ -z "$validator_check" ]; then
   echo "No equivocation evidence found."
@@ -233,7 +232,7 @@ else
   echo "Equivocation evidence found!"
 fi
 echo "> Collecting infraction height."
-height=$($CONSUMER_CHAIN_BINARY q evidence --home $consumer_whale_home -o json | jq -r '.evidence[0].height')
+height=$($CONSUMER_CHAIN_BINARY q evidence list --home $consumer_whale_home -o json | jq -r '.evidence[0].height')
 echo "> Evidence height: $height"
 sleep $(($COMMIT_TIMEOUT*3))
 
