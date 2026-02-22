@@ -186,7 +186,7 @@ jobs:
           echo "[INFO]: Set halt-height to $halt_height"
           sed -i -e "/halt-height =/ s^= .*^= $halt_height^" $NODE_HOME/config/app.toml
           echo "[INFO]: Start gaiad with halt-height"
-          gaiad start --home $NODE_HOME
+          gaiad start --home $NODE_HOME &
           screen -L -Logfile /home/runner/artifact/gaiad_sync2.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
           sleep 1
           ( tail -f -n0 /home/runner/artifact/gaiad_sync2.log & ) | grep -q "CONSENSUS FAILURE"
