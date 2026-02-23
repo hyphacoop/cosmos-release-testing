@@ -198,13 +198,13 @@ jobs:
           current_block=$halt_height
           echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           sleep 10s
-      - name: DEBUG
-        if: always() && !cancelled()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       # - name: Make current snapshot and upload
       #   run: |
       #     echo "[INFO]: Compressing data and wasm..."
