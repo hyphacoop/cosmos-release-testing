@@ -98,8 +98,10 @@ txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
 
-echo "> Start submitting staking transactions"
-python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+if [ "$STAKING_OPERATIONS" = true ]; then
+    echo "> Start submitting staking transactions"
+    python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+fi
 
 echo "> Save the upgrade height to GITHUB_ENV"
 echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV

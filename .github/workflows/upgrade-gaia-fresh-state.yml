@@ -100,6 +100,7 @@
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           COMMIT_TIMEOUT: 3
+          STAKING_OPERATIONS: true
         steps:
           - name: Update PATH
             run: |
