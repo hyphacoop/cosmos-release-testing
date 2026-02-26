@@ -558,7 +558,7 @@ class ValsetCheck():
         expected_comet_set = {}
         for val in self.data['n']['expected_validator_info']:
             if val['bonded'] == 'BOND_STATUS_BONDED':
-                if index >= self.provider_max_vals:
+                if not self.ics_disable_upgrade and index >= self.provider_max_vals:
                     continue
                 expected_comet_set[val['pubkey']] = {
                     'voting_power': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
