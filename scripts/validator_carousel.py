@@ -170,6 +170,7 @@ class ValidatorCarousel():
 
 
     def transaction_json(
+        self,
         messages: list,
         gas_prices: float = 0.005,
         fee_denom: str = "uatom",
