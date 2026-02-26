@@ -118,7 +118,7 @@
           - name: Install dependencies
             run: |
               python -m pip install --upgrade pip
-              python -m pip install toml-cli
+              python -m pip install toml-cli asyncio websockets subprocess requests urllib3
 
           - name: Set up relayer
             run: |
@@ -139,6 +139,11 @@
             run: |
               source scripts/vars.sh
               tests/test_multisend_gas_consumption.sh
+
+          - name: Test validator carousel
+            run: |
+              source scripts/vars.sh
+              python scripts/test_validator_carousel.py --api $whale_api --rpc $whale_rpc --chain-id testnet --height 50
 
           - name: Test software upgrade
             env:
