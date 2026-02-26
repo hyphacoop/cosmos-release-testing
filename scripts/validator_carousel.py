@@ -393,7 +393,7 @@ class ValidatorCarousel():
              f'--chain-id={self.chain}',
              '--output-document=tx-signed.json',
              '--output=json',
-             f'--home={self.home}'
+             f'--home={self.home}',
              '-y'],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True
