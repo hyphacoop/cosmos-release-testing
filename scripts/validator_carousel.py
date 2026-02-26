@@ -138,7 +138,7 @@ class ValidatorCarousel():
             return response["params"]
         return []
 
-    def delegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
+    def delegate_message_json(self, del_addr, val_addr, amount, denom: str = "uatom"):
         return {
             "@type": "/cosmos.staking.v1beta1.MsgDelegate",
             "delegator_address": del_addr,
@@ -147,7 +147,7 @@ class ValidatorCarousel():
         }
 
 
-    def redelegate_message_json(
+    def redelegate_message_json(self, 
         del_addr, src_addr, dst_addr, amount, denom: str = "uatom"
     ):
         return {
@@ -160,7 +160,7 @@ class ValidatorCarousel():
 
 
 
-    def undelegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
+    def undelegate_message_json(self, del_addr, val_addr, amount, denom: str = "uatom"):
         return {
             "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
             "delegator_address": del_addr,
