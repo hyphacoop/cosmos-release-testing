@@ -144,10 +144,10 @@
           #     source scripts/vars.sh
           #     tests/test_multisend_gas_consumption.sh
 
-          - name: Test validator carousel
-            run: |
-              source scripts/vars.sh
-              python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height 50
+          # - name: Test validator carousel
+          #   run: |
+          #     source scripts/vars.sh
+          #     python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height 50
 
           - name: Test software upgrade
             env:

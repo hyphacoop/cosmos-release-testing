@@ -98,6 +98,10 @@ txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
 
+echo "> Start submitting staking transactions"
+python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+
+
 # Wait for the voting period to be over
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
