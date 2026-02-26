@@ -589,12 +589,12 @@ class ValidatorCarousel():
 
                         if self.height > self.target_height:
                             logging.info(f"Passed target height of {self.target_height}, stopping now.")
-                            return
+                            exit(0)
 
                         if self.height == self.target_height:
                             self.rotate()
                             logging.info(f"Reached target height of {self.target_height}, stopping now.")
-                            return
+                            exit(0)
                         
             except websockets.exceptions.ConnectionClosedError as cce:
                 logging.error("Connection Closed Error: %s", cce)
