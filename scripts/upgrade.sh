@@ -60,7 +60,7 @@ echo "Using ($VOTING_PERIOD)s voting period to calculate the upgrade height."
 # Calculate upgrade height
 echo "Calculate upgrade height"
 block_time=$COMMIT_TIMEOUT
-let voting_blocks_delta=$VOTING_PERIOD/$block_time+5
+let voting_blocks_delta=$VOTING_PERIOD/$block_time+10
 height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
