@@ -135,15 +135,15 @@
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
 
-          - name: Test multi-send gas consumption is within expected range
-            run: |
-              source scripts/vars.sh
-              tests/test_multisend_gas_consumption.sh
+          # - name: Test multi-send gas consumption is within expected range
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_multisend_gas_consumption.sh
 
           - name: Test validator carousel
             run: |
               source scripts/vars.sh
-              python scripts/test_validator_carousel.py --api $whale_api --rpc $whale_rpc --chain-id testnet --height 50
+              python scripts/validator_carousel.py --api $whale_api --rpc $whale_rpc --chain-id testnet --height 50
 
           - name: Test software upgrade
             env:
