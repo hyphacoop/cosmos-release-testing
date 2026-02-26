@@ -152,21 +152,29 @@
               source scripts/vars.sh
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-          # - name: _Blocks produced after upgrade
-          #   run: |
-          #     source scripts/vars.sh
-          #     tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: Validator set checks
             run: |
               source scripts/vars.sh
+              # echo "> Precheck"
+              # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
+              # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
+              # echo "> Postcheck"
+              # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
+              # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
-              echo "> Precheck"
-              $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
-              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
-              echo "> Postcheck"
-              $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
-              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
+              check_result=$(cat valset-info-$UPGRADE_HEIGHT.json | grep FAIL)
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Validator set check passed"
+              else
+                echo "> FAIL: Validator set check failed"
+                jq '.' valset-info-$UPGRADE_HEIGHT.json
+                exit 1
+              fi
 
           - name: Test create-consumer is disabled
             run: |
