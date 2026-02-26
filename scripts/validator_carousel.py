@@ -43,6 +43,7 @@ class ValidatorCarousel():
         urlRPC: str,
         binary: str,
         chain: str,
+        home: str,
         denom: str,
         delegator: str,
         target_rank: int,
@@ -58,6 +59,7 @@ class ValidatorCarousel():
         self.urlRPC = urlRPC
         self.binary = binary
         self.chain = chain
+        self.home = home
         self.denom = denom
         self.delegator = delegator
         self.target_rank = target_rank
@@ -391,6 +393,7 @@ class ValidatorCarousel():
              f'--chain-id={self.chain}',
              '--output-document=tx-signed.json',
              '--output=json',
+             f'--home={self.home}'
              '-y'],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True
@@ -622,6 +625,8 @@ if __name__ == '__main__':
                         help='RPC endpoint URL (default: http://localhost:27001)')
     parser.add_argument('--binary', type=str, default='gaiad',
                         help='Binary name (default: gaiad)')
+    parser.add_argument('--home', type=str, default='~/.gaia',
+                        help='Home directory for the binary (default: ~/.gaia)')
     parser.add_argument('--chain-id', type=str, default='testnet',
                         help='Chain ID (default: testnet)')
     parser.add_argument('--denom', type=str, default='uatom',
@@ -650,6 +655,7 @@ if __name__ == '__main__':
         urlAPI=args.api,
         urlRPC=args.rpc,
         binary=args.binary,
+        home=args.home,
         chain=args.chain_id,
         denom=args.denom,
         delegator=args.delegator,
