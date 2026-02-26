@@ -167,7 +167,6 @@
               # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
               # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
-              jq '.' valset-info-$UPGRADE_HEIGHT.json
               check_result=$(jq -r '.' valset-info-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
