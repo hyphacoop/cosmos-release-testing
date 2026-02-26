@@ -128,7 +128,6 @@ def api_get_validators(urlAPI, height: int = 0):
 
 def rpc_get_block_results(urlRPC, height):
     response = requests.get(f"{urlRPC}/block_results?height={height}").json()
-    print(response)
     if 'result' not in response:
         return {}
     return response['result']

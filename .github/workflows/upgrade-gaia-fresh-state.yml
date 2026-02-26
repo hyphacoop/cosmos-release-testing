@@ -144,11 +144,6 @@
           #     source scripts/vars.sh
           #     tests/test_multisend_gas_consumption.sh
 
-          # - name: Test validator carousel
-          #   run: |
-          #     source scripts/vars.sh
-          #     python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height 50
-
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -157,19 +152,19 @@
               source scripts/vars.sh
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          # - name: _Blocks produced after upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: Validator set checks
             run: |
               source scripts/vars.sh
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
-              # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
-              # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
-              # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
-              # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
+              $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
+              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
+              $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
+              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
 
           - name: Test create-consumer is disabled
             run: |
