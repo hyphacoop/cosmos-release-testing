@@ -25,6 +25,131 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+
+def api_get_validators(urlAPI, height: int = 0):
+    """
+    Collects the validators info at the specified height
+    - operator address in cosmosvaloper format
+    - consensus pubkey
+    - jailed status
+    - tokens
+    - delegator shares
+    - moniker
+    - and more
+    """
+    if height > 0:
+        response = requests.get(
+            f"{urlAPI}/cosmos/staking/v1beta1/validators?pagination.limit=1000",
+            headers={"x-cosmos-block-height": f"{height}"},
+        ).json()
+    else:
+        response = requests.get(f"{urlAPI}/cosmos/staking/v1beta1/validators").json()
+    # total = int(response["pagination"]["total"])
+    if 'code' in response and response['code'] != 0:
+        logging.error(f"Error fetching validators: {response['message']}")
+        return []
+    api_vals = response["validators"]
+    next_key = response["pagination"]["next_key"]
+    while next_key:
+        response = requests.get(
+            f"{urlAPI}/cosmos/staking/v1beta1/validators?pagination.limit=1000&pagination.key="
+            f"{urllib.parse.quote(next_key)}",
+            headers={"x-cosmos-block-height": f"{height}"},
+        ).json()
+        api_vals.extend(response["validators"])
+        next_key = response["pagination"]["next_key"]
+    return api_vals
+
+def api_get_provider_params(urlAPI: str, height: int = 0):
+    """
+    Returns the info array
+    """
+    endpoint = f"{urlAPI}/interchain_security/ccv/provider/params"
+    if height:
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{height}"}
+        ).json()
+    else:
+        response = requests.get(endpoint).json()
+    if "params" in response:
+        return response["params"]
+    return []
+
+
+def api_get_staking_params(urlAPI: str, height: int = 0):
+    """
+    Returns the info array
+    """
+    endpoint = f"{urlAPI}/cosmos/staking/v1beta1/params"
+    if height:
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{height}"}
+        ).json()
+    else:
+        response = requests.get(endpoint).json()
+    if "params" in response:
+        return response["params"]
+    return []
+
+def delegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
+    return {
+        "@type": "/cosmos.staking.v1beta1.MsgDelegate",
+        "delegator_address": del_addr,
+        "validator_address": val_addr,
+        "amount": {"denom": str(denom), "amount": str(amount)},
+    }
+
+
+def redelegate_message_json( 
+    del_addr, src_addr, dst_addr, amount, denom: str = "uatom"
+):
+    return {
+        "@type": "/cosmos.staking.v1beta1.MsgBeginRedelegate",
+        "delegator_address": del_addr,
+        "validator_src_address": src_addr,
+        "validator_dst_address": dst_addr,
+        "amount": {"denom": str(denom), "amount": str(amount)},
+    }
+
+
+
+def undelegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
+    return {
+        "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
+        "delegator_address": del_addr,
+        "validator_address": val_addr,
+        "amount": {"denom": str(denom), "amount": str(amount)},
+    }
+
+
+def transaction_json(
+    messages: list,
+    gas_prices: float = 0.005,
+    fee_denom: str = "uatom",
+    gas_limit: int = 1000000,
+    memo: str = "",
+):
+    fee_amount = int(gas_limit * gas_prices)
+    return {
+        "body": {
+            "messages": messages,
+            "memo": memo,
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": [],
+        },
+        "auth_info": {
+            "signer_infos": [],
+            "fee": {
+                "amount": [{"denom": str(fee_denom), "amount": str(fee_amount)}],
+                "gas_limit": str(gas_limit),
+                "payer": "",
+                "granter": "",
+            },
+        },
+    }
+
+
 class ValidatorCarousel():
     """Manages validator rotations through delegation operations."""
     
@@ -74,130 +199,6 @@ class ValidatorCarousel():
         self._validators_by_vp: List[Dict[str, Any]] = []
         self.account_balance = 0
         self.height = 0
-
-    def api_get_validators(self, urlAPI, height: int = 0):
-        """
-        Collects the validators info at the specified height
-        - operator address in cosmosvaloper format
-        - consensus pubkey
-        - jailed status
-        - tokens
-        - delegator shares
-        - moniker
-        - and more
-        """
-        if height > 0:
-            response = requests.get(
-                f"{urlAPI}/cosmos/staking/v1beta1/validators?pagination.limit=1000",
-                headers={"x-cosmos-block-height": f"{height}"},
-            ).json()
-        else:
-            response = requests.get(f"{urlAPI}/cosmos/staking/v1beta1/validators").json()
-        # total = int(response["pagination"]["total"])
-        if 'code' in response and response['code'] != 0:
-            logging.error(f"Error fetching validators: {response['message']}")
-            return []
-        api_vals = response["validators"]
-        next_key = response["pagination"]["next_key"]
-        while next_key:
-            response = requests.get(
-                f"{urlAPI}/cosmos/staking/v1beta1/validators?pagination.limit=1000&pagination.key="
-                f"{urllib.parse.quote(next_key)}",
-                headers={"x-cosmos-block-height": f"{height}"},
-            ).json()
-            api_vals.extend(response["validators"])
-            next_key = response["pagination"]["next_key"]
-        return api_vals
-
-    def api_get_provider_params(self, urlAPI: str, height: int = 0):
-        """
-        Returns the info array
-        """
-        endpoint = f"{urlAPI}/interchain_security/ccv/provider/params"
-        if height:
-            response = requests.get(
-                endpoint, headers={"x-cosmos-block-height": f"{height}"}
-            ).json()
-        else:
-            response = requests.get(endpoint).json()
-        if "params" in response:
-            return response["params"]
-        return []
-
-
-    def api_get_staking_params(self, urlAPI: str, height: int = 0):
-        """
-        Returns the info array
-        """
-        endpoint = f"{urlAPI}/cosmos/staking/v1beta1/params"
-        if height:
-            response = requests.get(
-                endpoint, headers={"x-cosmos-block-height": f"{height}"}
-            ).json()
-        else:
-            response = requests.get(endpoint).json()
-        if "params" in response:
-            return response["params"]
-        return []
-
-    def delegate_message_json(self, del_addr, val_addr, amount, denom: str = "uatom"):
-        return {
-            "@type": "/cosmos.staking.v1beta1.MsgDelegate",
-            "delegator_address": del_addr,
-            "validator_address": val_addr,
-            "amount": {"denom": str(denom), "amount": str(amount)},
-        }
-
-
-    def redelegate_message_json(self, 
-        del_addr, src_addr, dst_addr, amount, denom: str = "uatom"
-    ):
-        return {
-            "@type": "/cosmos.staking.v1beta1.MsgBeginRedelegate",
-            "delegator_address": del_addr,
-            "validator_src_address": src_addr,
-            "validator_dst_address": dst_addr,
-            "amount": {"denom": str(denom), "amount": str(amount)},
-        }
-
-
-
-    def undelegate_message_json(self, del_addr, val_addr, amount, denom: str = "uatom"):
-        return {
-            "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
-            "delegator_address": del_addr,
-            "validator_address": val_addr,
-            "amount": {"denom": str(denom), "amount": str(amount)},
-        }
-
-
-    def transaction_json(
-        self,
-        messages: list,
-        gas_prices: float = 0.005,
-        fee_denom: str = "uatom",
-        gas_limit: int = 1000000,
-        memo: str = "",
-    ):
-        fee_amount = int(gas_limit * gas_prices)
-        return {
-            "body": {
-                "messages": messages,
-                "memo": memo,
-                "timeout_height": "0",
-                "extension_options": [],
-                "non_critical_extension_options": [],
-            },
-            "auth_info": {
-                "signer_infos": [],
-                "fee": {
-                    "amount": [{"denom": str(fee_denom), "amount": str(fee_amount)}],
-                    "gas_limit": str(gas_limit),
-                    "payer": "",
-                    "granter": "",
-                },
-            },
-        }
 
     def update_account_balance(self) -> None:
         """Update the account balance and exit if below minimum."""
@@ -494,7 +495,7 @@ class ValidatorCarousel():
         messages = []
         for operation in self.operations:
             if operation['op'] == 'unbond':
-                messages.append(self.undelegate_message_json(
+                messages.append(undelegate_message_json(
                     del_addr=self.delegator,
                     val_addr=operation['validator']['operator_address'],
                     amount=operation['amount'],
@@ -504,14 +505,14 @@ class ValidatorCarousel():
                 if operation['amount'] > self.account_balance:
                     logging.info('The required delegation amount is more than the available funds, stopping now.')
                     exit()
-                messages.append(self.delegate_message_json(
+                messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=operation['validator']['operator_address'],
                     amount=operation['amount'],
                     denom=self.denom
                 ))
             elif operation['op'] == 'redelegate':
-                messages.append(self.redelegate_message_json(
+                messages.append(redelegate_message_json(
                     del_addr=self.delegator,
                     src_addr=operation['from_validator']['operator_address'],
                     dst_addr=operation['to_validator']['operator_address'],
@@ -520,7 +521,7 @@ class ValidatorCarousel():
                 ))
         
         # Build, sign, and broadcast transaction
-        tx_json = self.transaction_json(messages=messages)
+        tx_json = transaction_json(messages=messages)
         with open('tx.json', 'w') as f:
             json.dump(tx_json, f, indent=4)
         self.sign()
@@ -552,13 +553,13 @@ class ValidatorCarousel():
             val_list = self.api_get_validators(self.urlAPI)
             messages = []
             for val in val_list:
-                messages.append(self.delegate_message_json(
+                messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=val['operator_address'],
                     amount=self.PRE_FUNDING_AMOUNT,
                     denom=self.denom
                 ))
-            tx_json = self.transaction_json(messages=messages)
+            tx_json = transaction_json(messages=messages)
             with open('tx.json', 'w') as f:
                 json.dump(tx_json, f, indent=4)
             self.sign()

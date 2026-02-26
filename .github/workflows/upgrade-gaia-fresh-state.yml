@@ -162,13 +162,14 @@
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
-          - name: Query validators and comet validator set
+          - name: Validator set checks
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
-              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
-              $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
-              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
+              python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
+              # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
+              # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
+              # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
 
           - name: Test create-consumer is disabled
             run: |
