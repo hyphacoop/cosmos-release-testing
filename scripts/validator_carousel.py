@@ -225,7 +225,7 @@ class ValidatorCarousel():
 
     def sort_vals_by_vp(self) -> None:
         """Sort validators by voting power (includes inactive validators)."""
-        val_list = self.api_get_validators(self.urlAPI)
+        val_list = api_get_validators(self.urlAPI)
         self._validators_by_vp = sorted(val_list, key=lambda val: int(val['tokens']), reverse=True)
 
     def _create_swap_operation(
@@ -550,7 +550,7 @@ class ValidatorCarousel():
         # Pre-fund validators if needed for upward rotations or redelegations
         if self.up_rotation or self.redelegate:
             logging.info("> Pre-funding all validators with delegations to enable upward rotations.")
-            val_list = self.api_get_validators(self.urlAPI)
+            val_list = api_get_validators(self.urlAPI)
             messages = []
             for val in val_list:
                 messages.append(delegate_message_json(
