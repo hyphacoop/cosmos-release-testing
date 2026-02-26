@@ -166,9 +166,9 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
-              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
+              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
               $CHAIN_BINARY q staking validators --home $whale_home -o json --height $UPGRADE_HEIGHT | jq '.'
-              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json --height $((UPGRADE_HEIGHT+2)) | jq '.'
+              $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $((UPGRADE_HEIGHT+2)) | jq '.'
 
           - name: Test create-consumer is disabled
             run: |
