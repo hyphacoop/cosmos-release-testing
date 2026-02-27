@@ -163,6 +163,8 @@
           - name: Validator set checks
             run: |
               source scripts/vars.sh
+              export MAX_VALIDATORS=4
+              export MAX_PROVIDER_VALIDATORS=3
               # echo "> Precheck"
               # $CHAIN_BINARY q staking validators --home $whale_home -o json --height $((UPGRADE_HEIGHT-2)) | jq '.'
               # $CHAIN_BINARY q comet-validator-set --home $whale_home -o json $UPGRADE_HEIGHT | jq '.'
