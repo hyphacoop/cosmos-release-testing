@@ -60,7 +60,7 @@ echo "Using ($VOTING_PERIOD)s voting period to calculate the upgrade height."
 # Calculate upgrade height
 echo "Calculate upgrade height"
 block_time=$COMMIT_TIMEOUT
-let voting_blocks_delta=$VOTING_PERIOD/$block_time+5
+let voting_blocks_delta=$VOTING_PERIOD/$block_time+10
 height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r .result.block.header.height)
 upgrade_height=$(($height+$voting_blocks_delta))
 echo "Upgrade block height set to $upgrade_height."
@@ -97,6 +97,14 @@ echo $vote
 txhash=$($vote | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
+
+if [ "$STAKING_OPERATIONS" = true ]; then
+    echo "> Start submitting staking transactions"
+    python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+fi
+
+echo "> Save the upgrade height to GITHUB_ENV"
+echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 
 # Wait for the voting period to be over
 echo "Waiting for the voting period to end..."
@@ -150,5 +158,5 @@ fi
 
 sleep 10
 
-echo "> Validator log:"
-tail -n 100 ${logs[0]}
+# echo "> Validator log:"
+# tail -n 100 ${logs[0]}

@@ -27,6 +27,9 @@ export GAS_ADJUSTMENT=3
 export STATE_SYNC_SNAPSHOT_INTERVAL=50
 export STATE_SYNC_SNAPSHOT_KEEP_RECENT=5
 
+export MAX_VALIDATORS=200
+export MAX_PROVIDER_VALIDATORS=180
+
 export COUNT_WIDTH="01"
 export moniker_prefix='val_'
 export home_prefix='/home/runner/.val_'
