@@ -87,7 +87,7 @@
          upgrade_name: ${{ steps.upgrade.outputs.name }}
          binary_source: ${{ steps.binary.outputs.source }}
 
-      Test-ics-removal:
+      Test-ics-removal-live-consumer:
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
@@ -150,11 +150,17 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               scripts/add_consumer.sh
           - name: Initialize consumer chain with ICS v6.4.0  
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
               chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
               scripts/setup_consumer.sh
@@ -165,22 +171,34 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               scripts/spawn_consumer.sh
           - name: Start consumer chain v640-one
             run: |
               source scripts/vars.sh 
               source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               ./start-$CONSUMER_CHAIN_ID.sh
               sleep $(($COMMIT_TIMEOUT*3))
               tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
           - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
             run: |
               source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
           - name: Establish CCV channel for v640-one
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               echo "Creating channel with Hermes..."
               hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
@@ -193,6 +211,9 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh  
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               tests/test_ccv_channel.sh
           - name: _Pre-upgrade IBC transfer successful> ICS v6.4.0 chain 1
             run: |
@@ -209,6 +230,9 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
           
           - name: _Blocks produced after upgrade
@@ -220,16 +244,77 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh  
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               tests/test_ccv_channel.sh
           - name: _IBC transfer successful> ICS v6.4.0 chain 1
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id channel-1
-          
+
+          - name: Trigger consumer rewards distribution> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000ucon \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Rewards pool:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
+          - name: _Consumer rewards distribution> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              ibc_denom=ibc/$(echo -n transfer/$channel_id/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+              echo "> Denom: $ibc_denom"
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              val1_rewards=$(curl -s http://localhost:$whale_api/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+              echo "> val1_rewards: $val1_rewards"
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              echo "> val1_consumer_rewards: $val1_consumer_rewards"
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
+              else
+                echo "PASS: Consumer rewards distributed to val1."
+              fi            
+
+
+          # - name: ICS Removal Upgrade
+          #   env:
+          #     TARGET_VERSION: v28.0.0
+          #   run: |
+          #     source scripts/vars.sh
+          #     export validator_count=10
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
+
 
           - name: Validator set checks
             run: |
@@ -248,22 +333,276 @@
                 exit 1
               fi
 
-          - name: Test create-consumer is disabled
+      Test-ics-removal-stopped-consumer:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 3
+          STAKING_OPERATIONS: true
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli asyncio websockets requests urllib3
+
+          - name: Set up relayer
             run: |
               source scripts/vars.sh
-              # Populate template with chain id
-              jq -r '.chain_id |= "mychain"' templates/create-consumer.json > create.json
-              if $CHAIN_BINARY tx provider create-consumer create.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -o json 2>&1 | grep -q "MsgCreateConsumer is disabled"; then
-                echo "> PASS: create-consumer is disabled"
+              scripts/setup_relayer.sh
+
+          - name: Start chain at v26.0.0
+            env:
+              START_VERSION: v26.0.0
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${START_VERSION}/gaiad-${START_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+              printf "app.toml:\r\n"
+              cat $whale_home/config/app.toml
+              printf "config.toml:\r\n"
+              cat $whale_home/config/config.toml
+
+          - name: Start relayer
+            run: |
+              source scripts/vars.sh
+              scripts/start_relayer.sh
+
+          - name: Add consumer chain with ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              scripts/add_consumer.sh
+          - name: Initialize consumer chain with ICS v6.4.0  
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
+              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+              scripts/setup_consumer.sh
+              sleep $(($COMMIT_TIMEOUT*4))
+          - name: Spawn consumer chain v640-one
+            env:
+              PROVIDER_ICS: v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              scripts/spawn_consumer.sh
+          - name: Start consumer chain v640-one
+            run: |
+              source scripts/vars.sh 
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              ./start-$CONSUMER_CHAIN_ID.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+              tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
+          - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
+          - name: Establish CCV channel for v640-one
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh 
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+          - name: _Pre-upgrade CCV channel verified> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh  
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              tests/test_ccv_channel.sh
+          - name: _Pre-upgrade IBC transfer successful> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id channel-1
+    
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              scripts/upgrade.sh $TARGET_VERSION
+          
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: _CCV channel verified> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh  
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              tests/test_ccv_channel.sh
+          - name: _IBC transfer successful> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh 
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id channel-1
+
+          - name: Trigger consumer rewards distribution> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000ucon \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Rewards pool:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
+          - name: _Consumer rewards distribution> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              ibc_denom=ibc/$(echo -n transfer/$channel_id/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+              echo "> Denom: $ibc_denom"
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              val1_rewards=$(curl -s http://localhost:$whale_api/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+              echo "> val1_rewards: $val1_rewards"
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              echo "> val1_consumer_rewards: $val1_consumer_rewards"
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
               else
-                echo "> FAIL: create-consumer is not disabled"
+                echo "PASS: Consumer rewards distributed to val1."
+              fi            
+
+          - name: _Remove consumer chain> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              echo "Consumer chains:"
+              $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
+              consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).consumer_id')
+              echo "Removing v640-one (consumer_id = $consumer_id):"
+              txhash=$($CHAIN_BINARY tx provider remove-consumer $consumer_id --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home -o json | jq -r '.txhash')
+              sleep $(($COMMIT_TIMEOUT*2))
+              $CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq '.'
+              $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
+              phase=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chain).phase')
+              if [[ "$phase" -eq "CONSUMER_PHASE_STOPPED" ]]; then
+                echo "PASS: Consumer chain was stopped."
+              else
+                echo "FAIL: Consumer chain was not stopped."
                 exit 1
               fi
 
-          - name: Test multi-send gas consumption is within expected range
+          # - name: ICS Removal Upgrade
+          #   env:
+          #     TARGET_VERSION: v28.0.0
+          #   run: |
+          #     source scripts/vars.sh
+          #     export validator_count=10
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
+
+
+          - name: Validator set checks
             run: |
               source scripts/vars.sh
-              tests/test_multisend_gas_consumption.sh surcharge
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
+              check_result=$(jq -r '.' valset-info-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Validator set check passed"
+              else
+                echo "> FAIL: Validator set check failed"
+                jq '.' valset-info-$UPGRADE_HEIGHT.json
+                exit 1
+              fi
+
+
+
 
       # Test-01-cosmovisor-upgrade:
       #   runs-on: ubuntu-24.04
