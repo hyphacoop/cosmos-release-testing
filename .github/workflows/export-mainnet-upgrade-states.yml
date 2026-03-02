@@ -304,6 +304,7 @@ jobs:
           NODE_HOME: /home/runner/.gaia
           CHAIN_BINARY: 'gaiad'
         run: |
+          source ~/env/bin/activate
           set -e
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
