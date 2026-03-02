@@ -67,7 +67,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install toml-cli requests
+          python -m pip install toml-cli requests asyncio websockets urllib3
 
       - name: Get current running gaiad version
         run: |
@@ -276,6 +276,7 @@ jobs:
       - name: Make forked state archive and upload
         run: |
           set -e
+          rm /home/runner/.gaia/config/addrbook.json || true
           echo "[INFO]: Compressing ~/.gaia ..."
           cd /home/runner/
           tar cfz ${{ env.RUNNING_VERSION }}_${{ env.FORK_HEIGHT }}-stateful-fork.tar.gz .gaia
@@ -299,11 +300,16 @@ jobs:
           min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
           echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
         run: |
           set -e
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $upgrade_height &
           echo "Submitting the upgrade proposal..."
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
@@ -331,6 +337,7 @@ jobs:
       - name: Compress and upload files
         run: |
           set -e
+          rm /home/runner/.gaia/config/addrbook.json || true
           echo "Compressing ~/.gaia ..."
           cd /home/runner/
           tar cfz ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz .gaia
