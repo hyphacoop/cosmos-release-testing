@@ -614,6 +614,20 @@
                 exit 1
               fi
 
+          - name: Add up validator rewards for all validators
+            run: |
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              total_rewards=0
+              for i in $(seq 1 $validator_count); do
+                valoper="VALOPER_$i"
+                rewards=$(curl -s http://localhost:$whale_api/cosmos/distribution/v1beta1/validators/${!valoper}/outstanding_rewards | jq -r '.rewards.rewards[] | select(.denom=="$ibc_denom").amount' || echo 0)
+                total_rewards=$(echo "$total_rewards + $rewards" | bc)
+              done
+              echo "Total outstanding rewards for all validators: $total_rewards"
+
           - name: Query bank supply
             run: |
               source scripts/vars.sh
@@ -647,7 +661,6 @@
                 jq '.' valset-info-$UPGRADE_HEIGHT.json
                 exit 1
               fi
-
 
           - name: Query bank supply
             run: |
