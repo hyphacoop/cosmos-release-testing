@@ -93,7 +93,7 @@ echo "Proposal ID: $proposal_id"
 # Vote yes on the proposal
 echo "Submitting the \"yes\" vote to proposal $proposal_id..."
 # Vote with each of the validators starting with val_002
-for i in $(seq - w 01 $validator_count); do
+for i in $(seq -w 01 $validator_count); do
     val_wallet="$moniker_prefix$i"
     echo "Voting from $val_wallet"
     vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from ${!val_wallet} --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
