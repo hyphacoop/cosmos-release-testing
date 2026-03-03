@@ -214,8 +214,12 @@ class ValidatorCarousel():
         try:
             result.check_returncode()
             response = json.loads(result.stdout)
-            self.account_balance = int(response['balances'][0]['amount'])
-            logging.info(f'The account has {self.account_balance}{response["balances"][0]["denom"]}.')
+            self.account_balance = 0
+            for balance in response['balances']:
+                if balance['denom'] == self.denom:
+                    self.account_balance = int(balance['amount'])
+                    break
+            logging.info(f'The account has {self.account_balance}{self.denom}.')
             if self.account_balance < self.ACCOUNT_MINIMUM:
                 logging.info("The account balance has decreased below the specified minimum, stopping now.")
                 exit()
