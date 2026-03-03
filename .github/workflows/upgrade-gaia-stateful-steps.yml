@@ -196,7 +196,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install toml-cli graph-cli cosmospy
+          python -m pip install toml-cli graph-cli cosmospy requests asyncio websockets urllib3
 
       - name: Print RPC port
         run: echo $VAL1_RPC_PORT
@@ -256,6 +256,21 @@ jobs:
       - name: Print starting validator set
         run: |
           $CHAIN_BINARY --home $HOME_1 q comet-validator-set 
+          PROVIDER_VALIDATORS=$($CHAIN_BINARY q comet-validator-set -o json | jq -r '.pagination.total')
+          echo "Number of validators: $PROVIDER_VALIDATORS"
+          echo "PROVIDER_VALIDATORS=$PROVIDER_VALIDATORS" >> $GITHUB_ENV
+      - name: Get and store upgrade height
+        run: |
+          UPGRADE_HEIGHT=$($CHAIN_BINARY --home $HOME_1 q gov proposals --page-reverse -o json | jq -r '.proposals[0].messages[0].value.plan.height')
+          echo "Upgrade height from last upgrade proposal: $UPGRADE_HEIGHT"
+          echo "UPGRADE_HEIGHT=$UPGRADE_HEIGHT" >> $GITHUB_ENV
+          
+      - name: _Validator set checks
+        run: |
+          source ~/env/bin/activate
+          python scripts/validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary $CHAIN_BINARY --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals ${{ env.PROVIDER_VALIDATORS }}
+          check_result=$(jq -r '.' valset-info-$UPGRADE_HEIGHT.json | grep FAIL || true)
+
       - name: Query default validator description
         run: |
           set -e

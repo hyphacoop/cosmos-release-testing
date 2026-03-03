@@ -310,7 +310,7 @@ jobs:
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $upgrade_height &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) &
           echo "Submitting the upgrade proposal..."
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
