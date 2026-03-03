@@ -310,7 +310,6 @@ jobs:
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) &
           echo "Submitting the upgrade proposal..."
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
@@ -327,6 +326,8 @@ jobs:
           $vote
       - name: Stop gaiad when reached upgrade height
         run: |
+          source ~/env/bin/activate
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height)) &
           current_block=0
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
