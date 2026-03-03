@@ -300,9 +300,6 @@ jobs:
           min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
           echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
-        env:
-          NODE_HOME: /home/runner/.gaia
-          CHAIN_BINARY: 'gaiad'
         run: |
           source ~/env/bin/activate
           set -e
@@ -325,6 +322,9 @@ jobs:
           vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
           $vote
       - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
         run: |
           source ~/env/bin/activate
           python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height)) &
