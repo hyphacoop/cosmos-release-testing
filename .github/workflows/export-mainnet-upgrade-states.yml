@@ -301,12 +301,10 @@ jobs:
           echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
         run: |
-          source ~/env/bin/activate
           set -e
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
-          echo "Starting scripts/validator_carousel.py"
           echo "Submitting the upgrade proposal..."
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
@@ -327,9 +325,10 @@ jobs:
           CHAIN_BINARY: 'gaiad'
         run: |
           source ~/env/bin/activate
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height)) &
-          current_block=0
           echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) &
+          current_block=0
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
