@@ -330,6 +330,23 @@
           #     scripts/upgrade.sh $TARGET_VERSION
 
 
+          - name: Consumer rewards balances check
+            run: |
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              python scripts/validator_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Consumer rewards balances check passed"
+              else
+                echo "> FAIL: Consumer rewards balances check failed"
+                jq '.' rewards-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi    
+
           - name: Validator set checks
             run: |
               source scripts/vars.sh
@@ -614,19 +631,22 @@
                 exit 1
               fi
 
-          - name: Add up validator rewards for all validators
+          - name: Consumer rewards balances check
             run: |
               source scripts/vars.sh
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              total_rewards=0
-              for i in $(seq 1 $validator_count); do
-                valoper="VALOPER_$i"
-                rewards=$(curl -s http://localhost:$whale_api/cosmos/distribution/v1beta1/validators/${!valoper}/outstanding_rewards | jq -r '.rewards.rewards[] | select(.denom=="$ibc_denom").amount' || echo 0)
-                total_rewards=$(echo "$total_rewards + $rewards" | bc)
-              done
-              echo "Total outstanding rewards for all validators: $total_rewards"
+              python scripts/validator_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Consumer rewards balances check passed"
+              else
+                echo "> FAIL: Consumer rewards balances check failed"
+                jq '.' rewards-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi    
 
           - name: Query bank supply
             run: |
