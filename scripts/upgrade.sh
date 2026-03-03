@@ -110,6 +110,8 @@ echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
 
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.'
+
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
 
