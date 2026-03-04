@@ -511,9 +511,7 @@ class ValsetCheck():
                 continue
             validator['comet_rank'] = new_rank
             new_rank += 1
-            if new_rank > self.data['n']['staking_validators']:
-                break
-            # Get the old index of the validator in the N-1 validator set to determine if it was bonded or not before the rotations were applied
+            
             if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                 validator['bonded'] = 'BOND_STATUS_UNBONDING'
                 logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}")
