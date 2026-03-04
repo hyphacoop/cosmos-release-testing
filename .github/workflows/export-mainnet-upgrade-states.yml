@@ -221,6 +221,7 @@ jobs:
         env:
           NODE_HOME: /home/runner/.gaia
         run: |
+          source ~/env/bin/activate
           set -e
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/node_key.json > /home/runner/.gaia/config/node_key.json
@@ -231,6 +232,7 @@ jobs:
           sed -i -e "/trust_height =/ s/= .*/= 0/" $NODE_HOME/config/config.toml
           sed -i -e "/trust_hash =/ s/= .*/= \"\"/" $NODE_HOME/config/config.toml
           sed -i -e "/rpc_servers =/ s^= .*^= \"\"^" $NODE_HOME/config/config.toml
+          toml set api.enable "true" --toml-path $NODE_HOME/config/app.toml
           screen -L -Logfile /home/runner/artifact/gaiad_fork.log -S gaiad -d -m /home/runner/go/bin/gaiad-fork --home /home/runner/.gaia testnet unsafe-start-local-validator \
           --validator-operator cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv \
           --validator-pubkey "$pubkey" \
