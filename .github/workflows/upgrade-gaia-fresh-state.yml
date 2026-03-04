@@ -354,13 +354,13 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
-              check_result=$(jq -r '.' valset-info-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
                 echo "> PASS: Validator set check passed"
               else
                 echo "> FAIL: Validator set check failed"
-                jq '.' valset-info-$UPGRADE_HEIGHT.json
+                jq '.' validator-check-$UPGRADE_HEIGHT.json
                 exit 1
               fi
 
@@ -672,13 +672,13 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
-              check_result=$(jq -r '.' valset-info-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
                 echo "> PASS: Validator set check passed"
               else
                 echo "> FAIL: Validator set check failed"
-                jq '.' valset-info-$UPGRADE_HEIGHT.json
+                jq '.' validator-check-$UPGRADE_HEIGHT.json
                 exit 1
               fi
 
