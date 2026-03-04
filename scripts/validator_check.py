@@ -506,9 +506,6 @@ class ValsetCheck():
                     old_rank = old_val.get('comet_rank', None)
                     break
 
-            if not validator['comet_rank']:
-                print(f"Validator {validator['moniker']} does not have a comet rank, skipping bonded status check for this validator")
-                continue
             validator['comet_rank'] = new_rank
             new_rank += 1
             # Get the old index of the validator in the N-1 validator set to determine if it was bonded or not before the rotations were applied
