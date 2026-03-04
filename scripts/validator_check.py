@@ -497,8 +497,9 @@ class ValsetCheck():
         """
         Apply the expected bonded status based on the reordering of the validators due to token changes.
         """
+        new_rank = 1
         for validator in self.data['n']['expected_validator_info']:
-            
+
             # Get comet rank for validator in n-1
             for old_val in self.data['n-1']['validator_info']:
                 if old_val['operator_address'] == validator['operator_address']:
@@ -508,6 +509,8 @@ class ValsetCheck():
             if not validator['comet_rank']:
                 print(f"Validator {validator['moniker']} does not have a comet rank, skipping bonded status check for this validator")
                 continue
+            validator['comet_rank'] = new_rank
+            new_rank += 1
             # Get the old index of the validator in the N-1 validator set to determine if it was bonded or not before the rotations were applied
             if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                 validator['bonded'] = 'BOND_STATUS_UNBONDING'
@@ -565,13 +568,6 @@ class ValsetCheck():
         # Sort the expected validator info by tokens to reflect the changes in the validator set order after the rotations are applied
         self.data['n']['expected_validator_info'].sort(key=lambda x: x['tokens'], reverse=True)
         
-        rank = 1
-        for val in self.data['n']['expected_validator_info']:
-            if val['bonded'] == 'BOND_STATUS_BONDED':
-                # logging.info(f"Validator {val['moniker']} has {val['tokens']} tokens and bonded status {val['bonded']} after applying operations")
-                val['comet_rank'] = rank
-                rank += 1
-
         self.apply_expected_bonded_status()
         self.calculate_expected_total_bonded_tokens()
         # self.print_bonded_tokens()
