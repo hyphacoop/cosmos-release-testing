@@ -2,11 +2,7 @@
 PROVIDER_CHANNEL=$1
 
 echo "Patching update template with consumer id..."
-jq -r --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' templates/update-consumer.json > update.json
-
-echo "> Delete new_owner_address"
-jq 'del(.new_owner_address)' update.json > update-consumer.json
-cp update-consumer.json update.json
+jq -r --arg CONSUMERID "$CONSUMER_ID" '.consumer_id |= $CONSUMERID' templates/update-consumer-allowlisted-denoms.json > update.json
 
 echo "> Set denom allowlist"
 provider_denom=ibc/$(echo -n transfer/$PROVIDER_CHANNEL/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')

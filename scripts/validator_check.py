@@ -238,7 +238,8 @@ class ValsetInfo():
                 'operator_address': val['operator_address'],
                 'bonded': val['status'],
                 'tokens': int(val['tokens']),
-                'pubkey': pubkey
+                'pubkey': pubkey,
+                'jailed': val['jailed']
             }
             if pubkey in self.data['comet_validator_set']:
                 new_validator['comet_vp'] = int(
@@ -270,10 +271,6 @@ class ValsetInfo():
         # Sort validator_info by tokens descending
         validator_info.sort(key=lambda v: v['tokens'], reverse=True)
 
-
-        # validator_info = dict(sorted(validator_info.items(), key=lambda item: item[1]['tokens'], reverse=True))
-        # validator_info = list(sorted(validator_info.items(), key=lambda item: item[1]['tokens'], reverse=True))
-
         # Stage data for saving
         self.data['validator_info'] = validator_info
         self.data['total_bonded_tokens'] = total_bonded_tokens
@@ -294,9 +291,9 @@ class ValsetInfo():
         comet_validator_issues = []
         for pubkey in self.data['comet_validator_set'].keys():
             operator_address = None
-            for op_addr, info in self.data['validator_info'].items():
-                if info['pubkey'] == pubkey:
-                    operator_address = op_addr
+            for val in self.data['validator_info']:
+                if val['pubkey'] == pubkey:
+                    operator_address = val['operator_address']
                     break
             if operator_address is None:
                 issue = f"❌ MISSING VALIDATOR: Pubkey {pubkey} in comet set not found in validator info"
@@ -304,7 +301,13 @@ class ValsetInfo():
                 logging.warning(f"❌ Validator with pubkey {pubkey} in comet validator set not found in validator info")
                 continue
             
-            val_info = self.data['validator_info'][operator_address]
+            val_info = None
+            for val in self.data['validator_info']:
+                if val['operator_address'] == operator_address:
+                    val_info = val
+                    break
+            if val_info is None:
+                continue
             if val_info['bonded'] == 'BOND_STATUS_BONDED':
                 continue
             else:
@@ -316,13 +319,19 @@ class ValsetInfo():
         vp_fraction_issues = []
         for pubkey in self.data['comet_validator_set'].keys():
             operator_address = None
-            for op_addr, info in self.data['validator_info'].items():
-                if info['pubkey'] == pubkey:
-                    operator_address = op_addr
+            for val in self.data['validator_info']:
+                if val['pubkey'] == pubkey:
+                    operator_address = val['operator_address']
                     break
             if operator_address is None:
                 continue
-            val_info = self.data['validator_info'][operator_address]
+            val_info = None
+            for val in self.data['validator_info']:
+                if val['operator_address'] == operator_address:
+                    val_info = val
+                    break
+            if val_info is None:
+                continue
             if abs(val_info['tokens_vp_fraction'] - val_info['comet_vp_fraction']) < 1e-6:
                 continue
             else:
@@ -488,14 +497,36 @@ class ValsetCheck():
         """
         Apply the expected bonded status based on the reordering of the validators due to token changes.
         """
-        for index, validator in enumerate(self.data['n']['expected_validator_info']):
-            if index >= self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
+        new_rank = 1
+        for validator in self.data['n']['expected_validator_info']:
+
+            # Get comet rank for validator in n-1
+            for old_val in self.data['n-1']['validator_info']:
+                if old_val['operator_address'] == validator['operator_address']:
+                    old_rank = old_val.get('comet_rank', None)
+                    break
+            
+            if validator['jailed']:
+                logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it is jailed in block n with {validator["tokens"]} tokens')
+                continue
+            validator['comet_rank'] = new_rank
+            new_rank += 1
+            
+            if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                 validator['bonded'] = 'BOND_STATUS_UNBONDING'
-            if index < self.data['n']['staking_validators']:
-                validator['bonded'] = 'BOND_STATUS_BONDED'
-            if self.ics_disable_upgrade and index >= self.provider_max_vals:
+                logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}")
+            if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING' and (old_rank and old_rank > self.data['n-1']['staking_validators']):
+                if validator['comet_rank'] <= self.data['n']['staking_validators']:
+                    validator['bonded'] = 'BOND_STATUS_BONDED'
+                    logging.info(f"Validator {validator['moniker']} is expected to be bonded with {validator['tokens']} tokens after applying operations because it was ranked {old_rank} in block n-1 which is above the max validators limit of {self.data['n-1']['staking_validators']} but is ranked {validator['comet_rank']} in block n which is below the max validators limit of {self.data['n']['staking_validators']}")
+            if self.ics_disable_upgrade and validator['comet_rank'] >= self.provider_max_vals:
                 if validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
+                    logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because ICS is disabled and it is ranked {validator['comet_rank']} which is above the provider max validators limit of {self.provider_max_vals}")
+
+            # if validator['bonded'] == 'BOND_STATUS_BONDED':
+                # logging.info(f"Validator {validator['moniker']} is expected to be {validator['bonded']} with {validator['tokens']} tokens after applying operations")
+
 
     def calculate_expected_total_bonded_tokens(self):
         """
@@ -521,39 +552,99 @@ class ValsetCheck():
                 if op['operation'] == 'redelegate':
                     if new_val['operator_address'] == op['source_validator']:
                         new_val['tokens'] -= int(op['amount'])
+                        logging.info(f"Applying redelegate operation: {op['amount']} tokens moved from {op['source_validator']} to {op['destination_validator']}")
                     if new_val['operator_address'] == op['destination_validator']:
                         new_val['tokens'] += int(op['amount'])
+                        logging.info(f"Applying redelegate operation: {op['amount']} tokens moved from {op['source_validator']} to {op['destination_validator']}")
                 elif op['operation'] == 'delegate':
                     if new_val['operator_address'] == op['validator']:
                         new_val['tokens'] += int(op['amount']) 
+                        logging.info(f"Applying delegate operation: {op['amount']} tokens delegated to {op['validator']}")
                 elif op['operation'] == 'unbond':
                     if new_val['operator_address'] == op['validator']:
                         new_val['tokens'] -= int(op['amount'])
+                        logging.info(f"Applying unbond operation: {op['amount']} tokens unbonded from {op['validator']}")
        
-        # Sort the expected validator info by tokens to reflect the changes in the validator set order after the rotations are applied
-        self.data['n']['expected_validator_info'].sort(key=lambda x: x['tokens'], reverse=True)
+        for val in self.data['n']['expected_validator_info']:
+            """
+            Add key with the comet vp by dividing over 1000000
+            """
+            val['comet_vp'] = int(val['tokens']/1000000)
+        # Sort the expected validator info by comet_vp to reflect the changes in the validator set order after the rotations are applied
+        self.data['n']['expected_validator_info'].sort(key=lambda x: x['comet_vp'], reverse=True)
         
         self.apply_expected_bonded_status()
         self.calculate_expected_total_bonded_tokens()
+        # self.print_bonded_tokens()
 
+    def print_bonded_tokens(self):
+        """
+        Print the list of validator monikers and their bonded tokens for block N-1, bonded tokens for block N,
+        and the expected bonded tokens after the staking operations are applied.
+        """
+        bonded_data = {}
+        # 1. Get list of validators from block N-1 and their bonded tokens
+        for val in self.data['n-1']['validator_info']:
+            if val['bonded'] != 'BOND_STATUS_BONDED':
+               bonded_data[val['operator_address']] = {
+                'moniker': val['moniker'],
+                'n-1': 0
+                }
+               continue
+            # logging.info(f"Block N-1: Validator {val['moniker']} has {val['tokens']} bonded tokens")
+            bonded_data[val['operator_address']] = {
+                'moniker': val['moniker'],
+                'n-1': val['tokens']
+            }
+        # 2. Get tokens for the same validators in block N
+        for val in self.data['n']['validator_info']:
+            if val['operator_address'] in bonded_data:
+                if val['bonded'] != 'BOND_STATUS_BONDED':
+                    bonded_data[val['operator_address']]['n'] = 0
+                    continue
+                # logging.info(f"Block N: Validator {val['moniker']} has {val['tokens']} bonded tokens")
+                bonded_data[val['operator_address']]['n'] = val['tokens']
+        # 3. Get expected tokens for the same validators after applying the operations
+        for val in self.data['n']['expected_validator_info']:
+            if val['operator_address'] in bonded_data:
+                if val['bonded'] != 'BOND_STATUS_BONDED':
+                    bonded_data[val['operator_address']]['expected'] = 0
+                    continue
+                # logging.info(f"Expected after operations: Validator {val['moniker']} has {val['tokens']} bonded tokens")
+                bonded_data[val['operator_address']]['expected'] = val['tokens']
+        # Print bonded_data in tabulated format
+        logging.info(f"{'Validator':<20} {'N-1 Tokens':<15} {'N Tokens':<15} {'Expected Tokens':<15}")
+        for op_addr, data in bonded_data.items():
+            logging.info(f"{data['moniker']:<20} {data.get('n-1', 'N/A'):<15} {data.get('n', 'N/A'):<15} {data.get('expected', 'N/A'):<15}")
 
     def calculate_expected_comet_validator_sets(self):
         """
         Calculate the expected comet validator set based on the expected bonded status and the tokens for each validator.
         """
+        if self.data['n-2']['ics_enabled'] and not self.provider_max_vals:
+            self.provider_max_vals = self.data['n-2']['provider_validators']
+            logging.info(f"Setting provider max validators to {self.provider_max_vals} based on block n-2 provider params since ICS is enabled at that block and no value was provided as input")
+        
         expected_comet_set = {}
-        for index, val in enumerate(self.data['n-2']['validator_info']):
+        index = 0
+        for val in self.data['n-2']['validator_info']:
             if val['bonded'] == 'BOND_STATUS_BONDED':
-                if index >= self.provider_max_vals:
-                    continue
+                index += 1
+                if not self.ics_disable_upgrade and index > self.provider_max_vals:
+                    break
+                # print(f'validator: {val["moniker"]}, tokens: {val["tokens"]}, voting power: {int(val["tokens"]/1000000)}')
                 expected_comet_set[val['pubkey']] = {
                     'voting_power': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
                 }
+                
+        # print(f'Expected_comet_set size: {len(expected_comet_set)}')
         # Sort comet set by voting power
         expected_comet_set = dict(sorted(expected_comet_set.items(), key=lambda item: item[1]['voting_power'], reverse=True))
         for index, (_, val) in enumerate(expected_comet_set.items(), start=1):
             val['rank'] = index
         self.data['n']['expected_comet_validator_set'] = expected_comet_set
+        logging.info(f"Expected comet validator set size calculated based on block n-2 validator info: {len(expected_comet_set)} validators")
+
 
         expected_comet_set = {}
         for val in self.data['n']['expected_validator_info']:
@@ -592,13 +683,17 @@ class ValsetCheck():
     def comet_size_param_check(self):
         """
         If ICS is disabled:
-        Checks that the comet validator set size matches the staking module max_validators parameter.
+        Checks that the comet validator set size matches whichever is lower between:
+            * The staking module max_validators parameter, or
+            * The number of bonded validators at block N-2
         If ICS is enabled:
-        Checks that the comet validator set size matches the provider module max_provider_consensus_validators parameter.
+        Checks that the comet validator set size matches whichever is lower:
+            * The provider module max_provider_consensus_validators parameter, or
+            * The number of bonded validators at block N-2
         """
         comet_size = len(self.data['n']['comet_validator_set'])
         if not self.ics_disable_upgrade:
-            expected_size = self.data['n']['provider_validators']
+            expected_size = len(self.data['n']['expected_comet_validator_set'])
             if expected_size is None:
                 logging.error("Cannot perform comet size check because provider params could not be fetched at the starting height")
                 self.data['checks']['comet_size_check'] = 'FAIL'
@@ -610,7 +705,7 @@ class ValsetCheck():
                 logging.info(f"> Comet validator set size check passed with ICS enabled: expected {expected_size} matches actual {comet_size}")
                 self.data['checks']['comet_size_check'] = 'PASS'
         else:
-            expected_size = self.data['n']['staking_validators']
+            expected_size = len(self.data['n']['expected_comet_validator_set'])
             if expected_size is None:
                 logging.error("> Cannot perform comet size check because max_validators param could not be fetched at the ending height")
                 self.data['checks']['comet_size_check'] = 'FAIL'
@@ -629,7 +724,6 @@ class ValsetCheck():
         if self.data['n']['expected_total_bonded_tokens'] != self.data['n']['total_bonded_tokens']:
             logging.error(f"> Total bonded tokens check failed: expected {self.data['n']['expected_total_bonded_tokens']} but got {self.data['n']['total_bonded_tokens']}")
             self.data['checks']['total_bonded_tokens'] = 'FAIL'
-            exit()
         else:
             logging.info(f"> Total bonded tokens check passed: expected {self.data['n']['expected_total_bonded_tokens']} matches actual {self.data['n']['total_bonded_tokens']}")
             self.data['checks']['total_bonded_tokens'] = 'PASS'
@@ -816,9 +910,10 @@ class ValsetCheck():
         self.comet_validator_set_post_check()
 
 
-        print(json.dumps(self.data['checks'], indent=4))
+        # print(json.dumps(self.data['checks'], indent=4))
 
     def save(self):
+        logging.info(f'Saving to {self.output_prefix + "-" + str(self.height) + ".json"}')
         with open(self.output_prefix + '-' + str(self.height) + '.json', 'w') as f:
             json.dump(self.data, f, indent=4)
 
@@ -836,14 +931,15 @@ if __name__ == '__main__':
                         help='Flag to indicate if the upgrade being analyzed is the ICS removal upgrade (default: False)')
     parser.add_argument('--provider-max-vals', type=int, default=0,
                         help='Max provider consensus validators param value (default: 0, required if --ics-removal-upgrade is set)')
-    parser.add_argument('--output', type=str, default='valset-info',
-                        help='Output file name prefix (default: valset-info-<height>.json)')
+    parser.add_argument('--output', type=str, default='validator-check',
+                        help='Output file name prefix (default: validator-check-<height>.json)')
     
     args = parser.parse_args()
     
     vc = ValsetCheck(urlAPI=args.api, urlRPC=args.rpc, binary=args.binary, height=args.height, ics_removal_upgrade=args.ics_removal_upgrade, provider_max_vals=args.provider_max_vals, output_prefix=args.output)
     vc.collect_inputs()
     vc.calculate_expected_validator_data()
+    # exit()
     vc.calculate_expected_comet_validator_sets()
     vc.check()
     vc.save()
