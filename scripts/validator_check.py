@@ -910,10 +910,10 @@ class ValsetCheck():
         self.comet_validator_set_post_check()
 
 
-        print(json.dumps(self.data['checks'], indent=4))
+        # print(json.dumps(self.data['checks'], indent=4))
 
     def save(self):
-        print(f'Saving to {self.output_prefix + "-" + str(self.height) + ".json"}')
+        logging.info(f'Saving to {self.output_prefix + "-" + str(self.height) + ".json"}')
         with open(self.output_prefix + '-' + str(self.height) + '.json', 'w') as f:
             json.dump(self.data, f, indent=4)
 
