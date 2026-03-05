@@ -270,7 +270,14 @@ jobs:
           source ~/env/bin/activate
           python scripts/validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary $CHAIN_BINARY --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals ${{ env.PROVIDER_VALIDATORS }}
           check_result=$(jq -r '.' valset-info-$UPGRADE_HEIGHT.json | grep FAIL || true)
-
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq '.' valset-info-$UPGRADE_HEIGHT.json
+            exit 1
+          fi
       - name: Query default validator description
         run: |
           set -e
