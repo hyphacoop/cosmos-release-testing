@@ -256,7 +256,7 @@ jobs:
       - name: Print starting validator set
         run: |
           $CHAIN_BINARY --home $HOME_1 q comet-validator-set 
-          PROVIDER_VALIDATORS=$($CHAIN_BINARY q comet-validator-set -o json | jq -r '.pagination.total')
+          PROVIDER_VALIDATORS=$($CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.pagination.total')
           echo "Number of validators: $PROVIDER_VALIDATORS"
           echo "PROVIDER_VALIDATORS=$PROVIDER_VALIDATORS" >> $GITHUB_ENV
       - name: Get and store upgrade height
