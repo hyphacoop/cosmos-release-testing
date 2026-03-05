@@ -92,9 +92,14 @@ echo "Proposal ID: $proposal_id"
 
 # Vote yes on the proposal
 echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
-echo $vote
-txhash=$($vote | jq -r .txhash)
+# Vote with each of the validators
+for i in $(seq -w 01 $validator_count); do
+    val_wallet="$moniker_prefix$i"
+    echo "Voting from $val_wallet"
+    vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $val_wallet --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
+    echo $vote
+    txhash=$($vote | jq -r .txhash)
+done
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
 
@@ -109,6 +114,8 @@ echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 # Wait for the voting period to be over
 echo "Waiting for the voting period to end..."
 sleep $VOTING_PERIOD
+
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.'
 
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
