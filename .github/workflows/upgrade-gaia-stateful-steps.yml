@@ -275,7 +275,7 @@ jobs:
             echo "> PASS: Validator set check passed"
           else
             echo "> FAIL: Validator set check failed"
-            jq '.' valset-info-$UPGRADE_HEIGHT.json
+            jq '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json
             exit 1
           fi
       - name: Query default validator description
