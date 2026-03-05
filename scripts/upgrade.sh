@@ -105,7 +105,12 @@ $CHAIN_BINARY q tx $txhash --home $whale_home
 
 if [ "$STAKING_OPERATIONS" = true ]; then
     echo "> Start submitting staking transactions"
-    python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+    # Update the flag depending on the value of the OPERATION env var
+    if [ "$OPERATION" = "down" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+    else
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --up-rotation &
+    fi
 fi
 
 echo "> Save the upgrade height to GITHUB_ENV"

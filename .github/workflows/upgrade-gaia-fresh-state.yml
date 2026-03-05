@@ -91,6 +91,8 @@
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
+          matrix:
+            operation: ["down","up"]
           fail-fast: false
         env:
           COSMOVISOR: false
@@ -229,6 +231,7 @@
               TARGET_VERSION: v27.0.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              export OPERATION=${{ matrix.operation }}
               source scripts/vars.sh
               export validator_count=10
               export MAX_VALIDATORS=8
