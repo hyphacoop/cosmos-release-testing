@@ -18,7 +18,7 @@
             required: false
             type: string
             default: v28.0.0
-      # push:
+      push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -378,7 +378,7 @@
 
           - name: Upgrade to v28.0.0
             env:
-              TARGET_VERSION: feat/remove-ics
+              TARGET_VERSION: ${{ matrix.target_version }}
             run: |
               # export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               export OPERATION=${{ matrix.operation }}
@@ -386,7 +386,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: Validator set checks
             run: |
