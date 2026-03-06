@@ -88,6 +88,7 @@ jobs:
           GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
           GAS_PRICES: "0.0025uatom"
         run: |
+          source ~/env/bin/activate
           set -e
           echo "Initializing $NODE_HOME..."
           $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
