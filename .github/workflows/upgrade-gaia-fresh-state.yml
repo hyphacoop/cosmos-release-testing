@@ -92,7 +92,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down","up"]
+            operation: ["down","up","swap-consensus"]
           fail-fast: false
         env:
           COSMOVISOR: false
@@ -388,6 +388,8 @@
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
+          matrix:
+            operation: ["down","up","swap-consensus"]
           fail-fast: false
         env:
           COSMOVISOR: false
