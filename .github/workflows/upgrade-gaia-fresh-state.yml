@@ -357,6 +357,7 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
+              jq '.' validator-check-$UPGRADE_HEIGHT.json
               check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
@@ -677,6 +678,7 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
+              jq '.' validator-check-$UPGRADE_HEIGHT.json
               check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
