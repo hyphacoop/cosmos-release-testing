@@ -182,7 +182,7 @@ jobs:
           source ~/env/bin/activate
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
-          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals $current_validators
+          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals $current_validators
           check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
@@ -305,7 +305,7 @@ jobs:
           source ~/env/bin/activate
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
-          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals $current_validators
+          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals $current_validators
           check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
@@ -330,7 +330,7 @@ jobs:
           source ~/env/bin/activate
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
           current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
-          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals $current_validators
+          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals $current_validators
           check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
