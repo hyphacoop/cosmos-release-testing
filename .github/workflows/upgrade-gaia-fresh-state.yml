@@ -389,7 +389,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down","up","swap-consensus"]
+            operation: ["down","up","swap-consensus","swap-bonded"]
           fail-fast: false
         env:
           COSMOVISOR: false

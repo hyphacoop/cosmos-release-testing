@@ -104,12 +104,16 @@ sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
 
 if [ "$STAKING_OPERATIONS" = true ]; then
-    echo "> Start submitting staking transactions"
+    echo "> Start staking transactions"
     # Update the flag depending on the value of the OPERATION env var
     if [ "$OPERATION" = "down" ]; then
         python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
     elif [ "$OPERATION" = "up" ]; then
         python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --up-rotation &
+    elif [ "$OPERATION" = "swap-consensus" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-consensus &
+    elif [ "$OPERATION" = "swap-bonded" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-bonded &
     fi
 fi
 
