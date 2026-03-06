@@ -174,13 +174,52 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
+      - name: Validator set checks after initial sync
+        run: |
+          source ~/env/bin/activate
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
+          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals $current_validators
+          check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 0
+          fi
       - name: Stop gaiad
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
         run: |
           echo "exiting gaia and screen"
           current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
-          echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
           killall gaiad screen
           sleep 10s
+          let halt_height=$current_block+50
+          echo "[INFO]: Set halt-height to $halt_height"
+          sed -i -e "/halt-height =/ s^= .*^= $halt_height^" $NODE_HOME/config/app.toml
+          echo "[INFO]: Start gaiad with halt-height"
+          screen -L -Logfile /home/runner/artifact/gaiad_sync2.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+          sleep 1
+          ( tail -f -n0 /home/runner/artifact/gaiad_sync2.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_sync2.log
+          echo "[INFO]: Reset halt-height"
+          sed -i -e "/halt-height =/ s^= .*^= 0^" $NODE_HOME/config/app.toml
+          current_block=$halt_height
+          echo "SNAPSHOT_HEIGHT=$current_block" >> $GITHUB_ENV
+          sleep 10s
+      # - name: DEBUG
+      #   if: always() && !cancelled()
+      #   run: |
+      #     while [ ! -f /continue ]
+      #     do
+      #       sleep 1
+      #     done
       # - name: Make current snapshot and upload
       #   run: |
       #     echo "[INFO]: Compressing data and wasm..."
@@ -258,6 +297,21 @@ jobs:
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
           tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Validator set checks after fork
+        run: |
+          source ~/env/bin/activate
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
+          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals $current_validators
+          check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 0
+          fi
       - name: Restore val key
         run: |
           echo "Restoring validator key"
@@ -268,6 +322,21 @@ jobs:
           gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
           echo "Wait for the delegation to go on chain..."
           tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Validator set checks after delegation
+        run: |
+          source ~/env/bin/activate
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
+          python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals $current_validators
+          check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 0
+          fi
       - name: Stop gaiad
         run: |
           echo "exiting gaia and screen"
@@ -330,7 +399,6 @@ jobs:
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
           python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) &
-          current_block=0
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -348,6 +416,8 @@ jobs:
           scp ${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz gh-actions@files.polypore.xyz:/var/www/html/archived-state/
           # Update latest file symlinks
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
+          # copy validator-check-*.json to artifacts
+          cp validator-check-*.json ~/artifact/
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
