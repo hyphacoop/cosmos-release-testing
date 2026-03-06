@@ -94,6 +94,8 @@
           matrix:
             operation: ["down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: [false, true]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
         env:
           COSMOVISOR: false
