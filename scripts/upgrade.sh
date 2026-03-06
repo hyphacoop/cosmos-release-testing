@@ -114,6 +114,12 @@ if [ "$STAKING_OPERATIONS" = true ]; then
         python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-consensus &
     elif [ "$OPERATION" = "swap-bonded" ]; then
         python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-bonded &
+    elif [ "$OPERATION" = "double-swap" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-consensus --swap-bonded &
+    elif [ "$OPERATION" = "double-swap-redel" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-consensus --swap-bonded --redelegate &
+    elif [ "$OPERATION" = "up-double-swap-redel" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --swap-consensus --swap-bonded --redelegate --up-rotation &
     fi
 fi
 

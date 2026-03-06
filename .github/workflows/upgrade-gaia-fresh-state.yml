@@ -92,7 +92,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down","up","swap-consensus"]
+            operation: ["down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
           fail-fast: false
         env:
           COSMOVISOR: false
@@ -389,7 +389,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down","up","swap-consensus","swap-bonded"]
+            operation: ["down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
           fail-fast: false
         env:
           COSMOVISOR: false
