@@ -18,7 +18,7 @@
             required: false
             type: string
             default: v28.0.0
-      push:
+      # push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -378,7 +378,7 @@
 
           - name: Upgrade to v28.0.0
             env:
-              TARGET_VERSION: feat/remove-ics
+              TARGET_VERSION: ${{ matrix.target_version }}
             run: |
               # export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               export OPERATION=${{ matrix.operation }}
@@ -386,7 +386,12 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
           - name: Validator set checks
             run: |
@@ -394,7 +399,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
+              python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
               jq '.' validator-check-$UPGRADE_HEIGHT.json
               check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
