@@ -154,10 +154,10 @@ class ValidatorCarousel():
     """Manages validator rotations through delegation operations."""
     
     # Constants
-    ACCOUNT_MINIMUM = 50_000_000  # 50 tokens
+    ACCOUNT_MINIMUM = 20_000_000  # 50 tokens
     ROTATION_DELTA = 10_000_000  # 10 tokens
     SWAP_DELTA = 1_000_000  # 1 token
-    PRE_FUNDING_AMOUNT = 10_000_000_000  # 10,000 tokens
+    PRE_FUNDING_AMOUNT = 100_000_000  # 100 tokens
     WEBSOCKET_MAX_SIZE = 100 * 1024 * 1024  # 100MB
     WEBSOCKET_DELAY = 0.2  # seconds
     RECONNECT_DELAY = 3  # seconds
@@ -290,7 +290,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        provider_params = self.api_get_provider_params(self.urlAPI)
+        provider_params = api_get_provider_params(self.urlAPI)
         if not provider_params:
             logging.warning("Failed to fetch provider params, skipping swap-consensus operation.")
             return None
@@ -304,7 +304,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        provider_params = self.api_get_provider_params(self.urlAPI)
+        provider_params = api_get_provider_params(self.urlAPI)
         if not provider_params:
             logging.warning("Failed to fetch provider params, skipping swap-consensus-redel operation.")
             return None
@@ -318,7 +318,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        staking_params = self.api_get_staking_params(self.urlAPI)
+        staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
         return self._create_swap_operation(bonded_cap, 'bonded', False)
 
@@ -329,7 +329,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        staking_params = self.api_get_staking_params(self.urlAPI)
+        staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
         return self._create_swap_operation(bonded_cap, 'bonded', True)
 
