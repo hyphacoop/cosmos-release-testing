@@ -185,6 +185,7 @@ jobs:
           current_validators=$(gaiad q comet-validator-set -o json | jq -r '.pagination.total')
           echo "[INFO]: Current block: $current_block"
           echo "[INFO]: Current validators: $current_validators"
+          curl http://localhost:1317/cosmos/staking/v1beta1/params
           python scripts/validator_check.py --height $current_block --binary gaiad --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals 180
           check_result=$(jq -r '.' validator-check-$current_block.json | grep FAIL || true)
           echo "Check result: $check_result"
