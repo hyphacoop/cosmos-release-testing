@@ -72,6 +72,7 @@ def api_get_staking_params(urlAPI: str, height: int = 0):
         ).json()
     else:
         response = requests.get(endpoint).json()
+    logging.info(f'Response from staking params endpoint: {response}')
     if "params" in response:
         return response["params"]
     return []
@@ -204,6 +205,9 @@ class ValsetInfo():
 
     def get_staking_params(self):
         params = api_get_staking_params(self.urlAPI, height=self.height)
+        if not params:
+            logging.error("Error fetching staking params")
+            exit()
         self.data['staking_validators'] = int(params['max_validators'])
 
     def get_staking_pool(self):
