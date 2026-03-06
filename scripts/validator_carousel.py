@@ -290,7 +290,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        provider_params = self.api_get_provider_params(self.urlAPI)
+        provider_params = api_get_provider_params(self.urlAPI)
         if not provider_params:
             logging.warning("Failed to fetch provider params, skipping swap-consensus operation.")
             return None
@@ -304,7 +304,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        provider_params = self.api_get_provider_params(self.urlAPI)
+        provider_params = api_get_provider_params(self.urlAPI)
         if not provider_params:
             logging.warning("Failed to fetch provider params, skipping swap-consensus-redel operation.")
             return None
@@ -318,7 +318,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        staking_params = self.api_get_staking_params(self.urlAPI)
+        staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
         return self._create_swap_operation(bonded_cap, 'bonded', False)
 
@@ -329,7 +329,7 @@ class ValidatorCarousel():
         Returns:
             Operation dictionary or None if no swap is needed
         """
-        staking_params = self.api_get_staking_params(self.urlAPI)
+        staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
         return self._create_swap_operation(bonded_cap, 'bonded', True)
 
