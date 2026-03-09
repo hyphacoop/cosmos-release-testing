@@ -112,7 +112,6 @@ def redelegate_message_json(
     }
 
 
-
 def undelegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
     return {
         "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
@@ -638,8 +637,8 @@ if __name__ == '__main__':
                         help='Denom for delegations (default: uatom)')
     parser.add_argument('--delegator', type=str, default='cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl',
                         help='Delegator address for delegations (default: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl)')
-    parser.add_argument('--target-rank', type=int, default=1,
-                        help='Target rank for the validator carousel (default: 1)')
+    parser.add_argument('--target-rank', type=int, default=2,
+                        help='Target rank for the validator carousel (default: 2)')
     parser.add_argument('--no-rotation', action='store_true',
                         help='Disables the full set rotation and only executes the specified swap operations if any (default: False)')
     parser.add_argument('--up-rotation', action='store_true',
