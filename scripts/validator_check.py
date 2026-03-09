@@ -506,9 +506,9 @@ class ValsetCheck():
         for validator in self.data['n']['expected_validator_info']:
 
             # Get comet rank for validator in n-1
-            # for old_val in self.data['n-1']['validator_info']:
-            #     if old_val['operator_address'] == validator['operator_address']:
-            #         old_rank = old_val.get('comet_rank', None)
+            for old_val in self.data['n-1']['validator_info']:
+                if old_val['operator_address'] == validator['operator_address']:
+                    old_rank = old_val.get('comet_rank', None)
             #         break
             
             if validator['jailed']:
@@ -557,6 +557,19 @@ class ValsetCheck():
         """
         self.data['n']['expected_validator_info'] = copy.deepcopy(self.data['n-1']['validator_info'])
         
+        rank_comparison = {}
+        for val in self.data['n-1']['validator_info']:
+            rank_comparison[val['operator_address']] = {
+                'moniker': val['moniker'],
+                'starting_vp': val['tokens']/1000000, # Convert from uatom to atom for voting power calculation
+            }
+        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting_vp
+        sorted_validators = sorted(rank_comparison.items(), key=lambda x: x[1]['starting_vp'], reverse=True)
+        for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
+            rank_comparison[operator_address]['starting_rank'] = rank
+        print(rank_comparison)
+        exit()
+
         self.data['n']['preop_validator_info'] = copy.deepcopy(self.data['n-1']['validator_info'])
         for val in self.data['n']['preop_validator_info']:
             val['comet_vp'] = int(val['tokens']/1000000)
