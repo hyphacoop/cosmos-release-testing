@@ -580,14 +580,18 @@ class ValsetCheck():
         self.data['n']['sorted_by_tokens'] = copy.deepcopy(self.data['n']['expected_validator_info'])
         self.data['n']['sorted_by_tokens'].sort(key=lambda x: x['tokens'], reverse=True)
 
-        for i in range(200):
+        # Remove validators with jailed status from the expected validator info since they should not be active in the validator set even if they have a high token amount
+        self.data['n']['expected_validator_info'] = [val for val in self.data['n']['expected_validator_info'] if not val['jailed']]
+        self.data['n']['sorted_by_tokens'] = [val for val in self.data['n']['sorted_by_tokens'] if not val['jailed']]
+
+        for i in range(self.provider_max_vals):
             sorted_by_tokens = self.data['n']['sorted_by_tokens'][i]
             sorted_by_comet = self.data['n']['expected_validator_info'][i]
             print(f'Rank {i+1}: {sorted_by_tokens["moniker"]} with {sorted_by_tokens["tokens"]} tokens is ranked {sorted_by_comet["comet_rank"]} in comet with {sorted_by_comet["comet_vp"]} voting power')
 
         # # Print tabulated data of moniker, bonded tokens for block n-1, bonded tokens for block n, and expected bonded tokens after applying operations
         # self.print_bonded_tokens()
-        exit()
+        # exit()
         
         self.apply_expected_bonded_status()
         self.calculate_expected_total_bonded_tokens()
