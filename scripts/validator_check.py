@@ -515,7 +515,7 @@ class ValsetCheck():
                 continue
             
             validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
-            if not self.data['n']['rank_change_validators'][validator['operator_address']]['rank_change']:
+            if not self.data['n']['rank_change_validators'][validator['operator_address']]['rank_change'] and (self.data['n']['rank_change_validators'][validator['operator_address']]['starting_vp'] == self.data['n']['rank_change_validators'][validator['operator_address']]['ending_vp']):
                 logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} did not change rank.')               
             else:
                 validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
