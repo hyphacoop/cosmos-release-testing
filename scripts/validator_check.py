@@ -517,6 +517,8 @@ class ValsetCheck():
             validator['comet_rank'] = new_rank
             new_rank += 1
             
+            logging.info(f'Checking validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} against max validators limit of {self.data["n"]["staking_validators"]}')
+            
             if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                 validator['bonded'] = 'BOND_STATUS_UNBONDING'
                 logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}. Old rank: {old_rank}")
@@ -581,21 +583,10 @@ class ValsetCheck():
             val['comet_vp'] = int(val['tokens']/1000000)
         # Sort the expected validator info by comet_vp to reflect the changes in the validator set order after the rotations are applied
         self.data['n']['expected_validator_info'].sort(key=lambda x: x['comet_vp'], reverse=True)
-        self.data['n']['sorted_by_tokens'] = copy.deepcopy(self.data['n']['expected_validator_info'])
-        self.data['n']['sorted_by_tokens'].sort(key=lambda x: x['tokens'], reverse=True)
 
         # Remove validators with jailed status from the expected validator info since they should not be active in the validator set even if they have a high token amount
         self.data['n']['expected_validator_info'] = [val for val in self.data['n']['expected_validator_info'] if not val['jailed']]
-        self.data['n']['sorted_by_tokens'] = [val for val in self.data['n']['sorted_by_tokens'] if not val['jailed']]
 
-        for i in range(self.provider_max_vals):
-            sorted_by_tokens = self.data['n']['sorted_by_tokens'][i]
-            sorted_by_comet = self.data['n']['expected_validator_info'][i]
-            print(f'Rank {i+1}: {sorted_by_tokens["moniker"]} with {sorted_by_tokens["tokens"]} tokens is ranked {sorted_by_comet["comet_rank"]} in comet with {sorted_by_comet["comet_vp"]} voting power')
-
-        # # Print tabulated data of moniker, bonded tokens for block n-1, bonded tokens for block n, and expected bonded tokens after applying operations
-        # self.print_bonded_tokens()
-        # exit()
         
         self.apply_expected_bonded_status()
         # exit()
