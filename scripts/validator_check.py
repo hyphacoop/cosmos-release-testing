@@ -568,7 +568,7 @@ class ValsetCheck():
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['starting_rank'] = rank
         print(rank_comparison)
-        exit()
+        # exit()
 
         self.data['n']['preop_validator_info'] = copy.deepcopy(self.data['n-1']['validator_info'])
         for val in self.data['n']['preop_validator_info']:
