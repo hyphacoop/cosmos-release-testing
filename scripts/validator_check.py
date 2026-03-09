@@ -527,21 +527,6 @@ class ValsetCheck():
                 if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
             logging.info(f"Validator {validator['moniker']} is expected to have status {validator['bonded']} tokens after applying operations because it is ranked {validator['comet_rank']}")
-            # if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING' and (old_rank and old_rank > self.data['n-1']['staking_validators']):
-                # if validator['comet_rank'] <= self.data['n']['staking_validators']:
-                    # validator['bonded'] = 'BOND_STATUS_BONDED'
-                    # logging.info(f"Validator {validator['moniker']} is expected to be bonded with {validator['tokens']} tokens after applying operations because it was ranked {old_rank} in block n-1 which is above the max validators limit of {self.data['n-1']['staking_validators']} but is ranked {validator['comet_rank']} in block n which is below the max validators limit of {self.data['n']['staking_validators']}")
-            # if self.ics_disable_upgrade and validator['comet_rank'] > self.provider_max_vals:
-                # if validator['bonded'] == 'BOND_STATUS_BONDED':
-                    # validator['bonded'] = 'BOND_STATUS_UNBONDING'
-                    # logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because ICS is disabled and it is ranked {validator['comet_rank']} which is above the provider max validators limit of {self.provider_max_vals}")
-            # if new_rank > self.provider_max_vals:
-                # break
-        # for i in range(self.data['n']['staking_validators']):
-            # validator = self.data['n']['expected_validator_info'][i]
-            # print(validator['moniker'], validator['tokens'], validator['comet_rank'], validator['bonded'])
-            # if validator['bonded'] == 'BOND_STATUS_BONDED':
-                # logging.info(f"Validator {validator['moniker']} is expected to be {validator['bonded']} with {validator['tokens']} tokens after applying operations")
 
 
     def calculate_expected_total_bonded_tokens(self):
@@ -671,14 +656,11 @@ class ValsetCheck():
                     'voting_power': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
                 }
                 
-        # print(f'Expected_comet_set size: {len(expected_comet_set)}')
         # Sort comet set by voting power
         expected_comet_set = dict(sorted(expected_comet_set.items(), key=lambda item: item[1]['voting_power'], reverse=True))
         for index, (_, val) in enumerate(expected_comet_set.items(), start=1):
             val['rank'] = index
         self.data['n']['expected_comet_validator_set'] = expected_comet_set
-        # logging.info(f"Expected comet validator set size calculated based on block n-2 validator info: {len(expected_comet_set)} validators")
-
 
         expected_comet_set = {}
         for val in self.data['n']['expected_validator_info']:
