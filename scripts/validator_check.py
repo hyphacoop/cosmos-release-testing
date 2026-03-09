@@ -502,7 +502,7 @@ class ValsetCheck():
         """
         Apply the expected bonded status based on the reordering of the validators due to token changes.
         """
-        new_rank = 1
+        rank_index = 1
         for validator in self.data['n']['expected_validator_info']:
 
             # # Get comet rank for validator in n-1
@@ -514,14 +514,15 @@ class ValsetCheck():
             if validator['jailed']:
                 logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it is jailed in block n with {validator["tokens"]} tokens')
                 continue
-            validator['comet_rank'] = new_rank
-            new_rank += 1
+            validator['comet_rank'] = rank_index
+            rank_index += 1
             
             
             if validator['operator_address'] not in self.data['n']['rank_change_validators']:
                 logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} did not change rank.')               
             else:
-                logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} changed rank.')
+                validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
+                logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens changed rank: {validator["comet_rank"]}')
                 # 1. Is it within the max_validators threshold?
                 if validator['comet_rank'] <= self.data['n']['staking_validators']:
                     if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING':
@@ -530,7 +531,8 @@ class ValsetCheck():
                 # 2. Is if outside the max_validators threshold?
                 if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
-                    logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}. Old rank: {old_rank}")
+                    logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}.")
+            
             # if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING' and (old_rank and old_rank > self.data['n-1']['staking_validators']):
                 # if validator['comet_rank'] <= self.data['n']['staking_validators']:
                     # validator['bonded'] = 'BOND_STATUS_BONDED'
@@ -609,7 +611,8 @@ class ValsetCheck():
                 rank_comparison[op]['rank_change'] = True
 
         # Create list of validators with rank changes
-        rank_change_validators = [rank_comparison[op] for op in rank_comparison.keys() if rank_comparison[op]['rank_change']]
+        rank_change_validators = {op: data for op, data in rank_comparison.items() if data['rank_change']}
+        print(f'rank_change_validators: {rank_change_validators}')
         self.data['n']['rank_change_validators'] = rank_change_validators
         
         self.apply_expected_bonded_status()
