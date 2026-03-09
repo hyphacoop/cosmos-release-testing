@@ -528,7 +528,11 @@ class ValsetCheck():
                 if validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
                     logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because ICS is disabled and it is ranked {validator['comet_rank']} which is above the provider max validators limit of {self.provider_max_vals}")
-
+            if new_rank > self.provider_max_vals:
+                break
+        for i in range(self.data['n']['staking_validators']):
+            validator = self.data['n']['expected_validator_info'][i]
+            print(validator['moniker'], validator['tokens'], validator['comet_rank'], validator['bonded'])
             # if validator['bonded'] == 'BOND_STATUS_BONDED':
                 # logging.info(f"Validator {validator['moniker']} is expected to be {validator['bonded']} with {validator['tokens']} tokens after applying operations")
 
@@ -594,6 +598,8 @@ class ValsetCheck():
         # exit()
         
         self.apply_expected_bonded_status()
+        exit()
+
         self.calculate_expected_total_bonded_tokens()
         # self.print_bonded_tokens()
 
@@ -641,16 +647,14 @@ class ValsetCheck():
         """
         Calculate the expected comet validator set based on the expected bonded status and the tokens for each validator.
         """
-        if self.data['n-2']['ics_enabled'] and not self.provider_max_vals:
-            self.provider_max_vals = self.data['n-2']['provider_validators']
-            logging.info(f"Setting provider max validators to {self.provider_max_vals} based on block n-2 provider params since ICS is enabled at that block and no value was provided as input")
         
         expected_comet_set = {}
         index = 0
+
         for val in self.data['n-2']['validator_info']:
             if val['bonded'] == 'BOND_STATUS_BONDED':
                 index += 1
-                if not self.ics_disable_upgrade and index > self.provider_max_vals:
+                if index > self.provider_max_vals:
                     break
                 # print(f'validator: {val["moniker"]}, tokens: {val["tokens"]}, voting power: {int(val["tokens"]/1000000)}')
                 expected_comet_set[val['pubkey']] = {
@@ -663,14 +667,16 @@ class ValsetCheck():
         for index, (_, val) in enumerate(expected_comet_set.items(), start=1):
             val['rank'] = index
         self.data['n']['expected_comet_validator_set'] = expected_comet_set
-        logging.info(f"Expected comet validator set size calculated based on block n-2 validator info: {len(expected_comet_set)} validators")
+        # logging.info(f"Expected comet validator set size calculated based on block n-2 validator info: {len(expected_comet_set)} validators")
 
 
         expected_comet_set = {}
+        index = 0
         for val in self.data['n']['expected_validator_info']:
             if val['bonded'] == 'BOND_STATUS_BONDED':
-                if not self.ics_disable_upgrade and index >= self.provider_max_vals:
-                    continue
+                index += 1
+                if index > self.provider_max_vals:
+                    break
                 expected_comet_set[val['pubkey']] = {
                     'voting_power': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
                 }
