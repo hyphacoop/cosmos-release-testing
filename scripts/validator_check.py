@@ -598,7 +598,7 @@ class ValsetCheck():
         # exit()
         
         self.apply_expected_bonded_status()
-        exit()
+        # exit()
 
         self.calculate_expected_total_bonded_tokens()
         # self.print_bonded_tokens()
