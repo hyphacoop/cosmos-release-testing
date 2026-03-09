@@ -502,7 +502,6 @@ class ValsetCheck():
         """
         Apply the expected bonded status based on the reordering of the validators due to token changes.
         """
-        rank_index = 1
         for validator in self.data['n']['expected_validator_info']:
 
             # # Get comet rank for validator in n-1
@@ -514,25 +513,20 @@ class ValsetCheck():
             if validator['jailed']:
                 logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it is jailed in block n with {validator["tokens"]} tokens')
                 continue
-            validator['comet_rank'] = rank_index
-            rank_index += 1
             
-            
-            if validator['operator_address'] not in self.data['n']['rank_change_validators']:
+            validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
+            if not self.data['n']['rank_change_validators'][validator['operator_address']]['rank_change']:
                 logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} did not change rank.')               
             else:
                 validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
-                logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens changed rank: {validator["comet_rank"]}')
                 # 1. Is it within the max_validators threshold?
                 if validator['comet_rank'] <= self.data['n']['staking_validators']:
                     if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING':
                         validator['bonded'] = 'BOND_STATUS_BONDED'
-                        logging.info(f"Validator {validator['moniker']} is expected to be bonded with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is within the max validators limit of {self.data['n']['staking_validators']}")
                 # 2. Is if outside the max_validators threshold?
                 if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
-                    logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}.")
-            
+            logging.info(f"Validator {validator['moniker']} is expected to have status {validator['bonded']} tokens after applying operations because it is ranked {validator['comet_rank']}")
             # if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING' and (old_rank and old_rank > self.data['n-1']['staking_validators']):
                 # if validator['comet_rank'] <= self.data['n']['staking_validators']:
                     # validator['bonded'] = 'BOND_STATUS_BONDED'
@@ -611,9 +605,8 @@ class ValsetCheck():
                 rank_comparison[op]['rank_change'] = True
 
         # Create list of validators with rank changes
-        rank_change_validators = {op: data for op, data in rank_comparison.items() if data['rank_change']}
-        print(f'rank_change_validators: {rank_change_validators}')
-        self.data['n']['rank_change_validators'] = rank_change_validators
+        # print(f'rank_change_validators: {rank_comparison}')
+        self.data['n']['rank_change_validators'] = rank_comparison
         
         self.apply_expected_bonded_status()
 
@@ -688,11 +681,9 @@ class ValsetCheck():
 
 
         expected_comet_set = {}
-        index = 0
         for val in self.data['n']['expected_validator_info']:
             if val['bonded'] == 'BOND_STATUS_BONDED':
-                index += 1
-                if index > self.provider_max_vals:
+                if val['comet_rank'] > self.provider_max_vals:
                     break
                 expected_comet_set[val['pubkey']] = {
                     'voting_power': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
