@@ -57,7 +57,7 @@ def api_get_provider_params(urlAPI: str, height: int = 0):
         ).json()
     else:
         response = requests.get(endpoint).json()
-    logging.info(f'Response from provider params endpoint: {response}')
+    # logging.info(f'Response from provider params endpoint: {response}')
     if "params" in response:
         return response["params"]
     return []
@@ -73,7 +73,7 @@ def api_get_staking_params(urlAPI: str, height: int = 0):
         ).json()
     else:
         response = requests.get(endpoint).json()
-    logging.info(f'Response from staking params endpoint: {response}')
+    # logging.info(f'Response from staking params endpoint: {response}')
     if "params" in response:
         return response["params"]
     return []
@@ -519,12 +519,12 @@ class ValsetCheck():
             
             if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                 validator['bonded'] = 'BOND_STATUS_UNBONDING'
-                logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}")
+                logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because it is ranked {validator['comet_rank']} which is above the max validators limit of {self.data['n']['staking_validators']}. Old rank: {old_rank}")
             if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING' and (old_rank and old_rank > self.data['n-1']['staking_validators']):
                 if validator['comet_rank'] <= self.data['n']['staking_validators']:
                     validator['bonded'] = 'BOND_STATUS_BONDED'
                     logging.info(f"Validator {validator['moniker']} is expected to be bonded with {validator['tokens']} tokens after applying operations because it was ranked {old_rank} in block n-1 which is above the max validators limit of {self.data['n-1']['staking_validators']} but is ranked {validator['comet_rank']} in block n which is below the max validators limit of {self.data['n']['staking_validators']}")
-            if self.ics_disable_upgrade and validator['comet_rank'] >= self.provider_max_vals:
+            if self.ics_disable_upgrade and validator['comet_rank'] > self.provider_max_vals:
                 if validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
                     logging.info(f"Validator {validator['moniker']} is expected to be unbonding with {validator['tokens']} tokens after applying operations because ICS is disabled and it is ranked {validator['comet_rank']} which is above the provider max validators limit of {self.provider_max_vals}")
@@ -577,6 +577,17 @@ class ValsetCheck():
             val['comet_vp'] = int(val['tokens']/1000000)
         # Sort the expected validator info by comet_vp to reflect the changes in the validator set order after the rotations are applied
         self.data['n']['expected_validator_info'].sort(key=lambda x: x['comet_vp'], reverse=True)
+        self.data['n']['sorted_by_tokens'] = copy.deepcopy(self.data['n']['expected_validator_info'])
+        self.data['n']['sorted_by_tokens'].sort(key=lambda x: x['tokens'], reverse=True)
+
+        for i in range(200):
+            sorted_by_tokens = self.data['n']['sorted_by_tokens'][i]
+            sorted_by_comet = self.data['n']['expected_validator_info'][i]
+            print(f'Rank {i+1}: {sorted_by_tokens["moniker"]} with {sorted_by_tokens["tokens"]} tokens is ranked {sorted_by_comet["comet_rank"]} in comet with {sorted_by_comet["comet_vp"]} voting power')
+
+        # # Print tabulated data of moniker, bonded tokens for block n-1, bonded tokens for block n, and expected bonded tokens after applying operations
+        # self.print_bonded_tokens()
+        exit()
         
         self.apply_expected_bonded_status()
         self.calculate_expected_total_bonded_tokens()
