@@ -326,16 +326,6 @@
               source scripts/vars.sh
               $CHAIN_BINARY q bank total-supply --home $whale_home -o json | jq '.'
 
-          - name: ICS Removal Upgrade
-            env:
-              TARGET_VERSION: v28.0.0
-            run: |
-              source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
-
 
           - name: Consumer rewards balances check
             run: |
@@ -378,7 +368,7 @@
                 exit 1
               fi
 
-          - name: Upgrade to v28.0.0
+          - name: Upgrade to v28.0.0 (ICS Removal)
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
             run: |
