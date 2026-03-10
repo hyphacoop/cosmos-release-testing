@@ -10,7 +10,7 @@ on:
         description: 'Gaia version to upgrade from'
         required: true
         type: string
-        default: v26.0.0
+        default: v27.0.0
       to_version:
         description: 'Gaia version to upgrade to'
         required: true
@@ -29,7 +29,7 @@ on:
 jobs:
   set-version-matrix:
     env:
-      START: ${{ github.event_name == 'push' && 'v26.0.0' || github.event_name == 'repository_dispatch' && 'v26.0.0' || inputs.from_version }}
+      START: ${{ github.event_name == 'push' && 'v27.0.0' || github.event_name == 'repository_dispatch' && 'v27.0.0' || inputs.from_version }}
       TARGET: ${{ github.event_name == 'push' && 'feat/remove-ics' || inputs.to_version }}
       ARCHIVE_URL: ${{ github.event_name == 'push' && 'https://files.polypore.xyz/archived-state/latest_v27.tar.gz' || inputs.archive_url }}
     runs-on: ubuntu-24.04
