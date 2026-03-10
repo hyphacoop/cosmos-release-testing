@@ -515,6 +515,7 @@ class ValsetCheck():
                 continue
             
             validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
+            
             if not self.data['n']['rank_change_validators'][validator['operator_address']]['rank_change'] and (self.data['n']['rank_change_validators'][validator['operator_address']]['starting_vp'] == self.data['n']['rank_change_validators'][validator['operator_address']]['ending_vp']):
                 logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} did not change rank.')               
             else:
@@ -904,9 +905,9 @@ class ValsetCheck():
         logging.info("> Total bonded tokens check")
         self.total_bonded_tokens_check()
 
-        # 4. Staking pool check
-        logging.info("> Staking pool bonded tokens check")
-        self.staking_pool_bonded_tokens_check()
+        # 4. Staking pool check: Enable after fork tool is fixed
+        # logging.info("> Staking pool bonded tokens check")
+        # self.staking_pool_bonded_tokens_check()
 
         # 5. Number of bonded validators must match comet validator set size if ICS is disabled
         logging.info("> Comet validator set size vs bonded validators check")
