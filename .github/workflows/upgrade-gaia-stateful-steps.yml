@@ -261,6 +261,7 @@ jobs:
           echo "PROVIDER_VALIDATORS=$PROVIDER_VALIDATORS" >> $GITHUB_ENV
       - name: Get and store upgrade height
         run: |
+          $CHAIN_BINARY --home $HOME_1 q gov proposals --page-reverse -o json
           UPGRADE_HEIGHT=$($CHAIN_BINARY --home $HOME_1 q gov proposals --page-reverse -o json | jq -r '.proposals[0].messages[0].value.plan.height')
           echo "Upgrade height from last upgrade proposal: $UPGRADE_HEIGHT"
           echo "UPGRADE_HEIGHT=$UPGRADE_HEIGHT" >> $GITHUB_ENV
