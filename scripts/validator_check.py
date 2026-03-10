@@ -57,7 +57,7 @@ def api_get_provider_params(urlAPI: str, height: int = 0):
         ).json()
     else:
         response = requests.get(endpoint).json()
-    # logging.info(f'Response from provider params endpoint: {response}')
+    logging.info(f'Response from provider params endpoint: {response}')
     if "params" in response:
         return response["params"]
     return []
@@ -73,7 +73,7 @@ def api_get_staking_params(urlAPI: str, height: int = 0):
         ).json()
     else:
         response = requests.get(endpoint).json()
-    # logging.info(f'Response from staking params endpoint: {response}')
+    logging.info(f'Response from staking params endpoint: {response}')
     if "params" in response:
         return response["params"]
     return []
