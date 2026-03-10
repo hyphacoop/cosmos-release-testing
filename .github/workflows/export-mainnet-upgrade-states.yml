@@ -10,7 +10,7 @@ concurrency:
   group: self-hosted-runners
 
 jobs:
-  export-cosmoshub-mainnet:
+  export-cosmoshub-upgrade-state:
     runs-on: cosmos-runner-set
     environment: export-cosmoshub-mainnet
     env:
