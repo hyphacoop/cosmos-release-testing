@@ -906,8 +906,8 @@ class ValsetCheck():
         self.total_bonded_tokens_check()
 
         # 4. Staking pool check: Enable after fork tool is fixed
-        # logging.info("> Staking pool bonded tokens check")
-        # self.staking_pool_bonded_tokens_check()
+        logging.info("> Staking pool bonded tokens check")
+        self.staking_pool_bonded_tokens_check()
 
         # 5. Number of bonded validators must match comet validator set size if ICS is disabled
         logging.info("> Comet validator set size vs bonded validators check")
