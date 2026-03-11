@@ -51,9 +51,9 @@
               echo "NAME: $NAME"
               ldd --version
           - name: Check out repository code
-            uses: actions/checkout@v4
+            uses: actions/checkout@v6
           - name: Set up Python
-            uses: actions/setup-python@v5
+            uses: actions/setup-python@v6
             with:
               python-version: '3.11'
           - name: Install dependencies
@@ -112,9 +112,9 @@
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
-            uses: actions/checkout@v4
+            uses: actions/checkout@v6
           - name: Set up Python
-            uses: actions/setup-python@v5
+            uses: actions/setup-python@v6
             with:
               python-version: '3.11'
           - name: Install dependencies
@@ -312,11 +312,10 @@
               $CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
               $CHAIN_BINARY q gov proposals --home $whale_home -o json | jq '.'
-              sleep $VOTING_PERIOD
-
+              
           - name: Stop consumer chain
             run: |
-              echo "The consumer chain will be stoppe here."
+              echo "The consumer chain will be stopped here."
             if: matrix.stop-chain == 'true'
 
 
@@ -457,9 +456,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -535,9 +534,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -717,9 +716,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -910,9 +909,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1076,9 +1075,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1190,9 +1189,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1366,9 +1365,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1504,9 +1503,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1688,9 +1687,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1802,9 +1801,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1924,9 +1923,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -1987,9 +1986,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -2085,9 +2084,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -2166,9 +2165,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
@@ -2284,9 +2283,9 @@
       #     - name: Bypass the grub-efi-amd64-signed package
       #       run: sudo apt-mark hold grub-efi-amd64-signed
       #     - name: Check out repository code
-      #       uses: actions/checkout@v4
+      #       uses: actions/checkout@v6
       #     - name: Set up Python
-      #       uses: actions/setup-python@v5
+      #       uses: actions/setup-python@v6
       #       with:
       #         python-version: '3.11'
       #     - name: Install dependencies
