@@ -254,15 +254,19 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ vars.GO_VER }}
-      - name: Build fork tool
+      # - name: Build fork tool
+      #   run: |
+      #     cd /home/runner
+      #     git clone https://github.com/cosmos/gaia.git
+      #     cd gaia
+      #     # git checkout ${{ env.RUNNING_VERSION }}
+      #     git checkout ${{ vars.FORK_TOOL_TAG }}
+      #     make build BUILD_TAGS="-tag unsafe_start_local_validator"
+      #     cp build/gaiad /home/runner/go/bin/gaiad-fork
+      - name: Download fork tool
         run: |
-          cd /home/runner
-          git clone https://github.com/cosmos/gaia.git
-          cd gaia
-          # git checkout ${{ env.RUNNING_VERSION }}
-          git checkout ${{ vars.FORK_TOOL_TAG }}
-          make build BUILD_TAGS="-tag unsafe_start_local_validator"
-          cp build/gaiad /home/runner/go/bin/gaiad-fork
+          wget -O /home/runner/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.0.0-fork/gaiad
+          chmod +x /home/runner/go/bin/gaiad-fork
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
@@ -284,9 +288,7 @@ jobs:
           --validator-pubkey "$pubkey" \
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl \
-          --replace-validator \
-          --replaced-operator-address="${{ vars.VALIDATOR_TO_REPLACE }}" \
-          --replaced-consensus-address="${{ vars.VALIDATOR_TO_REPLACE_CONSENSUS }}"
+          --auto-find-target \
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: |
