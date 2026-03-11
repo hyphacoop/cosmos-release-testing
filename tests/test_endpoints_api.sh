@@ -82,7 +82,7 @@ echo "> $GOV_PROPOSALS"
 #     response_failed $RESPONSE
 # fi
 
-curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '.'
+curl $GOV_PROPOSALS | jq -r '.'
 
 echo "> $GOV_DEPOSITS"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_DEPOSITS | jq -r '. | keys[0]')
