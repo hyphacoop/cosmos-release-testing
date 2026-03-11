@@ -75,12 +75,14 @@ if [ "$RESPONSE" != "evidence" ]; then
 fi
 
 echo "> $GOV_PROPOSALS"
-RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '. | keys[-1]')
-if [ "$RESPONSE" != "proposals" ]; then
-    curl -s $GOV_PROPOSALS | jq -r '.'
-    $CHAIN_BINARY q gov proposals --home $HOME_1 -o json | jq '.'
-    response_failed $RESPONSE
-fi
+# RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '. | keys[-1]')
+# if [ "$RESPONSE" != "proposals" ]; then
+#     curl -s $GOV_PROPOSALS | jq -r '.'
+#     $CHAIN_BINARY q gov proposals --home $HOME_1 -o json | jq '.'
+#     response_failed $RESPONSE
+# fi
+
+curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_PROPOSALS | jq -r '.'
 
 echo "> $GOV_DEPOSITS"
 RESPONSE=$(curl --retry 10 --retry-delay 5 --retry-connrefused -s $GOV_DEPOSITS | jq -r '. | keys[0]')
