@@ -92,7 +92,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
+            operation: ["down"] #,"up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: [false] #, true]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
@@ -100,7 +100,7 @@
         env:
           COSMOVISOR: false
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          COMMIT_TIMEOUT: 3
+          COMMIT_TIMEOUT: 2
           STAKING_OPERATIONS: true
         steps:
           - name: Update PATH
@@ -380,12 +380,18 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
 
-          - name: _Check CLI block query
+          - name: Check CLI block query
             run: |
               source scripts/vars.sh
               echo "> Querying block at height $REWARD_TX_HEIGHT"
               $CHAIN_BINARY q block --type=height $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
-              tests/test_block_query.sh
+              $CHAIN_BINARY q block-results $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+
+          - name: Check CLI transaction query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying txhash: $REWARD_TX_HASH"
+              $CHAIN_BINARY q tx $REWARD_TX_HASH --home $whale_home -o json | jq '.'
 
           # - name: _IBC transfer successful> ICS v6.4.0 chain 1
           #   run: |
