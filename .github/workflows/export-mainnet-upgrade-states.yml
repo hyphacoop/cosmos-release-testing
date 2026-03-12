@@ -288,7 +288,7 @@ jobs:
           --validator-pubkey "$pubkey" \
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl \
-          --auto-find-target \
+          --auto-find-target
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
         run: |
