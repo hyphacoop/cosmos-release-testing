@@ -270,7 +270,7 @@ jobs:
       - name: _Validator set checks
         run: |
           source ~/env/bin/activate
-          python scripts/validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary $CHAIN_BINARY --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals ${{ env.PROVIDER_VALIDATORS }}
+          python scripts/validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary $CHAIN_BINARY --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
           check_result=$(jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
