@@ -293,8 +293,6 @@ if __name__ == '__main__':
                         help='Block height to query (default: 0 for latest)')
     parser.add_argument('--ics-removal-upgrade', action='store_true',
                         help='Flag to indicate if the upgrade being analyzed is the ICS removal upgrade (default: False)')
-    parser.add_argument('--provider-max-vals', type=int, default=0,
-                        help='Max provider consensus validators param value (default: 0, required if --ics-removal-upgrade is set)')
     parser.add_argument('--output', type=str, default='rewards-check',
                         help='Output file name prefix (default: rewards-check-<height>.json)')
     

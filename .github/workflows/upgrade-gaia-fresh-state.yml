@@ -294,7 +294,7 @@
               current_height=$($CHAIN_BINARY status --home $whale_home | jq -r '.sync_info.latest_block_height')
               echo "> Subtract three blocks from current height"
               current_height=$((current_height - 3))
-              python scripts/ics_removal_validator_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
+              python scripts/ics_removal_validator_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
               jq '.' validator-check-$current_height.json
               check_result=$(jq -r '.' validator-check-$current_height.json | grep FAIL || true)
               echo "Check result: $check_result"
@@ -428,7 +428,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
               check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
