@@ -249,14 +249,14 @@ class RewardsCheck():
                 else:
                     cp_amount_n = self.data['n']['community_pool'].get(denom, 0)
                     print(f'amount_n: {cp_amount_n}')
-                    community_pool_amount_n = int(cp_amount_n)
+                    community_pool_amount_n = int(float(cp_amount_n))
 
                 if denom not in self.data['n-1']['community_pool']:
                     community_pool_amount_n_minus_1 = 0
                 else:
                     cp_n_minus_1 = self.data['n-1']['community_pool'].get(denom, 0)
                     print(f'amount_n_minus_1: {cp_n_minus_1}')
-                    community_pool_amount_n_minus_1 = int(cp_n_minus_1)
+                    community_pool_amount_n_minus_1 = int(float(cp_n_minus_1))
                 community_pool_increase = community_pool_amount_n - community_pool_amount_n_minus_1
                 check_passed = transferred_amount == community_pool_increase
                 self.data['checks'][f'community_pool_transfer_{denom}'] = {
