@@ -284,28 +284,40 @@
                 echo "PASS: Consumer rewards distributed to val1."
               fi            
 
-      #     - name: Query bank supply
-      #       run: |
-      #         source scripts/vars.sh
-      #         $CHAIN_BINARY q bank total-supply --home $whale_home -o json | jq '.'
+          - name: Validator set checks
+            run: |
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              python scripts/ics_removal_validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
+              jq '.' validator-check-$UPGRADE_HEIGHT.json
+              check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Validator set check passed"
+              else
+                echo "> FAIL: Validator set check failed"
+                jq '.' validator-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi
 
-
-      #     # - name: Consumer rewards balances check
-      #     #   run: |
-      #     #     source scripts/vars.sh
-      #     #     export validator_count=10
-      #     #     export MAX_VALIDATORS=8
-      #     #     export MAX_PROVIDER_VALIDATORS=5
-      #     #     python scripts/validator_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
-      #     #     check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
-      #     #     echo "Check result: $check_result"
-      #     #     if [ -z "$check_result" ]; then
-      #     #       echo "> PASS: Consumer rewards balances check passed"
-      #     #     else
-      #     #       echo "> FAIL: Consumer rewards balances check failed"
-      #     #       jq '.' rewards-check-$UPGRADE_HEIGHT.json
-      #     #       exit 1
-      #     #     fi    
+          - name: Consumer rewards balances check
+            run: |
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Consumer rewards balances check passed"
+              else
+                echo "> FAIL: Consumer rewards balances check failed"
+                jq '.' rewards-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi    
 
           - name: Submit proposal to update provider params
             run: |
@@ -318,25 +330,6 @@
             run: |
               echo "The consumer chain will be stopped here."
             if: matrix.stop-chain == 'true'
-
-
-      #     # - name: Validator set checks
-      #     #   run: |
-      #     #     source scripts/vars.sh
-      #     #     export validator_count=10
-      #     #     export MAX_VALIDATORS=8
-      #     #     export MAX_PROVIDER_VALIDATORS=5
-      #     #     python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
-      #     #     jq '.' validator-check-$UPGRADE_HEIGHT.json
-      #     #     check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
-      #     #     echo "Check result: $check_result"
-      #     #     if [ -z "$check_result" ]; then
-      #     #       echo "> PASS: Validator set check passed"
-      #     #     else
-      #     #       echo "> FAIL: Validator set check failed"
-      #     #       jq '.' validator-check-$UPGRADE_HEIGHT.json
-      #     #       exit 1
-      #     #     fi
 
           - name: _Test API endpoints
             run: |
@@ -409,7 +402,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              python scripts/validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
+              python scripts/ics_removal_validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
               jq '.' validator-check-$UPGRADE_HEIGHT.json
               check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
@@ -421,10 +414,23 @@
                 exit 1
               fi
 
-      #     - name: Query bank supply
-      #       run: |
-      #         source scripts/vars.sh
-      #         $CHAIN_BINARY q bank total-supply --home $whale_home -o json | jq '.'
+          - name: Consumer rewards balances check
+            run: |
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Consumer rewards balances check passed"
+              else
+                echo "> FAIL: Consumer rewards balances check failed"
+                jq '.' rewards-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi    
+
 
           - name: _Test API endpoints
             run: |

@@ -1,6 +1,7 @@
 """
-Validator Rewards Check
-Adds up the validator rewards for each validator and outputs the total for each denom found
+Consumer Rewards Check
+1. Verify that the balances from the consumer rewards pool are transferred to the community pool
+2. Verify that the total supply for each of the tokens in the consumer rewards pool remains unchanged
 """
 
 from logging import exception
@@ -154,7 +155,7 @@ class RewardsInfo():
     #         self.data['validators'][operator] = rewards
 
 
-    def get_consumer_rewards_denoms(self):
+    def get_consumer_rewards_balances(self):
         response = requests.get(f"{self.urlAPI}/cosmos/bank/v1beta1/balances/{self.CONSUMER_REWARDS_POOL_ADDRESS}?height={self.height}").json()
         if 'code' in response and response['code'] != 0:
             logging.error(f"Error fetching community pool: {response['message']}")
@@ -165,6 +166,15 @@ class RewardsInfo():
             denoms.add(coin['denom'])
             self.data['consumer_rewards_pool'][coin['denom']] = coin['amount']
         self.data['consumer_rewards_denoms'] = list(denoms)
+
+    def get_community_pool_balances(self):
+        response = requests.get(f"{self.urlAPI}/cosmos/distribution/v1beta1/community_pool?height={self.height}").json()
+        if 'code' in response and response['code'] != 0:
+            logging.error(f"Error fetching community pool: {response['message']}")
+            return
+        pool = response['pool']
+        for coin in pool:
+            self.data['community_pool'][coin['denom']] = coin['amount']
 
     def get_supplies(self):
         for denom in self.data['consumer_rewards_denoms']:
@@ -177,7 +187,8 @@ class RewardsInfo():
             self.height = rpc_get_current_height(self.urlRPC)
             self.data['height'] = self.height   
         
-        self.get_consumer_rewards_denoms()
+        self.get_consumer_rewards_balances()
+        self.get_community_pool_balances()
         self.get_supplies()
 
         with open(f'{self.output_prefix}-{self.height}.json', 'w') as f:
@@ -220,64 +231,51 @@ class RewardsCheck():
         self.data['n'] = rewards_info_n.data
         
 
-    def check_balances(self):
+    def check_community_pool_transfer(self):
         """
         Check that the balances for the consumer rewards denoms are correct based on the rewards distribution and the supplies.
         """
         if self.ics_disable_upgrade:
-            # The balance for each of the denom in the balances field should decrease by the amount in the consumer rewards pool, since all the rewards are distributed to the consumer rewards pool and there are no more validator rewards.
-            for denom in self.data['n']['consumer_rewards_denoms']:
-                if denom == 'uatom':
-                    # Skip checking uatom balance since there is also the mint module that mints new uatoms which can interfere with the balance check.
-                    continue
-                balance_n_minus_1 = int(self.data['n-1']['balances'][denom])
-                balance_n = int(self.data['n']['balances'][denom])
-                rewards_pool_amount = int(self.data['n']['consumer_rewards_pool'][denom])
-                expected_balance_n = balance_n_minus_1 - rewards_pool_amount
-                if balance_n != expected_balance_n:
-                    logging.error(f"Balance for denom {denom} is incorrect. Expected {expected_balance_n}, got {balance_n}.")
-                    self.data['checks'][denom] = {
-                        'status': 'FAIL',
-                        'expected_balance': expected_balance_n,
-                        'actual_balance': balance_n
-                    }
-                else:
-                    logging.info(f"Balance for denom {denom} is correct.")
-                    self.data['checks'][denom] = {
-                        'status': 'PASS',
-                        'expected_balance': expected_balance_n,
-                        'actual_balance': balance_n
-                    }
-        else:
-            # The balance for each of the denom in the balances field should remain the same since the rewards distribution should not be affected.
-            for denom in self.data['n']['consumer_rewards_denoms']:
-                if denom == 'uatom':
-                    # Skip checking uatom balance since there is also the mint module that mints new uatoms which can interfere with the balance check.
-                    continue
-                balance_n_minus_1 = int(self.data['n-1']['balances'][denom])
-                balance_n = int(self.data['n']['balances'][denom])
-                if balance_n != balance_n_minus_1:
-                    logging.error(f"Balance for denom {denom} is incorrect. Expected {balance_n_minus_1}, got {balance_n}.")
-                    self.data['checks'][denom] = {
-                        'status': 'FAIL',
-                        'expected_balance': balance_n_minus_1,
-                        'actual_balance': balance_n
-                    }
-                else:
-                    logging.info(f"Balance for denom {denom} is correct.")
-                    self.data['checks'][denom] = {
-                        'status': 'PASS',
-                        'expected_balance': balance_n_minus_1,
-                        'actual_balance': balance_n
-                    }
+            # For each denom in the consumer rewards pool:
+            # 1. The balance in the community pool should increase by that amount
+            # 2. The balance in the consumer rewards pool should decrease by that amount
+            for denom, amount in self.data['n-1']['consumer_rewards_pool'].items():
+                amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
+                amount_n_minus_1 = int(amount)
+                transferred_amount = amount_n_minus_1 - amount_n
+                community_pool_amount_n = int(self.data['n']['community_pool'].get(denom, 0))
+                community_pool_amount_n_minus_1 = int(self.data['n-1']['community_pool'].get(denom, 0))
+                community_pool_increase = community_pool_amount_n - community_pool_amount_n_minus_1
+                check_passed = transferred_amount == community_pool_increase
+                self.data['checks'][f'community_pool_transfer_{denom}'] = {
+                    'transferred_amount': transferred_amount,
+                    'community_pool_increase': community_pool_increase,
+                    'check_passed': check_passed
+                }
+
+    def check_supply_unchanged(self):
+        # For each denom in the consumer rewards pool, check that the total supply remains unchanged
+        for denom in self.data['n-1']['consumer_rewards_denoms']:
+            supply_n = int(self.data['n']['balances'].get(denom, 0))
+            supply_n_minus_1 = int(self.data['n-1']['balances'].get(denom, 0))
+            supply_change = supply_n - supply_n_minus_1
+            check_passed = supply_change == 0
+            self.data['checks'][f'supply_unchanged_{denom}'] = {
+                'supply_n': supply_n,
+                'supply_n_minus_1': supply_n_minus_1,
+                'supply_change': supply_change,
+                'check_passed': check_passed
+            }
 
     def check(self):
         """
         Check each of the fields and verify that the new balances are correct.
         """
-        self.check_balances()
+        if self.ics_disable_upgrade:
+            self.check_community_pool_transfer()
+        self.check_supply_unchanged()
 
-        # print(json.dumps(self.data['checks'], indent=4))
+        print(json.dumps(self.data['checks'], indent=4))
 
     def save(self):
         with open(self.output_prefix + '-' + str(self.height) + '.json', 'w') as f:
