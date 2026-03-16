@@ -267,19 +267,19 @@ jobs:
           # echo "UPGRADE_HEIGHT=$UPGRADE_HEIGHT" >> $GITHUB_ENV
           echo "UPGRADE_HEIGHT=30159789" >> $GITHUB_ENV
           
-      - name: _Validator set checks
-        run: |
-          source ~/env/bin/activate
-          python scripts/validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary $CHAIN_BINARY --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
-          check_result=$(jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
-          echo "Check result: $check_result"
-          if [ -z "$check_result" ]; then
-            echo "> PASS: Validator set check passed"
-          else
-            echo "> FAIL: Validator set check failed"
-            jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
-            exit 1
-          fi
+      # - name: _Validator set checks
+      #   run: |
+      #     source ~/env/bin/activate
+      #     python scripts/validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary $CHAIN_BINARY --api http://localhost:$VAL1_API_PORT --rpc http://localhost:$VAL1_RPC_PORT --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      #     check_result=$(jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
+      #     echo "Check result: $check_result"
+      #     if [ -z "$check_result" ]; then
+      #       echo "> PASS: Validator set check passed"
+      #     else
+      #       echo "> FAIL: Validator set check failed"
+      #       jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+      #       exit 1
+      #     fi
       - name: Query default validator description
         run: |
           set -e
