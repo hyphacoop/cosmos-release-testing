@@ -134,7 +134,8 @@ class RewardsInfo():
             'height': self.height,
             'balances': {},
             'consumer_rewards_denoms': [],
-            'consumer_rewards_pool': {}
+            'consumer_rewards_pool': {},
+            'community_pool': {}
         }
 
         self.CONSUMER_REWARDS_POOL_ADDRESS = 'cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd'
