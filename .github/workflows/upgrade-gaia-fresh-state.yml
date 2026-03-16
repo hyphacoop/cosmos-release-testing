@@ -291,7 +291,7 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               echo "> Getting current height"
-              current_height=$($CHAIN_BINARY q block -o json --home $whale_home | jq -r '.block.header.height')
+              current_height=$($CHAIN_BINARY status --home $whale_home | jq -r '.sync_info.latest_block_height')
               echo "> Subtract three blocks from current height"
               current_height=$((current_height - 3))
               python scripts/ics_removal_validator_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
@@ -313,7 +313,7 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               echo "> Getting current height"
-              current_height=$($CHAIN_BINARY q block -o json --home $whale_home | jq -r '.block.header.height')
+              current_height=$($CHAIN_BINARY status --home $whale_home | jq -r '.sync_info.latest_block_height')
               echo "> Subtract three blocks from current height"
               current_height=$((current_height - 3))
               python scripts/ics_removal_consumer_rewards_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
