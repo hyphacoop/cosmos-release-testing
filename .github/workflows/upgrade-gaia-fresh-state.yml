@@ -290,15 +290,19 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              python scripts/ics_removal_validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
-              jq '.' validator-check-$UPGRADE_HEIGHT.json
-              check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "> Getting current height"
+              current_height=$($CHAIN_BINARY q block -o json --home $whale_home | jq -r '.block.header.height')
+              echo "> Subtract three blocks from current height"
+              current_height=$((current_height - 3))
+              python scripts/ics_removal_validator_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
+              jq '.' validator-check-$current_height.json
+              check_result=$(jq -r '.' validator-check-$current_height.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
                 echo "> PASS: Validator set check passed"
               else
                 echo "> FAIL: Validator set check failed"
-                jq '.' validator-check-$UPGRADE_HEIGHT.json
+                jq '.' validator-check-$current_height.json
                 exit 1
               fi
 
@@ -308,14 +312,18 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
-              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "> Getting current height"
+              current_height=$($CHAIN_BINARY q block -o json --home $whale_home | jq -r '.block.header.height')
+              echo "> Subtract three blocks from current height"
+              current_height=$((current_height - 3))
+              python scripts/ics_removal_consumer_rewards_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc
+              check_result=$(jq -r '.' rewards-check-$current_height.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
                 echo "> PASS: Consumer rewards balances check passed"
               else
                 echo "> FAIL: Consumer rewards balances check failed"
-                jq '.' rewards-check-$UPGRADE_HEIGHT.json
+                jq '.' rewards-check-$current_height.json
                 exit 1
               fi    
 
