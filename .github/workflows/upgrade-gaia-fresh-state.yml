@@ -338,6 +338,54 @@
       #     #       exit 1
       #     #     fi
 
+          - name: _Test API endpoints
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
+
+          - name: _Test RPC endpoints
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
+
+          - name: _Test RPC endpoint - block results - reward
+            run: |
+              source scripts/vars.sh
+              curl http://localhost:$whale_rpc/block_results?height=$REWARD_TX_HEIGHT | jq '.'
+
+          - name: _Test RPC endpoint - block - reward
+            run: |
+              source scripts/vars.sh
+              curl http://localhost:$whale_rpc/block?height=$REWARD_TX_HEIGHT | jq '.'
+
+          - name: Check CLI block query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block at height $REWARD_TX_HEIGHT"
+              $CHAIN_BINARY q block --type=height $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+              
+          - name: Check CLI block-results query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block at height $REWARD_TX_HEIGHT"
+              $CHAIN_BINARY q block-results $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+
+          - name: Check CLI transaction query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying txhash: $REWARD_TX_HASH"
+              $CHAIN_BINARY q tx $REWARD_TX_HASH --home $whale_home -o json | jq '.'
+
+          - name: Check proposals query
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q gov proposals --home $whale_home -o json | jq '.'
+
+          - name: Check proposal query
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q gov proposal 1 --home $whale_home -o json | jq '.'
+
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
