@@ -9,6 +9,9 @@ sleep $(($COMMIT_TIMEOUT+2))
 echo "Querying txhash:"
 $CHAIN_BINARY q tx $txhash --home ${whale_home} -o json | jq '.'
 
+echo "> Save tx hash to GH environment variable"
+echo "CREATE_CONSUMER_TX_HASH=$txhash" >> $GITHUB_ENV
+
 export consumer_id=$($CHAIN_BINARY --output json q tx $txhash --home ${whale_home} | jq -r '.events[] | select(.type=="create_consumer") | .attributes[] | select(.key=="consumer_id") | .value')
 echo "Consumer ID: $consumer_id"
 echo "CONSUMER_ID=$consumer_id" >> $GITHUB_ENV
