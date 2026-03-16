@@ -527,6 +527,13 @@ class ValsetCheck():
                 # 2. Is if outside the max_validators threshold?
                 if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
                     validator['bonded'] = 'BOND_STATUS_UNBONDING'
+
+            if self.ics_disable_upgrade:
+                if validator['comet_rank'] <= self.data['n']['staking_validators']:
+                    if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING':
+                        validator['bonded'] = 'BOND_STATUS_BONDED'
+                elif validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
+                    validator['bonded'] = 'BOND_STATUS_UNBONDING'
             logging.info(f"Validator {validator['moniker']} is expected to have status {validator['bonded']} tokens after applying operations because it is ranked {validator['comet_rank']}")
 
 
