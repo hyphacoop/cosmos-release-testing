@@ -53,11 +53,11 @@ fi
 echo "[INFO]: Gaiad output:"
 echo $output
 
-echo $output | grep "MsgCreateConsumer is disabled"
+echo $output | grep 'unknown command "provider" for "tx"'
 if [ $? -eq 0 ]
 then
-    echo "[PASS]: Got MsgCreateConsumer is disabled message"
+    echo "[PASS]: Got unknown command for provider"
 else
-    echo "[ERROR]: MsgCreateConsumer is disabled message not detected!"
+    echo "[ERROR]: unknown command not detected!"
     exit 1
 fi
