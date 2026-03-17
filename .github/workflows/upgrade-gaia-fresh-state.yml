@@ -419,6 +419,15 @@
               echo "> Rewards pool:"
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
 
+          - name: Query the consumer rewards pool and community pool before upgrade
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              echo "> Consumer rewards pool balances before upgrade:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Community pool balances before upgrade:"
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -466,6 +475,8 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
               python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
               check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
               echo "Check result: $check_result"
