@@ -89,7 +89,7 @@ $CONSUMER_CHAIN_BINARY genesis add-genesis-account relayer $VAL_FUNDS$CONSUMER_D
 
 echo "> Whale validator"
 echo $MNEMONIC_1 | $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[0]} --keyring-backend test --home ${homes[0]} --output json --recover > keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json
-$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
+$CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[0]} $VAL_FUNDS$CONSUMER_DENOM,${VAL_FUNDS}ucons --home ${homes[0]} --keyring-backend test
 wallet=$(jq -r '.address' keys-${consumer_monikers[0]}-$CONSUMER_CHAIN_ID.json)
 wallets+=($wallet)
 for i in $(seq 1 $[$validator_count-1])
@@ -98,7 +98,7 @@ do
     $CONSUMER_CHAIN_BINARY keys add ${consumer_monikers[i]} --keyring-backend test --home ${homes[0]} --output json > keys-${consumer_monikers[i]}-$CONSUMER_CHAIN_ID.json
     wallet=$(jq -r '.address' keys-${consumer_monikers[i]}-$CONSUMER_CHAIN_ID.json)
     wallets+=($wallet)
-    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM --home ${homes[0]} --keyring-backend test
+    $CONSUMER_CHAIN_BINARY genesis add-genesis-account ${consumer_monikers[i]} $VAL_FUNDS$CONSUMER_DENOM,${VAL_FUNDS}ucons --home ${homes[0]} --keyring-backend test
 done
 
 echo "> Consumer keys:"
@@ -140,7 +140,7 @@ done
 echo "> Configuring app.toml"
 for i in $(seq 0 $[$validator_count-1])
 do
-    toml set --toml-path ${homes[i]}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE"
+    toml set --toml-path ${homes[i]}/config/app.toml minimum-gas-prices "$CONSUMER_GAS_PRICE,0.001ucons"
     toml set --toml-path ${homes[i]}/config/app.toml api.enable true
     toml set --toml-path ${homes[i]}/config/app.toml api.enabled-unsafe-cors true
     toml set --toml-path ${homes[i]}/config/app.toml api.address "tcp://0.0.0.0:${api_ports[i]}"
