@@ -67,6 +67,8 @@ def api_get_balances(urlAPI: str, address: str, height: int = 0):
         ).json()
     else:
         response = requests.get(endpoint).json()
+    # TODO: handle pagination
+
     if 'code' in response and response['code'] != 0:
         logging.error(f"Error fetching balances for address {address}: {response['message']}")
         return
@@ -279,7 +281,7 @@ class RewardsCheck():
         self.data['n'] = rewards_info_n.data
         self.data['n+1'] = rewards_info_n_plus_1.data
 
-        print(f'Rewards data: {json.dumps(self.data, indent=4)}')
+        # print(f'Rewards data: {json.dumps(self.data, indent=4)}')
         
 
     def check_community_pool_transfer(self):
