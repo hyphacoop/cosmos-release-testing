@@ -157,7 +157,10 @@ class RewardsInfo():
 
 
     def get_consumer_rewards_balances(self):
-        response = requests.get(f"{self.urlAPI}/cosmos/bank/v1beta1/balances/{self.CONSUMER_REWARDS_POOL_ADDRESS}?height={self.height}").json()
+        endpoint = f"{self.urlAPI}/cosmos/bank/v1beta1/balances/{self.CONSUMER_REWARDS_POOL_ADDRESS}"
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{self.height}"}
+        ).json()
         if 'code' in response and response['code'] != 0:
             logging.error(f"Error fetching community pool: {response['message']}")
             return
@@ -170,7 +173,10 @@ class RewardsInfo():
         self.data['consumer_rewards_denoms'] = list(denoms)
 
     def get_community_pool_balances(self):
-        response = requests.get(f"{self.urlAPI}/cosmos/distribution/v1beta1/community_pool?height={self.height}").json()
+        endpoint = f"{self.urlAPI}/cosmos/distribution/v1beta1/community_pool"
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{self.height}"}
+        ).json()
         if 'code' in response and response['code'] != 0:
             logging.error(f"Error fetching community pool: {response['message']}")
             return

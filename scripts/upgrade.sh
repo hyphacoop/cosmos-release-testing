@@ -180,5 +180,5 @@ fi
 
 sleep 10
 
-# echo "> Validator log:"
-# tail -n 100 ${logs[0]}
+echo "> Validator log:"
+tail -n 100 $whale_log
