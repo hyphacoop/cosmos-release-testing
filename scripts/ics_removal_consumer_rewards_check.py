@@ -39,6 +39,34 @@ def api_get_supply_of(urlAPI: str, denom: str, height: int = 0):
         return response["amount"]['amount']
     return {}
 
+
+def api_get_balances(urlAPI: str, address: str, height: int = 0):
+    endpoint = f"{urlAPI}/cosmos/bank/v1beta1/balances/{address}"
+    if height:
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{height}"}
+        ).json()
+    else:
+        response = requests.get(endpoint).json()
+    if 'code' in response and response['code'] != 0:
+        logging.error(f"Error fetching balances for address {address}: {response['message']}")
+        return
+    return response['balances']
+
+def api_get_community_pool(urlAPI: str, height: int = 0):
+    endpoint = f"{urlAPI}/cosmos/distribution/v1beta1/community_pool"
+    if height:
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{height}"}
+        ).json()
+    else:
+        response = requests.get(endpoint).json()
+    if 'code' in response and response['code'] != 0:
+        logging.error(f"Error fetching community pool: {response['message']}")
+        return
+    return response['pool']
+
+
 def api_get_validators(urlAPI, height: int = 0):
     """
     Collects the validators info at the specified height
@@ -157,14 +185,7 @@ class RewardsInfo():
 
 
     def get_consumer_rewards_balances(self):
-        endpoint = f"{self.urlAPI}/cosmos/bank/v1beta1/balances/{self.CONSUMER_REWARDS_POOL_ADDRESS}"
-        response = requests.get(
-            endpoint, headers={"x-cosmos-block-height": f"{self.height}"}
-        ).json()
-        if 'code' in response and response['code'] != 0:
-            logging.error(f"Error fetching community pool: {response['message']}")
-            return
-        pool = response['balances']
+        pool = api_get_balances(self.urlAPI, self.CONSUMER_REWARDS_POOL_ADDRESS, height=self.height)
         denoms = set()
         print(f'Consumer rewards pool balances at height {self.height}:{pool}')
         for coin in pool:
@@ -173,14 +194,7 @@ class RewardsInfo():
         self.data['consumer_rewards_denoms'] = list(denoms)
 
     def get_community_pool_balances(self):
-        endpoint = f"{self.urlAPI}/cosmos/distribution/v1beta1/community_pool"
-        response = requests.get(
-            endpoint, headers={"x-cosmos-block-height": f"{self.height}"}
-        ).json()
-        if 'code' in response and response['code'] != 0:
-            logging.error(f"Error fetching community pool: {response['message']}")
-            return
-        pool = response['pool']
+        pool = api_get_community_pool(self.urlAPI, height=self.height)
         for coin in pool:
             self.data['community_pool'][coin['denom']] = coin['amount']
 
