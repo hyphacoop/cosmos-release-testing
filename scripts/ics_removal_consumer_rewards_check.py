@@ -21,6 +21,25 @@ logging.basicConfig(
 )
 
 
+def api_get_total_supply(urlAPI: str, height: int = 0):
+    """
+    Returns the total supply for a specific denom.
+    Endpoint: GET /cosmos/bank/v1beta1/supply/by_denom?denom={denom}
+    Response: {'amount': {'denom': str, 'amount': str}}
+    Note: this endpoint returns a single coin, so no pagination is needed.
+    """
+    endpoint = f"{urlAPI}/cosmos/bank/v1beta1/supply"
+    if height:
+        response = requests.get(
+            endpoint, headers={"x-cosmos-block-height": f"{height}"}
+        ).json()
+    else:
+        response = requests.get(endpoint).json()
+    if "supply" in response:
+        return response["supply"]
+    return []
+
+
 def api_get_supply_of(urlAPI: str, denom: str, height: int = 0):
     """
     Returns the total supply for a specific denom.
@@ -199,9 +218,10 @@ class RewardsInfo():
             self.data['community_pool'][coin['denom']] = coin['amount']
 
     def get_supplies(self):
-        for denom in self.data['consumer_rewards_denoms']:
-            supply = api_get_supply_of(self.urlAPI, denom, height=self.height)
-            self.data['balances'][denom] = supply
+        for coin in api_get_total_supply(self.urlAPI, height=self.height):
+            denom = coin['denom']
+            amount = coin['amount']
+            self.data['balances'][denom] = amount
 
     def collect(self):
         # 0. Get block height if not provided
