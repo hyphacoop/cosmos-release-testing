@@ -411,7 +411,7 @@
               --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
               --gas auto --fees 1000000ucons \
               --home $consumer_whale_home -o json -y | jq '.'
-              sleep $(($COMMIT_TIMEOUT*10))
+              sleep $(($COMMIT_TIMEOUT*20))
               echo "> Balance in consumer chain recipient:"
               $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
               echo "> Val1 outstanding rewards:"
@@ -435,7 +435,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              $CHAIN_BINARY q ibc channel channels --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
+              $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
 
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
@@ -504,7 +504,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              $CHAIN_BINARY q ibc channel channels --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
+              $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
 
           - name: _Test API endpoints
             run: |
