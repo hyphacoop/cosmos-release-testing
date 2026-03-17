@@ -426,6 +426,12 @@
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
+          - name: Restart relayer
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
+
           - name: Validator set checks
             run: |
               source scripts/vars.sh
@@ -517,7 +523,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              tests/test_consumer_ibc_transfer.sh $CONSUMER_CHANNEL_ID channel-1
+              tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
 
 
       # Test-01-cosmovisor-upgrade:
