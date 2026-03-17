@@ -163,6 +163,7 @@ class RewardsInfo():
             return
         pool = response['balances']
         denoms = set()
+        print(f'Consumer rewards pool balances at height {self.height}:')
         for coin in pool:
             denoms.add(coin['denom'])
             self.data['consumer_rewards_pool'][coin['denom']] = coin['amount']
