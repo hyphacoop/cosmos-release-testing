@@ -224,13 +224,22 @@ class RewardsCheck():
             self.height = rpc_get_current_height(self.urlRPC)
         logging.info(f"Collecting inputs.")
 
+        rewards_info_n_minus_2 = RewardsInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height-2)
         rewards_info_n_minus_1 = RewardsInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height-1)
         rewards_info_n = RewardsInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height)
+        rewards_info_n_plus_1 = RewardsInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height+1)
+
         
+        rewards_info_n_minus_2.collect()
         rewards_info_n_minus_1.collect()
         rewards_info_n.collect()
+        rewards_info_n_plus_1.collect()
+        self.data['n-2'] = rewards_info_n_minus_2.data
         self.data['n-1'] = rewards_info_n_minus_1.data
         self.data['n'] = rewards_info_n.data
+        self.data['n+1'] = rewards_info_n_plus_1.data
+
+        print(f'Rewards data: {json.dumps(self.data, indent=4)}')
         
 
     def check_community_pool_transfer(self):
@@ -246,6 +255,7 @@ class RewardsCheck():
                 amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
                 amount_n_minus_1 = int(amount)
                 transferred_amount = amount_n_minus_1 - amount_n
+                print(f'Transferred amount for denom {denom}: {transferred_amount}')
                 if denom not in self.data['n']['community_pool']:
                     community_pool_amount_n = 0
                 else:
@@ -285,6 +295,8 @@ class RewardsCheck():
         """
         Check each of the fields and verify that the new balances are correct.
         """
+        logging.info(f"Checking rewards distribution changes at heights n-1 ({self.height-1}) and n ({self.height}).")
+
         if self.ics_disable_upgrade:
             self.check_community_pool_transfer()
         self.check_supply_unchanged()
