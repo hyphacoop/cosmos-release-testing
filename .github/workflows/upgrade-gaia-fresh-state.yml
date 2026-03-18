@@ -445,6 +445,12 @@
               export MAX_PROVIDER_VALIDATORS=5
               $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
 
+          - name: Consumer rewards pool balances check before upgrade
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -461,6 +467,7 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
 
           - name: _Blocks produced after upgrade
             run: |

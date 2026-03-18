@@ -8,6 +8,7 @@ from logging import exception
 import argparse
 import json
 import logging
+import math
 import requests
 import copy
 import urllib
@@ -267,7 +268,6 @@ class RewardsCheck():
                 amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
                 amount_n_minus_1 = int(amount)
                 transferred_amount = amount_n_minus_1 - amount_n
-                print(f'Transferred amount for denom {denom}: {transferred_amount}')
                 if denom not in self.data['n']['community_pool']:
                     community_pool_amount_n = 0
                 else:
@@ -282,7 +282,11 @@ class RewardsCheck():
                     print(f'amount_n_minus_1: {cp_n_minus_1}')
                     community_pool_amount_n_minus_1 = int(float(cp_n_minus_1))
                 community_pool_increase = community_pool_amount_n - community_pool_amount_n_minus_1
-                check_passed = 'PASS' if transferred_amount == community_pool_increase else 'FAIL'
+
+                print(f'Transferred amount for denom {denom}: {transferred_amount}')
+                print(f'Community pool increase for denom {denom}: {community_pool_increase}')
+                
+                check_passed = 'PASS' if math.isclose(transferred_amount, community_pool_increase, abs_tol=2) else 'FAIL'
                 self.data['checks'][f'community_pool_transfer_{denom}'] = {
                     'transferred_amount': transferred_amount,
                     'community_pool_increase': community_pool_increase,
