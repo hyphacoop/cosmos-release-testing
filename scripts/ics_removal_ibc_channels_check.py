@@ -143,7 +143,6 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
-    rc = ChannelsCheck(urlAPI=args.api, urlRPC=args.rpc, binary=args.binary, height=args.height, ics_removal_upgrade=args.ics_removal_upgrade, output_prefix=args.output)
-    rc.collect_inputs()
-    rc.check()
-    rc.save()
+    cc = ChannelsCheck(urlAPI=args.api, urlRPC=args.rpc, binary=args.binary, height=args.height, ics_removal_upgrade=args.ics_removal_upgrade, output_prefix=args.output)
+    cc.check()
+    cc.save()
