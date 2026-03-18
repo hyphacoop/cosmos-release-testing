@@ -449,6 +449,11 @@
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
+          - name: Consumer rewards pool balances check after upgrade
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh

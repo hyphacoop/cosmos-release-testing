@@ -181,4 +181,4 @@ fi
 sleep 10
 
 echo "> Validator log:"
-tail -n 100 $whale_log
+tail -n 200 $whale_log
