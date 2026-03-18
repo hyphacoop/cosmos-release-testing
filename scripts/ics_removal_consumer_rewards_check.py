@@ -265,9 +265,9 @@ class RewardsCheck():
             # 2. The balance in the consumer rewards pool should decrease by that amount
             for denom, amount in self.data['n-1']['consumer_rewards_pool'].items():
                 print(f'Checking denom {denom} with amount {amount} in consumer rewards pool at height n-1.')
-                amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
+                # amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
                 amount_n_minus_1 = int(amount)
-                transferred_amount = amount_n_minus_1 - amount_n
+                transferred_amount = amount_n_minus_1 #- amount_n
                 if denom not in self.data['n']['community_pool']:
                     community_pool_amount_n = 0
                 else:
