@@ -110,15 +110,18 @@ class ChannelsCheck():
 
         print(f'Found {len(provider_port_channels)} channels with provider port: {provider_port_channels}')
 
+        open_provider_port_channels = [channel for channel in provider_port_channels if channel['state'] == 'STATE_OPEN']
+        print(f'Found {len(open_provider_port_channels)} open channels with provider port: {open_provider_port_channels}')
+
         if not self.ics_disable_upgrade:
              logging.info("Upgrade is not the ICS removal upgrade, skipping provider port channels check.")
              return
 
-        if len(provider_port_channels) == 0:
+        if len(open_provider_port_channels) == 0:
             self.data['checks']['provider_port_channels'] = 'PASS'
         else:
             self.data['checks']['provider_port_channels'] = 'FAIL'
-            self.data['checks']['provider_port_channels_details'] = f'Expected 0 channels with provider port, found {len(provider_port_channels)}: {provider_port_channels}'
+            self.data['checks']['provider_port_channels_details'] = f'Expected 0 open channels with provider port, found {len(open_provider_port_channels)}: {open_provider_port_channels}'
 
         print(json.dumps(self.data['checks'], indent=4))
 
