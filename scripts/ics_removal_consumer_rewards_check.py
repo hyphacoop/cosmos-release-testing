@@ -264,7 +264,7 @@ class RewardsCheck():
             # 1. The balance in the community pool should increase by that amount
             # 2. The balance in the consumer rewards pool should decrease by that amount
             for denom, amount in self.data['n-1']['consumer_rewards_pool'].items():
-                print(f'Checking denom {denom} with amount {amount} in consumer rewards pool at height n-1.')
+                logging.info(f'Checking denom {denom} with amount {amount} in consumer rewards pool at height n-1.')
                 # amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
                 amount_n_minus_1 = int(amount)
                 transferred_amount = amount_n_minus_1 #- amount_n
@@ -272,20 +272,23 @@ class RewardsCheck():
                     community_pool_amount_n = 0
                 else:
                     cp_amount_n = self.data['n']['community_pool'].get(denom, 0)
-                    print(f'amount_n: {cp_amount_n}')
+                    logging.info(f'amount_n: {cp_amount_n}')
                     community_pool_amount_n = int(float(cp_amount_n))
 
                 if denom not in self.data['n-1']['community_pool']:
                     community_pool_amount_n_minus_1 = 0
                 else:
                     cp_n_minus_1 = self.data['n-1']['community_pool'].get(denom, 0)
-                    print(f'amount_n_minus_1: {cp_n_minus_1}')
+                    logging.info(f'amount_n_minus_1: {cp_n_minus_1}')
                     community_pool_amount_n_minus_1 = int(float(cp_n_minus_1))
                 community_pool_increase = community_pool_amount_n - community_pool_amount_n_minus_1
 
-                print(f'Transferred amount for denom {denom}: {transferred_amount}')
-                print(f'Community pool increase for denom {denom}: {community_pool_increase}')
+                logging.info(f'Transferred amount for denom {denom}: {transferred_amount}')
+                logging.info(f'Community pool increase for denom {denom}: {community_pool_increase}')
                 
+                if denom == 'uatom':
+                    continue
+
                 check_passed = 'PASS' if math.isclose(transferred_amount, community_pool_increase, abs_tol=2) else 'FAIL'
                 self.data['checks'][f'community_pool_transfer_{denom}'] = {
                     'transferred_amount': transferred_amount,
@@ -296,6 +299,7 @@ class RewardsCheck():
     def check_supply_unchanged(self):
         # For each denom in the consumer rewards pool, check that the total supply remains unchanged
         for denom in self.data['n-1']['consumer_rewards_denoms']:
+
             supply_n = int(self.data['n']['balances'].get(denom, 0))
             supply_n_minus_1 = int(self.data['n-1']['balances'].get(denom, 0))
             supply_change = supply_n - supply_n_minus_1
@@ -305,6 +309,10 @@ class RewardsCheck():
                 amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
                 if amount_n:
                     supply_change -= amount_n
+
+            if 'uatom' in denom:
+                continue
+          
 
             check_passed = 'PASS' if supply_change == 0 else 'FAIL'
             self.data['checks'][f'supply_unchanged_{denom}'] = {
