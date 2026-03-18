@@ -299,6 +299,12 @@ class RewardsCheck():
             supply_n = int(self.data['n']['balances'].get(denom, 0))
             supply_n_minus_1 = int(self.data['n-1']['balances'].get(denom, 0))
             supply_change = supply_n - supply_n_minus_1
+
+            # Adjust for transfers coming in at the upgrade height
+            amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
+            if amount_n:
+                supply_change -= amount_n
+
             check_passed = 'PASS' if supply_change == 0 else 'FAIL'
             self.data['checks'][f'supply_unchanged_{denom}'] = {
                 'supply_n': supply_n,
