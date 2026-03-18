@@ -23,40 +23,26 @@ logging.basicConfig(
 
 def api_get_total_supply(urlAPI: str, height: int = 0):
     """
-    Returns the total supply for a specific denom.
-    Endpoint: GET /cosmos/bank/v1beta1/supply/by_denom?denom={denom}
-    Response: {'amount': {'denom': str, 'amount': str}}
-    Note: this endpoint returns a single coin, so no pagination is needed.
+    Returns the total supply for all denoms.
+    Endpoint: GET /cosmos/bank/v1beta1/supply
+    Response: {'supply': [{'denom': str, 'amount': str}], 'pagination': {'next_key': str, 'total': str}}
     """
-    endpoint = f"{urlAPI}/cosmos/bank/v1beta1/supply"
-    if height:
+    endpoint = f"{urlAPI}/cosmos/bank/v1beta1/supply?pagination.limit=1000"
+    headers = {"x-cosmos-block-height": f"{height}"} if height else {}
+    response = requests.get(endpoint, headers=headers).json()
+    if "supply" not in response:
+        return []
+    supply = response["supply"]
+    next_key = response["pagination"]["next_key"]
+    while next_key:
         response = requests.get(
-            endpoint, headers={"x-cosmos-block-height": f"{height}"}
+            f"{urlAPI}/cosmos/bank/v1beta1/supply?pagination.limit=1000&pagination.key="
+            f"{urllib.parse.quote(next_key)}",
+            headers=headers,
         ).json()
-    else:
-        response = requests.get(endpoint).json()
-    if "supply" in response:
-        return response["supply"]
-    return []
-
-
-def api_get_supply_of(urlAPI: str, denom: str, height: int = 0):
-    """
-    Returns the total supply for a specific denom.
-    Endpoint: GET /cosmos/bank/v1beta1/supply/by_denom?denom={denom}
-    Response: {'amount': {'denom': str, 'amount': str}}
-    Note: this endpoint returns a single coin, so no pagination is needed.
-    """
-    endpoint = f"{urlAPI}/cosmos/bank/v1beta1/supply/by_denom?denom={urllib.parse.quote(denom)}"
-    if height:
-        response = requests.get(
-            endpoint, headers={"x-cosmos-block-height": f"{height}"}
-        ).json()
-    else:
-        response = requests.get(endpoint).json()
-    if "amount" in response:
-        return response["amount"]['amount']
-    return {}
+        supply.extend(response["supply"])
+        next_key = response["pagination"]["next_key"]
+    return supply
 
 
 def api_get_balances(urlAPI: str, address: str, height: int = 0):
@@ -188,22 +174,6 @@ class RewardsInfo():
         }
 
         self.CONSUMER_REWARDS_POOL_ADDRESS = 'cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd'
-    # def get_operators(self):
-    #     val_list = api_get_validators(self.urlAPI, height=self.height)
-    #     for val in val_list:
-    #         operator = val['operator_address']
-    #         self.operators.add(operator)
-
-    # def get_rewards(self):
-    #     for operator in self.operators:
-    #         print(f'> Fetching rewards for validator {operator} at height {self.height}.')
-    #         response = requests.get(f"{self.urlAPI}/cosmos/distribution/v1beta1/validators/{operator}/outstanding_rewards?height={self.height}").json()
-    #         if 'code' in response and response['code'] != 0:
-    #             logging.error(f"Error fetching rewards for validator {operator}: {response['message']}")
-    #             continue
-    #         rewards = response['rewards']['rewards']
-    #         self.data['validators'][operator] = rewards
-
 
     def get_consumer_rewards_balances(self):
         pool = api_get_balances(self.urlAPI, self.CONSUMER_REWARDS_POOL_ADDRESS, height=self.height)
@@ -312,7 +282,7 @@ class RewardsCheck():
                     print(f'amount_n_minus_1: {cp_n_minus_1}')
                     community_pool_amount_n_minus_1 = int(float(cp_n_minus_1))
                 community_pool_increase = community_pool_amount_n - community_pool_amount_n_minus_1
-                check_passed = transferred_amount == community_pool_increase
+                check_passed = 'PASS' if transferred_amount == community_pool_increase else 'FAIL'
                 self.data['checks'][f'community_pool_transfer_{denom}'] = {
                     'transferred_amount': transferred_amount,
                     'community_pool_increase': community_pool_increase,
@@ -325,7 +295,7 @@ class RewardsCheck():
             supply_n = int(self.data['n']['balances'].get(denom, 0))
             supply_n_minus_1 = int(self.data['n-1']['balances'].get(denom, 0))
             supply_change = supply_n - supply_n_minus_1
-            check_passed = supply_change == 0
+            check_passed = 'PASS' if supply_change == 0 else 'FAIL'
             self.data['checks'][f'supply_unchanged_{denom}'] = {
                 'supply_n': supply_n,
                 'supply_n_minus_1': supply_n_minus_1,
@@ -350,7 +320,7 @@ class RewardsCheck():
             json.dump(self.data, f, indent=4)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Get validator set information')
+    parser = argparse.ArgumentParser(description='Get consumer rewards information')
     parser.add_argument('--api', type=str, default='http://localhost:25001', 
                         help='API endpoint URL (default: http://localhost:25001)')
     parser.add_argument('--rpc', type=str, default='http://localhost:27001',
