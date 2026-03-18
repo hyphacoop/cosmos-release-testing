@@ -301,9 +301,10 @@ class RewardsCheck():
             supply_change = supply_n - supply_n_minus_1
 
             # Adjust for transfers coming in at the upgrade height
-            amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
-            if amount_n:
-                supply_change -= amount_n
+            if self.ics_disable_upgrade:
+                amount_n = int(self.data['n']['consumer_rewards_pool'].get(denom, 0))
+                if amount_n:
+                    supply_change -= amount_n
 
             check_passed = 'PASS' if supply_change == 0 else 'FAIL'
             self.data['checks'][f'supply_unchanged_{denom}'] = {
