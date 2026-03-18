@@ -223,7 +223,7 @@ class RewardsCheck():
         self.binary = binary
         self.height = height
         self.output_prefix = output_prefix
-        self.data = {'checks': {}, 'operations': []}
+        self.data = {'checks': {}}
         self.ics_disable_upgrade = ics_removal_upgrade
 
 
