@@ -93,8 +93,8 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down"] #,"up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
-            stop-chain: [false] #, true]
+            operation: ["down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
+            stop-chain: ["keep-consumer","stop-consumer"]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
@@ -340,11 +340,6 @@
               $CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq '.'
               sleep $(($COMMIT_TIMEOUT*2))
               $CHAIN_BINARY q gov proposals --home $whale_home -o json | jq '.'
-              
-          - name: Stop consumer chain
-            run: |
-              echo "The consumer chain will be stopped here."
-            if: matrix.stop-chain == 'true'
 
           - name: _Test API endpoints
             run: |
@@ -427,6 +422,19 @@
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
               echo "> Community pool balances before upgrade:"
               $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
+              
+          - name: Stop consumer chain
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh 
+              export validator_count=10
+              echo "> Submitting transaction to remove the consumer chain"
+              $CHAIN_BINARY tx provider remove-consumer 0 --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*2))
+              echo "> Checking that the consumer chain is removed"
+              $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
+            if: matrix.stop-chain == 'stop-consumer'
 
           - name: Check for open provider channels before upgrade
             run: |
