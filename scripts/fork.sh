@@ -22,6 +22,8 @@ VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 
 echo "> Rolling back chain to ensure a clean state."
 $CHAIN_BINARY rollback --home $FORK_HOME
+echo "> Deleting vote state."
+rm $FORK_HOME/data/priv_validator_state.json
 
 # Target: auto-select
 # build/gaiad testnet unsafe-start-local-validator \
