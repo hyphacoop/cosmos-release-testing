@@ -12,8 +12,8 @@ toml set --toml-path $FORK_HOME/config/config.toml rpc.pprof_laddr localhost:606
 toml set --toml-path $FORK_HOME/config/config.toml p2p.laddr tcp://0.0.0.0:26656
 
 echo "> Copying snapshot."
-rsync -a "$whale_home/data/" "$FORK_HOME/data/"
-rsync -a "$whale_home/wasm/" "$FORK_HOME/wasm/"
+cp -r "$whale_home/data/" "$FORK_HOME/data/"
+cp -r "$whale_home/wasm/" "$FORK_HOME/wasm/"
 
 PUBKEY=$(jq -r '.pub_key.value' $FORK_HOME/config/priv_validator_key.json)
 PRIVKEY=$(jq -r '.priv_key.value' $FORK_HOME/config/priv_validator_key.json)
@@ -23,6 +23,7 @@ VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 echo "> Rolling back chain to ensure a clean state."
 $CHAIN_BINARY rollback --home $FORK_HOME
 echo "> Deleting vote state."
+ls $FORK_HOME/data
 rm $FORK_HOME/data/priv_validator_state.json
 
 # Target: auto-select
