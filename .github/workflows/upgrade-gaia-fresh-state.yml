@@ -2510,6 +2510,7 @@
 
           - name: Start forked chain
             run: |
+              export FORK_HOME=$HOME/.gaia-fork
               source scripts/vars.sh
               $CHAIN_BINARY start --home $FORK_HOME > fork.log 2>&1 &
               FORK_PID=$!
