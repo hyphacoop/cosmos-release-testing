@@ -33,7 +33,7 @@ $FORK_BINARY testnet unsafe-start-local-validator \
 FORK_PID=$!
 
 echo "> Started fork process with PID: $FORK_PID"
-sleep 20
+sleep 30
 
 echo "> Killing fork process with PID: $FORK_PID"
 kill $FORK_PID
