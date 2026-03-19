@@ -2496,7 +2496,7 @@
               export FORK_BINARY=$HOME/go/bin/gaiad-fork
               git clone https://github.com/cosmos/gaia.git fork-build
               pushd fork-build
-              git checkout $TARGET_VERSION
+              git checkout ${{ matrix.target_version }}
               make build BUILD_TAGS="-tag unsafe_start_local_validator"
               cp build/gaiad $FORK_BINARY
               popd
