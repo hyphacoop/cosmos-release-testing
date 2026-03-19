@@ -2515,6 +2515,7 @@
               FORK_PID=$!
               echo "Forked chain started with PID $FORK_PID"
               sleep 10
+              cat fork.log
 
           - name: _Blocks produced on forked chain
             run: |
