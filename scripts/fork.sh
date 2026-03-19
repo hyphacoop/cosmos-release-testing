@@ -20,6 +20,9 @@ PRIVKEY=$(jq -r '.priv_key.value' $FORK_HOME/config/priv_validator_key.json)
 WALLET=cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq
 VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 
+echo "> Rolling back chain to ensure a clean state."
+$CHAIN_BINARY rollback --home $FORK_HOME
+
 # Target: auto-select
 # build/gaiad testnet unsafe-start-local-validator \
 $FORK_BINARY testnet unsafe-start-local-validator \
