@@ -2489,7 +2489,7 @@
               ./$STOP_SCRIPT
               sleep 10s
               tail -n 100 $whale_log
-              tmux list-sessions
+              # tmux list-sessions
             
           - name: Build fork binary
             run: |
