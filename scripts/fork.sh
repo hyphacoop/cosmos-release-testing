@@ -33,7 +33,7 @@ WALLET=cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq
 VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 
 echo "> Rolling back chain to ensure a clean state."
-$CHAIN_BINARY rollback --home $FORK_HOME
+$CHAIN_BINARY rollback --hard --home $FORK_HOME
 echo "> Resetting validator state."
 jq '.' $FORK_HOME/data/priv_validator_state.json
 # Set height, round, and step to 0 to ensure a clean state for voting on the upgrade proposal
