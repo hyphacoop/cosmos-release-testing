@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gaiad init fork-home --chain-id provider --home $FORK_HOME
+gaiad init fork-home --chain-id testnet --home $FORK_HOME
 toml set --toml-path $FORK_HOME/config/client.toml keyring-backend test
 toml set --toml-path $FORK_HOME/config/app.toml minimum-gas-prices $GAS_PRICE
 toml set --toml-path $FORK_HOME/config/app.toml api.enable true
@@ -11,9 +11,21 @@ toml set --toml-path $FORK_HOME/config/config.toml rpc.laddr tcp://127.0.0.1:266
 toml set --toml-path $FORK_HOME/config/config.toml rpc.pprof_laddr localhost:6060
 toml set --toml-path $FORK_HOME/config/config.toml p2p.laddr tcp://0.0.0.0:26656
 
+rm -rf $FORK_HOME/data
+rm -rf $FORK_HOME/wasm
+
 echo "> Copying snapshot."
-cp -r "$whale_home/data/" "$FORK_HOME/data/"
-cp -r "$whale_home/wasm/" "$FORK_HOME/wasm/"
+cp -r "$whale_home/data" "$FORK_HOME/data"
+cp -r "$whale_home/wasm" "$FORK_HOME/wasm"
+
+echo "> Whale data:"
+ls $whale_home/data
+echo "> Fork data:"
+ls $FORK_HOME/data
+echo "> Whale wasm:"
+ls $whale_home/wasm
+echo "> Fork wasm:"
+ls $FORK_HOME/wasm
 
 PUBKEY=$(jq -r '.pub_key.value' $FORK_HOME/config/priv_validator_key.json)
 PRIVKEY=$(jq -r '.priv_key.value' $FORK_HOME/config/priv_validator_key.json)

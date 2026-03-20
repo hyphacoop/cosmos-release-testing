@@ -2487,7 +2487,7 @@
             run: |
               source scripts/vars.sh
               ./$STOP_SCRIPT
-              sleep $(($COMMIT_TIMEOUT*2))
+              sleep 10s
               tail -n 100 $whale_log
             
           - name: Build fork binary
