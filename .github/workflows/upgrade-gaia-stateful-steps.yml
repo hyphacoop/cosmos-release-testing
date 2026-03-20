@@ -500,7 +500,9 @@ jobs:
           $CHAIN_BINARY keys list
       - name: _Test fork tool
         run: |
-          screen -L -Logfile $HOME/artifact/gaiad_fork.log -S $CHAIN_BINARY -d -m /home/runner/go/bin/gaiad-fork --home $HOME/.gaia testnet unsafe-start-local-validator \
+          pubkey=$(jq -r .pub_key.value $HOME/.gaia/config/priv_validator_key.json)
+          privkey=$(jq -r .priv_key.value $HOME/.gaia/config/priv_validator_key.json)
+          screen -L -Logfile $HOME/artifact/gaiad_fork.log -S $CHAIN_BINARY -d -m $HOME/go/bin/gaiad-fork --home $HOME/.gaia testnet unsafe-start-local-validator \
           --validator-operator cosmosvaloper1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd5lxtwj \
           --validator-pubkey "$pubkey" \
           --validator-privkey "$privkey" \
