@@ -255,6 +255,7 @@ do
     echo "sleep 0.2s" >> $START_SCRIPT
     echo "echo \"Stopping validator ${monikers[i]}...\"" >> $STOP_SCRIPT
     echo "tmux send-keys -t ${monikers[i]} C-c" >> $STOP_SCRIPT
+    echo "sleep 5s" >> $STOP_SCRIPT
     echo "$CHAIN_BINARY tendermint unsafe-reset-all --home ${homes[i]}" >> $RESET_SCRIPT
     echo "sleep 0.2s" >> $RESET_SCRIPT
 done
@@ -263,7 +264,7 @@ echo "./$START_SCRIPT" >> $RESET_SCRIPT
 
 echo "sleep 3s" >> $START_SCRIPT
 echo "echo \"tmux sessions:\"" >> $STOP_SCRIPT
-echo "tmux list-sessions" >> $STOP_SCRIPT
+echo "tmux list-sessions 2>/dev/null || true" >> $STOP_SCRIPT
 
 echo "> Setup complete."
 echo "* Run $START_SCRIPT to start the chain"
