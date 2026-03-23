@@ -264,7 +264,7 @@ echo "./$START_SCRIPT" >> $RESET_SCRIPT
 
 echo "sleep 3s" >> $START_SCRIPT
 echo "echo \"tmux sessions:\"" >> $STOP_SCRIPT
-echo "tmux list-sessions" >> $STOP_SCRIPT
+echo "tmux list-sessions 2>/dev/null || true" >> $STOP_SCRIPT
 
 echo "> Setup complete."
 echo "* Run $START_SCRIPT to start the chain"
