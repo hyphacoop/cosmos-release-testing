@@ -280,6 +280,76 @@ jobs:
             jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
             exit 0
           fi
+
+      - name: Stop services
+        if: always()
+        run: |
+          # hermes
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          # provider
+          killall ${{ env.CHAIN_BINARY }}  || true
+          screen -XS {{ env.PROVIDER_SERVICE_1 }} quit || true
+          screen -XS {{ env.PROVIDER_SERVICE_2 }} quit || true
+          # consumer chains
+          killall ${{ env.CONSUMER_CHAIN_BINARY }} || true
+          killall ${{ env.CONSUMER_CHAIN_BINARY_2 }} || true
+          screen -XS ${{ env.CONSUMER_SERVICE_1 }} quit || true
+          screen -XS conb1.service quit || true
+          # stride
+          killall ${{ env.STRIDE_CHAIN_BINARY }}  || true
+          screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
+          killall screen || true
+          sleep 20
+      - name: Build fork tool
+        run: |
+          cd /home/runner
+          git clone https://github.com/cosmos/gaia.git
+          cd gaia
+          # git checkout ${{ env.RUNNING_VERSION }}
+          echo "git checkout ${{ env.UPGRADE_VERSION }}"
+          git checkout ${{ env.UPGRADE_VERSION }}
+          make build BUILD_TAGS="-tag unsafe_start_local_validator"
+          cp build/gaiad $HOME/go/bin/gaiad-fork
+      # - name: Download fork tool
+      #   run: |
+      #     wget -O $HOME/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.0.0-fork/gaiad
+      #     chmod +x $HOME/go/bin/gaiad-fork
+
+      - name: Make snapshot of val1
+        run: |
+          cp -rvp $HOME_1 $HOME/.gaia
+      - name: Create tmp home
+        run: gaiad init --chain-id cosmoshub-4 --home $HOME/.test-fork fork-vel
+      - name: Replace node keys
+        run: |
+          cp $HOME/.test-fork/config/priv_validator_key.json $HOME/.gaia/config/
+          cp $HOME/.test-fork/config/node_key.json $HOME/.gaia/config/
+      - name: Add fork wallet
+        run: |
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --recover > ~/.gaia/validator.json
+          $CHAIN_BINARY keys list
+      - name: _Test fork tool
+        run: |
+          pubkey=$(jq -r .pub_key.value $HOME/.gaia/config/priv_validator_key.json)
+          privkey=$(jq -r .priv_key.value $HOME/.gaia/config/priv_validator_key.json)
+          screen -L -Logfile $HOME/artifact/gaiad_fork.log -S $CHAIN_BINARY -d -m $HOME/go/bin/gaiad-fork --home $HOME/.gaia testnet unsafe-start-local-validator \
+          --validator-operator cosmosvaloper1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd5lxtwj \
+          --validator-pubkey "$pubkey" \
+          --validator-privkey "$privkey" \
+          --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
+          --auto-find-target
+          sleep 30
+          cat $HOME/artifact/gaiad_fork.log
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
+
       - name: _Consumer rewards balances check
         run: |
           source ~/env/bin/activate
@@ -448,76 +518,6 @@ jobs:
             echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
             exit 1
           fi
-      
-
-      - name: Stop services
-        if: always()
-        run: |
-          # hermes
-          screen -XS hermes.service quit || true
-          killall hermes || true
-          sleep 1
-          # provider
-          killall ${{ env.CHAIN_BINARY }}  || true
-          screen -XS {{ env.PROVIDER_SERVICE_1 }} quit || true
-          screen -XS {{ env.PROVIDER_SERVICE_2 }} quit || true
-          # consumer chains
-          killall ${{ env.CONSUMER_CHAIN_BINARY }} || true
-          killall ${{ env.CONSUMER_CHAIN_BINARY_2 }} || true
-          screen -XS ${{ env.CONSUMER_SERVICE_1 }} quit || true
-          screen -XS conb1.service quit || true
-          # stride
-          killall ${{ env.STRIDE_CHAIN_BINARY }}  || true
-          screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
-          killall screen || true
-          sleep 20
-      # - name: Build fork tool
-      #   run: |
-      #     cd /home/runner
-      #     git clone https://github.com/cosmos/gaia.git
-      #     cd gaia
-      #     # git checkout ${{ env.RUNNING_VERSION }}
-      #     git checkout ${{ vars.FORK_TOOL_TAG }}
-      #     make build BUILD_TAGS="-tag unsafe_start_local_validator"
-      #     cp build/gaiad $HOME/go/bin/gaiad-fork
-      - name: Download fork tool
-        run: |
-          wget -O $HOME/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.0.0-fork/gaiad
-          chmod +x $HOME/go/bin/gaiad-fork
-
-      - name: Make snapshot of val1
-        run: |
-          cp -rvp $HOME_1 $HOME/.gaia
-      - name: Create tmp home
-        run: gaiad init --chain-id cosmoshub-4 --home $HOME/.test-fork fork-vel
-      - name: Replace node keys
-        run: |
-          cp $HOME/.test-fork/config/priv_validator_key.json $HOME/.gaia/config/
-          cp $HOME/.test-fork/config/node_key.json $HOME/.gaia/config/
-      - name: Add fork wallet
-        run: |
-          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --recover > ~/.gaia/validator.json
-          $CHAIN_BINARY keys list
-      - name: _Test fork tool
-        run: |
-          pubkey=$(jq -r .pub_key.value $HOME/.gaia/config/priv_validator_key.json)
-          privkey=$(jq -r .priv_key.value $HOME/.gaia/config/priv_validator_key.json)
-          screen -L -Logfile $HOME/artifact/gaiad_fork.log -S $CHAIN_BINARY -d -m $HOME/go/bin/gaiad-fork --home $HOME/.gaia testnet unsafe-start-local-validator \
-          --validator-operator cosmosvaloper1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd5lxtwj \
-          --validator-pubkey "$pubkey" \
-          --validator-privkey "$privkey" \
-          --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
-          --auto-find-target
-          sleep 30
-          cat $HOME/artifact/gaiad_fork.log
-      - name: DEBUG
-        if: always() && !cancelled()
-        run: |
-          while [ ! -f /continue ]
-          do
-            sleep 1
-          done
-
 
       - name: _Test disabled command provider create-consumer
         env:
