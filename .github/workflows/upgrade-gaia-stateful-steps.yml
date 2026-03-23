@@ -284,7 +284,6 @@ jobs:
       - name: Build fork tool
         run: |
           cd /home/runner
-          git clone https://github.com/cosmos/gaia.git
           cd gaia
           # git checkout ${{ env.RUNNING_VERSION }}
           echo "git checkout ${{ env.UPGRADE_VERSION }}"
