@@ -26,8 +26,7 @@ The script will then fetch the validator set information at:
 - Block N-1
 - Block N (the rotations go in)
 - Block N+1 (rotations are applied)
-- Block N+2
-- Block N+3 (comet validator set is updated)
+- Block N+2 (comet validator set should reflect the rotations applied in block N)
 """
 
 from logging import exception
@@ -37,6 +36,7 @@ import logging
 import requests
 import copy
 import urllib
+from bech32 import bech32_decode, bech32_encode
 
 
 logging.basicConfig(
@@ -61,6 +61,19 @@ def api_get_provider_params(urlAPI: str, height: int = 0):
     if "params" in response:
         return response["params"]
     return []
+
+def operator_to_delegator(operator_addr: str) -> str:
+    _, data = bech32_decode(operator_addr)
+    return bech32_encode("cosmos", data)
+
+def api_get_self_delegation(urlAPI: str, operator_addr: str, height: int = 0):
+    delegator_addr = operator_to_delegator(operator_addr)
+    endpoint = f"{urlAPI}/cosmos/staking/v1beta1/validators/{operator_addr}/delegations/{delegator_addr}"
+    headers = {"x-cosmos-block-height": f"{height}"} if height else {}
+    response = requests.get(endpoint, headers=headers).json()
+    if "delegation_response" in response:
+        return int(response["delegation_response"]["balance"]["amount"])
+    return 0
 
 def api_get_staking_params(urlAPI: str, height: int = 0):
     """
@@ -127,6 +140,7 @@ def api_get_validators(urlAPI, height: int = 0):
         api_vals.extend(response["validators"])
         next_key = response["pagination"]["next_key"]
     return api_vals
+
 
 def rpc_get_block_results(urlRPC, height):
     response = requests.get(f"{urlRPC}/block_results?height={height}").json()
@@ -244,8 +258,31 @@ class ValsetInfo():
                 'bonded': val['status'],
                 'tokens': int(val['tokens']),
                 'pubkey': pubkey,
-                'jailed': val['jailed']
+                'jailed': val['jailed'],
+                'min_self_delegation': int(val['min_self_delegation']),
+                'self_delegation': api_get_self_delegation(self.urlAPI, val['operator_address'], height=self.height)
             }
+
+            # Skip jailed validators
+            # if new_validator['jailed']:
+            #     logging.info(f'> Removing validator {new_validator["moniker"]} from validator info because it is jailed.')
+            #     continue
+
+            # Remove validators with 0 tokens
+            # if new_validator['tokens'] == 0:
+            #     logging.info(f'Removing validator {new_validator["moniker"]} from validator info because it has 0 tokens.')
+            #     continue
+
+            # Remove validators with self-delegation < min_self_delegation
+            # Obtain self-bonded amount
+            # self_delegation = api_get_self_delegation(self.urlAPI, new_validator['operator_address'], height=self.height)
+            # print(f'Self delegation for validator {new_validator["moniker"]} ({new_validator["operator_address"]}): {self_delegation} uatom')
+            # print(f'Min self delegation for validator {new_validator["moniker"]} ({new_validator["operator_address"]}): {new_validator["min_self_delegation"]} uatom')
+            # exit()
+            # if self_delegation < new_validator['min_self_delegation']:
+            #     logging.info(f'Removing validator {new_validator["moniker"]} from validator info because self-delegation ({self_delegation}) is less than min_self_delegation ({new_validator["min_self_delegation"]}).')
+            #     continue
+
             if pubkey in self.data['comet_validator_set']:
                 new_validator['comet_vp'] = int(
                     self.data['comet_validator_set'][pubkey]['voting_power']
@@ -461,7 +498,7 @@ class ValsetCheck():
         """
         try:
             block_results = rpc_get_block_results(self.urlRPC, self.height)
-            txs_results = block_results.get('txs_results', [])
+            txs_results = block_results.get('txs_results') or []
             for tx in txs_results:
                 if 'events' in tx:
                     self.get_events_from_transaction(tx)
@@ -480,21 +517,18 @@ class ValsetCheck():
         valset_info_n = ValsetInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height)
         valset_info_n_plus_1 = ValsetInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height+1)
         valset_info_n_plus_2 = ValsetInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height+2)
-        valset_info_n_plus_3 = ValsetInfo(urlAPI=self.urlAPI, urlRPC=self.urlRPC, binary=self.binary, height=self.height+3)
         
         valset_info_n_minus_2.collect()
         valset_info_n_minus_1.collect()
         valset_info_n.collect()
         valset_info_n_plus_1.collect()
         valset_info_n_plus_2.collect()
-        valset_info_n_plus_3.collect()
         self.data['n-2'] = valset_info_n_minus_2.data
         self.data['n-1'] = valset_info_n_minus_1.data
         self.data['n'] = valset_info_n.data
         self.data['n+1'] = valset_info_n_plus_1.data
         self.data['n+2'] = valset_info_n_plus_2.data
-        self.data['n+3'] = valset_info_n_plus_3.data
-
+        
         # Get staking messages from block N
         self.get_staking_messages()
 
@@ -514,6 +548,10 @@ class ValsetCheck():
                 logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it is jailed in block n with {validator["tokens"]} tokens')
                 continue
             
+            if validator['tokens'] == 0:
+                logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it has 0 tokens in block n')
+                continue
+
             validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
             
             if not self.data['n']['rank_change_validators'][validator['operator_address']]['rank_change'] and (self.data['n']['rank_change_validators'][validator['operator_address']]['starting_vp'] == self.data['n']['rank_change_validators'][validator['operator_address']]['ending_vp']):
@@ -557,13 +595,17 @@ class ValsetCheck():
         
         rank_comparison = {}
         for val in self.data['n']['expected_validator_info']:
+            # Only rank validators eligible for the bonded set: exclude jailed and zero-token validators
+            if val['jailed'] or val['tokens'] == 0:
+                continue
             rank_comparison[val['operator_address']] = {
                 'moniker': val['moniker'],
                 'starting_vp': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
+                'starting_tokens': val['tokens'],
                 'rank_change': False
             }
-        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting_vp
-        sorted_validators = sorted(rank_comparison.items(), key=lambda x: x[1]['starting_vp'], reverse=True)
+        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting tokens
+        sorted_validators = sorted(rank_comparison.items(), key=lambda x: x[1]['starting_tokens'], reverse=True)
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['starting_rank'] = rank
         
@@ -587,9 +629,14 @@ class ValsetCheck():
                         logging.info(f"Applying unbond operation: {op['amount']} tokens unbonded from {op['validator']}")
        
         for val in self.data['n']['expected_validator_info']:
+            if val['operator_address'] not in rank_comparison:
+                continue  # Validator was ineligible at N-1; skip it
             rank_comparison[val['operator_address']]['ending_vp'] = int(val['tokens']/1000000)
+            rank_comparison[val['operator_address']]['ending_tokens'] = val['tokens']
         
-        sorted_validators = sorted(rank_comparison.items(), key=lambda x: x[1]['ending_vp'], reverse=True)
+        # Re-check token eligibility after operations (exclude validators that dropped to 0)
+        eligible_after_ops = {addr: val for addr, val in rank_comparison.items() if val['ending_tokens'] > 0}
+        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: x[1]['ending_tokens'], reverse=True)
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['ending_rank'] = rank
         # Check which validators are expected to be bonded or unbonded based on their new rank in the validator set (preop vs expected validator info)
@@ -673,8 +720,8 @@ class ValsetCheck():
         expected_comet_set = {}
         for val in self.data['n']['expected_validator_info']:
             if val['bonded'] == 'BOND_STATUS_BONDED':
-                if val['comet_rank'] > self.provider_max_vals:
-                    break
+                if val['comet_rank'] is None or val['comet_rank'] > self.provider_max_vals:
+                    continue
                 expected_comet_set[val['pubkey']] = {
                     'voting_power': int(val['tokens']/1000000), # Convert from uatom to atom for voting power calculation
                 }
