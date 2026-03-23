@@ -508,6 +508,8 @@ jobs:
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
           --auto-find-target
+          sleep 30
+          cat $HOME/artifact/gaiad_fork.log
       - name: DEBUG
         if: always() && !cancelled()
         run: |
