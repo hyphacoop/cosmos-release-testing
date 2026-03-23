@@ -34,8 +34,8 @@ VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 
 # echo "> Rolling back chain to ensure a clean state."
 # $CHAIN_BINARY rollback --hard --home $FORK_HOME
-echo "> Resetting validator state."
-jq '.' $FORK_HOME/data/priv_validator_state.json
+# echo "> Resetting validator state."
+# jq '.' $FORK_HOME/data/priv_validator_state.json
 # Set height, round, and step to 0 to ensure a clean state for voting on the upgrade proposal
 jq '.height="0" | .round=0 | .step=0' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
 jq 'del(.signature) | del(.signbytes)' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
