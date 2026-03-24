@@ -67,7 +67,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install toml-cli requests asyncio websockets urllib3
+          python -m pip install toml-cli requests asyncio websockets urllib3 bech32
 
       - name: Get current running gaiad version
         run: |
