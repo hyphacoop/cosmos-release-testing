@@ -235,7 +235,8 @@ class ValidatorCarousel():
     def _create_swap_operation(
         self, 
         cap: int, 
-        use_redelegate: bool
+        use_redelegate: bool,
+        source_status: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
         Generic method to create swap operations for consensus or bonded sets.
@@ -243,14 +244,24 @@ class ValidatorCarousel():
         Args:
             cap: The maximum validator cap for the set
             use_redelegate: Whether to use redelegate instead of delegate
+            source_status: If set, scan from cap onwards for a validator with this bond status
             
         Returns:
             Operation dictionary or None if no swap is needed
         """
         if len(self._validators_by_vp) <= cap:
             return None
-            
-        source_val = self._validators_by_vp[cap]
+
+        if source_status:
+            source_val = next(
+                (v for v in self._validators_by_vp[cap:] if v['status'] == source_status),
+                None
+            )
+            if source_val is None:
+                logging.warning(f'No validator with status {source_status} found past cap {cap}, skipping swap.')
+                return None
+        else:
+            source_val = self._validators_by_vp[cap]
         target_val = self._validators_by_vp[cap - 1]
         
         if use_redelegate:
@@ -318,7 +329,7 @@ class ValidatorCarousel():
         """
         staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
-        return self._create_swap_operation(bonded_cap, False)
+        return self._create_swap_operation(bonded_cap, False, source_status='BOND_STATUS_UNBONDED')
 
     def swap_bonded_op_redel(self) -> Optional[Dict[str, Any]]:
         """
@@ -329,7 +340,7 @@ class ValidatorCarousel():
         """
         staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
-        return self._create_swap_operation(bonded_cap, True)
+        return self._create_swap_operation(bonded_cap, True, source_status='BOND_STATUS_UNBONDED')
 
     def set_operations(self) -> None:
         """Determine and set the operations to be performed based on configured rotation mode."""
