@@ -125,7 +125,7 @@ def transaction_json(
     messages: list,
     gas_prices: float = 0.005,
     fee_denom: str = "uatom",
-    gas_limit: int = 1000000,
+    gas_limit: int = 70000000,
     memo: str = "",
 ):
     fee_amount = int(gas_limit * gas_prices)
@@ -227,14 +227,14 @@ class ValidatorCarousel():
 
 
     def sort_vals_by_vp(self) -> None:
-        """Sort validators by voting power (includes inactive validators)."""
+        """Sort validators by voting power (excludes jailed and zero-token validators)."""
         val_list = api_get_validators(self.urlAPI)
+        val_list = [val for val in val_list if not val['jailed'] and int(val['tokens']) > 0]
         self._validators_by_vp = sorted(val_list, key=lambda val: int(val['tokens']), reverse=True)
 
     def _create_swap_operation(
         self, 
         cap: int, 
-        set_type: str, 
         use_redelegate: bool
     ) -> Optional[Dict[str, Any]]:
         """
@@ -242,7 +242,6 @@ class ValidatorCarousel():
         
         Args:
             cap: The maximum validator cap for the set
-            set_type: Type of set ('consensus' or 'bonded')
             use_redelegate: Whether to use redelegate instead of delegate
             
         Returns:
@@ -294,7 +293,7 @@ class ValidatorCarousel():
             logging.warning("Failed to fetch provider params, skipping swap-consensus operation.")
             return None
         consensus_cap = int(provider_params['max_provider_consensus_validators'])
-        return self._create_swap_operation(consensus_cap, 'consensus', False)
+        return self._create_swap_operation(consensus_cap, False)
     
     def swap_consensus_redel_op(self) -> Optional[Dict[str, Any]]:
         """
@@ -308,7 +307,7 @@ class ValidatorCarousel():
             logging.warning("Failed to fetch provider params, skipping swap-consensus-redel operation.")
             return None
         consensus_cap = int(provider_params['max_provider_consensus_validators'])
-        return self._create_swap_operation(consensus_cap, 'consensus', True)
+        return self._create_swap_operation(consensus_cap, True)
 
     def swap_bonded_op(self) -> Optional[Dict[str, Any]]:
         """
@@ -319,7 +318,7 @@ class ValidatorCarousel():
         """
         staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
-        return self._create_swap_operation(bonded_cap, 'bonded', False)
+        return self._create_swap_operation(bonded_cap, False)
 
     def swap_bonded_op_redel(self) -> Optional[Dict[str, Any]]:
         """
@@ -330,7 +329,7 @@ class ValidatorCarousel():
         """
         staking_params = api_get_staking_params(self.urlAPI)
         bonded_cap = int(staking_params['max_validators'])
-        return self._create_swap_operation(bonded_cap, 'bonded', True)
+        return self._create_swap_operation(bonded_cap, True)
 
     def set_operations(self) -> None:
         """Determine and set the operations to be performed based on configured rotation mode."""
@@ -554,6 +553,7 @@ class ValidatorCarousel():
         if self.up_rotation or self.redelegate:
             logging.info("> Pre-funding all validators with delegations to enable upward rotations.")
             val_list = api_get_validators(self.urlAPI)
+            val_list = [val for val in val_list if val['status'] == 'BOND_STATUS_BONDED']
             messages = []
             for val in val_list:
                 messages.append(delegate_message_json(
