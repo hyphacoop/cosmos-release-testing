@@ -13,9 +13,6 @@ on:
       upgrade_version:
         required: true
         type: string
-      env_name:
-        required: true
-        type: string
       archive_url:
         required: true
         type: string
