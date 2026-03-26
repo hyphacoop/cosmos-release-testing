@@ -23,6 +23,7 @@ jobs:
     env:
       SSH_KEYS: ${{ vars.SSH_KEYS }}
       CHAIN_BINARY: gaiad
+      RUNNING_VERSION: v27.0.0
       
     steps:
       # Get system info
