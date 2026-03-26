@@ -32,9 +32,13 @@ PRIVKEY=$(jq -r '.priv_key.value' $FORK_HOME/config/priv_validator_key.json)
 WALLET=cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq
 VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 
+echo "> Add new validator to keyring"
+FORK_MNEMONIC="abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon garage"
+$FORK_BINARY keys add fork-val --keyring-backend test --home $FORK_HOME --recover --output json <<< "$FORK_MNEMONIC" > /dev/null
+
 # echo "> Rolling back chain to ensure a clean state."
 # $CHAIN_BINARY rollback --hard --home $FORK_HOME
-# echo "> Resetting validator state."
+echo "> Resetting validator state."
 # jq '.' $FORK_HOME/data/priv_validator_state.json
 # Set height, round, and step to 0 to ensure a clean state for voting on the upgrade proposal
 jq '.height="0" | .round=0 | .step=0' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
