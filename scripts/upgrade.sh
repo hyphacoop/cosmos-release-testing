@@ -108,6 +108,8 @@ if [ "$STAKING_OPERATIONS" = true ]; then
     # Update the flag depending on the value of the OPERATION env var
     if [ "$OPERATION" = "down" ]; then
         python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) &
+    elif [ "$OPERATION" = "no-rotation" ]; then
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --no-rotation &
     elif [ "$OPERATION" = "up" ]; then
         python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --up-rotation &
     elif [ "$OPERATION" = "swap-consensus" ]; then

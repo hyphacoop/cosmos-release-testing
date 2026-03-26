@@ -33,7 +33,7 @@ WALLET=cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq
 VALIDATOR=cosmosvaloper1ay4dpm0kjmvtpug28vgw5w32yyjxa5spq248vn
 
 echo "> Add new validator to keyring"
-FORK_MNEMONIC="abandonabandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon garage"
+FORK_MNEMONIC="abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon garage"
 $FORK_BINARY keys add fork-val --keyring-backend test --home $FORK_HOME --recover --output json <<< "$FORK_MNEMONIC" > /dev/null
 
 # echo "> Rolling back chain to ensure a clean state."
