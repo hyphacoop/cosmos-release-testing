@@ -1,0 +1,632 @@
+{
+  "rotations": {
+    "30327960": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1lt7f9u99mlfv5ysxjtvn3ql9k5nxcl97k9rqqf",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "RdEDmSC/fRq3Qv4zsxJL13+MSXslpKIm2Z77XdK6wkc="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_UNBONDED",
+            "tokens": "1",
+            "delegator_shares": "1.000000000000000000",
+            "description": {
+              "moniker": "oneUatom2",
+              "identity": "",
+              "website": "",
+              "security_contact": "",
+              "details": ""
+            },
+            "unbonding_height": "0",
+            "unbonding_time": "1970-01-01T00:00:00Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.100000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2022-09-20T08:13:34.229134850Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": []
+          },
+          "op": "delegate",
+          "amount": 15235599830327
+        }
+      ]
+    },
+    "30327975": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1lt7f9u99mlfv5ysxjtvn3ql9k5nxcl97k9rqqf",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "RdEDmSC/fRq3Qv4zsxJL13+MSXslpKIm2Z77XdK6wkc="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_UNBONDED",
+            "tokens": "1",
+            "delegator_shares": "1.000000000000000000",
+            "description": {
+              "moniker": "oneUatom2",
+              "identity": "",
+              "website": "",
+              "security_contact": "",
+              "details": ""
+            },
+            "unbonding_height": "0",
+            "unbonding_time": "1970-01-01T00:00:00Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.100000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2022-09-20T08:13:34.229134850Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": []
+          },
+          "op": "delegate",
+          "amount": 15235599830327
+        }
+      ]
+    },
+    "30327942": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1lt7f9u99mlfv5ysxjtvn3ql9k5nxcl97k9rqqf",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "RdEDmSC/fRq3Qv4zsxJL13+MSXslpKIm2Z77XdK6wkc="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_UNBONDED",
+            "tokens": "1",
+            "delegator_shares": "1.000000000000000000",
+            "description": {
+              "moniker": "oneUatom2",
+              "identity": "",
+              "website": "",
+              "security_contact": "",
+              "details": ""
+            },
+            "unbonding_height": "0",
+            "unbonding_time": "1970-01-01T00:00:00Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.100000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2022-09-20T08:13:34.229134850Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": []
+          },
+          "op": "delegate",
+          "amount": 15235599830327
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper17dwgf5384udeuaypmyvveyvesu5y4yxu5xmu38",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "JymUn2Osphwy0JwR+epsDaoHyfzNj8C9pJSf40k8uto="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "145721324",
+            "delegator_shares": "145735824.000099504998317919",
+            "description": {
+              "moniker": "VALIDARIOS",
+              "identity": "94603103FEDD65E6",
+              "website": "https://validarios.com/",
+              "security_contact": "validarios.com@gmail.com",
+              "details": "You'll Never Walk Alone"
+            },
+            "unbonding_height": "29610972",
+            "unbonding_time": "2026-02-24T05:50:24.305989413Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2025-08-16T08:21:28.230143527Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1537533"
+            ]
+          },
+          "op": "delegate",
+          "amount": 49555640
+        }
+      ]
+    },
+    "30327945": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1lt7f9u99mlfv5ysxjtvn3ql9k5nxcl97k9rqqf",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "RdEDmSC/fRq3Qv4zsxJL13+MSXslpKIm2Z77XdK6wkc="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_UNBONDED",
+            "tokens": "1",
+            "delegator_shares": "1.000000000000000000",
+            "description": {
+              "moniker": "oneUatom2",
+              "identity": "",
+              "website": "",
+              "security_contact": "",
+              "details": ""
+            },
+            "unbonding_height": "0",
+            "unbonding_time": "1970-01-01T00:00:00Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.100000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2022-09-20T08:13:34.229134850Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": []
+          },
+          "op": "delegate",
+          "amount": 20912626791345
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper17dwgf5384udeuaypmyvveyvesu5y4yxu5xmu38",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "JymUn2Osphwy0JwR+epsDaoHyfzNj8C9pJSf40k8uto="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "145721324",
+            "delegator_shares": "145735824.000099504998317919",
+            "description": {
+              "moniker": "VALIDARIOS",
+              "identity": "94603103FEDD65E6",
+              "website": "https://validarios.com/",
+              "security_contact": "validarios.com@gmail.com",
+              "details": "You'll Never Walk Alone"
+            },
+            "unbonding_height": "29610972",
+            "unbonding_time": "2026-02-24T05:50:24.305989413Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2025-08-16T08:21:28.230143527Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1537533"
+            ]
+          },
+          "op": "delegate",
+          "amount": 49555640
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1s0lankh33kprer2l22nank5rvsuh9ksam8l32u",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "4qgnBMni20vIpBCRPamLUBK9RsHu+N75UP6E83zk0FI="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "4000000",
+            "delegator_shares": "4000000.000000000000000000",
+            "description": {
+              "moniker": "KingSuper",
+              "identity": "C8992BB62C009B9F",
+              "website": "https://kingsuper.org",
+              "security_contact": "aditya@kingsuper.services",
+              "details": "Others Trust, We Validate ! Your Stake is Important to Us. Secure Networks while You Earn Rewards."
+            },
+            "unbonding_height": "30326414",
+            "unbonding_time": "2026-04-13T06:40:00.895916163Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.080000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.040000000000000000"
+              },
+              "update_time": "2023-09-30T12:56:21.606807890Z"
+            },
+            "min_self_delegation": "0",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1545617",
+              "1555495",
+              "1555643",
+              "1556148",
+              "1556487"
+            ]
+          },
+          "op": "delegate",
+          "amount": 1000000
+        }
+      ]
+    },
+    "30327948": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1x8efhljzvs52u5xa6m7crcwes7v9u0nlwdgw30",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "68r8DAukUPMCZMD36AjOsf6qRTFj+V25uaE1EAFRAAI="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "20912716791346",
+            "delegator_shares": "20912716791346.000000000000000000",
+            "description": {
+              "moniker": "Upbit Staking",
+              "identity": "58BF2A0CBC9230B9",
+              "website": "https://upbit.com",
+              "security_contact": "staking@upbit.com",
+              "details": "The Most Trusted Digital-Asset Exchange"
+            },
+            "unbonding_height": "0",
+            "unbonding_time": "1970-01-01T00:00:00Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "1.000000000000000000",
+                "max_rate": "1.000000000000000000",
+                "max_change_rate": "1.000000000000000000"
+              },
+              "update_time": "2022-07-07T09:58:20.833843390Z"
+            },
+            "min_self_delegation": "100",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": []
+          },
+          "op": "unbond",
+          "amount": 20912726791345
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper17dwgf5384udeuaypmyvveyvesu5y4yxu5xmu38",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "JymUn2Osphwy0JwR+epsDaoHyfzNj8C9pJSf40k8uto="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "245721324",
+            "delegator_shares": "245745774.499931296945471733",
+            "description": {
+              "moniker": "VALIDARIOS",
+              "identity": "94603103FEDD65E6",
+              "website": "https://validarios.com/",
+              "security_contact": "validarios.com@gmail.com",
+              "details": "You'll Never Walk Alone"
+            },
+            "unbonding_height": "29610972",
+            "unbonding_time": "2026-02-24T05:50:24.305989413Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2025-08-16T08:21:28.230143527Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1537533"
+            ]
+          },
+          "op": "delegate",
+          "amount": 49555640
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1s7mj0fal0hs75mnp7fypp4q53fh3ldn8yrmlxs",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "lMQYTNeW6ARUhrK+qUkrZMBFcCdN+HWTIJipvr6ru1U="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_UNBONDING",
+            "tokens": "4008904",
+            "delegator_shares": "4008904.000000000000000000",
+            "description": {
+              "moniker": ".",
+              "identity": "",
+              "website": "",
+              "security_contact": "",
+              "details": ""
+            },
+            "unbonding_height": "30260519",
+            "unbonding_time": "2026-04-08T21:19:57.456024073Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.050000000000000000"
+              },
+              "update_time": "2024-12-21T15:08:06.031381366Z"
+            },
+            "min_self_delegation": "0",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1545607",
+              "1553231",
+              "1553438",
+              "1555132",
+              "1555319"
+            ]
+          },
+          "op": "delegate",
+          "amount": 100991096
+        }
+      ]
+    },
+    "30327971": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper17dwgf5384udeuaypmyvveyvesu5y4yxu5xmu38",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "JymUn2Osphwy0JwR+epsDaoHyfzNj8C9pJSf40k8uto="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "145721324",
+            "delegator_shares": "145735824.000099504998317919",
+            "description": {
+              "moniker": "VALIDARIOS",
+              "identity": "94603103FEDD65E6",
+              "website": "https://validarios.com/",
+              "security_contact": "validarios.com@gmail.com",
+              "details": "You'll Never Walk Alone"
+            },
+            "unbonding_height": "29610972",
+            "unbonding_time": "2026-02-24T05:50:24.305989413Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2025-08-16T08:21:28.230143527Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1537533"
+            ]
+          },
+          "op": "delegate",
+          "amount": 49555640
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1s0lankh33kprer2l22nank5rvsuh9ksam8l32u",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "4qgnBMni20vIpBCRPamLUBK9RsHu+N75UP6E83zk0FI="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "4000000",
+            "delegator_shares": "4000000.000000000000000000",
+            "description": {
+              "moniker": "KingSuper",
+              "identity": "C8992BB62C009B9F",
+              "website": "https://kingsuper.org",
+              "security_contact": "aditya@kingsuper.services",
+              "details": "Others Trust, We Validate ! Your Stake is Important to Us. Secure Networks while You Earn Rewards."
+            },
+            "unbonding_height": "30326414",
+            "unbonding_time": "2026-04-13T06:40:00.895916163Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.080000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.040000000000000000"
+              },
+              "update_time": "2023-09-30T12:56:21.606807890Z"
+            },
+            "min_self_delegation": "0",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1545617",
+              "1555495",
+              "1555643",
+              "1556148",
+              "1556487"
+            ]
+          },
+          "op": "delegate",
+          "amount": 1000000
+        }
+      ]
+    },
+    "30327941": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper17dwgf5384udeuaypmyvveyvesu5y4yxu5xmu38",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "JymUn2Osphwy0JwR+epsDaoHyfzNj8C9pJSf40k8uto="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "145721324",
+            "delegator_shares": "145735824.000099504998317919",
+            "description": {
+              "moniker": "VALIDARIOS",
+              "identity": "94603103FEDD65E6",
+              "website": "https://validarios.com/",
+              "security_contact": "validarios.com@gmail.com",
+              "details": "You'll Never Walk Alone"
+            },
+            "unbonding_height": "29610972",
+            "unbonding_time": "2026-02-24T05:50:24.305989413Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2025-08-16T08:21:28.230143527Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1537533"
+            ]
+          },
+          "op": "delegate",
+          "amount": 49555640
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper1s0lankh33kprer2l22nank5rvsuh9ksam8l32u",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "4qgnBMni20vIpBCRPamLUBK9RsHu+N75UP6E83zk0FI="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "4000000",
+            "delegator_shares": "4000000.000000000000000000",
+            "description": {
+              "moniker": "KingSuper",
+              "identity": "C8992BB62C009B9F",
+              "website": "https://kingsuper.org",
+              "security_contact": "aditya@kingsuper.services",
+              "details": "Others Trust, We Validate ! Your Stake is Important to Us. Secure Networks while You Earn Rewards."
+            },
+            "unbonding_height": "30326414",
+            "unbonding_time": "2026-04-13T06:40:00.895916163Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.080000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.040000000000000000"
+              },
+              "update_time": "2023-09-30T12:56:21.606807890Z"
+            },
+            "min_self_delegation": "0",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1545617",
+              "1555495",
+              "1555643",
+              "1556148",
+              "1556487"
+            ]
+          },
+          "op": "delegate",
+          "amount": 1000000
+        }
+      ]
+    },
+    "30327968": {
+      "operations": [
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper17dwgf5384udeuaypmyvveyvesu5y4yxu5xmu38",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "JymUn2Osphwy0JwR+epsDaoHyfzNj8C9pJSf40k8uto="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_BONDED",
+            "tokens": "145721324",
+            "delegator_shares": "145735824.000099504998317919",
+            "description": {
+              "moniker": "VALIDARIOS",
+              "identity": "94603103FEDD65E6",
+              "website": "https://validarios.com/",
+              "security_contact": "validarios.com@gmail.com",
+              "details": "You'll Never Walk Alone"
+            },
+            "unbonding_height": "29610972",
+            "unbonding_time": "2026-02-24T05:50:24.305989413Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2025-08-16T08:21:28.230143527Z"
+            },
+            "min_self_delegation": "1",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": [
+              "1537533"
+            ]
+          },
+          "op": "delegate",
+          "amount": 49555640
+        },
+        {
+          "validator": {
+            "operator_address": "cosmosvaloper15xl8lrtz65dm7yqtnpntmmv7asl0jqk8xc5jd0",
+            "consensus_pubkey": {
+              "@type": "/cosmos.crypto.ed25519.PubKey",
+              "key": "S3Y93jS2PQAxNOHMWw4QEfhnRtaF8Oi7MmG1eBdAMKA="
+            },
+            "jailed": false,
+            "status": "BOND_STATUS_UNBONDED",
+            "tokens": "3287947",
+            "delegator_shares": "3287947.000000000000000000",
+            "description": {
+              "moniker": "Station8",
+              "identity": "0EE0E1ADCAEC1633",
+              "website": "station8.zone",
+              "security_contact": "info@station8.zone",
+              "details": "Professional"
+            },
+            "unbonding_height": "0",
+            "unbonding_time": "1970-01-01T00:00:00Z",
+            "commission": {
+              "commission_rates": {
+                "rate": "0.050000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "update_time": "2022-07-20T18:49:10.983711028Z"
+            },
+            "min_self_delegation": "1000000",
+            "unbonding_on_hold_ref_count": "0",
+            "unbonding_ids": []
+          },
+          "op": "delegate",
+          "amount": 1712053
+        }
+      ]
+    }
+  }
+}
