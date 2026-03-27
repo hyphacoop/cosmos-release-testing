@@ -59,7 +59,6 @@ MEMO=$(openssl rand -hex $memo_limit)
 echo "> Sending tx with $memo_limit character memo (should succeed)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
-
 MEMO=$(openssl rand -hex $(( memo_limit +1 )))
 echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
@@ -83,7 +82,50 @@ proposal_id=$($CHAIN_BINARY q gov proposals --home ${homes[0]} -o json | jq -r '
 echo "> Voting for the proposal"
 $CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
+sleep $VOTING_PERIOD
 echo "> Checking if the proposal passed"
 $CHAIN_BINARY q gov proposals --home ${homes[0]} -o json | jq -r '.proposals[-1]'
 echo "> Checking if the auth params were updated"
 $CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.'
+
+$CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.'
+memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.params.max_memo_characters')
+echo "> Test memo characters limit"
+
+MEMO=$(openssl rand -hex $memo_limit)
+echo "> Sending tx with $memo_limit character memo (should succeed)"
+$CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
+MEMO=$(openssl rand -hex $(( memo_limit +1 )))
+echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
+$CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
+
+echo "> Restoring starting auth params"
+echo "> Setting new auth params in proposal template"
+jq --argjson new_auth_params "$auth_params" '.messages[].params = $new_auth_params' templates/proposal-auth-params.json > proposal-auth-params.json
+echo "> Submitting proposal to update auth params"
+txhash=$($CHAIN_BINARY tx gov submit-proposal proposal-auth-params.json --from $WALLET_1 --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+$CHAIN_BINARY q gov proposals --home $whale_home -o json | jq -r '.proposals[-1]'
+echo "> Checking proposal id"
+proposal_id=$($CHAIN_BINARY q gov proposals --home ${homes[0]} -o json | jq -r '.proposals[-1].id')
+echo "> Voting for the proposal"
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
+sleep $VOTING_PERIOD
+echo "> Checking if the proposal passed"
+$CHAIN_BINARY q gov proposals --home ${homes[0]} -o json | jq -r '.proposals[-1]'
+echo "> Checking if the auth params were updated"
+$CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.'
+memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.params.max_memo_characters')
+echo "> Test memo characters limit"
+
+MEMO=$(openssl rand -hex $memo_limit)
+echo "> Sending tx with $memo_limit character memo (should succeed)"
+$CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
+MEMO=$(openssl rand -hex $(( memo_limit +1 )))
+echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
+$CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
