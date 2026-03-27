@@ -52,7 +52,7 @@ check_code()
 ## AUTH: PARAMS
 echo "> Test auth params"
 $CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.'
-memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.params.max_memo_characters')
+memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.params.max_memo_characters')
 echo "> Test memo characters limit"
 MEMO=$(head -c $memo_limit /dev/urandom | base64)
 echo "> Sending tx with $memo_limit character memo (should succeed)"
