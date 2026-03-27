@@ -65,7 +65,7 @@ $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 -
 echo "> Test auth params update"
 echo "> Setting memo characters limit to 100"
 echo "> Setting current params to the auth_params variable"
-auth_params=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.')
+auth_params=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.params')
 echo "> Current auth params: $auth_params"
 new_auth_params=$(echo $auth_params | jq '.max_memo_characters = 100')
 echo "> New auth params: $new_auth_params"
