@@ -451,6 +451,13 @@
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
               $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
 
+          - name: Check validators
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.validators[] | {description.moniker, operator_address, jailed, status}'
+
+
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -462,6 +469,13 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          - name: Check validators
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.validators[] | {description.moniker, operator_address, jailed, status}'
+
 
           - name: Consumer rewards pool balances check after upgrade
             run: |
@@ -2977,6 +2991,12 @@
               source scripts/vars.sh
               tests/test_auth.sh
 
+          - name: Check validators
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.validators[] | {description.moniker, operator_address, jailed, status}'
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: "${{ matrix.target_version }}"
@@ -2988,6 +3008,13 @@
             run: |
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: Check validators
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.validators[] | {description.moniker, operator_address, jailed, status}'
+
 
           - name: _Test auth module
             run: |
