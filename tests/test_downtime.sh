@@ -38,6 +38,9 @@ echo "> Bytes: $bytes"
 valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
 echo "> Valoper: $valoper"
 
+echo "> Slashing parameters:"
+$CHAIN_BINARY q slashing params --home $whale_home -o json | jq '.'
+
 # Jailing
 echo "> Stopping the last validator's node."
 session=${monikers[-1]}
@@ -58,9 +61,16 @@ $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_UNBONDING" ]]; then
-    echo "> PASS: Validator has been jailed."
+    echo "> PASS: Validator is unbonding."
 else
-    echo "> FAIL: Validator has not been jailed."
+    echo "> FAIL: Validator is not unbonding."
+    exit 1
+fi
+jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
+if [[ "$jailed" == "true" ]]; then
+    echo "> PASS: Validator is jailed."
+else
+    echo "> FAIL: Validator is not jailed."
     exit 1
 fi
 
@@ -84,3 +94,10 @@ else
     exit 1
 fi
 
+jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
+if [[ "$jailed" == "false" ]]; then
+    echo "> PASS: Validator is not jailed."
+else
+    echo "> FAIL: Validator is still jailed."
+    exit 1
+fi
