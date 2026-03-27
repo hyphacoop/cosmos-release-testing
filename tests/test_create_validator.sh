@@ -21,8 +21,8 @@ valcons=$($CHAIN_BINARY comet show-address --home $node_home)
 echo "> Valcons: $valcons"
 
 # Modify create-validator template
-jq --arg pubkey "$pubkey" '.pubkey = $pubkey' templates/create-validator.json > create-validator.json
-jq --arg amount "${VAL_AMOUNT}${DENOM}" '.amount = $amount' create-validator.json > create-validator-amount.json
+jq --argjson pubkey "$pubkey" '.pubkey = $pubkey' templates/create-validator.json > create-validator.json
+jq --arg amount "${VAL_STAKE}${DENOM}" '.amount = $amount' create-validator.json > create-validator-amount.json
 
 echo "> Create validator JSON:"
 jq '.' create-validator-amount.json
