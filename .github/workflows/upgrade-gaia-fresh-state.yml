@@ -553,6 +553,7 @@
           - name: _Test validator jailing and slashing
             run: |
               source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
               tests/test_downtime.sh
               
           - name: _Test API endpoints
