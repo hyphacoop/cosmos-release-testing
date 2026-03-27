@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# Only needs a node_home variable to function, so we can reuse the state sync node for this test
 
 # Create new key in state sync node's keyring
 $CHAIN_BINARY keys add validator --keyring-backend test --home $node_home > /dev/null
