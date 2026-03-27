@@ -2982,6 +2982,11 @@
               source scripts/vars.sh
               tests/test_auth.sh
 
+          - name: _Test validator jailing and slashing
+            run: |
+              source scripts/vars.sh
+              tests/test_downtime.sh
+
           # - name: Restart relayer
           #   run: |
           #     # sudo systemctl restart $RELAYER
