@@ -61,3 +61,26 @@ $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} $SEND_AMOUNT --from $WALL
 MEMO=$(head -c $(( memo_limit +1 )) /dev/urandom | base64)
 echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} $SEND_AMOUNT --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+
+echo "> Test auth params update"
+echo "> Setting memo characters limit to 100"
+echo "> Setting current params to the auth_params variable"
+auth_params=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json)
+echo "> Current auth params: $auth_params"
+new_auth_params=$(echo $auth_params | jq '.params.max_memo_characters = 100')
+echo "> New auth params: $new_auth_params"
+echo "> Setting new auth params in proposal template"
+jq --argjson new_auth_params "$new_auth_params" '.messages[].params = $new_auth_params' templates/proposal-auth-params.json > proposal-auth-params.json
+echo "> Submitting proposal to update auth params"
+txhash=$($CHAIN_BINARY tx gov submit-proposal proposal-auth-params.json --from $WALLET_1 --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+$CHAIN_BINARY q gov proposals --home $whale_home -o json | jq -r '.proposals[-1]'
+echo "> Checking proposal id"
+proposal_id=$($CHAIN_BINARY q gov proposals --home ${homes[0]} -o json | jq -r '.proposals[-1].id')
+echo "> Voting for the proposal"
+$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
+echo "> Checking if the proposal passed"
+$CHAIN_BINARY q gov proposals --home ${homes[0]} -o json | jq -r '.proposals[-1]'
+echo "> Checking if the auth params were updated"
+$CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.'

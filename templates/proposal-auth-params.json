@@ -1,0 +1,20 @@
+{
+ "messages": [
+  {
+   "@type": "/cosmos.auth.v1beta1.MsgUpdateParams",
+   "authority": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "params": {
+    "max_memo_characters": "0",
+    "tx_sig_limit": "0",
+    "tx_size_cost_per_byte": "0",
+    "sig_verify_cost_ed25519": "0",
+    "sig_verify_cost_secp256k1": "0"
+   }
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000uatom",
+ "title": "Update auth params",
+ "summary": "Update auth params",
+ "expedited": false
+}
