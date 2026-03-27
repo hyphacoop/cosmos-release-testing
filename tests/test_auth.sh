@@ -54,13 +54,16 @@ echo "> Test auth params"
 $CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq '.'
 memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.params.max_memo_characters')
 echo "> Test memo characters limit"
-MEMO=$(head -c $memo_limit /dev/urandom)
+
+MEMO=$(openssl rand -hex $memo_limit)
 echo "> Sending tx with $memo_limit character memo (should succeed)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
 
-MEMO=$(head -c $(( memo_limit +1 )) /dev/urandom)
+MEMO=$(openssl rand -hex $(( memo_limit +1 )))
 echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
+sleep $((COMMIT_TIMEOUT*2))
 
 echo "> Test auth params update"
 echo "> Setting memo characters limit to 100"
