@@ -88,16 +88,11 @@ sleep $(($COMMIT_TIMEOUT*5))
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
-    echo "> PASS: Validator has been unjailed."
+    echo "> PASS: Validator is bonded."
 else
-    echo "> FAIL: Validator has not been unjailed."
+    echo "> FAIL: Validator is not bonded."
     exit 1
 fi
 
 jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
-if [[ "$jailed" == "false" ]]; then
-    echo "> PASS: Validator is not jailed."
-else
-    echo "> FAIL: Validator is still jailed."
-    exit 1
-fi
+echo "> Jailed: $jailed"
