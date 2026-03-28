@@ -156,7 +156,7 @@ class ValidatorCarousel():
     ACCOUNT_MINIMUM = 20_000_000  # 50 tokens
     ROTATION_DELTA = 10_000_000  # 10 tokens
     SWAP_DELTA = 1_000_000  # 1 token
-    PRE_FUNDING_AMOUNT = 100_000_000  # 100 tokens
+    PRE_FUNDING_AMOUNT = 200_000_000  # 200 tokens
     WEBSOCKET_MAX_SIZE = 100 * 1024 * 1024  # 100MB
     WEBSOCKET_DELAY = 0.2  # seconds
     RECONNECT_DELAY = 3  # seconds
