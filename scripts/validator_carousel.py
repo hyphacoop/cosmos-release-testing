@@ -568,6 +568,13 @@ class ValidatorCarousel():
             messages = []
             adjusted_amount = self.PRE_FUNDING_AMOUNT
             for val in val_list:
+                if val['status'] == 'BOND_STATUS_BONDED':
+                    messages.append(delegate_message_json(
+                        del_addr=self.delegator,
+                        val_addr=val['operator_address'],
+                        amount=adjusted_amount,
+                        denom=self.denom
+                    ))
                 if self.up_rotation:
                     adjusted_amount += int(self.ROTATION_DELTA/2)
                 messages.append(delegate_message_json(
