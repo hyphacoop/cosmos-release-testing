@@ -291,12 +291,6 @@
                 echo "PASS: Consumer rewards distributed to val1."
               fi            
 
-          - name: Review block results at upgrade height
-            run: |
-              source scripts/vars.sh
-              echo "> Querying block results at height $UPGRADE_HEIGHT"
-              $CHAIN_BINARY q block-results $UPGRADE_HEIGHT --home $whale_home -o json | jq '.'
-
           - name: Validator set checks
             run: |
               source scripts/vars.sh
@@ -488,6 +482,13 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+
+
+          - name: Review block results at upgrade height
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block results at height $UPGRADE_HEIGHT"
+              $CHAIN_BINARY q block-results $UPGRADE_HEIGHT --home $whale_home -o json | jq '.'
 
 
           - name: Consumer rewards pool balances check after upgrade
