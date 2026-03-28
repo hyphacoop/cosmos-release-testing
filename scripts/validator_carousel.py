@@ -577,12 +577,12 @@ class ValidatorCarousel():
                     ))
                 if self.up_rotation:
                     adjusted_amount += int(self.ROTATION_DELTA/2)
-                messages.append(delegate_message_json(
-                    del_addr=self.delegator,
-                    val_addr=val['operator_address'],
-                    amount=adjusted_amount,
-                    denom=self.denom
-                ))
+                    messages.append(delegate_message_json(
+                        del_addr=self.delegator,
+                        val_addr=val['operator_address'],
+                        amount=adjusted_amount,
+                        denom=self.denom
+                    ))
             tx_json = transaction_json(messages=messages)
             with open('tx.json', 'w') as f:
                 json.dump(tx_json, f, indent=4)
