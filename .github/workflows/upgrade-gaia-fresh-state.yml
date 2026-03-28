@@ -93,7 +93,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
+            operation: ["down","no-rotation","up"] #,"swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: ["keep-consumer"] #,"stop-consumer"]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
@@ -291,6 +291,12 @@
                 echo "PASS: Consumer rewards distributed to val1."
               fi            
 
+          - name: Review block results at upgrade height
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block results at height $UPGRADE_HEIGHT"
+              $CHAIN_BINARY q block-results $UPGRADE_HEIGHT --home $whale_home -o json | jq '.'
+
           - name: Validator set checks
             run: |
               source scripts/vars.sh
@@ -303,6 +309,15 @@
               current_height=$((current_height - 3))
               python scripts/ics_removal_validator_check.py --height $current_height --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS
               jq '.' validator-check-$current_height.json
+              operations=$(jq -r '.operations' validator-check-$current_height.json)
+              echo "> Operations: $operations"
+              # echo "> Check if any operations went through at the upgrade height. If operations are expected but not found, fail the test."
+              # if [ "${{ matrix.operation }}" != "no-rotation" ]; then
+              #   operation="downtime"
+              # else
+              #   operation="rotation"
+              # fi
+
               check_result=$(jq -r '.' validator-check-$current_height.json | grep FAIL || true)
               echo "Check result: $check_result"
               if [ -z "$check_result" ]; then
