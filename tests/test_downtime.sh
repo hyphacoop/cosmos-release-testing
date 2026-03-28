@@ -30,8 +30,8 @@ do
     logs+=($log)
 done
 
-echo "> Moniker: ${monikers[-1]}"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[-1]}" '.[] | select(.name==$name).address')
+echo "> Moniker: ${monikers[2]}"
+wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[2]}" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
 bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
 echo "> Bytes: $bytes"
@@ -43,11 +43,11 @@ $CHAIN_BINARY q slashing params --home $whale_home -o json | jq '.'
 
 # Jailing
 echo "> Stopping the last validator's node."
-session=${monikers[-1]}
+session=${monikers[2]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
 sleep $((COMMIT_TIMEOUT*3))
-tail ${logs[-1]} -n 100
+tail ${logs[2]} -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$DOWNTIME_WINDOW))
 
@@ -77,11 +77,12 @@ fi
 # Unjailing
 
 echo "> Starting the last validator's node again."
-tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
+tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[2]} 2>&1 | tee ${logs[2]}"
+echo "> Waiting for the downtime infraction to expire."
 sleep $DOWNTIME_JAIL_DURATION
-tail ${logs[-1]}
+tail ${logs[2]} -n 100
 echo "> Submitting unjail transaction."
-$CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+$CHAIN_BINARY tx slashing unjail --from ${monikers[2]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Wait for another downtime infraction."
 sleep $(($COMMIT_TIMEOUT*5))
