@@ -156,7 +156,7 @@ class ValidatorCarousel():
     ACCOUNT_MINIMUM = 20_000_000  # 50 tokens
     ROTATION_DELTA = 10_000_000  # 10 tokens
     SWAP_DELTA = 1_000_000  # 1 token
-    PRE_FUNDING_AMOUNT = 200_000_000  # 200 tokens
+    PRE_FUNDING_AMOUNT = 100_000_000  # 100 tokens
     WEBSOCKET_MAX_SIZE = 100 * 1024 * 1024  # 100MB
     WEBSOCKET_DELAY = 0.2  # seconds
     RECONNECT_DELAY = 3  # seconds
@@ -566,11 +566,14 @@ class ValidatorCarousel():
             val_list = api_get_validators(self.urlAPI)
             val_list = [val for val in val_list if val['status'] == 'BOND_STATUS_BONDED']
             messages = []
+            adjusted_amount = self.PRE_FUNDING_AMOUNT
             for val in val_list:
+                if self.up_rotation:
+                    adjusted_amount += int(self.ROTATION_DELTA/2)
                 messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=val['operator_address'],
-                    amount=self.PRE_FUNDING_AMOUNT,
+                    amount=adjusted_amount,
                     denom=self.denom
                 ))
             tx_json = transaction_json(messages=messages)
