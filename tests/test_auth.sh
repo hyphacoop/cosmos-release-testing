@@ -56,10 +56,13 @@ memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.pa
 
 echo "> Test memo characters limit"
 MEMO=$(openssl rand -hex $((memo_limit / 2)))
+echo "> Generated memo: $MEMO ($(wc -c <<< $MEMO) characters)"
+
 echo "> Sending tx with $memo_limit character memo (should succeed)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
 MEMO=$(openssl rand -hex $(( (memo_limit +1) / 2 )))
+echo "> Generated memo: $MEMO ($(wc -c <<< $MEMO) characters)"
 echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
@@ -93,10 +96,14 @@ memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.pa
 
 echo "> Test memo characters limit"
 MEMO=$(openssl rand -hex $((memo_limit / 2)))
+echo "> Generated memo: $MEMO ($(wc -c <<< $MEMO) characters)"
+
 echo "> Sending tx with $memo_limit character memo (should succeed)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
 MEMO=$(openssl rand -hex $(( (memo_limit +1) / 2 )))
+echo "> Generated memo: $MEMO ($(wc -c <<< $MEMO) characters)"
+
 echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
@@ -122,10 +129,13 @@ memo_limit=$($CHAIN_BINARY q auth params --home ${homes[0]} -o json | jq -r '.pa
 
 echo "> Test memo characters limit"
 MEMO=$(openssl rand -hex $((memo_limit / 2)))
+echo "> Generated memo: $MEMO ($(wc -c <<< $MEMO) characters)"
+
 echo "> Sending tx with $memo_limit character memo (should succeed)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
 MEMO=$(openssl rand -hex $(( (memo_limit +1) / 2 )))
+echo "> Generated memo: $MEMO ($(wc -c <<< $MEMO) characters)"
 echo "> Sending tx with $(( memo_limit +1 )) character memo (should fail)"
 $CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.'
 sleep $((COMMIT_TIMEOUT*2))
