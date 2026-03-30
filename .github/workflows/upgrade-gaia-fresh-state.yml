@@ -542,6 +542,18 @@
                 jq '.' validator-check-$UPGRADE_HEIGHT.json
                 exit 1
               fi
+              echo "> Verify that operations occurred at upgrade height"
+              operations=$(jq -r '.operations' validator-check-$UPGRADE_HEIGHT.json)
+              echo "> Operations: $operations"
+              if [ "${{ matrix.operation }}" != "no-rotation" ]; then
+                # Verify that operations array is not empty
+                if [ "$operations" != "[]" ]; then
+                  echo "> PASS: Operations occurred at upgrade height as expected for operation ${{ matrix.operation }}"
+                else
+                  echo "> FAIL: No operations occurred at upgrade height for operation ${{ matrix.operation }}"
+                  exit 1
+                fi
+              fi
 
           # - name: Consumer rewards balances check
           #   run: |

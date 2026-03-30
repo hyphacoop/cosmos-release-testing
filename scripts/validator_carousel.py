@@ -121,6 +121,8 @@ def undelegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
     }
 
 
+
+
 def transaction_json(
     messages: list,
     gas_prices: float = 0.005,
@@ -147,6 +149,8 @@ def transaction_json(
             },
         },
     }
+
+
 
 
 class ValidatorCarousel():
@@ -417,7 +421,7 @@ class ValidatorCarousel():
         except subprocess.CalledProcessError as cpe:
             logging.error(f"{cpe}\n{result.stderr}")
 
-    def broadcast(self) -> None:
+    def broadcast(self) -> str:
         """Broadcast the signed transaction to the network."""
         result = subprocess.run(
             [self.binary, 'tx', 'broadcast', 'tx-signed.json',
@@ -428,11 +432,29 @@ class ValidatorCarousel():
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True
         )
-        print(result.stdout)
+        logging.info(result.stdout)
         try:
             result.check_returncode()
         except subprocess.CalledProcessError as cpe:
             logging.error(f"{cpe}\n{result.stderr}")
+        return json.loads(result.stdout)
+    
+    def tx_query(self, txhash) -> None:
+        """Query the transaction result using the tx hash."""
+        result = subprocess.run(
+            [self.binary, 'q', 'tx', txhash,
+             f'--node={self.urlRPC}',
+             f'--chain-id={self.chain}',
+             '--output=json'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True
+        )
+        logging.info(result.stdout)
+        try:
+            result.check_returncode()
+        except subprocess.CalledProcessError as cpe:
+            logging.error(f"{cpe}\n{result.stderr}")
+        return json.loads(result.stdout)
 
     def record_operations(self) -> None:
         """
@@ -586,7 +608,12 @@ class ValidatorCarousel():
             with open('tx.json', 'w') as f:
                 json.dump(tx_json, f, indent=4)
             self.sign()
-            self.broadcast()
+            result = self.broadcast()
+            logging.info("Broadcast result: %s", result)
+            tx_hash = result['txhash']
+            await asyncio.sleep(3)  # Wait for pre-funding transaction to be included before subscribing to blocks
+            query_result = self.tx_query(tx_hash)
+            logging.info("Pre-funding transaction result: %s", query_result)
 
         while True:
             try:
