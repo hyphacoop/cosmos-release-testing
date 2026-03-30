@@ -566,23 +566,20 @@ class ValidatorCarousel():
             val_list = api_get_validators(self.urlAPI)
             val_list = [val for val in val_list if val['status'] == 'BOND_STATUS_BONDED']
             messages = []
-            adjusted_amount = self.PRE_FUNDING_AMOUNT
-            for val in val_list:
-                if val['status'] == 'BOND_STATUS_BONDED':
-                    messages.append(delegate_message_json(
-                        del_addr=self.delegator,
-                        val_addr=val['operator_address'],
-                        amount=adjusted_amount,
-                        denom=self.denom
-                    ))
-                if self.up_rotation:
-                    adjusted_amount += int(self.ROTATION_DELTA/2)
-                    messages.append(delegate_message_json(
-                        del_addr=self.delegator,
-                        val_addr=val['operator_address'],
-                        amount=adjusted_amount,
-                        denom=self.denom
-                    ))
+            for val in val_list[:-1]:
+                messages.append(delegate_message_json(
+                    del_addr=self.delegator,
+                    val_addr=val['operator_address'],
+                    amount=self.PRE_FUNDING_AMOUNT,
+                    denom=self.denom
+                ))
+            if self.up_rotation:
+                messages.append(delegate_message_json(
+                    del_addr=self.delegator,
+                    val_addr=val_list[-1]['operator_address'],
+                    amount=int(self.PRE_FUNDING_AMOUNT/2),
+                    denom=self.denom
+                ))
             tx_json = transaction_json(messages=messages)
             with open('tx.json', 'w') as f:
                 json.dump(tx_json, f, indent=4)
