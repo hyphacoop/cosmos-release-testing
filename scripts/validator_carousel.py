@@ -563,10 +563,12 @@ class ValidatorCarousel():
         # Pre-fund validators if needed for upward rotations or redelegations
         if self.up_rotation or self.redelegate:
             logging.info("> Pre-funding all validators with delegations to enable upward rotations.")
-            val_list = api_get_validators(self.urlAPI)
-            val_list = [val for val in val_list if val['status'] == 'BOND_STATUS_BONDED']
+            # val_list = api_get_validators(self.urlAPI)
+            # Filter val_list by tokens amount
+            self.sort_vals_by_vp()
+            
             messages = []
-            for val in val_list[:-1]:
+            for val in self._validators_by_vp[:1]:
                 messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=val['operator_address'],
@@ -576,7 +578,7 @@ class ValidatorCarousel():
             if self.up_rotation:
                 messages.append(delegate_message_json(
                     del_addr=self.delegator,
-                    val_addr=val_list[-1]['operator_address'],
+                    val_addr=self._validators_by_vp[-1]['operator_address'],
                     amount=int(self.PRE_FUNDING_AMOUNT/2),
                     denom=self.denom
                 ))
