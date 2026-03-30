@@ -27,6 +27,7 @@ jobs:
       PERSISTENT_PEERS: 6a40fcafbf98a8d0cae4437c76486a6cb88576dc@one.cosmos-mainnet.polypore.xyz:26656,d09265f7e2b854435a800b15ecabf591a8426994@sentry-01.cosmoshub-4.polypore.xyz:26656
       SYNC_RPC_1: https://rpc.sentry-01.cosmoshub-4.polypore.xyz:443
       SYNC_RPC_2: https://rpc.sentry-01.cosmoshub-4.polypore.xyz:443
+      ADDRBOOK_URL: https://snapshots.polkachu.com/addrbook/cosmos/addrbook.json
       
     steps:
       # Get system info
@@ -172,7 +173,7 @@ jobs:
             rm archive.tar.lz4
           fi
       - name: Get addrbook
-        run: curl -Ls ${{ vars.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
+        run: curl -Ls ${{ env.ADDRBOOK_URL }} > /home/runner/.gaia/config/addrbook.json
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
