@@ -590,20 +590,20 @@ class ValidatorCarousel():
             self.sort_vals_by_vp()
             
             messages = []
-            for val in self._validators_by_vp[:-1]:
+            for val in self._validators_by_vp:
                 messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=val['operator_address'],
                     amount=self.PRE_FUNDING_AMOUNT,
                     denom=self.denom
                 ))
-            if self.up_rotation:
-                messages.append(delegate_message_json(
-                    del_addr=self.delegator,
-                    val_addr=self._validators_by_vp[-1]['operator_address'],
-                    amount=int(self.PRE_FUNDING_AMOUNT/2),
-                    denom=self.denom
-                ))
+            # if self.up_rotation:
+            #     messages.append(delegate_message_json(
+            #         del_addr=self.delegator,
+            #         val_addr=self._validators_by_vp[-1]['operator_address'],
+            #         amount=int(self.PRE_FUNDING_AMOUNT/2),
+            #         denom=self.denom
+            #     ))
             tx_json = transaction_json(messages=messages)
             with open('tx.json', 'w') as f:
                 json.dump(tx_json, f, indent=4)
