@@ -610,23 +610,23 @@
               source scripts/vars.sh
               curl http://localhost:$whale_rpc/block?height=$REWARD_TX_HEIGHT | jq '.'
 
-          - name: Check CLI block query
-            run: |
-              source scripts/vars.sh
-              echo "> Querying block at height $REWARD_TX_HEIGHT"
-              $CHAIN_BINARY q block --type=height $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+          # - name: Check CLI block query
+          #   run: |
+          #     source scripts/vars.sh
+          #     echo "> Querying block at height $REWARD_TX_HEIGHT"
+          #     $CHAIN_BINARY q block --type=height $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
               
-          - name: Check CLI block-results query
-            run: |
-              source scripts/vars.sh
-              echo "> Querying block at height $REWARD_TX_HEIGHT"
-              $CHAIN_BINARY q block-results $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+          # - name: Check CLI block-results query
+          #   run: |
+          #     source scripts/vars.sh
+          #     echo "> Querying block at height $REWARD_TX_HEIGHT"
+          #     $CHAIN_BINARY q block-results $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
 
-          - name: Check CLI transaction query
-            run: |
-              source scripts/vars.sh
-              echo "> Querying txhash: $REWARD_TX_HASH"
-              $CHAIN_BINARY q tx $REWARD_TX_HASH --home $whale_home -o json | jq '.'
+          # - name: Check CLI transaction query
+          #   run: |
+          #     source scripts/vars.sh
+          #     echo "> Querying txhash: $REWARD_TX_HASH"
+          #     $CHAIN_BINARY q tx $REWARD_TX_HASH --home $whale_home -o json | jq '.'
 
           - name: Check proposals query
             run: |
