@@ -590,7 +590,7 @@ class ValidatorCarousel():
             self.sort_vals_by_vp()
             
             messages = []
-            for val in self._validators_by_vp[:1]:
+            for val in self._validators_by_vp[:-1]:
                 messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=val['operator_address'],

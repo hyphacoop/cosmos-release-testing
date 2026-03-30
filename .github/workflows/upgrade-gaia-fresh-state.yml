@@ -100,7 +100,8 @@
           fail-fast: false
         env:
           COSMOVISOR: false
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          BINARY_SOURCE: DOWNLOAD
           COMMIT_TIMEOUT: 2
           STAKING_OPERATIONS: true
         steps:
@@ -471,6 +472,7 @@
               TARGET_VERSION: ${{ matrix.target_version }}
             run: |
               # export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               export OPERATION=${{ matrix.operation }}
               source scripts/vars.sh
               export validator_count=10
