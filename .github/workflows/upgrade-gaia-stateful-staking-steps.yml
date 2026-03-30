@@ -334,6 +334,12 @@ jobs:
             exit 0
           fi
 
+      - name: Get min_deposit
+        run: |
+          set -e
+          gaiad q gov params -o json
+          min_deposit=$(gaiad q gov params -o json | jq -r '.params.min_deposit[] | select(.denom=="uatom") | .amount')
+          echo "MIN_DEPOSIT=$min_deposit" >> $GITHUB_ENV
       - name: Submit and vote on the upgrade proposal
         run: |
           set -e
