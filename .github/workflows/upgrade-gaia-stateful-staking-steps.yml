@@ -24,6 +24,9 @@ jobs:
       SSH_KEYS: ${{ vars.SSH_KEYS }}
       CHAIN_BINARY: gaiad
       RUNNING_VERSION: v27.0.0
+      PERSISTENT_PEERS: 6a40fcafbf98a8d0cae4437c76486a6cb88576dc@one.cosmos-mainnet.polypore.xyz:26656,d09265f7e2b854435a800b15ecabf591a8426994@sentry-01.cosmoshub-4.polypore.xyz:26656
+      SYNC_RPC_1: https://rpc.sentry-01.cosmoshub-4.polypore.xyz:443
+      SYNC_RPC_2: https://rpc.sentry-01.cosmoshub-4.polypore.xyz:443
       
     steps:
       # Get system info
@@ -120,8 +123,8 @@ jobs:
           sed -i -e "/rpc_servers =/ s^= .*^= \"${{ vars.SYNC_RPC_1 }},${{ vars.SYNC_RPC_2 }}\"^" $NODE_HOME/config/config.toml
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
           toml set api.enable "true" --toml-path $NODE_HOME/config/app.toml
-          echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
-          echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
+          # echo "${{ secrets.PRIV_VALIDATOR_KEY }}" | base64 --decode > $NODE_HOME/config/priv_validator_key.json
+          # echo "${{ secrets.NODE_KEY }}" | base64 --decode > $NODE_HOME/config/node_key.json
           echo "Replaceing genesis..."
           wget -nv $GENESIS_URL -O genesis.json.gz
           gunzip genesis.json.gz
