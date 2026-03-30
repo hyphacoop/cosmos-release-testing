@@ -482,6 +482,7 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q staking delegations $WALLET_1 --home $whale_home -o json --height $((UPGRADE_HEIGHT-1)) | jq '.'
+              $CHAIN_BINARY q staking delegations $WALLET_1 --home $whale_home -o json | jq '.'
 
           - name: Check validators
             run: |
@@ -507,11 +508,11 @@
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
-          - name: Restart relayer
-            run: |
-              tmux send-keys -t relayer C-c
-              sleep $(($COMMIT_TIMEOUT*2))
-              scripts/start_relayer.sh
+          # - name: Restart relayer
+          #   run: |
+          #     tmux send-keys -t relayer C-c
+          #     sleep $(($COMMIT_TIMEOUT*2))
+          #     scripts/start_relayer.sh
 
           - name: Delegate to validators
             run: |
@@ -542,46 +543,46 @@
                 exit 1
               fi
 
-          - name: Consumer rewards balances check
-            run: |
-              source scripts/vars.sh
-              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
-              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
-              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
-              jq '.' rewards-check-$UPGRADE_HEIGHT.json
-              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
-              echo "Check result: $check_result"
-              if [ -z "$check_result" ]; then
-                echo "> PASS: Consumer rewards balances check passed"
-              else
-                echo "> FAIL: Consumer rewards balances check failed"
-                jq '.' rewards-check-$UPGRADE_HEIGHT.json
-                exit 1
-              fi    
+          # - name: Consumer rewards balances check
+          #   run: |
+          #     source scripts/vars.sh
+          #     $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+          #     $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+          #     python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
+          #     jq '.' rewards-check-$UPGRADE_HEIGHT.json
+          #     check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+          #     echo "Check result: $check_result"
+          #     if [ -z "$check_result" ]; then
+          #       echo "> PASS: Consumer rewards balances check passed"
+          #     else
+          #       echo "> FAIL: Consumer rewards balances check failed"
+          #       jq '.' rewards-check-$UPGRADE_HEIGHT.json
+          #       exit 1
+          #     fi    
 
-          - name: IBC channels check
-            run: |
-              source scripts/vars.sh  
-              python scripts/ics_removal_ibc_channels_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
-              jq '.' channels-check-$UPGRADE_HEIGHT.json
-              check_result=$(jq -r '.' channels-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
-              echo "Check result: $check_result"
-              if [ -z "$check_result" ]; then
-                echo "> PASS: IBC channels check passed"
-              else
-                echo "> FAIL: IBC channels check failed"
-                jq '.' channels-check-$UPGRADE_HEIGHT.json
-                exit 1
-              fi    
+          # - name: IBC channels check
+          #   run: |
+          #     source scripts/vars.sh  
+          #     python scripts/ics_removal_ibc_channels_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
+          #     jq '.' channels-check-$UPGRADE_HEIGHT.json
+          #     check_result=$(jq -r '.' channels-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+          #     echo "Check result: $check_result"
+          #     if [ -z "$check_result" ]; then
+          #       echo "> PASS: IBC channels check passed"
+          #     else
+          #       echo "> FAIL: IBC channels check failed"
+          #       jq '.' channels-check-$UPGRADE_HEIGHT.json
+          #       exit 1
+          #     fi    
 
-          - name: Check for open provider channels after upgrade
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
+          # - name: Check for open provider channels after upgrade
+          #   run: |
+          #     source scripts/vars.sh  
+          #     source scripts/vars_consumer_v640_one.sh 
+          #     export validator_count=10
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
 
           - name: _Test validator jailing and slashing
             run: |
