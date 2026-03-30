@@ -2865,12 +2865,12 @@
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
               ending_delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
               diff=$(echo "$ending_delegation_amount - $starting_delegation_amount" | bc)
-              echo "> Differnece in delegation amount: $diff"
+              echo "> Difference in delegation amount: $diff"
               if [[ "$diff" == "1000000" ]]; then
                   echo "Token redemption succeeded."
               else
                   echo "Token redemption failed."
-                  exit 0
+                  exit 1
               fi
     
           - name: Set up vesting account
@@ -3056,21 +3056,23 @@
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
               liquid_denom=$($CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq -r --arg valoper "$VALOPER_1" '.balances | map(select(.denom | startswith($valoper))) | .[-1].denom')
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
+              starting_delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
               echo "> Denom: $liquid_denom"
               echo "> Command: $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $whale_home -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home"
               $CHAIN_BINARY tx liquid redeem-tokens 1000000$liquid_denom --from $upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
               $CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq '.'
-              delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
-              echo "> Delegation_amount: $delegation_amount"
-              if [[ "$delegation_amount" == "1000000" ]]; then
-                  echo "PASS: Token redemption succeeded."
+              ending_delegation_amount=$($CHAIN_BINARY q staking delegations $upgrade_wallet --home $whale_home -o json | jq -r '.delegation_responses[0].balance.amount')
+              diff=$(echo "$ending_delegation_amount - $starting_delegation_amount" | bc)
+              echo "> Difference in delegation amount: $diff"
+              if [[ "$diff" == "1000000" ]]; then
+                  echo "Token redemption succeeded."
               else
-                  echo "FAIL: Token redemption failed."
+                  echo "Token redemption failed."
                   exit 1
               fi
-
+    
           - name: _Test ICA send
             run: |
               source scripts/vars.sh
