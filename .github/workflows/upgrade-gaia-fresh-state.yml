@@ -466,6 +466,29 @@
           #     source scripts/vars.sh
           #     $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              export validator_count=10
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
