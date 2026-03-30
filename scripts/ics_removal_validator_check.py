@@ -258,7 +258,7 @@ class ValsetInfo():
                 'bonded': val['status'],
                 'tokens': int(val['tokens']),
                 'pubkey': pubkey,
-                'jailed': val['jailed'],
+                'jailed': val['jailed'] if 'jailed' in val else False,
                 'min_self_delegation': int(val['min_self_delegation']),
                 'self_delegation': api_get_self_delegation(self.urlAPI, val['operator_address'], height=self.height)
             }
@@ -862,6 +862,24 @@ class ValsetCheck():
                 logging.info(f"> Validator status check passed for {val['operator_address']}: expected {expected_status} matches actual {actual_status}")
                 self.data['checks'][f"validator_status_{val['operator_address']}"] = 'PASS'
                 
+    def validator_jailed_check(self):
+        """
+        Check that the validator jailed status is unchanged.
+        """
+        for val in self.data['n']['expected_validator_info']:
+            expected_jailed = val['jailed']
+            for ref_val in self.data['n']['validator_info']:
+                if ref_val['operator_address'] == val['operator_address']:
+                    actual_jailed = ref_val['jailed']
+                    break
+            if expected_jailed != actual_jailed:
+                logging.error(f"> Validator jailed check failed for {val['operator_address']}: expected {expected_jailed} but got {actual_jailed}")
+                self.data['checks'][f"validator_jailed_{val['operator_address']}"] = 'FAIL'
+            else:
+                logging.info(f"> Validator jailed check passed for {val['operator_address']}: expected {expected_jailed} matches actual {actual_jailed}")
+                self.data['checks'][f"validator_jailed_{val['operator_address']}"] = 'PASS'
+                
+        
     def comet_validator_set_pre_check(self):
         """
         Checks that the actual validator set matches the expected one at N.
@@ -974,6 +992,10 @@ class ValsetCheck():
         # 7. Validator set changes: Status (active/inactive based on max validators and bonded status)
         logging.info("> Validator status check")
         self.validator_status_check()
+
+        # 8. Validator set changes: Jailed status should not change
+        logging.info("> Validator jailed status check")
+        self.validator_jailed_check()
 
         # 8. Comet validator set
         logging.info("> Comet validator set check")
