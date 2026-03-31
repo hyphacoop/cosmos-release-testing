@@ -660,7 +660,8 @@
           fail-fast: false
         env:
           COSMOVISOR: false
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          BINARY_SOURCE: DOWNLOAD
           COMMIT_TIMEOUT: 3
         steps:
           - name: Update PATH
@@ -790,6 +791,7 @@
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
@@ -2588,7 +2590,8 @@
           fail-fast: false
         env:
           COSMOVISOR: false
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          BINARY_SOURCE: DOWNLOAD
           COMMIT_TIMEOUT: 3
           VESTING_AMOUNT: 110000000
           VESTING_DELEGATED_AMOUNT: 100000000
@@ -2988,6 +2991,12 @@
               source scripts/vars.sh
               tests/test_auth.sh
 
+          - name: _Test authz module
+            run: |
+              source scripts/vars.sh
+              tests/test_authz.sh
+
+
           - name: Upgrade to v27.0.0
             env:
               TARGET_VERSION: v27.0.0
@@ -3023,6 +3032,7 @@
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}  
           - name: _Blocks produced after upgrade
             run: |
@@ -3033,6 +3043,12 @@
             run: |
               source scripts/vars.sh
               tests/test_auth.sh
+
+          - name: _Test authz module
+            run: |
+              source scripts/vars.sh
+              tests/test_authz.sh
+
 
           - name: _Test validator jailing and slashing
             run: |
