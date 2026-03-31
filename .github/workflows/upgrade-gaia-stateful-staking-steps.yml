@@ -399,6 +399,9 @@ jobs:
 
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
@@ -459,6 +462,9 @@ jobs:
       
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
@@ -519,6 +525,9 @@ jobs:
 
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
@@ -579,6 +588,9 @@ jobs:
       
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
@@ -639,6 +651,9 @@ jobs:
       
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
@@ -699,6 +714,9 @@ jobs:
       
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
@@ -759,6 +777,9 @@ jobs:
 
       - name: Prepare new for new test
         run: |
+          killall gaiad gaiad-v28 screen
+          sleep 10
+          tail /home/runner/artifact/gaiad_test.log
           cd ~
           rm -rf .gaia
           tar xf test-archive.tar
