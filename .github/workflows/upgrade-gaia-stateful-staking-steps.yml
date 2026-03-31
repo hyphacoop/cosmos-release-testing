@@ -379,7 +379,7 @@ jobs:
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
 
-      - name: Build and install test gaiad
+      - name: Download v24 binary
         run: |
           sudo wget https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad -O /usr/local/bin/gaiad-v28
           sudo chmod +x /usr/local/bin/gaiad-v28
@@ -389,14 +389,434 @@ jobs:
           tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: Print starting validator set
         run: |
-          PROVIDER_VALIDATORS=$(gaiad-v28 --home $HOME_1 q comet-validator-set -o json | jq -r '.pagination.total')
+          PROVIDER_VALIDATORS=$(gaiad-v28 q comet-validator-set -o json | jq -r '.pagination.total')
           echo "Number of validators: $PROVIDER_VALIDATORS"
-          # echo "PROVIDER_VALIDATORS=$PROVIDER_VALIDATORS" >> $GITHUB_ENV
-          echo "PROVIDER_VALIDATORS=180" >> $GITHUB_ENV 
+          echo "PROVIDER_VALIDATORS=$PROVIDER_VALIDATORS" >> $GITHUB_ENV
       - name: _Validator set check (down)
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --no-rotation) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (no-rotation)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --up-rotation) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (up-rotation)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (swap-consensus)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-bonded) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (swap-bonded)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus --swap-bonded) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (swap-consensus and swap-bonded)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus --swap-bonded --redelegate) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (swap-consensus swap-bonded redelegate)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+
+      - name: Prepare new for new test
+        run: |
+          cd ~
+          rm -rf .gaia
+          tar xf test-archive.tar
+      - name: Start gaiad
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_upgrade.log -S gaiad -d -m gaiad --home /home/runner/.gaia start
+      - name: Wait for gaiad to start and stabilize
+        run: |
+          tail -f /home/runner/artifact/gaiad_upgrade.log &
+          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+      - name: Restore val key
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art" | gaiad --output json keys add val --keyring-backend test --recover > ~/.gaia/validator.json
+      - name: Delegate to validator
+        run: |
+          echo "Delegate 10ATOM to validator."
+          gaiad tx staking delegate cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv 10000000uatom --from val --keyring-backend test --fees 1000000uatom -y
+          echo "Wait for the delegation to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 10
+      - name: Submit and vote on the upgrade proposal
+        run: |
+          set -e
+          current_block=$(curl -s 127.0.0.1:26657/block | jq -r .result.block.header.height)
+          upgrade_height=$(($current_block+20))
+          echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
+          echo "Submitting the upgrade proposal..."
+          echo "Upgrade Name set to: ${{ env.UPGRADE_NAME }}"
+          echo "Creating json proposal"
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ env.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes"
+          txhash=$($proposal | jq -r .txhash)
+          echo "Wait for the proposal to go on chain..."
+          tests/test_block_production.sh 127.0.0.1 26657 1 1
+          echo "Get proposal ID from txhash: $txhash ..."
+          gaiad q tx $txhash
+          proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+          echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          $vote
+      - name: Stop gaiad when reached upgrade height
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: |
+          source ~/env/bin/activate
+          echo "Upgrade height is: ${{ env.upgrade_height }}"
+          echo "Starting scripts/validator_carousel.py"
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus --swap-bonded --redelegate --up-rotation) &
+          ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
+          echo "exiting gaia and screen"
+          killall gaiad screen
+          tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: _Validator set check (swap-consensus swap-bonded redelegate up-rotation)
+        run: |
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
