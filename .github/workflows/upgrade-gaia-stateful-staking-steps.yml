@@ -382,7 +382,7 @@ jobs:
       - name: Build and install test gaiad
         run: |
           sudo wget https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad -O /usr/local/bin/gaiad-v28
-          sudo chmod +x ~/go/bin/gaiad-v28
+          sudo chmod +x /usr/local/bin/gaiad-v28
       - name: Start gaiad v28
         run: |
           screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
