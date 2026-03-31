@@ -450,7 +450,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --no-rotation) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --no-rotation &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -513,7 +513,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --up-rotation) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --up-rotation &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -576,7 +576,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --swap-consensus &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -639,7 +639,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-bonded) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --swap-bonded &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -702,7 +702,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus --swap-bonded) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --swap-consensus --swap-bonded &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -765,7 +765,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus --swap-bonded --redelegate) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --swap-consensus --swap-bonded --redelegate &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
@@ -828,7 +828,7 @@ jobs:
           source ~/env/bin/activate
           echo "Upgrade height is: ${{ env.upgrade_height }}"
           echo "Starting scripts/validator_carousel.py"
-          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1) --swap-consensus --swap-bonded --redelegate --up-rotation) &
+          python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $NODE_HOME --api http://localhost:1317 --rpc http://localhost:26657 --chain-id cosmoshub-4 --height $(($upgrade_height-1)) --swap-consensus --swap-bonded --redelegate --up-rotation &
           ( tail -f -n0 /home/runner/artifact/gaiad_upgrade.log & ) | grep -q "CONSENSUS FAILURE"
           echo "exiting gaia and screen"
           killall gaiad screen
