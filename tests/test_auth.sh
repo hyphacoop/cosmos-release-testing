@@ -66,7 +66,7 @@ check_code $txhash
 MEMO=$(openssl rand -hex 256 | cut -c1-$((memo_limit + 1)) )
 echo "> Generated memo: $MEMO (${#MEMO} characters)"
 echo "> Sending tx with ${#MEMO} character memo (should fail)"
-response=$($CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.')
+response=$($CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json 2>&1)
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Response: $response"
 if [[ $response == *"memo too large"* ]]; then
@@ -114,7 +114,7 @@ check_code $txhash
 MEMO=$(openssl rand -hex 256 | cut -c1-$((memo_limit + 1)) ) 
 echo "> Generated memo: $MEMO (${#MEMO} characters)"
 echo "> Sending tx with ${#MEMO} character memo (should fail)"
-response=$($CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.')
+response=$($CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json 2>&1)
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Response: $response"
 if [[ $response == *"memo too large"* ]]; then
@@ -154,7 +154,7 @@ check_code $txhash
 MEMO=$(openssl rand -hex 256 | cut -c1-$((memo_limit + 1)) ) 
 echo "> Generated memo: $MEMO (${#MEMO} characters)"
 echo "> Sending tx with ${#MEMO} character memo (should fail)"
-response=$($CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json | jq '.')
+response=$($CHAIN_BINARY tx bank send ${wallets[0]} ${wallets[1]} 1uatom --from $WALLET_1 --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --note "$MEMO" -y -o json 2>&1)
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Response: $response"
 if [[ $response == *"memo too large"* ]]; then
