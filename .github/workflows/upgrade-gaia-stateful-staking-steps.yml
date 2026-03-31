@@ -286,7 +286,8 @@ jobs:
           sleep 10s
       - name: Archive running state for later tests
         run: |
-          tar cf test-archive.tar $NODE_HOME
+          cd ~/
+          tar cf test-archive.tar .gaia
           ls -alh test-archive.tar
       - name: Start gaiad
         run: |
