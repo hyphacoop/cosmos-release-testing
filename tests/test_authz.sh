@@ -40,7 +40,7 @@ done
 
 
 # Query the keyring to get the granter and grantee wallets. If there are granter and grantee wallets in the keyring, they will be used. Otherwise, new wallets will be created.
-if $CHAIN_BINARY keys show granter --home ${homes[0]} > /dev/null  then
+if $CHAIN_BINARY keys show granter --home ${homes[0]} > /dev/null ; then
     echo "> Granter wallet already exists in keyring"
 else
     echo "> Creating granter wallet"
@@ -50,7 +50,7 @@ else
     rm keys.json
 fi
 
-if $CHAIN_BINARY keys show grantee --home ${homes[0]} > /dev/null  then
+if $CHAIN_BINARY keys show grantee --home ${homes[0]} > /dev/null ; then
     echo "> Grantee wallet already exists in keyring"
 else
     echo "> Creating grantee wallet"
@@ -81,4 +81,45 @@ echo "> Submit the bank send transaction from grantee's account using the authz 
 txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the transaction was successful"
+check_code $txhash
+
+echo "> 3: Revoking the send authorization from granter to grantee"
+txhash=$($CHAIN_BINARY tx authz revoke $grantee_wallet send --from granter --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+echo "> Checking the grant was revoked"
+$CHAIN_BINARY q authz grants --granter $granter_wallet --grantee $grantee_wallet --home ${homes[0]} -o json | jq '.'
+echo "> Submit the bank send transaction from grantee's account using the authz exec command"
+txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+echo "> Checking the transaction was not successful"
+check_code $txhash
+
+echo "> 1b: Granting send authorization with expiration from granter to grantee"
+# Set expiration to 1 minute from now in Unix timestamp format
+current_time=$(date +%s)
+expiration=$(date -d "+1 minute" +%s)
+echo "> Current time: $current_time, expiration time: $expiration"
+txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --from granter --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json --expiration $expiration | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+echo "> Checking the grant"
+$CHAIN_BINARY q authz grants --granter $granter_wallet --grantee $grantee_wallet --home ${homes[0]} -o json | jq '.'
+
+echo "> 2b: Executing the a send message from grantee to send tokens on behalf of granter before expiration"
+echo "> Create a transaction to send tokens from granter to the whale account using the grantee's authorization"
+$CHAIN_BINARY tx bank send $granter_wallet $WALLET_1 1000000$DENOM --from granter --home ${homes[0]} --chain-id $CHAIN_ID --generate-only > tx.json
+echo "> Transaction:"
+jq '.' tx.json
+echo "> Submit the bank send transaction from grantee's account using the authz exec command"
+txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+echo "> Checking the transaction was successful"
+check_code $txhash
+
+echo "> 4: Checking the send authorization expires after 1 minute"
+echo "> Waiting for 1 minute for the grant to expire"
+sleep 1m
+echo "> Submit the bank send transaction from grantee's account using the authz exec command"
+txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home ${homes[0]} --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+sleep $((COMMIT_TIMEOUT*2))
+echo "> Checking the transaction was not successful"
 check_code $txhash
