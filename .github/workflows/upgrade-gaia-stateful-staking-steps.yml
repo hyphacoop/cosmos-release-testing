@@ -23,7 +23,7 @@ jobs:
     env:
       SSH_KEYS: ${{ vars.SSH_KEYS }}
       CHAIN_BINARY: gaiad
-      RUNNING_VERSION: v27.0.0
+      RUNNING_VERSION: v27.1.0
       UPGRADE_NAME: v28.0.0
       PERSISTENT_PEERS: 6a40fcafbf98a8d0cae4437c76486a6cb88576dc@one.cosmos-mainnet.polypore.xyz:26656,d09265f7e2b854435a800b15ecabf591a8426994@sentry-01.cosmoshub-4.polypore.xyz:26656
       SYNC_RPC_1: https://rpc.sentry-01.cosmoshub-4.polypore.xyz:443
