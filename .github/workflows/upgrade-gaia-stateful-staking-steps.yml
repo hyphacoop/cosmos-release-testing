@@ -397,7 +397,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
 
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
@@ -464,7 +464,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
       
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
@@ -531,7 +531,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
 
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
@@ -598,7 +598,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
       
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
@@ -665,7 +665,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
       
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
@@ -732,7 +732,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
       
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
@@ -799,7 +799,7 @@ jobs:
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
 
-      - name: Prepare new for new test
+      - name: Prepare for new test
         run: |
           killall gaiad-v28 screen
           sleep 10
