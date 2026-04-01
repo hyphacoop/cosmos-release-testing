@@ -250,7 +250,7 @@ jobs:
       #     cp build/gaiad /home/runner/go/bin/gaiad-fork
       - name: Download fork tool
         run: |
-          wget -O /home/runner/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.0.0-fork/gaiad
+          wget -O /home/runner/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.1.0-fork/gaiad
           chmod +x /home/runner/go/bin/gaiad-fork
       - name: Fork the chain
         env:
