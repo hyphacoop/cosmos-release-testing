@@ -68,7 +68,7 @@ $CHAIN_BINARY tx bank send $WALLET_1 $grantee_wallet $SEND_AMOUNT$DENOM --from $
 sleep $((COMMIT_TIMEOUT*2))
 
 echo "> 1: Granting send authorization from granter to grantee"
-txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --spend-limit 100000000uatom --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant"
 $CHAIN_BINARY q authz grants --granter $granter_wallet --grantee $grantee_wallet --home $whale_home -o json | jq '.'
@@ -100,7 +100,7 @@ echo "> 1b: Granting send authorization with expiration from granter to grantee"
 current_time=$(date +%s)
 expiration=$(date -d "+1 minute" +%s)
 echo "> Current time: $current_time, expiration time: $expiration"
-txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json --expiration $expiration | jq -r '.txhash')
+txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --spend-limit 100000000uatom --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json --expiration $expiration | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant"
 $CHAIN_BINARY q authz grants --granter $granter_wallet --grantee $grantee_wallet --home $whale_home -o json | jq '.'
