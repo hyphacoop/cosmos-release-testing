@@ -396,6 +396,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
       - name: Prepare for new test
         run: |
@@ -463,6 +465,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
       - name: Prepare for new test
         run: |
@@ -530,6 +534,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
       - name: Prepare for new test
         run: |
@@ -597,6 +603,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
       - name: Prepare for new test
         run: |
@@ -664,6 +672,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
       - name: Prepare for new test
         run: |
@@ -731,6 +741,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
       - name: Prepare for new test
         run: |
@@ -798,6 +810,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
       - name: Prepare for new test
         run: |
@@ -865,6 +879,8 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+      - name: Print validator-check json
+        run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
       - name: Upload artifacts
         if: always()
