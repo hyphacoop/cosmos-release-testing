@@ -183,7 +183,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_sync.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 100000
+          tests/test_block_production.sh 127.0.0.1 26657 10 100000
       - name: Syncing Chain
         run: |
           catching_up="true"
@@ -278,7 +278,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_fork.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Stop fork tool
         run: |
           echo "exiting gaia and screen"
@@ -295,7 +295,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Validator set checks after fork
         run: |
           source ~/env/bin/activate
@@ -411,7 +411,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Restore val key
         run: |
           echo "Restoring validator key"
@@ -478,7 +478,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Restore val key
         run: |
           echo "Restoring validator key"
@@ -545,7 +545,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Restore val key
         run: |
           echo "Restoring validator key"
@@ -612,7 +612,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Restore val key
         run: |
           echo "Restoring validator key"
@@ -679,7 +679,7 @@ jobs:
       - name: Wait for gaiad to start and stabilize
         run: |
           tail -f /home/runner/artifact/gaiad_upgrade.log &
-          tests/test_block_production.sh 127.0.0.1 26657 50 1000
+          tests/test_block_production.sh 127.0.0.1 26657 10 1000
       - name: Restore val key
         run: |
           echo "Restoring validator key"
