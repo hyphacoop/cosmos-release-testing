@@ -42,19 +42,20 @@ done
 # Query the keyring to get the granter and grantee wallets. If there are granter and grantee wallets in the keyring, they will be used. Otherwise, new wallets will be created.
 
 # List keys in the keyring and check if granter and grantee wallets exist
-$CHAIN_BINARY keys list --home ${homes[0]} -o json | jq -r '.[].name' > keys.txt
+$CHAIN_BINARY keys list --home ${homes[0]} --output json | jq -r '.[].name' > keys.txt
 if grep -q "granter" keys.txt ; then
   echo "Granter wallet already exists in keyring"
 else
   echo "Creating granter wallet"
-  $CHAIN_BINARY keys add granter --home ${homes[0]} -o json | jq '.'
+  $CHAIN_BINARY keys add granter --home ${homes[0]} --output json | jq '.'
+
 fi
 
 if grep -q "grantee" keys.txt ; then
   echo "Grantee wallet already exists in keyring"
 else
   echo "Creating grantee wallet"
-  $CHAIN_BINARY keys add grantee --home ${homes[0]} -o json | jq '.'
+  $CHAIN_BINARY keys add grantee --home ${homes[0]} --output json | jq '.'
 fi
 
 

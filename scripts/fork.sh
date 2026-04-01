@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gaiad init fork-home --chain-id testnet --home $FORK_HOME
+$CHAIN_BINARY init fork-home --chain-id testnet --home $FORK_HOME
 toml set --toml-path $FORK_HOME/config/client.toml keyring-backend test
 toml set --toml-path $FORK_HOME/config/app.toml minimum-gas-prices $GAS_PRICE
 toml set --toml-path $FORK_HOME/config/app.toml api.enable true
