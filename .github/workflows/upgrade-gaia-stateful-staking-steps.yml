@@ -379,7 +379,7 @@ jobs:
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
 
-      - name: Download v24 binary
+      - name: Download v28 binary
         run: |
           sudo wget https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad -O /usr/local/bin/gaiad-v28
           sudo chmod +x /usr/local/bin/gaiad-v28
@@ -455,6 +455,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (no-rotation)
         run: |
           source ~/env/bin/activate
@@ -518,6 +522,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (up-rotation)
         run: |
           source ~/env/bin/activate
@@ -581,6 +589,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (swap-consensus)
         run: |
           source ~/env/bin/activate
@@ -644,6 +656,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (swap-bonded)
         run: |
           source ~/env/bin/activate
@@ -707,6 +723,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (swap-consensus and swap-bonded)
         run: |
           source ~/env/bin/activate
@@ -770,6 +790,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (swap-consensus swap-bonded redelegate)
         run: |
           source ~/env/bin/activate
@@ -833,6 +857,10 @@ jobs:
           echo "exiting gaia and screen"
           killall gaiad screen
           tail -30 /home/runner/artifact/gaiad_upgrade.log
+      - name: Start gaiad v28
+        run: |
+          screen -L -Logfile /home/runner/artifact/gaiad_test.log -S gaiad -d -m gaiad-v28 --home /home/runner/.gaia start
+          tests/test_block_production.sh 127.0.0.1 26657 10 10
       - name: _Validator set check (swap-consensus swap-bonded redelegate up-rotation)
         run: |
           source ~/env/bin/activate
