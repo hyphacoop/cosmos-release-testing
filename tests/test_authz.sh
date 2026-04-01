@@ -57,8 +57,8 @@ else
   $CHAIN_BINARY keys add grantee --home $whale_home --output json | jq '.'
 fi
 
-granter_wallet=$($CHAIN_BINARY keys show granter --home $whale_home -o json | jq -r '.address')
-grantee_wallet=$($CHAIN_BINARY keys show grantee --home $whale_home -o json | jq -r '.address')
+granter_wallet=$($CHAIN_BINARY keys show granter --home $whale_home --output json | jq -r '.address')
+grantee_wallet=$($CHAIN_BINARY keys show grantee --home $whale_home --output json | jq -r '.address')
 
 
 # Fund the granter and grantee wallets
