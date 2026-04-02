@@ -85,7 +85,7 @@ echo "> Checking the transaction was successful"
 check_code $txhash
 
 echo "> 3: Revoking the send authorization from granter to grantee"
-txhash=$($CHAIN_BINARY tx authz revoke $grantee_wallet send --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
+txhash=$($CHAIN_BINARY tx authz revoke $grantee_wallet '/cosmos.bank.v1beta1.MsgSend' --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant was revoked"
 $CHAIN_BINARY q authz grants-by-granter $granter_wallet --grantee $grantee_wallet --home $whale_home -o json | jq '.'
