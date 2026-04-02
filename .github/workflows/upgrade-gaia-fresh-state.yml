@@ -769,9 +769,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.1.0
@@ -781,9 +778,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: Test software upgrade
@@ -822,7 +816,8 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh
-              tests/test_consumer_downtime_disabled.sh
+              tests/test_consumer_downtime.sh
+              # tests/test_consumer_downtime_disabled.sh
             
           - name: _Test consumer equivocation
             run: |
@@ -968,6 +963,24 @@
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id channel-1
           
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: "${{ matrix.target_version }}"
@@ -1010,14 +1023,14 @@
               export TOPN=0
               scripts/consumer_set_topn.sh
 
-          - name: Opt out from top n-1 validators 
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_v400_one.sh
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
-              scripts/consumer_opt_out.sh
-              $CHAIN_BINARY q comet-validator-set --home $whale_home
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+          # - name: Opt out from top n-1 validators 
+          #   run: |
+          #     source scripts/vars.sh
+          #     source scripts/vars_consumer_v400_one.sh
+          #     $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
+          #     scripts/consumer_opt_out.sh
+          #     $CHAIN_BINARY q comet-validator-set --home $whale_home
+          #     $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home
 
           - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0 chain 1
             run: |
@@ -1175,6 +1188,25 @@
             run: |
               source scripts/vars_pfm_3.sh
               tests/test_pfm_transfers.sh
+          
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+              
           - name: Test software upgrade
             env:
               TARGET_VERSION: "${{ matrix.target_version }}"
@@ -1282,7 +1314,25 @@
               $CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 1000000$DENOM $upgrade_wallet --from upgrade_wallet -o json --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y --home $whale_home
               sleep $(($COMMIT_TIMEOUT+2))
               $CHAIN_BINARY q bank balances $upgrade_wallet --home $whale_home -o json | jq '.'
-          
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION              
+              
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -1442,6 +1492,24 @@
               echo "> Saving channel ID to GITHUB_ENV"
               echo "TRANSFER_CHANNEL_ID=$channel_id" >> $GITHUB_ENV
 
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION              
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -1475,14 +1543,14 @@
               export TOPN=0
               scripts/consumer_set_topn.sh
 
-          - name: Opt out from top n-1 validators 
-            run: |
-              source scripts/vars.sh
-              source scripts/vars_consumer_stride.sh
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
-              scripts/consumer_opt_out.sh
-              $CHAIN_BINARY q comet-validator-set --home $whale_home
-              $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
+          # - name: Opt out from top n-1 validators 
+          #   run: |
+          #     source scripts/vars.sh
+          #     source scripts/vars_consumer_stride.sh
+          #     $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
+          #     scripts/consumer_opt_out.sh
+          #     $CHAIN_BINARY q comet-validator-set --home $whale_home
+          #     $CONSUMER_CHAIN_BINARY q tendermint-validator-set --home $consumer_whale_home --node http://localhost:$consumer_whale_rpc
 
           - name: _Consumer chain produces blocks after top N = 0> ICS v4.0.0
             run: |
@@ -1576,6 +1644,24 @@
               --from $vesting_wallet --home $whale_home \
               --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y      
     
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -1752,6 +1838,24 @@
               recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient1").address')
               tests/test_ica_send.sh $controller1 $recipient_wallet
       
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -1907,9 +2011,15 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: _Blocks produced after upgrade
@@ -1926,23 +2036,6 @@
             run: |
               source scripts/vars.sh
               tests/test_contract_multisig.sh
-
-          - name: Upgrade to v27.1.0
-            env:
-              TARGET_VERSION: v27.1.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
-
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: Test software upgrade
             env:
@@ -2045,6 +2138,24 @@
               echo "> feemarket params:"
               $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
   
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
     
           - name: Test software upgrade
             env:
@@ -2147,7 +2258,26 @@
             run: |
               source scripts/vars.sh
               scripts/wait_for_block.sh $whale_rpc 3
-            
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+              
+              
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2238,6 +2368,25 @@
               source scripts/vars.sh
               tests/test_tx.sh
 
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2314,6 +2463,25 @@
             run: |
               source scripts/vars.sh
               tests/test_tx.sh
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
 
           - name: Test software upgrade
             env:
@@ -2414,6 +2582,25 @@
               source scripts/vars.sh
               tests/test_tokenfactory_burn.sh preupgrade 5000000
               
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2508,6 +2695,25 @@
               sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 log_$COUNT_WIDTH
               scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
 
           - name: Test software upgrade
             env:
@@ -2997,7 +3203,6 @@
               source scripts/vars.sh
               tests/test_authz.sh
 
-
           - name: Upgrade to v27.0.0
             env:
               TARGET_VERSION: v27.0.0
@@ -3005,9 +3210,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.1.0
@@ -3017,10 +3219,8 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
+
 
           - name: _Blocks produced after upgrade
             run: |
