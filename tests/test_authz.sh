@@ -89,11 +89,15 @@ txhash=$($CHAIN_BINARY tx authz revoke $grantee_wallet '/cosmos.bank.v1beta1.Msg
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant was revoked"
 $CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o json | jq '.'
-echo "> Submit the bank send transaction from grantee's account using the authz exec command"
-txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
-sleep $((COMMIT_TIMEOUT*2))
-echo "> Checking the transaction was not successful"
-check_code $txhash
+echo "> Submit the bank send transaction from grantee's account using the authz exec command (should fail)"
+response=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json 2>&1)
+echo "Response: $response"
+if [[ $response == *"failed to get grant"* ]]; then
+  echo "> Error message indicates authorization was revoked, as expected."
+else
+  echo "> Unexpected response, expected an error indicating the authorization was revoked."
+  exit 1
+fi
 
 echo "> 1b: Granting send authorization with expiration from granter to grantee"
 # Set expiration to 1 minute from now in Unix timestamp format
@@ -121,8 +125,12 @@ echo "> Waiting for 1 minute for the grant to expire"
 sleep 1m
 echo "> Checking the grant"
 $CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o json | jq '.'
-echo "> Submit the bank send transaction from grantee's account using the authz exec command"
-txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
-sleep $((COMMIT_TIMEOUT*2))
-echo "> Checking the transaction was not successful"
-check_code $txhash
+echo "> Submit the bank send transaction from grantee's account using the authz exec command (should fail)"
+response=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json 2>&1)
+echo "Response: $response"
+if [[ $response == *"failed to get grant"* ]]; then
+  echo "> Error message indicates authorization was revoked, as expected."
+else
+  echo "> Unexpected response, expected an error indicating the authorization was revoked."
+  exit 1
+fi
