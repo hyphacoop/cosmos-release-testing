@@ -71,7 +71,7 @@ echo "> 1: Granting send authorization from granter to grantee"
 txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --spend-limit 100000000uatom --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant"
-$CHAIN_BINARY q authz grants-by-granter $granter_wallet --grantee $grantee_wallet --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o json | jq '.'
 
 echo "> 2: Executing the a send message from grantee to send tokens on behalf of granter"
 echo "> Create a transaction to send tokens from granter to the whale account using the grantee's authorization"
@@ -88,7 +88,7 @@ echo "> 3: Revoking the send authorization from granter to grantee"
 txhash=$($CHAIN_BINARY tx authz revoke $grantee_wallet '/cosmos.bank.v1beta1.MsgSend' --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant was revoked"
-$CHAIN_BINARY q authz grants-by-granter $granter_wallet --grantee $grantee_wallet --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o json | jq '.'
 echo "> Submit the bank send transaction from grantee's account using the authz exec command"
 txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
@@ -103,7 +103,7 @@ echo "> Current time: $current_time, expiration time: $expiration"
 txhash=$($CHAIN_BINARY tx authz grant $grantee_wallet send --spend-limit 100000000uatom --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json --expiration $expiration | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the grant"
-$CHAIN_BINARY q authz grants-by-granter $granter_wallet --grantee $grantee_wallet --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o json | jq '.'
 
 echo "> 2b: Executing the a send message from grantee to send tokens on behalf of granter before expiration"
 echo "> Create a transaction to send tokens from granter to the whale account using the grantee's authorization"
@@ -119,6 +119,8 @@ check_code $txhash
 echo "> 4: Checking the send authorization expires after 1 minute"
 echo "> Waiting for 1 minute for the grant to expire"
 sleep 1m
+echo "> Checking the grant"
+$CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o json | jq '.'
 echo "> Submit the bank send transaction from grantee's account using the authz exec command"
 txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
 sleep $((COMMIT_TIMEOUT*2))
