@@ -36,8 +36,6 @@ do
   rpc_ports+=($rpc_port)
   log=$log_prefix$i
   logs+=($log)
-  wallet=$wallet_prefix$i
-  wallets+=($wallet)
 done
 
 
@@ -50,13 +48,6 @@ if grep -q "sender" keys.txt ; then
 else
   echo "Creating sender wallet"
   $CHAIN_BINARY keys add sender --home $whale_home --output json | jq '.'
-fi
-
-if grep -q "grantee" keys.txt ; then
-  echo "Grantee wallet already exists in keyring"
-else
-  echo "Creating grantee wallet"
-  $CHAIN_BINARY keys add grantee --home $whale_home --output json | jq '.'
 fi
 
 sender_wallet=$($CHAIN_BINARY keys show sender --home $whale_home --output json | jq -r '.address')
@@ -80,9 +71,9 @@ else
   exit 1
 fi
 
-recipient1=$($CHAIN_BINARY keys show ${wallets[0]} --home ${homes[0]} --output json | jq -r '.address')
-recipient2=$($CHAIN_BINARY keys show ${wallets[1]} --home ${homes[1]} --output json | jq -r '.address')
-recipient3=$($CHAIN_BINARY keys show ${wallets[2]} --home ${homes[2]} --output json | jq -r '.address')
+recipient1=$($CHAIN_BINARY keys show ${monikers[0]} --home ${homes[0]} --output json | jq -r '.address')
+recipient2=$($CHAIN_BINARY keys show ${monikers[1]} --home ${homes[1]} --output json | jq -r '.address')
+recipient3=$($CHAIN_BINARY keys show ${monikers[2]} --home ${homes[2]} --output json | jq -r '.address')
 
 echo "> 2: Multi-send"
 echo "> Create a transaction to send tokens from sender to three validator accounts using the multi-send feature"

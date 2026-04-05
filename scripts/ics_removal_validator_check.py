@@ -792,22 +792,22 @@ class ValsetCheck():
         """
         Check that the staking pool values are correct based on the transactions collected.
         """
-        if self.data['n']['expected_total_bonded_tokens'] != self.data['n']['total_bonded_tokens']:
+        if abs(self.data['n']['expected_total_bonded_tokens'] - self.data['n']['total_bonded_tokens']) > 1: # Allow for 1 token difference due to rounding issues when comparing expected bonded tokens (calculated with 1E6 clipped decimals) and actual bonded tokens
             logging.error(f"> Total bonded tokens check failed: expected {self.data['n']['expected_total_bonded_tokens']} but got {self.data['n']['total_bonded_tokens']}")
             self.data['checks']['total_bonded_tokens'] = 'FAIL'
         else:
-            logging.info(f"> Total bonded tokens check passed: expected {self.data['n']['expected_total_bonded_tokens']} matches actual {self.data['n']['total_bonded_tokens']}")
+            logging.info(f"> Total bonded tokens check passed: expected {self.data['n']['expected_total_bonded_tokens']} matches actual {self.data['n']['total_bonded_tokens']} within 1 unit")
             self.data['checks']['total_bonded_tokens'] = 'PASS'
         
     def staking_pool_bonded_tokens_check(self):
         """
         The staking pool bonded tokens should match the calculated total bonded tokens.
         """
-        if self.data['n']['expected_total_bonded_tokens'] != self.data['n']['staking_pool']['bonded_tokens']:
+        if abs(self.data['n']['expected_total_bonded_tokens'] - self.data['n']['staking_pool']['bonded_tokens']) > 1: # Allow for 1 token difference due to rounding issues when comparing expected bonded tokens (calculated with 1E6 clipped decimals) and actual bonded tokens
             logging.error(f"> Staking pool bonded tokens check failed: expected {self.data['n']['expected_total_bonded_tokens']} but got {self.data['n']['staking_pool']['bonded_tokens']}")
             self.data['checks']['staking_pool_bonded_tokens'] = 'FAIL'
         else:
-            logging.info(f"> Staking pool bonded tokens check passed, expected {self.data['n']['expected_total_bonded_tokens']} matches actual {self.data['n']['staking_pool']['bonded_tokens']}")
+            logging.info(f"> Staking pool bonded tokens check passed, expected {self.data['n']['expected_total_bonded_tokens']} matches actual {self.data['n']['staking_pool']['bonded_tokens']} within 1 unit")
             self.data['checks']['staking_pool_bonded_tokens'] = 'PASS'
 
     def comet_size_bonded_validators_check(self):
@@ -838,11 +838,11 @@ class ValsetCheck():
                 if ref_val['operator_address'] == val['operator_address']:
                     actual_tokens = ref_val['tokens']
                     break
-            if expected_tokens != actual_tokens:
+            if abs(expected_tokens - actual_tokens) > 1: # Allow for 1 token difference due to rounding issues when comparing expected bonded tokens (calculated with 1E6 clipped decimals) and actual bonded tokens
                 logging.error(f"> Validator tokens check failed for {val['operator_address']}: expected {expected_tokens} but got {actual_tokens}")
                 self.data['checks'][f"validator_tokens_{val['operator_address']}"] = 'FAIL'
             else:
-                logging.info(f"> Validator tokens check passed for {val['operator_address']}: expected {expected_tokens} matches actual {actual_tokens}")
+                logging.info(f"> Validator tokens check passed for {val['operator_address']}: expected {expected_tokens} matches actual {actual_tokens} within 1 unit")
                 self.data['checks'][f"validator_tokens_{val['operator_address']}"] = 'PASS'
 
     def validator_status_check(self):
