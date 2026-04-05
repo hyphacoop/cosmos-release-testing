@@ -75,6 +75,7 @@ $CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o js
 
 echo "> 2: Executing the a send message from grantee to send tokens on behalf of granter"
 echo "> Create a transaction to send tokens from granter to the whale account using the grantee's authorization"
+starting_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r '.balances[] | select(.denom=="'$DENOM'").amount')
 $CHAIN_BINARY tx bank send $granter_wallet $WALLET_1 1000000$DENOM --from granter --home $whale_home --chain-id $CHAIN_ID --generate-only > tx.json
 echo "> Transaction:"
 jq '.' tx.json
@@ -83,6 +84,14 @@ txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home -
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the transaction was successful"
 check_code $txhash
+ending_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r '.balances[] | select(.denom=="'$DENOM'").amount')
+diff=$(($ending_balance - $starting_balance))
+if [ $diff -eq 1000000 ]; then
+  echo "> PASS: tokens sent on behalf of granter"
+else
+  echo "> FAIL: balance difference does not equal sent amount: $diff"
+  exit 1
+fi
 
 echo "> 3: Revoking the send authorization from granter to grantee"
 txhash=$($CHAIN_BINARY tx authz revoke $grantee_wallet '/cosmos.bank.v1beta1.MsgSend' --from granter --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json | jq -r '.txhash')
@@ -93,9 +102,9 @@ echo "> Submit the bank send transaction from grantee's account using the authz 
 response=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json 2>&1)
 echo "Response: $response"
 if [[ $response == *"failed to get grant"* ]]; then
-  echo "> Error message indicates authorization was revoked, as expected."
+  echo "> PASS: authorization was revoked"
 else
-  echo "> Unexpected response, expected an error indicating the authorization was revoked."
+  echo "> FAIL: Unexpected response"
   exit 1
 fi
 
@@ -111,6 +120,7 @@ $CHAIN_BINARY q authz grants-by-granter $granter_wallet --home $whale_home -o js
 
 echo "> 2b: Executing the a send message from grantee to send tokens on behalf of granter before expiration"
 echo "> Create a transaction to send tokens from granter to the whale account using the grantee's authorization"
+starting_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r '.balances[] | select(.denom=="'$DENOM'").amount')
 $CHAIN_BINARY tx bank send $granter_wallet $WALLET_1 1000000$DENOM --from granter --home $whale_home --chain-id $CHAIN_ID --generate-only > tx.json
 echo "> Transaction:"
 jq '.' tx.json
@@ -119,6 +129,15 @@ txhash=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home -
 sleep $((COMMIT_TIMEOUT*2))
 echo "> Checking the transaction was successful"
 check_code $txhash
+ending_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r '.balances[] | select(.denom=="'$DENOM'").amount')
+diff=$(($ending_balance - $starting_balance))
+if [ $diff -eq 1000000 ]; then
+  echo "> PASS: tokens sent on behalf of granter"
+else
+  echo "> FAIL: balance difference does not equal sent amount: $diff"
+  exit 1
+fi
+
 
 echo "> 4: Checking the send authorization expires after 1 minute"
 echo "> Waiting for 1 minute for the grant to expire"
@@ -129,8 +148,8 @@ echo "> Submit the bank send transaction from grantee's account using the authz 
 response=$($CHAIN_BINARY tx authz exec tx.json --from grantee --home $whale_home --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y -o json 2>&1)
 echo "Response: $response"
 if [[ $response == *"failed to get grant"* ]]; then
-  echo "> Error message indicates authorization was revoked, as expected."
+  echo "> PASS: authorization was revoked"
 else
-  echo "> Unexpected response, expected an error indicating the authorization was revoked."
+  echo "> FAIL: Unexpected response"
   exit 1
 fi
