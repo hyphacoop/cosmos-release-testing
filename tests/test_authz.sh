@@ -87,7 +87,7 @@ check_code $txhash
 ending_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r '.balances[] | select(.denom=="'$DENOM'").amount')
 diff=$(($ending_balance - $starting_balance))
 if [ $diff -eq 1000000 ]; then
-  echo "> PASS: tokens sent on behalf of granter"
+  echo "> PASS: tokens sent on behalf of granter were received"
 else
   echo "> FAIL: balance difference does not equal sent amount: $diff"
   exit 1
@@ -132,7 +132,7 @@ check_code $txhash
 ending_balance=$($CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq -r '.balances[] | select(.denom=="'$DENOM'").amount')
 diff=$(($ending_balance - $starting_balance))
 if [ $diff -eq 1000000 ]; then
-  echo "> PASS: tokens sent on behalf of granter"
+  echo "> PASS: tokens sent on behalf of granter were received"
 else
   echo "> FAIL: balance difference does not equal sent amount: $diff"
   exit 1
