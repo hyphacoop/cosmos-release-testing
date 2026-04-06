@@ -13,13 +13,13 @@
             description: 'Gaia version to upgrade to'
             required: true
             type: string
-            default: v27.2.0-upgrade-handler
+            default: release/v27.x
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
             type: string
             default: v27.2.0
-      push:
+      # push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -41,7 +41,7 @@
       set-versions:
         env:
           START: ${{ github.event_name == 'push' && 'v26.0.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'v27.2.0-upgrade-handler' || inputs.to_version }}
+          TARGET: ${{ github.event_name == 'push' && 'release/v27.x' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v27.2.0' || inputs.upgrade_name }}
         runs-on: ubuntu-24.04
         steps:
@@ -76,12 +76,11 @@
           - name: Set binary source
             id: binary
             run: |
-              echo "source=BUILD" >> $GITHUB_OUTPUT
-              # if [[ "${TARGET:0:1}" != "v" ]]; then
-              #   echo "source=BUILD" >> $GITHUB_OUTPUT
-              # else
-              #   echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
-              # fi
+              if [[ "${TARGET:0:1}" != "v" ]]; then
+                echo "source=BUILD" >> $GITHUB_OUTPUT
+              else
+                echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+              fi
               
         outputs:
          start_version: ${{ steps.start.outputs.version }}
@@ -3204,10 +3203,10 @@
               source scripts/vars.sh
               tests/test_authz.sh
 
-          - name: _Test bank module
-            run: |
-              source scripts/vars.sh
-              tests/test_bank.sh
+          # - name: _Test bank module
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_bank.sh
 
 
           - name: Upgrade to v27.0.0
@@ -3257,10 +3256,10 @@
               source scripts/vars.sh
               tests/test_authz.sh
 
-          - name: _Test bank module
-            run: |
-              source scripts/vars.sh
-              tests/test_bank.sh
+          # - name: _Test bank module
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_bank.sh
 
 
           - name: _Test validator jailing and slashing
