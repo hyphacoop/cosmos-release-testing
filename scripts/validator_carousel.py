@@ -121,6 +121,8 @@ def undelegate_message_json(del_addr, val_addr, amount, denom: str = "uatom"):
     }
 
 
+
+
 def transaction_json(
     messages: list,
     gas_prices: float = 0.005,
@@ -149,6 +151,8 @@ def transaction_json(
     }
 
 
+
+
 class ValidatorCarousel():
     """Manages validator rotations through delegation operations."""
     
@@ -156,7 +160,6 @@ class ValidatorCarousel():
     ACCOUNT_MINIMUM = 20_000_000  # 50 tokens
     ROTATION_DELTA = 10_000_000  # 10 tokens
     SWAP_DELTA = 1_000_000  # 1 token
-    PRE_FUNDING_AMOUNT = 100_000_000  # 100 tokens
     WEBSOCKET_MAX_SIZE = 100 * 1024 * 1024  # 100MB
     WEBSOCKET_DELAY = 0.2  # seconds
     RECONNECT_DELAY = 3  # seconds
@@ -177,6 +180,7 @@ class ValidatorCarousel():
         swap_bonded: bool,
         redelegate: bool,
         height: int,
+        prefund: int,
         operations_filename: str
     ) -> None:
         self.urlAPI = urlAPI
@@ -193,6 +197,7 @@ class ValidatorCarousel():
         self.swap_bonded = swap_bonded
         self.redelegate = redelegate
         self.target_height = height
+        self.prefund_amount = prefund
         self.operations_filename = operations_filename
         self.operations: List[Dict[str, Any]] = []
         self._validators_by_vp: List[Dict[str, Any]] = []
@@ -229,7 +234,7 @@ class ValidatorCarousel():
     def sort_vals_by_vp(self) -> None:
         """Sort validators by voting power (excludes jailed and zero-token validators)."""
         val_list = api_get_validators(self.urlAPI)
-        val_list = [val for val in val_list if not val['jailed'] and int(val['tokens']) > 0]
+        val_list = [val for val in val_list if not val['jailed'] and int(val['tokens']) > 1_000_000]
         self._validators_by_vp = sorted(val_list, key=lambda val: int(val['tokens']), reverse=True)
 
     def _create_swap_operation(
@@ -350,7 +355,10 @@ class ValidatorCarousel():
         if self.up_rotation:
             # The validator at the target rank will take the place of the validator with the least amount of voting power.
             source_val = self._validators_by_vp[self.target_rank]
-            target_val = self._validators_by_vp[-1]
+            # target_val = self._validators_by_vp[-1]
+            staking_params = api_get_staking_params(self.urlAPI)
+            bonded_cap = int(staking_params['max_validators'])
+            target_val = self._validators_by_vp[bonded_cap + 1] # The second non-bonded validator
             operation = 'unbond'
             amount = int(source_val['tokens']) - int(target_val['tokens']) + self.ROTATION_DELTA
             logging.info(
@@ -417,7 +425,7 @@ class ValidatorCarousel():
         except subprocess.CalledProcessError as cpe:
             logging.error(f"{cpe}\n{result.stderr}")
 
-    def broadcast(self) -> None:
+    def broadcast(self) -> str:
         """Broadcast the signed transaction to the network."""
         result = subprocess.run(
             [self.binary, 'tx', 'broadcast', 'tx-signed.json',
@@ -428,11 +436,29 @@ class ValidatorCarousel():
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True
         )
-        print(result.stdout)
+        logging.info(result.stdout)
         try:
             result.check_returncode()
         except subprocess.CalledProcessError as cpe:
             logging.error(f"{cpe}\n{result.stderr}")
+        return json.loads(result.stdout)
+    
+    def tx_query(self, txhash) -> None:
+        """Query the transaction result using the tx hash."""
+        result = subprocess.run(
+            [self.binary, 'q', 'tx', txhash,
+             f'--node={self.urlRPC}',
+             f'--chain-id={self.chain}',
+             '--output=json'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True
+        )
+        logging.info(result.stdout)
+        try:
+            result.check_returncode()
+        except subprocess.CalledProcessError as cpe:
+            logging.error(f"{cpe}\n{result.stderr}")
+        return json.loads(result.stdout)
 
     def record_operations(self) -> None:
         """
@@ -560,24 +586,31 @@ class ValidatorCarousel():
         )
         ws_url = self.urlRPC.replace('http', 'ws').replace('https', 'wss') + '/websocket'
         
-        # Pre-fund validators if needed for upward rotations or redelegations
         if self.up_rotation or self.redelegate:
-            logging.info("> Pre-funding all validators with delegations to enable upward rotations.")
-            val_list = api_get_validators(self.urlAPI)
-            val_list = [val for val in val_list if val['status'] == 'BOND_STATUS_BONDED']
+            logging.info("> Pre-funding all validators with delegations to enable upward rotations and redelegations.")
+            # val_list = api_get_validators(self.urlAPI)
+            # Filter val_list by tokens amount
+            self.sort_vals_by_vp()
+            logging.info(f"Found {len(self._validators_by_vp)} validators with more than 1 token.")
             messages = []
-            for val in val_list:
+            for val in self._validators_by_vp:
                 messages.append(delegate_message_json(
                     del_addr=self.delegator,
                     val_addr=val['operator_address'],
-                    amount=self.PRE_FUNDING_AMOUNT,
+                    amount=self.prefund_amount,
                     denom=self.denom
                 ))
+
             tx_json = transaction_json(messages=messages)
             with open('tx.json', 'w') as f:
                 json.dump(tx_json, f, indent=4)
             self.sign()
-            self.broadcast()
+            result = self.broadcast()
+            logging.info("Broadcast result: %s", result)
+            tx_hash = result['txhash']
+            await asyncio.sleep(6)  # Wait for pre-funding transaction to be included before subscribing to blocks
+            query_result = self.tx_query(tx_hash)
+            logging.info("Pre-funding transaction result: %s", query_result)
 
         while True:
             try:
@@ -662,6 +695,8 @@ if __name__ == '__main__':
                         help='Sets up a rotation that redelegates tokens instead of delegating them, applies to swap-consensus and swap-bonded operations')
     parser.add_argument('--height', type=int, default=0,
                         help='Target height to submit the rotation (default: 0 for no stop)')
+    parser.add_argument('--prefund', type=int, default=100_000_000,
+                        help='Amount to pre-fund validators with (default: 100_000_000 uatom)')
     parser.add_argument('--rotations', type=str, default='rotations.json',
                         help='Rotations JSON file (default: rotations.json)')
     args = parser.parse_args()
@@ -681,6 +716,7 @@ if __name__ == '__main__':
         swap_bonded=args.swap_bonded,
         redelegate=args.redelegate,
         height=args.height,
+        prefund=args.prefund,
         operations_filename=args.rotations
     )
     asyncio.run(carousel.subscribe())
