@@ -162,8 +162,8 @@ cp temp/voting.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for 2MiB block size"
 jq -r '.consensus.params.block.max_bytes = "20000000"' ${homes[0]}/config/genesis.json  > temp/blocksize.json
 cp temp/blocksize.json ${homes[0]}/config/genesis.json
-echo "> Patching genesis for 50M gas limit"
-jq -r '.consensus.params.block.max_gas = "50000000"' ${homes[0]}/config/genesis.json  > temp/blockgas.json
+echo "> Patching genesis for 75M gas limit"
+jq -r '.consensus.params.block.max_gas = "75000000"' ${homes[0]}/config/genesis.json  > temp/blockgas.json
 cp temp/blockgas.json ${homes[0]}/config/genesis.json
 
 echo "> Patching genesis for slashing block window"
@@ -176,7 +176,7 @@ cp temp/slashing.json ${homes[0]}/config/genesis.json
 echo "> Patching genesis for feemarket params"
 jq -r '.app_state.feemarket.params.fee_denom |= "uatom"' ${homes[0]}/config/genesis.json > temp/feemarket-denom.json
 mv temp/feemarket-denom.json ${homes[0]}/config/genesis.json
-jq -r '.app_state.feemarket.params.max_block_utilization |= "50000000"' ${homes[0]}/config/genesis.json > temp/feemarket-gas.json
+jq -r '.app_state.feemarket.params.max_block_utilization |= "75000000"' ${homes[0]}/config/genesis.json > temp/feemarket-gas.json
 mv temp/feemarket-gas.json ${homes[0]}/config/genesis.json
 jq -r '.app_state.feemarket.params.min_base_gas_price |= "0.005"' ${homes[0]}/config/genesis.json > temp/feemarket-min-base.json
 mv temp/feemarket-min-base.json ${homes[0]}/config/genesis.json
@@ -255,7 +255,7 @@ do
     echo "sleep 0.2s" >> $START_SCRIPT
     echo "echo \"Stopping validator ${monikers[i]}...\"" >> $STOP_SCRIPT
     echo "tmux send-keys -t ${monikers[i]} C-c" >> $STOP_SCRIPT
-    echo "sleep 5s" >> $STOP_SCRIPT
+    echo "sleep 2s" >> $STOP_SCRIPT
     echo "$CHAIN_BINARY tendermint unsafe-reset-all --home ${homes[i]}" >> $RESET_SCRIPT
     echo "sleep 0.2s" >> $RESET_SCRIPT
 done
