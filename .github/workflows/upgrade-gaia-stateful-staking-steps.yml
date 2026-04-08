@@ -274,7 +274,7 @@ jobs:
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl \
           --fund-amount 20000000000000000 \
-          --validator-tokens 100000000000000000 \ 
+          --validator-tokens 100000000000000000 \
           --auto-find-target
           screen -r gaiad -p0 -X logfile flush 0
       - name: Wait for gaiad to start and stabilize
