@@ -273,6 +273,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           set -e
+          rm /home/runner/.gaia/config/addrbook.json || true
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/priv_validator_key.json > /home/runner/.gaia/config/priv_validator_key.json
           curl -L https://raw.githubusercontent.com/hyphacoop/cosmos-ansible/main/examples/validator-keys/validator-40/node_key.json > /home/runner/.gaia/config/node_key.json
           pubkey=$(jq -r .pub_key.value /home/runner/.gaia/config/priv_validator_key.json)
