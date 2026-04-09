@@ -40,7 +40,7 @@ do
     grpc_ports+=($grpc_port)
     pprof_port=$pprof_prefix$i
     pprof_ports+=($pprof_port)
-    log=$log_prefix$i
+    log=$moniker$log_suffix
     logs+=($log)
 done
 

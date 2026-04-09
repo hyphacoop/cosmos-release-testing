@@ -10,7 +10,7 @@ for i in $(seq -w 01 $validator_count)
 do
     home=$home_prefix$i
     homes+=($home)
-    log=$log_prefix$i
+    log=$moniker$i$log_suffix
     logs+=($log)
 done
 

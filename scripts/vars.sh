@@ -39,12 +39,12 @@ export rpc_prefix="270"
 export grpc_prefix="280"
 export pprof_prefix="290"
 export sign_prefix="240"
-export log_prefix="log_"
+export log_suffix=".log"
 
 export whale_home=${home_prefix}$COUNT_WIDTH
 export whale_api=${api_prefix}$COUNT_WIDTH
 export whale_rpc=${rpc_prefix}$COUNT_WIDTH
-export whale_log=${log_prefix}$COUNT_WIDTH
+export whale_log="${moniker_prefix}$COUNT_WIDTH$log_suffix"
 
 export START_SCRIPT="start.sh"
 export STOP_SCRIPT="stop.sh"

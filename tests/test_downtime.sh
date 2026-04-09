@@ -26,7 +26,7 @@ do
     grpc_ports+=($grpc_port)
     pprof_port=$pprof_prefix$i
     pprof_ports+=($pprof_port)
-    log=$log_prefix$i
+    log=$moniker$log_suffix
     logs+=($log)
 done
 
@@ -35,34 +35,34 @@ moniker=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r 
 echo "> Moniker: $moniker"
 valoper=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg moniker "$moniker" '.validators[] | select(.description.moniker==$moniker).operator_address')
 echo "> Valoper: $valoper"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "$moniker" '.[] | select(.name==$name).address')
-echo "> Wallet: $wallet"
-echo "> OR, alternatively, using valoper address:"
 bytes=$($CHAIN_BINARY keys parse $valoper --output json --home $whale_home | jq -r '.bytes')
 echo "> Bytes: $bytes"
 wallet=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[0]')
 echo "> Wallet: $wallet"
 
-exit 0
+node_home="/home/runner/.$moniker"
+echo "> Node home: $node_home"
+log_file="$moniker$log_suffix"
+echo "> Log file: $log_file"
 
-echo "> Moniker: ${monikers[1]}"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[2]}" '.[] | select(.name==$name).address')
-echo "> Wallet: $wallet"
-bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
-echo "> Bytes: $bytes"
-valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
-echo "> Valoper: $valoper"
+# echo "> Moniker: ${monikers[1]}"
+# wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[2]}" '.[] | select(.name==$name).address')
+# echo "> Wallet: $wallet"
+# bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
+# echo "> Bytes: $bytes"
+# valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
+# echo "> Valoper: $valoper"
 
 echo "> Slashing parameters:"
 $CHAIN_BINARY q slashing params --home $whale_home -o json | jq '.'
 
 # Jailing
 echo "> Stopping the last validator's node."
-session=${monikers[2]}
+session=$moniker
 echo "> Session: $session"
 tmux send-keys -t $session C-c
 sleep $((COMMIT_TIMEOUT*3))
-tail ${logs[2]} -n 100
+tail $log_file -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$DOWNTIME_WINDOW))
 
@@ -92,12 +92,12 @@ fi
 # Unjailing
 
 echo "> Starting the last validator's node again."
-tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[2]} 2>&1 | tee ${logs[2]}"
+tmux new-session -d -s $session "$CHAIN_BINARY start --home $node_home 2>&1 | tee $log_file"
 echo "> Waiting for the downtime infraction to expire."
 sleep $DOWNTIME_JAIL_DURATION
-tail ${logs[2]} -n 100
+tail $log_file -n 100
 echo "> Submitting unjail transaction."
-$CHAIN_BINARY tx slashing unjail --from ${monikers[2]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+$CHAIN_BINARY tx slashing unjail --from $wallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
 sleep $(($COMMIT_TIMEOUT*2))
 echo "> Wait for another downtime infraction."
 sleep $(($COMMIT_TIMEOUT*5))
