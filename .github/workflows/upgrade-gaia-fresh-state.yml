@@ -142,7 +142,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
               printf "app.toml:\r\n"
               cat $whale_home/config/app.toml
