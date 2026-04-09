@@ -31,14 +31,14 @@ do
 done
 
 echo "> Finding first validator with BONDED status."
-moniker=$($CHAIN_BINARY q staking validators  -o json | jq -r '[.validators[] | select(.status=="BOND_STATUS_BONDED")][1].description.moniker')
+moniker=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r '[.validators[] | select(.status=="BOND_STATUS_BONDED")][1].description.moniker')
 echo "> Moniker: $moniker"
-valoper=$($CHAIN_BINARY q staking validators  -o json | jq -r --arg moniker "$moniker" '.validators[] | select(.description.moniker==$moniker).operator_address')
+valoper=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg moniker "$moniker" '.validators[] | select(.description.moniker==$moniker).operator_address')
 echo "> Valoper: $valoper"
 wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "$moniker" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
 echo "> OR, alternatively, using valoper address:"
-bytes=$($CHAIN_BINARY keys parse $valoper --output json | jq -r '.bytes')
+bytes=$($CHAIN_BINARY keys parse $valoper --output json --home $whale_home | jq -r '.bytes')
 echo "> Bytes: $bytes"
 wallet=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[0]')
 echo "> Wallet: $wallet"
