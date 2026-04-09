@@ -107,6 +107,9 @@ if [ "$STAKING_OPERATIONS" = true ]; then
     echo "> Schedule down rotation for upgrade height-2"
     python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-3)) --target-rank 1 &
     
+    echo "> Schedule down rotation for upgrade height-1"
+    python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-2)) --target-rank 1 &
+    
     echo "> Schedule operations for upgrade height"
     # Update the flag depending on the value of the OPERATION env var
     if [ "$OPERATION" = "down" ]; then
