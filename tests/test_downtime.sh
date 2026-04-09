@@ -31,7 +31,7 @@ do
 done
 
 echo "> Finding first validator with BONDED status."
-moniker=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r '[.validators[] | select(.status=="BOND_STATUS_BONDED")][1].description.moniker')
+moniker=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r '[.validators[] | select(.status=="BOND_STATUS_BONDED" and .description.moniker != "val_01")][0].description.moniker')
 echo "> Moniker: $moniker"
 valoper=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg moniker "$moniker" '.validators[] | select(.description.moniker==$moniker).operator_address')
 echo "> Valoper: $valoper"
