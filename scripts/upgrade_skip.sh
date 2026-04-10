@@ -136,12 +136,12 @@ do
     echo "sleep 0.2s" >> $START_SKIP_SCRIPT
 done
 
-echo "> Starting nodes with early upgrade skip setup"
+echo "> Starting nodes with skip upgrade argument"
 ./$START_SKIP_SCRIPT
 sleep 5
 
 echo "> Waiting for blocks..."
-tail -n 50 ${logs[0]}
+tail -n 100 ${logs[0]}
 tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 10
 echo "> Validator log:"
 tail -n 50 ${logs[0]}
