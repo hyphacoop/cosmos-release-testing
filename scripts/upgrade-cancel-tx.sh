@@ -98,7 +98,15 @@ sleep $(($COMMIT_TIMEOUT+2))
 echo "> Query the cancel proposal tx"
 $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
 echo "> Query the proposal to check if it was cancelled"
-$CHAIN_BINARY q gov proposal $proposal_id --home $whale_home -o json | jq '.'
+echo "> Capture std error to check if the proposal was cancelled"
+response=$($CHAIN_BINARY q gov proposal $proposal_id --home $whale_home 2>&1)
+echo "> Response: $response"
+if [[ $response == *"doesn't exist"* ]]; then
+    echo "> Proposal was cancelled successfully."
+    else
+    echo "> Proposal was not cancelled. Test failed."
+    exit 1
+fi
 
 # # Vote yes on the proposal
 # echo "Submitting the \"yes\" vote to proposal $proposal_id..."
