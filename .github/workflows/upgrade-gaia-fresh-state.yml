@@ -569,6 +569,12 @@
               source scripts/vars.sh
               $CHAIN_BINARY q gov proposal 1 --home $whale_home -o json | jq '.'
 
+          - name: Check auth accounts queries
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q auth accounts --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q auth module-accounts --home $whale_home -o json | jq '.'
+
           - name: _IBC transfer successful> ICS v6.4.0 chain 1
             run: |
               source scripts/vars.sh  
