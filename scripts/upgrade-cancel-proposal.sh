@@ -104,7 +104,7 @@ sleep $(($COMMIT_TIMEOUT+2))
 jq '.expedited |= true' templates/proposal-cancel-software-upgrade.json > cancel-upgrade.json
 
 echo "> Submitting the cancel-software-proposal proposal while the upgrade proposal is still in voting period"
-cancel_proposal="$CHAIN_BINARY --output json tx submit-proposal cancel-upgrade.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
+cancel_proposal="$CHAIN_BINARY --output json tx gov submit-proposal cancel-upgrade.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
 echo $cancel_proposal
 txhash=$($cancel_proposal | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
