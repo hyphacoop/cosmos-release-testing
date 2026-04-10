@@ -125,25 +125,12 @@ for i in $(seq -w 01 $validator_count); do
     txhash=$($vote | jq -r .txhash)
 done
 sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($EXPEDITED_VOTING_PERIOD))
 
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
 echo "Cancel upgrade proposal $cancel_proposal_id status:"
 $CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
-
-# Loop the amount of times in the expedited voting period, checking the proposal status each time
-for i in $(seq 1 $EXPEDITED_VOTING_PERIOD)
-    do
-        echo "Upgrade proposal $proposal_id status:"
-        $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
-        echo "Cancel upgrade proposal $cancel_proposal_id status:"
-        $CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
-        echo "> Querying upgrade plan to check if it was cancelled"
-        response=$($CHAIN_BINARY q upgrade plan --home $whale_home 2>&1)
-        echo "> Response: $response"
-        echo "Waiting one second..."
-        sleep 1s
-    done
 
 echo "> Querying upgrade plan to check if it was cancelled"
 response=$($CHAIN_BINARY q upgrade plan --home $whale_home 2>&1)
