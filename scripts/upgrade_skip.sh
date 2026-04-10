@@ -109,7 +109,23 @@ $CHAIN_BINARY q tx $txhash --home $whale_home
 echo "> Save the upgrade height to GITHUB_ENV"
 echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 
-echo "> Stopping all nodes before upgrade height is reached to simulate early upgrade skip setup"
+# Wait for the voting period to be over
+echo "Waiting for the voting period to end..."
+sleep $VOTING_PERIOD
+
+echo "Upgrade proposal $proposal_id status:"
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
+
+current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
+blocks_delta=$(($upgrade_height-$current_height))
+
+# Wait until the right height is reached
+echo "Waiting for the upgrade to take place at block height $upgrade_height..."
+tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 50
+echo "> Validator log:"
+tail -n 50 ${logs[0]}
+
+echo "> Stopping all nodes at the upgrade height and simulate an upgrade skip"
 ./$STOP_SCRIPT
 sleep 6
 touch $START_SKIP_SCRIPT ; chmod +x $START_SKIP_SCRIPT ; echo "#!/bin/bash" >> $START_SKIP_SCRIPT
@@ -124,10 +140,8 @@ echo "> Starting nodes with early upgrade skip setup"
 ./$START_SKIP_SCRIPT
 sleep 5
 
-echo "> Waiting for voting period to end"
-sleep $(($VOTING_PERIOD))
-
-echo "> Waiting for the upgrade to take place at block height $upgrade_height..."
+echo "> Waiting for blocks..."
+tail -n 50 ${logs[0]}
 tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 10
 echo "> Validator log:"
 tail -n 50 ${logs[0]}
