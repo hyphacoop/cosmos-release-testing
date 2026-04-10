@@ -129,17 +129,26 @@ $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq 
 echo "Cancel upgrade proposal $cancel_proposal_id status:"
 $CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
 
-echo "Waiting for the expedited voting period to end..."
-sleep $EXPEDITED_VOTING_PERIOD
+# Loop the amount of times in the expedited voting period, checking the proposal status each time
+for i in $(seq 1 $EXPEDITED_VOTING_PERIOD)
+    do
+        echo "Upgrade proposal $proposal_id status:"
+        $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
+        echo "Cancel upgrade proposal $cancel_proposal_id status:"
+        $CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
+        echo "> Querying upgrade plan to check if it was cancelled"
+        response=$($CHAIN_BINARY q upgrade plan --home $whale_home 2>&1)
+        echo "> Response: $response"
+        echo "Waiting one second..."
+        sleep 1s
+    done
 
-echo "Upgrade proposal $proposal_id status:"
-$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
-echo "Cancel upgrade proposal $cancel_proposal_id status:"
-$CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
-
-sleep $EXPEDITED_VOTING_PERIOD
-
-echo "Upgrade proposal $proposal_id status:"
-$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
-echo "Cancel upgrade proposal $cancel_proposal_id status:"
-$CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
+echo "> Querying upgrade plan to check if it was cancelled"
+response=$($CHAIN_BINARY q upgrade plan --home $whale_home 2>&1)
+echo "> Response: $response"
+if [[ $response == *"{}"* ]]; then
+    echo "> Upgrade plan was cancelled successfully."
+else
+    echo "> Upgrade plan was not cancelled. Test failed."
+    exit 1
+fi
