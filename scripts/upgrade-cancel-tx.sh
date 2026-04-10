@@ -95,10 +95,7 @@ cancel_proposal="$CHAIN_BINARY --output json tx gov cancel-proposal $proposal_id
 echo $cancel_proposal
 txhash=$($cancel_proposal | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
-echo "> Query the cancel proposal tx"
-$CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
 echo "> Query the proposal to check if it was cancelled"
-echo "> Capture std error to check if the proposal was cancelled"
 response=$($CHAIN_BINARY q gov proposal $proposal_id --home $whale_home 2>&1)
 echo "> Response: $response"
 if [[ $response == *"doesn't exist"* ]]; then
