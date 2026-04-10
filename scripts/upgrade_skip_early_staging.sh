@@ -135,7 +135,7 @@ tail -n 50 ${logs[0]}
 echo "> Restarting nodes without upgrade skip setup to check if they can start properly after the upgrade height is reached"
 ./$STOP_SCRIPT
 sleep 6
-./$STOP_SCRIPT
+./$START_SCRIPT
 
 # $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.'
 
