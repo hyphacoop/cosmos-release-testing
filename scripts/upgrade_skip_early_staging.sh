@@ -111,7 +111,8 @@ echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 
 echo "> Stopping all nodes before upgrade height is reached to simulate early upgrade skip setup"
 ./$STOP_SCRIPT
-rm $START__SKIP_SCRIPT ; touch $START_SKIP_SCRIPT ; chmod +x $START_SKIP_SCRIPT ; echo "#!/bin/bash" >> $START_SKIP_SCRIPT
+sleep 6
+touch $START_SKIP_SCRIPT ; chmod +x $START_SKIP_SCRIPT ; echo "#!/bin/bash" >> $START_SKIP_SCRIPT
 for i in $(seq 0 $[$validator_count-1])
 do
     echo "echo \"Starting validator ${monikers[i]}...\"" >> $START_SKIP_SCRIPT

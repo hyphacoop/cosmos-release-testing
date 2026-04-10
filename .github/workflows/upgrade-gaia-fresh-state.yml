@@ -2869,6 +2869,7 @@
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
+              export START_SKIP_SCRIPT="start_skip.sh"
               scripts/upgrade_skip_early_staging.sh ${{ matrix.upgrade_name }}
 
           - name: _Blocks produced after cancelled upgrade
