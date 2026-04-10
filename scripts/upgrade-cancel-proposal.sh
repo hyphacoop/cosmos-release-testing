@@ -101,6 +101,8 @@ for i in $(seq -w 01 $validator_count); do
 done
 sleep $(($COMMIT_TIMEOUT+2))
 
+sleep $(($COMMIT_TIMEOUT+10))
+
 jq '.expedited |= true' templates/proposal-cancel-software-upgrade.json > cancel-upgrade.json
 
 echo "> Submitting the cancel-software-proposal proposal while the upgrade proposal is still in voting period"
