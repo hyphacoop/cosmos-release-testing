@@ -56,7 +56,16 @@ do
 done
 
 echo "[INFO]: Query proposal $proposal_id ..."
+set +e
 $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+if [ $? != 0 ]
+then
+    echo "Proposal query failed as expected"
+else
+    echo "Proposal query successful, TEST FAILED"
+    exit 1
+fi
+set -e
 
 echo "[INFO]: Wait for orignal voting period to end"
 sleep $VOTING_PERIOD
@@ -69,6 +78,8 @@ if [ "$post_upgrade_plan" != "{}" ]
 then
     echo "[ERROR]: Upgrade plan is not empty"
     exit 1
+else
+    echo "[INFO]: Upgrade plan is empty"
 fi
 
 echo "[INFO]: Wait until upgrade height is reached"
