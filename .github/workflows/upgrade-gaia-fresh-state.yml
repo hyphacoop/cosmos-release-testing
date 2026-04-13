@@ -574,7 +574,7 @@
           - name: Check proposal tx query
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q gov tx $PARAMS_PROPOSAL_TX_HASH --home $whale_home -o json | jq -r '.'
+              $CHAIN_BINARY q tx $PARAMS_PROPOSAL_TX_HASH --home $whale_home -o json | jq -r '.'
 
           - name: Check auth accounts queries
             run: |
