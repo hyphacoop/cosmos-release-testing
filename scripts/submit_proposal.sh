@@ -2,10 +2,16 @@
 set -e
 
 vote_option="$2"
+wait_voting_period="$3"
 
 if [ ! $vote_option ]
 then
     vote_option="yes"
+fi
+
+if [ ! $wait_voting_period ]
+then
+    wait_voting_period="wait"
 fi
 
 # Generic submit proposal script
@@ -75,8 +81,13 @@ vote_tx_json=$($CHAIN_BINARY q tx $txhash --home $HOME_1 --output json)
 export VOTE_TX_JSON=$vote_tx_json
 
 $CHAIN_BINARY q gov tally $proposal_id --home $HOME_1
-echo "[INFO] Waiting for proposal to pass..."
-sleep $VOTING_PERIOD
+if [ $wait_voting_period == "wait" ]
+then
+    echo "[INFO] Waiting for proposal to pass..."
+    sleep $VOTING_PERIOD
+else
+    echo "[INFO] Skip waiting for proposal to pass..."
+fi
 
 echo "[INFO] Proposal status:"
 proposal_status=$($CHAIN_BINARY q gov proposal $proposal_id --home $HOME_1 -o json)
