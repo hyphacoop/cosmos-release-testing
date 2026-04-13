@@ -33,7 +33,7 @@ do
 done
 
 echo "> Moniker: ${monikers[1]}"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[-3]}" '.[] | select(.name==$name).address')
+wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[1]}" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
 bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
 echo "> Bytes: $bytes"
@@ -68,7 +68,7 @@ $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 
 $CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq '.'
 # $CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_addres==$addr)'
-# status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
+status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator has not been jailed."
