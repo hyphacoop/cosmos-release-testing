@@ -283,7 +283,7 @@ jobs:
           fi
 
       - name: Prop 792 debug
-        run: gaiad q gov proposal 792
+        run: gaiad --home $HOME_1 q gov proposal 792
 
       - name: _Consumer rewards balances check
         run: |
