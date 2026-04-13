@@ -297,9 +297,11 @@
           - name: Submit proposal to update provider params
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq '.'
+              txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*2))
               $CHAIN_BINARY q gov proposals --home $whale_home -o json | jq '.'
+              echo "> Exporting tx hash to GH environment variable"
+              echo "PARAMS_PROPOSAL_TX_HASH=$txhash" >> $GITHUB_ENV
 
           - name: Upgrade to v27.0.0
             env:
@@ -568,6 +570,11 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q gov proposal 1 --home $whale_home -o json | jq '.'
+
+          - name: Check proposal tx query
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q gov tx $PARAMS_PROPOSAL_TX_HASH --home $whale_home -o json | jq -r '.'
 
           - name: Check auth accounts queries
             run: |
