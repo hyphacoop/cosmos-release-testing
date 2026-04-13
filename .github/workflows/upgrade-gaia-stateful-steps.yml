@@ -282,6 +282,9 @@ jobs:
             exit 0
           fi
 
+      - name: Prop 792 debug
+        run: gaiad q gov proposal 792
+
       - name: _Consumer rewards balances check
         run: |
           source ~/env/bin/activate

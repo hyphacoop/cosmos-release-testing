@@ -36,7 +36,7 @@ fi
 # Submit cancel proposal
 proposal_id=$(echo $PROPOSAL_TX_JSON | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "[INFO]: Submitting TX gov cancel-proposal $proposal_id ..."
-$CHAIN_BINARY --home $HOME_1 tx gov cancel-proposal 1049 --gas auto --gas-prices 1000uatom --gas-adjustment 3 --from val --yes
+$CHAIN_BINARY --home $HOME_1 tx gov cancel-proposal $proposal_id --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --yes
 
 # Wait for block to go on chain
 cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
