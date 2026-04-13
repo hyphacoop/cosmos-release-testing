@@ -32,8 +32,8 @@ do
     logs+=($log)
 done
 
-echo "> Moniker: ${monikers[-2]}"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[-2]}" '.[] | select(.name==$name).address')
+echo "> Moniker: ${monikers[-3]}"
+wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[-3]}" '.[] | select(.name==$name).address')
 echo "> Wallet: $wallet"
 bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
 echo "> Bytes: $bytes"
@@ -43,11 +43,11 @@ $CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq '.'
 
 # Jailing
 echo "> Stopping the last validator's consumer node."
-session=${consumer_monikers[-2]}
+session=${consumer_monikers[-3]}
 echo "> Session: $session"
 tmux send-keys -t $session C-c
 sleep 2
-tail ${logs[-2]} -n 100
+tail ${logs[-3]} -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
 sleep $(($COMMIT_TIMEOUT*10))
@@ -67,7 +67,7 @@ echo "> Provider chain slashing:"
 $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 
 echo "> Print consumer chain log"
-tail ${logs[-2]} -n 1000
+tail ${logs[-3]} -n 1000
 
 
 $CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq '.'
