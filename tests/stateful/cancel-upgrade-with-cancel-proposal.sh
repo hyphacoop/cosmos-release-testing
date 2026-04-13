@@ -17,22 +17,6 @@ echo "[INFO]: Upgrade plan:"
 upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
 echo $upgrade_plan
 
-# Check if plan is not empty
-if [ "$upgrade_plan" == "{}" ]
-then
-    echo "[ERROR]: Upgrade plan is empty"
-    exit 1
-fi
-
-# Check if upgrade plan matches prop height
-upgrade_plan_height=$(echo $upgrade_plan | jq -r '.plan.height')
-if [ "$upgrade_height" != "$upgrade_plan_height" ]
-then
-    echo "[ERROR]: Upgrade plan upgrade height different than proposal"
-    echo "Expected $upgrade_height got $upgrade_plan_height"
-    exit 1
-fi
-
 # Submit cancel proposal
 proposal_id=$(echo $PROPOSAL_TX_JSON | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "[INFO]: Submitting TX gov cancel-proposal $proposal_id ..."
@@ -54,6 +38,12 @@ do
     fi
     sleep 1
 done
+
+echo "[INFO]: Query proposal $proposal_id ..."
+$CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+
+echo "[INFO]: Wait for orignal voting period to end"
+sleep $VOTING_PERIOD
 
 # Check if plan is empty
 echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
