@@ -358,7 +358,7 @@ jobs:
         env:
           UPGRADE_NAME: v99
           UPGRADE_AFTER: 50
-        run: tests/stateful/cancel-upgrade-with-cancel-proposal.sh yes do-not-wait
+        run: tests/stateful/cancel-upgrade-with-cancel-proposal.sh
 
 
 

@@ -11,7 +11,7 @@ echo "Upgrade height set to: $upgrade_height"
 
 jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"$UPGRADE_NAME\"" templates/proposal-software-upgrade.json > upgrade_prop.json
 echo "[INFO]: Submit upgrade proposal..."
-source scripts/submit_proposal.sh upgrade_prop.json
+source scripts/submit_proposal.sh upgrade_prop.json yes do-not-wait
 
 echo "[INFO]: Upgrade plan:"
 upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
