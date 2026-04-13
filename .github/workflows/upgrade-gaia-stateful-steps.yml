@@ -352,16 +352,6 @@ jobs:
             exit 1
           fi
 
-
-
-      - name: _Test cancelled upgrade
-        env:
-          UPGRADE_NAME: v99
-          UPGRADE_AFTER: 50
-        run: tests/stateful/cancel-upgrade-with-cancel-proposal.sh
-
-
-
       - name: Query staking params
         run: |
           $CHAIN_BINARY --home $HOME_1 q staking params
@@ -389,6 +379,12 @@ jobs:
         run: scripts/stateful/set_voting_period.sh templates/proposal-voting-period-60s.json
       - name: Query gov params time
         run: $CHAIN_BINARY --home $HOME_1 q gov params
+
+      - name: _Test cancelled upgrade
+        env:
+          UPGRADE_NAME: v99
+          UPGRADE_AFTER: 50
+        run: tests/stateful/cancel-upgrade-with-cancel-proposal.sh
       # - name: Query provider params
       #   run: $CHAIN_BINARY --home $HOME_1 q provider params -o json | jq -r '.'
       # - name: Set BlocksPerEpoch to 1
