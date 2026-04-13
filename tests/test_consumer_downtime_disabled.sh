@@ -65,6 +65,9 @@ $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 echo "> Provider chain slashing:"
 $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 
+echo "> Print consumer chain log"
+tail ${logs[-1]} -n 1000
+
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
@@ -74,69 +77,3 @@ else
     exit 1
 fi
 
-
-# # Unjailing
-
-# echo "> Starting the last validator's consumer node again."
-# tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
-# sleep $DOWNTIME_JAIL_DURATION
-# tail ${logs[-1]}
-# echo "> Submitting unjail transaction."
-# $CHAIN_BINARY tx slashing unjail --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
-# sleep $(($COMMIT_TIMEOUT*2))
-# echo "> Wait for consumer chain to submit another downtime infraction."
-# sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
-# sleep $(($COMMIT_TIMEOUT*5))
-# status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
-# echo "> Status: $status"
-# if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
-#     echo "> PASS: Validator has been unjailed."
-# else
-#     echo "> FAIL: Validator has not been unjailed."
-#     exit 1
-# fi
-
-# echo "> Throttle state:"
-# $CHAIN_BINARY q provider throttle-state --home $whale_home -o json | jq '.'
-
-# echo "> Opting out"
-# consensus_provider=$($CHAIN_BINARY tendermint show-address --home ${homes[-1]})
-# echo "> Provider consensus address: $consensus_address"
-# consumer_pubkey=$($CONSUMER_CHAIN_BINARY tendermint show-validator --home ${homes[-1]})
-# echo "> Consumer pubkey: $consumer_pubkey"
-# consumer_id=$($CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq -r --arg chainid "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id == $chainid).consumer_id')
-# echo "> Consumer ID: $consumer_id"
-# $CHAIN_BINARY tx provider opt-out $consumer_id --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
-# sleep $(($COMMIT_TIMEOUT*2))
-# echo "> Has to validate:"
-# $CHAIN_BINARY q provider has-to-validate $consensus_provider --home $whale_home -o json | jq '.'
-
-# # Jailing attempt
-# echo "> Stopping the last validator's consumer node."
-# session=${consumer_monikers[-1]}
-# echo "> Session: $session"
-# tmux send-keys -t $session C-c
-# sleep 5
-# tail ${logs[-1]} -n 100
-# echo "> Waiting for the downtime infraction."
-# sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
-# sleep $(($COMMIT_TIMEOUT*5))
-
-# status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
-# echo "> Status: $status"
-# if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
-#     echo "> PASS: Validator has not been jailed."
-# else
-#     echo "> FAIL: Validator has been jailed."
-#     exit 1
-# fi
-
-# echo "> Restarting the last validator's consumer node."
-# tmux new-session -d -s $session "$CONSUMER_CHAIN_BINARY start --home ${homes[-1]} 2>&1 | tee ${logs[-1]}"
-# sleep $DOWNTIME_JAIL_DURATION
-
-# echo "> Opting in"
-# $CHAIN_BINARY tx provider opt-in $consumer_id --from ${monikers[-1]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
-# sleep $(($COMMIT_TIMEOUT*2))
-# echo "> Has to validate:"
-# $CHAIN_BINARY q provider has-to-validate $consensus_provider --home $whale_home -o json | jq '.'

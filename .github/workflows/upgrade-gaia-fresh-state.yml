@@ -582,6 +582,13 @@
               $CHAIN_BINARY q auth accounts --home $whale_home -o json | jq '.'
               $CHAIN_BINARY q auth module-accounts --home $whale_home -o json | jq '.'
 
+          - name: _Downtime test> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=5
+              tests/test_consumer_downtime_disabled.sh
+
           - name: _IBC transfer successful> ICS v6.4.0 chain 1
             run: |
               source scripts/vars.sh  
