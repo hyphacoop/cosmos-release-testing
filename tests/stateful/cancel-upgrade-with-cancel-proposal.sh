@@ -12,6 +12,22 @@ echo "Upgrade height set to: $upgrade_height"
 jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"$UPGRADE_NAME\"" templates/proposal-software-upgrade.json > upgrade_prop.json
 echo "[INFO]: Submit upgrade proposal..."
 source scripts/submit_proposal.sh upgrade_prop.json yes do-not-wait
+# Wait for block to go on chain
+cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+let to_height=$cur_height+1
+echo_height=1
+echo "[INFO] Current height: $cur_height"
+
+until [[ "${cur_height}" -gt "${to_height}" ]]
+do
+    cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
+    if [ $echo_height -ne $cur_height ]
+    then
+        echo "[INFO] Current height: $cur_height"
+        echo_height=$cur_height
+    fi
+    sleep 1
+done
 
 echo "[INFO]: Upgrade plan:"
 upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
