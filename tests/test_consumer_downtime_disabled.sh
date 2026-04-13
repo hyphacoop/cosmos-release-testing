@@ -32,22 +32,16 @@ do
     logs+=($log)
 done
 
-echo "> Moniker: ${monikers[1]}"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[1]}" '.[] | select(.name==$name).address')
-echo "> Wallet: $wallet"
-bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
-echo "> Bytes: $bytes"
-valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
+echo "> Finding validator with BOND_STATUS_BONDED status."
+valoper=$($CHAIN_BINARY q staking validators -o json | jq -r '[.validators[] | select((.status=="BOND_STATUS_BONDED") and (.description.moniker!="val_01"))][0].operator_address')
 echo "> Valoper: $valoper"
-$CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq '.'
+moniker=$($CHAIN_BINARY q staking validator $valoper -o json | jq -r '.description.moniker')
+echo "> Moniker: $moniker"
 
 # Jailing
 echo "> Stopping the last validator's consumer node."
-session=${consumer_monikers[1]}
-echo "> Session: $session"
-tmux send-keys -t $session C-c
+tmux send-keys -t $moniker C-c
 sleep 2
-tail ${logs[1]} -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
 sleep $(($COMMIT_TIMEOUT*10))
@@ -67,7 +61,6 @@ echo "> Provider chain slashing:"
 $CHAIN_BINARY q slashing signing-infos --home $whale_home -o json | jq '.'
 
 $CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq '.'
-# $CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_addres==$addr)'
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then

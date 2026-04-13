@@ -607,6 +607,11 @@
               export MAX_PROVIDER_VALIDATORS=5
               tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
 
+          - name: Query consumer rewards pool balances
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
 
       # Test-01-cosmovisor-upgrade:
       #   runs-on: ubuntu-24.04
