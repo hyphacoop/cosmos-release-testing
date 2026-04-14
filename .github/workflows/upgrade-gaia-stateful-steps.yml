@@ -242,8 +242,8 @@ jobs:
           fi
       - name: Add fork wallet
         run: |
-          $CHAIN_BINARY keys list
-          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --recover > ~/.gaia/validator.json
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --keyring-backend test --recover > ~/.gaia/validator.json
           $CHAIN_BINARY keys list
       - name: Flush "migration successful" lines
         run: |
