@@ -95,7 +95,7 @@
         strategy:
           matrix:
             operation: ["down"] #,"no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
-            stop-chain: ["keep-consumer"] #,"stop-consumer"]
+            stop-chain: ["keep-consumer","stop-consumer"]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
@@ -611,6 +611,7 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
 
 
       # Test-01-cosmovisor-upgrade:
