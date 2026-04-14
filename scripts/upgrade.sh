@@ -135,7 +135,7 @@ echo "> Submit a consumer addition proposal"
 # Patch the template with the chain id "upgrade-chain"
 jq -r --arg CHAIN_ID "upgrade-chain" '.messages[0].chain_id |= $CHAIN_ID' templates/proposal-add-template.json > proposal-upgrade-consumer.json
 
-$CHAIN_BINARY tx gov submit-legacy-proposal --proposal proposal-upgrade-consumer.json --home $whale_home --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
+$CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
 
 echo "> Save the upgrade height to GITHUB_ENV"
 echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
