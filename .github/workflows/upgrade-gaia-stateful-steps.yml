@@ -243,6 +243,7 @@ jobs:
       - name: Add fork wallet
         run: |
           echo "Restoring validator key"
+          mkdir ~/.gaia
           echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --keyring-backend test --recover > ~/.gaia/validator.json
           $CHAIN_BINARY keys list
       - name: Flush "migration successful" lines
