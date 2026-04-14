@@ -595,7 +595,7 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              cat ${consumer_log_prefix}$COUNT_WIDTH
+              cat $consumer_whale_home
 
           - name: _Downtime test> ICS v6.4.0
             run: |
