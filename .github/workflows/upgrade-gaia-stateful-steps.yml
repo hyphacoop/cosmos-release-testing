@@ -240,12 +240,6 @@ jobs:
           else
             echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
           fi
-      - name: Add fork wallet
-        run: |
-          echo "Restoring validator key"
-          mkdir ~/.gaia
-          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --keyring-backend test --recover > ~/.gaia/validator.json
-          $CHAIN_BINARY keys list
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
@@ -1346,8 +1340,9 @@ jobs:
           cp $HOME/.test-fork/config/node_key.json $HOME/.gaia/config/
       - name: Add fork wallet
         run: |
-          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --recover > ~/.gaia/validator.json
-          $CHAIN_BINARY keys list
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --keyring-backend test --recover > ~/.gaia/validator.json
+          $CHAIN_BINARY keys list --keyring-backend test
       - name: _Test fork tool
         run: |
           pubkey=$(jq -r .pub_key.value $HOME/.gaia/config/priv_validator_key.json)
@@ -1358,6 +1353,7 @@ jobs:
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
           --auto-find-target
+          tests/test_block_production.sh 127.0.0.1 26657 20 50
           sleep 30
           cat $HOME/artifact/gaiad_fork.log
       # - name: DEBUG
