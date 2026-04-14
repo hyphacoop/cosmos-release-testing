@@ -133,7 +133,7 @@ fi
 
 echo "> Submit a consumer addition proposal"
 # Patch the template with the chain id "upgrade-chain"
-jq -r --arg CHAIN_ID "upgrade-chain" '.messages[0].chain_id |= $CHAIN_ID' templates/proposal-add-consumer.json > proposal-upgrade-consumer.json
+jq -r --arg CHAIN_ID "upgrade-chain" '.messages[0].chain_id |= $CHAIN_ID' templates/proposal-add-template.json > proposal-upgrade-consumer.json
 
 $CHAIN_BINARY tx gov submit-proposal proposal-upgrade-consumer.json --home $whale_home --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
 
