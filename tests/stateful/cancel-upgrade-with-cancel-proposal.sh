@@ -36,7 +36,7 @@ echo $upgrade_plan
 # Submit cancel proposal
 proposal_id=$(echo $PROPOSAL_TX_JSON | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "[INFO]: Submitting TX gov cancel-proposal $proposal_id ..."
-# $CHAIN_BINARY --home $HOME_1 tx gov cancel-proposal $proposal_id --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --yes
+$CHAIN_BINARY --home $HOME_1 tx gov cancel-proposal $proposal_id --gas auto --gas-prices $GAS_PRICES$DENOM --gas-adjustment $GAS_ADJUSTMENT --from $WALLET_1 --yes
 
 # Wait for block to go on chain
 cur_height=$(curl -s http://127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
@@ -55,32 +55,32 @@ do
     sleep 1
 done
 
-# echo "[INFO]: Query proposal $proposal_id ..."
-# set +e
-# $CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
-# if [ $? != 0 ]
-# then
-#     echo "Proposal query failed as expected"
-# else
-#     echo "Proposal query successful, TEST FAILED"
-#     exit 1
-# fi
-# set -e
+echo "[INFO]: Query proposal $proposal_id ..."
+set +e
+$CHAIN_BINARY --home $HOME_1 q gov proposal $proposal_id
+if [ $? != 0 ]
+then
+    echo "Proposal query failed as expected"
+else
+    echo "Proposal query successful, TEST FAILED"
+    exit 1
+fi
+set -e
 
-# echo "[INFO]: Wait for orignal voting period to end"
-# sleep $VOTING_PERIOD
+echo "[INFO]: Wait for orignal voting period to end"
+sleep $VOTING_PERIOD
 
-# # Check if plan is empty
-# echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
-# post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
-# echo $post_upgrade_plan
-# if [ "$post_upgrade_plan" != "{}" ]
-# then
-#     echo "[ERROR]: Upgrade plan is not empty"
-#     exit 1
-# else
-#     echo "[INFO]: Upgrade plan is empty"
-# fi
+# Check if plan is empty
+echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
+post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
+echo $post_upgrade_plan
+if [ "$post_upgrade_plan" != "{}" ]
+then
+    echo "[ERROR]: Upgrade plan is not empty"
+    exit 1
+else
+    echo "[INFO]: Upgrade plan is empty"
+fi
 
 echo "[INFO]: Wait until upgrade height is reached"
 current_block=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r .result.block.header.height)
