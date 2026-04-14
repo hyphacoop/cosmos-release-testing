@@ -1,0 +1,143 @@
+#!/bin/bash 
+# Test a gaia software upgrade via governance proposal.
+# It assumes gaia is running on the local host.
+
+upgrade_name=$1
+
+homes=()
+logs=()
+for i in $(seq -w 01 $validator_count)
+do
+    home=$home_prefix$i
+    homes+=($home)
+    log=$log_prefix$i
+    logs+=($log)
+done
+
+# if [ "$COSMOVISOR" = true ]; then
+#     if [ "$UPGRADE_MECHANISM" = "cv_manual" ]; then
+#         echo "> Using manual upgrade mechanism"
+#         if [ "$BINARY_SOURCE" = "BUILD" ]; then
+#             echo "> Using Cosmovisor"
+#             echo "Building new binary."
+#             sudo apt install build-essential -y
+#             wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
+#             sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
+#             rm -rf gaia
+#             git clone https://github.com/cosmos/gaia.git
+#             # cd gaia
+#             pushd gaia
+#             git checkout $TARGET_VERSION
+#             make install
+#             # cd ..
+#             popd
+#             cp $HOME/go/bin/gaiad $CHAIN_BINARY
+#             for i in $(seq 0 $[$validator_count-1])
+#             do
+#                 mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
+#                 cp $HOME/go/bin/gaiad ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY_NAME
+#             done
+#         else
+#             echo "Downloading new binary."
+#             wget $DOWNLOAD_URL -O ./upgraded -q
+#             chmod +x ./upgraded
+#             for i in $(seq 0 $[$validator_count-1])
+#             do
+#                 mkdir -p ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin
+#                 cp ./upgraded ${homes[i]}/cosmovisor/upgrades/$upgrade_name/bin/$CHAIN_BINARY_NAME
+#             done                
+#         fi
+#     fi
+# fi
+
+echo "Attempting upgrade to $upgrade_name."
+
+# Set time to wait for proposal to pass
+# echo "Get voting_period from genesis file"
+# voting_period=$(jq -r '.app_state.gov.voting_params.voting_period' $HOME_1/config/genesis.json)
+echo "Using ($VOTING_PERIOD)s voting period to calculate the upgrade height."
+    
+# Calculate upgrade height
+echo "Calculate upgrade height"
+block_time=$COMMIT_TIMEOUT
+let voting_blocks_delta=$VOTING_PERIOD/$block_time+10
+height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r .result.block.header.height)
+upgrade_height=$(($height+$voting_blocks_delta))
+echo "Upgrade block height set to $upgrade_height."
+
+upgrade_info="{\"binaries\":{\"linux/amd64\":\"$DOWNLOAD_URL\"}}"
+echo "Starting proposal:"
+jq '.' templates/proposal-software-upgrade.json
+# Set up metadata
+jq -r --arg NAME "$upgrade_name" '.messages[0].plan.name |= $NAME' templates/proposal-software-upgrade.json > upgrade-1.json
+jq -r --arg HEIGHT "$upgrade_height" '.messages[0].plan.height |= $HEIGHT' upgrade-1.json > upgrade-2.json
+jq -r --arg INFO "$upgrade_info" '.messages[0].plan.info |= $INFO' upgrade-2.json > upgrade-3.json
+jq -r '.expedited |= false' upgrade-3.json > upgrade-4.json
+echo "Modified proposal:"
+jq '.' upgrade-4.json
+proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT --yes --home $whale_home"
+
+
+# Submit the proposal
+echo "Submitting the upgrade proposal."
+echo $proposal
+txhash=$($proposal | jq -r .txhash)
+sleep $(($COMMIT_TIMEOUT+2))
+
+# Get proposal ID from txhash
+echo "Getting proposal ID from txhash..."
+proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+echo "Proposal ID: $proposal_id"
+
+# Vote yes on the proposal
+echo "Submitting the \"yes\" vote to proposal $proposal_id..."
+# Vote with each of the validators
+for i in $(seq -w 01 $validator_count); do
+    val_wallet="$moniker_prefix$i"
+    echo "Voting from $val_wallet"
+    vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $val_wallet --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
+    echo $vote
+    txhash=$($vote | jq -r .txhash)
+done
+sleep $(($COMMIT_TIMEOUT+2))
+
+sleep $(($COMMIT_TIMEOUT+10))
+
+jq '.expedited |= true' templates/proposal-cancel-software-upgrade.json > cancel-upgrade.json
+
+echo "> Submitting the cancel-software-proposal proposal while the upgrade proposal is still in voting period"
+cancel_proposal="$CHAIN_BINARY --output json tx gov submit-proposal cancel-upgrade.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
+echo $cancel_proposal
+txhash=$($cancel_proposal | jq -r .txhash)
+sleep $(($COMMIT_TIMEOUT+2))
+echo "Getting cancel proposal ID from txhash..."
+cancel_proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+echo "Cancel Proposal ID: $cancel_proposal_id"
+
+# Vote yes on the cancel proposal
+echo "Submitting the \"yes\" vote to proposal $cancel_proposal_id..."
+# Vote with each of the validators
+for i in $(seq -w 01 $validator_count); do
+    val_wallet="$moniker_prefix$i"
+    echo "Voting from $val_wallet"
+    vote="$CHAIN_BINARY tx gov vote $cancel_proposal_id yes --from $val_wallet --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
+    echo $vote
+    txhash=$($vote | jq -r .txhash)
+done
+sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($EXPEDITED_VOTING_PERIOD))
+
+echo "Upgrade proposal $proposal_id status:"
+$CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
+echo "Cancel upgrade proposal $cancel_proposal_id status:"
+$CHAIN_BINARY q gov proposal $cancel_proposal_id --output json --home $whale_home | jq '.proposal.status'
+
+echo "> Querying upgrade plan to check if it was cancelled"
+response=$($CHAIN_BINARY q upgrade plan --home $whale_home 2>&1)
+echo "> Response: $response"
+if [[ $response == *"{}"* ]]; then
+    echo "> Upgrade plan was cancelled successfully."
+else
+    echo "> Upgrade plan was not cancelled. Test failed."
+    exit 1
+fi

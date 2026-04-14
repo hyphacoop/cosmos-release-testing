@@ -13,7 +13,7 @@
             description: 'Gaia version to upgrade to'
             required: true
             type: string
-            default: release/v27.x
+            default: v27.2.0
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
@@ -41,7 +41,7 @@
       set-versions:
         env:
           START: ${{ github.event_name == 'push' && 'v26.0.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'release/v27.x' || inputs.to_version }}
+          TARGET: ${{ github.event_name == 'push' && 'v27.2.0' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v27.2.0' || inputs.upgrade_name }}
         runs-on: ubuntu-24.04
         steps:
@@ -2786,6 +2786,119 @@
                 echo "> PASS: Delegation amount after delegations is correct. Expected 20000000 more than starting delegation, got $diff"
               fi
 
+      Test-16-cancel-upgrade:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 3
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 log_$COUNT_WIDTH
+              scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Test software upgrade cancellation - proposer tx
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade_cancel_tx.sh ${{ matrix.upgrade_name }}
+
+          - name: Test software upgrade cancellation - cancel software upgrade proposal
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade_cancel_proposal.sh ${{ matrix.upgrade_name }}
+
+          - name: Test software upgrade cancellation - skip upgrade height through early staging
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export START_SKIP_SCRIPT="start_skip.sh"
+              scripts/upgrade_skip_early_staging.sh ${{ matrix.upgrade_name }}
+
+          - name: Test software upgrade cancellation - skip upgrade height after it has been reached
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export START_SKIP_SCRIPT="start_skip.sh"
+              scripts/upgrade_skip.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after cancelled upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
       Test-All:
         runs-on: ubuntu-24.04
         needs: set-versions
@@ -3227,6 +3340,45 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+
+          - name: Test software upgrade cancellation - proposer tx
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade_cancel_tx.sh ${{ matrix.upgrade_name }}
+
+          - name: Test software upgrade cancellation - cancel software upgrade proposal
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade_cancel_proposal.sh ${{ matrix.upgrade_name }}
+
+          - name: Test software upgrade cancellation - skip upgrade height through early staging
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export START_SKIP_SCRIPT="start_skip.sh"
+              scripts/upgrade_skip_early_staging.sh ${{ matrix.upgrade_name }}
+
+          - name: Test software upgrade cancellation - skip upgrade height after it has been reached
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export START_SKIP_SCRIPT="start_skip.sh"
+              scripts/upgrade_skip.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after cancelled upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: _Blocks produced after upgrade
             run: |
