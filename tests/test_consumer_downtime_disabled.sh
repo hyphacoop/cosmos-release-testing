@@ -38,10 +38,12 @@ echo "> Valoper: $valoper"
 $CHAIN_BINARY q staking validator $valoper --home $whale_home
 moniker=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.description.moniker')
 echo "> Moniker: $moniker"
+consumer_session="${moniker//$moniker_prefix/$consumer_moniker_prefix}"
+echo "> Consumer session: $consumer_session"
 
 # Jailing
 echo "> Stopping the last validator's consumer node."
-tmux send-keys -t $moniker C-c
+tmux send-keys -t $consumer_session C-c
 sleep 2
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$CONSUMER_DOWNTIME_WINDOW))
