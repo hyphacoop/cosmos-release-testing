@@ -729,8 +729,8 @@
           fail-fast: false
         env:
           COSMOVISOR: false
-          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          # BINARY_SOURCE: DOWNLOAD
+          # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          BINARY_SOURCE: DOWNLOAD
           COMMIT_TIMEOUT: 3
         steps:
           - name: Update PATH
