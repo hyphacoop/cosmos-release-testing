@@ -409,7 +409,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start relayer
@@ -610,7 +610,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start relayer
@@ -821,7 +821,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start relayer
@@ -834,7 +834,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start pfm2 chain
@@ -844,7 +844,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start pfm3 chain
@@ -854,7 +854,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Create transfer channels for PFM test
@@ -1000,7 +1000,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start relayer
@@ -1146,7 +1146,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start relayer
@@ -1322,7 +1322,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Set up vesting account
@@ -1482,7 +1482,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start host chain
@@ -1492,7 +1492,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start relayer
@@ -1680,7 +1680,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: _Test counter contract
@@ -1827,7 +1827,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Query consensus params
@@ -1967,7 +1967,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
           - name: Block production check
             run: |
               source scripts/vars.sh
@@ -2272,7 +2272,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
          
           - name: Query tokenfactory params
@@ -2407,7 +2407,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Upgrade to v27.0.0
@@ -2540,7 +2540,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Upgrade to v27.0.0
@@ -2661,7 +2661,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3              
 
           - name: Start relayer
@@ -2817,7 +2817,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start pfm2 chain
@@ -2827,7 +2827,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Start pfm3 chain
@@ -2837,7 +2837,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Create transfer channels for PFM test
@@ -2974,7 +2974,7 @@
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
-              tail -n 100 log_$COUNT_WIDTH
+              tail -n 100 $whale_log
               scripts/wait_for_block.sh $whale_rpc 3
 
           - name: Generate host connection
