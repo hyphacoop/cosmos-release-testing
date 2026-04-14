@@ -346,8 +346,10 @@
               source scripts/vars_consumer_v640_one.sh 
               export validator_count=10
               echo "> Submitting transaction to remove the consumer chain"
-              $CHAIN_BINARY tx provider remove-consumer 0 --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq '.'
+              txhash=$($CHAIN_BINARY tx provider remove-consumer 0 --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Querying transaction hash $txhash"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
               echo "> Checking that the consumer chain is removed"
               $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
             if: matrix.stop-chain == 'stop-consumer'
