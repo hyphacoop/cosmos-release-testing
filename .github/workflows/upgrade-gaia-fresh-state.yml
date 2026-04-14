@@ -387,6 +387,7 @@
               export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               export OPERATION=${{ matrix.operation }}
               source scripts/vars.sh
+              echo "> Whale log file name: $whale_log"
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
@@ -622,6 +623,11 @@
             run: |
               source scripts/vars.sh
               tests/test_tx.sh
+
+          - name: Print validator log
+            run: |
+              source scripts/vars.sh
+              cat $whale_log
   
       # Test-02-ics-optin:
       #   runs-on: ubuntu-24.04

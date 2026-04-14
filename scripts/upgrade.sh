@@ -10,7 +10,7 @@ for i in $(seq -w 01 $validator_count)
 do
     home=$home_prefix$i
     homes+=($home)
-    log=$moniker$i$log_suffix
+    log=$moniker_prefix$i$log_suffix
     logs+=($log)
 done
 
@@ -131,10 +131,7 @@ if [ "$STAKING_OPERATIONS" = true ]; then
     fi
 fi
 
-echo "> Submit a consumer addition proposal"
-# Patch the template with the chain id "upgrade-chain"
-jq -r --arg CHAIN_ID "upgrade-chain" '.messages[0].chain_id |= $CHAIN_ID' templates/proposal-add-template.json > proposal-upgrade-consumer.json
-
+echo "> Submit an ICS param update proposal"
 $CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
 
 echo "> Save the upgrade height to GITHUB_ENV"
