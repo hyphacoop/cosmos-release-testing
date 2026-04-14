@@ -240,6 +240,11 @@ jobs:
           else
             echo "[INFO]: Block hash matches. VAL1 hash: $hash_val1 VAL2 hash: $hash_val2"
           fi
+      - name: Add fork wallet
+        run: |
+          $CHAIN_BINARY keys list
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --recover > ~/.gaia/validator.json
+          $CHAIN_BINARY keys list
       - name: Flush "migration successful" lines
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
