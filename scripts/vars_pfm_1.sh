@@ -38,12 +38,12 @@ export p2p_prefix="360"
 export rpc_prefix="370"
 export grpc_prefix="380"
 export pprof_prefix="390"
-export log_prefix="logpfm1_"
+export log_suffix=".log"
 
 export whale_home=${home_prefix}$COUNT_WIDTH
 export whale_api=${api_prefix}$COUNT_WIDTH
 export whale_rpc=${rpc_prefix}$COUNT_WIDTH
-export whale_log=${log_prefix}$COUNT_WIDTH
+export whale_log="${moniker_prefix}$COUNT_WIDTH$log_suffix"
 
 export START_SCRIPT="start-pfm1.sh"
 export STOP_SCRIPT="stop-pfm1.sh"
