@@ -76,7 +76,7 @@
           - name: Set binary source
             id: binary
             run: |
-              echo "source=BUILD" >> $GITHUB_OUTPUT
+              echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
               # if [[ "${TARGET:0:1}" != "v" ]]; then
               #   echo "source=BUILD" >> $GITHUB_OUTPUT
               # else
@@ -102,7 +102,6 @@
         env:
           COSMOVISOR: false
           # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          BINARY_SOURCE: DOWNLOAD
           COMMIT_TIMEOUT: 2
           STAKING_OPERATIONS: true
         steps:
@@ -629,95 +628,94 @@
               source scripts/vars.sh
               cat $whale_log
 
-      # Test-01-cosmovisor-upgrade:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #       cv_version: [v1.7.1]
-      #       upgrade_mechanism: [cv_auto, cv_manual]
-      #       enable_cosmovisor: [false, true]
-      #       exclude:
-      #         - target_version: main
-      #           upgrade_mechanism: cv_auto
-      #         - enable_cosmovisor: false
-      #           upgrade_mechanism: cv_auto
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: ${{ matrix.enable_cosmovisor }}
-      #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-      #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     GO_VERSION: 1.24.1
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-      #     - name: Install Cosmovisor
-      #       if: ${{ matrix.enable_cosmovisor == true }}
-      #       run: |
-      #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh 3
+      Test-01-cosmovisor-upgrade:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+            cv_version: [v1.7.1]
+            upgrade_mechanism: [cv_auto, cv_manual]
+            enable_cosmovisor: [false, true]
+            exclude:
+              - target_version: main
+                upgrade_mechanism: cv_auto
+              - enable_cosmovisor: false
+                upgrade_mechanism: cv_auto
+          fail-fast: false
+        env:
+          COSMOVISOR: ${{ matrix.enable_cosmovisor }}
+          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          GO_VERSION: 1.24.1
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Install Cosmovisor
+            if: ${{ matrix.enable_cosmovisor == true }}
+            run: |
+              go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh 3
           
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
 
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
                   
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
 
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
   
-
       Test-02-ics-optin:
         runs-on: ubuntu-24.04
         needs: set-versions
@@ -729,8 +727,7 @@
           fail-fast: false
         env:
           COSMOVISOR: false
-          # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          BINARY_SOURCE: DOWNLOAD
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           COMMIT_TIMEOUT: 3
         steps:
           - name: Update PATH
@@ -1040,6 +1037,7 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id channel-1
+              echo "TRANSFER_CHANNEL_ID=$channel_id" >> $GITHUB_EN
           
           - name: Upgrade to v27.0.0
             env:
@@ -1076,7 +1074,7 @@
               source scripts/vars.sh
               export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
-              
+
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
@@ -1099,10 +1097,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v400_one.sh
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-              tests/test_consumer_ibc_transfer.sh $channel_id channel-1
+              tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
               
           # - name: Set Top N to 0 for ICS v4.0.0
           #   run: |
@@ -1125,15 +1120,6 @@
           #     source scripts/vars_consumer_v400_one.sh
           #     tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
 
-          - name: _IBC transfer successful> ICS v4.0.0 chain 1
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v400_one.sh
-              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
-              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
-              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
-              tests/test_consumer_ibc_transfer.sh $channel_id channel-1
-
           # - name: Query consumer chains
           #   run: |
           #     source scripts/vars.sh  
@@ -1153,190 +1139,190 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost $whale_rpc
   
-      # Test-04-pfm:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
+      Test-04-pfm:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
           
-      #     - name: Set up relayer
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/setup_relayer.sh
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
 
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Start relayer
-      #       run: scripts/start_relayer.sh
+          - name: Start relayer
+            run: scripts/start_relayer.sh
 
-      #     - name: Start pfm1 chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars_pfm_1.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start pfm1 chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_pfm_1.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Start pfm2 chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars_pfm_2.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start pfm2 chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_pfm_2.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Start pfm3 chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars_pfm_3.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start pfm3 chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_pfm_3.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Create transfer channels for PFM test
-      #       run: |
-      #         source scripts/vars.sh
-      #         tmux send-keys -t relayer C-c
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         if [ $RELAYER == "hermes" ]; then
-      #           echo "Creating channels with Hermes..."
-      #           hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
-      #           hermes create channel --new-client-connection --a-chain pfm1 --b-chain pfm2 --a-port transfer --b-port transfer --yes
-      #           hermes create channel --new-client-connection --a-chain pfm2 --b-chain pfm3 --a-port transfer --b-port transfer --yes
-      #         elif [ $RELAYER == "rly" ]; then
-      #           echo "Creating channel with Go relayer..."
-      #           echo "Paths"
-      #           rly paths new testnet pfm1 pfm-path-1
-      #           rly paths new pfm1 pfm2 pfm-path-2
-      #           rly paths new pfm2 pfm3 pfm-path-3
-      #           echo "Clients"
-      #           rly transact client testnet pfm1 pfm-path-1
-      #           rly transact client pfm1 pfm2 pfm-path-2
-      #           rly transact client pfm2 pfm3 pfm-path-3
-      #           sleep $(($COMMIT_TIMEOUT*2))
-      #           echo "Connections"
-      #           rly transact connection pfm-path-1
-      #           rly transact connection pfm-path-2
-      #           rly transact connection pfm-path-3
-      #           sleep $(($COMMIT_TIMEOUT*2))
-      #           echo "Channels"
-      #           rly transact channel pfm-path-1
-      #           rly transact channel pfm-path-2
-      #           rly transact channel pfm-path-3
-      #         fi
-      #         # sudo systemctl restart $RELAYER
-      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
-      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
-      #         # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
-      #         scripts/start_relayer.sh    
+          - name: Create transfer channels for PFM test
+            run: |
+              source scripts/vars.sh
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              if [ $RELAYER == "hermes" ]; then
+                echo "Creating channels with Hermes..."
+                hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
+                hermes create channel --new-client-connection --a-chain pfm1 --b-chain pfm2 --a-port transfer --b-port transfer --yes
+                hermes create channel --new-client-connection --a-chain pfm2 --b-chain pfm3 --a-port transfer --b-port transfer --yes
+              elif [ $RELAYER == "rly" ]; then
+                echo "Creating channel with Go relayer..."
+                echo "Paths"
+                rly paths new testnet pfm1 pfm-path-1
+                rly paths new pfm1 pfm2 pfm-path-2
+                rly paths new pfm2 pfm3 pfm-path-3
+                echo "Clients"
+                rly transact client testnet pfm1 pfm-path-1
+                rly transact client pfm1 pfm2 pfm-path-2
+                rly transact client pfm2 pfm3 pfm-path-3
+                sleep $(($COMMIT_TIMEOUT*2))
+                echo "Connections"
+                rly transact connection pfm-path-1
+                rly transact connection pfm-path-2
+                rly transact connection pfm-path-3
+                sleep $(($COMMIT_TIMEOUT*2))
+                echo "Channels"
+                rly transact channel pfm-path-1
+                rly transact channel pfm-path-2
+                rly transact channel pfm-path-3
+              fi
+              # sudo systemctl restart $RELAYER
+              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm1 -o json
+              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm2 -o json
+              # $CHAIN_BINARY q ibc connection connections --home /home/runner/.pfm3 -o json
+              scripts/start_relayer.sh    
 
-      #     - name: Store channel IDs for PFM test
-      #       run: |
-      #         scripts/store_pfm_channel_ids.sh
+          - name: Store channel IDs for PFM test
+            run: |
+              scripts/store_pfm_channel_ids.sh
 
-      #     - name: _Test PFM transfers
-      #       run: |
-      #         source scripts/vars_pfm_3.sh
-      #         tests/test_pfm_transfers.sh
+          - name: _Test PFM transfers
+            run: |
+              source scripts/vars_pfm_3.sh
+              tests/test_pfm_transfers.sh
           
-      #     - name: Upgrade to v27.0.0
-      #       env:
-      #         TARGET_VERSION: v27.0.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
 
-      #     - name: Upgrade to v27.1.0
-      #       env:
-      #         TARGET_VERSION: v27.1.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
               
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: "${{ matrix.target_version }}"
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}  
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: "${{ matrix.target_version }}"
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}  
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
-      #     - name: Restart relayer
-      #       run: |
-      #         # sudo systemctl restart $RELAYER
-      #         tmux send-keys -t relayer C-c
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         scripts/start_relayer.sh
+          - name: Restart relayer
+            run: |
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
 
-      #     - name: _Test PFM transfers
-      #       env:
-      #         PFM_HOME: /home/runner/.pfm3
-      #       run: |
-      #         tests/test_pfm_transfers.sh
+          - name: _Test PFM transfers
+            env:
+              PFM_HOME: /home/runner/.pfm3
+            run: |
+              tests/test_pfm_transfers.sh
 
-      #     # tokenfactory
+          # tokenfactory
 
-      #     - name: Query tokenfactory params
-      #       run: |
-      #         source scripts/vars.sh
-      #         $CHAIN_BINARY q tokenfactory params --home $whale_home -o json | jq '.'
+          - name: Query tokenfactory params
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q tokenfactory params --home $whale_home -o json | jq '.'
           
-      #     - name: Create and mint factory denom
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/factory_create_mint_denom.sh
+          - name: Create and mint factory denom
+            run: |
+              source scripts/vars.sh
+              scripts/factory_create_mint_denom.sh
           
-      #     - name: Test factory denom transfer with PFM
-      #       run: |
-      #         tests/test_factory_pfm_transfer.sh
+          - name: Test factory denom transfer with PFM
+            run: |
+              tests/test_factory_pfm_transfer.sh
 
       # Test-05-liquid-staking:
       #   runs-on: ubuntu-24.04
