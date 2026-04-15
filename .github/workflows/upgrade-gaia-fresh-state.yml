@@ -2202,228 +2202,248 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost $whale_rpc
     
-      # Test-10-feemarket:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     COMMIT_TIMEOUT: 3
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
+      Test-10-feemarket:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 3
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
 
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Query consensus params
-      #       run: |
-      #         source scripts/vars.sh
-      #         curl -s http://localhost:$whale_api/cosmos/consensus/v1/params | jq '.'
+          - name: Query consensus params
+            run: |
+              source scripts/vars.sh
+              curl -s http://localhost:$whale_api/cosmos/consensus/v1/params | jq '.'
           
-      #     - name: Query feemarket params
-      #       run: |
-      #         source scripts/vars.sh
-      #         curl -s http://localhost:$whale_api/feemarket/v1/params | jq '.'          
-      #     - name: _Test feemarket
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_feemarket.sh
+          - name: Query feemarket params
+            run: |
+              source scripts/vars.sh
+              curl -s http://localhost:$whale_api/feemarket/v1/params | jq '.'          
+          - name: _Test feemarket
+            run: |
+              source scripts/vars.sh
+              tests/test_feemarket.sh
   
-      #     - name: Print consensus and feemarket params
-      #       run: |
-      #         source scripts/vars.sh  
-      #         echo "> consensus params:"
-      #         $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
-      #         echo "> feemarket params:"
-      #         $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
+          - name: Print consensus and feemarket params
+            run: |
+              source scripts/vars.sh  
+              echo "> consensus params:"
+              $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
+              echo "> feemarket params:"
+              $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
   
-      #     - name: Upgrade to v27.0.0
-      #       env:
-      #         TARGET_VERSION: v27.0.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
 
-      #     - name: Upgrade to v27.1.0
-      #       env:
-      #         TARGET_VERSION: v27.1.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
-
-    
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
-          
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
-  
-      #     - name: _Test feemarket
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_feemarket.sh
-  
-      #     - name: Print consensus and feemarket params
-      #       run: |
-      #         source scripts/vars.sh
-      #         echo "> consensus params:"
-      #         $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
-      #         echo "> feemarket params:"
-      #         $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
-      #     - name: Change consensus and feemarket params
-      #       run: |
-      #         source scripts/vars.sh
-      #         txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
-      #         echo "tx hash: $txhash"
-      #         sleep $(($COMMIT_TIMEOUT+2))
-      #         prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
-      #         echo "> Proposal ID: $prop_id"
-      #         $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
-      #         sleep $VOTING_PERIOD
-      #         sleep $(($COMMIT_TIMEOUT+2))
-      #     - name: Print consensus and feemarket params
-      #       run: |
-      #         source scripts/vars.sh
-      #         echo "> consensus params:"
-      #         $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
-      #         echo "> feemarket params:"
-      #         $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
-  
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost $whale_api
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost $whale_rpc
-  
-      # Test-11-expedited-proposals:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64    
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #     - name: Block production check
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/wait_for_block.sh $whale_rpc 3
-
-      #     - name: Upgrade to v27.0.0
-      #       env:
-      #         TARGET_VERSION: v27.0.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
-
-      #     - name: Upgrade to v27.1.0
-      #       env:
-      #         TARGET_VERSION: v27.1.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
               
-              
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          - name: Upgrade to v27.2.0
+            env:
+              TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
           
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+  
+          - name: _Test feemarket
+            run: |
+              source scripts/vars.sh
+              tests/test_feemarket.sh
+  
+          - name: Print consensus and feemarket params
+            run: |
+              source scripts/vars.sh
+              echo "> consensus params:"
+              $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
+              echo "> feemarket params:"
+              $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
+          - name: Change consensus and feemarket params
+            run: |
+              source scripts/vars.sh
+              txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+              echo "tx hash: $txhash"
+              sleep $(($COMMIT_TIMEOUT+2))
+              prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
+              echo "> Proposal ID: $prop_id"
+              $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+              sleep $VOTING_PERIOD
+              sleep $(($COMMIT_TIMEOUT+2))
+          - name: Print consensus and feemarket params
+            run: |
+              source scripts/vars.sh
+              echo "> consensus params:"
+              $CHAIN_BINARY q consensus params --home $whale_home -o json | jq '.'
+              echo "> feemarket params:"
+              $CHAIN_BINARY q feemarket params --home $whale_home -o json | jq '.'
+  
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
+  
+      Test-11-expedited-proposals:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64    
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+          - name: Block production check
+            run: |
+              source scripts/vars.sh
+              scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+              
+          - name: Upgrade to v27.2.0
+            env:
+              TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
     
-      #     - name: _Test expedited proposals
-      #       run: |
-      #         source ./scripts/vars.sh
-      #         tests/test_expedited_proposals.sh
+          - name: _Test expedited proposals
+            run: |
+              source ./scripts/vars.sh
+              tests/test_expedited_proposals.sh
 
       # Test-12-key-management:
       #   runs-on: ubuntu-24.04
