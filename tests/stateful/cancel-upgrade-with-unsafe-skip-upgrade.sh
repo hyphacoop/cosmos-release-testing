@@ -47,6 +47,8 @@ sleep 10
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m bash $HOME/$PROVIDER_SERVICE_1.sh
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m bash $HOME/$PROVIDER_SERVICE_2.sh
 
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 20
+
 # Check if plan is empty
 echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
 post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
