@@ -144,7 +144,7 @@ echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
 
 echo "> Submit an ICS param update proposal"
-txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y)
+txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT+2))
 ics_proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
