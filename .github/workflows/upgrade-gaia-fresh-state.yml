@@ -1821,356 +1821,386 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost $whale_rpc
 
-      # Test-08-ICA-controller:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     CHAIN_BINARY_SECONDARY: gaiad-ibc
-      #     COMMIT_TIMEOUT: 1
-      #     RELAYER: hermes
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-      #     - name: Set up relayer
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/setup_relayer.sh
+      Test-08-ICA-controller:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          CHAIN_BINARY_SECONDARY: gaiad-ibc
+          COMMIT_TIMEOUT: 1
+          RELAYER: hermes
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
 
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Start host chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars_ica.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start host chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_ica.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-      #     - name: Start relayer
-      #       run: |
-      #         scripts/start_relayer.sh
-      #         sleep $(($COMMIT_TIMEOUT*3))
+          - name: Start relayer
+            run: |
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*3))
               
-      #     - name: Generate host connection
-      #       env:
-      #         CHAIN_1: testnet
-      #         CHAIN_2: ica
-      #       run: |
-      #         tmux send-keys -t relayer C-c
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         hermes create client --host-chain $CHAIN_1 --reference-chain $CHAIN_2
-      #         hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
-      #         source scripts/vars.sh
-      #         ica_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r --arg chain "$CHAIN_2" '.client_states[] | select(.client_state.chain_id==$chain).client_id')
-      #         echo "> Creating connection with Hermes"
-      #         hermes create connection --a-chain $CHAIN_1 --a-client $ica_client_id --b-client 07-tendermint-0
-      #         ica_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$ica_client_id" '.connections[] | select((.client_id==$client) and (.state=="STATE_OPEN")).id')
+          - name: Generate host connection
+            env:
+              CHAIN_1: testnet
+              CHAIN_2: ica
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              hermes create client --host-chain $CHAIN_1 --reference-chain $CHAIN_2
+              hermes create client --reference-chain $CHAIN_1 --host-chain $CHAIN_2
+              source scripts/vars.sh
+              ica_client_id=$($CHAIN_BINARY q ibc client states -o json --home $whale_home | jq -r --arg chain "$CHAIN_2" '.client_states[] | select(.client_state.chain_id==$chain).client_id')
+              echo "> Creating connection with Hermes"
+              hermes create connection --a-chain $CHAIN_1 --a-client $ica_client_id --b-client 07-tendermint-0
+              ica_connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$ica_client_id" '.connections[] | select((.client_id==$client) and (.state=="STATE_OPEN")).id')
               
-      #         printf ">Saving variables to GITHUB_ENV.\n"
-      #         echo "ica_client_id=$ica_client_id" >> $GITHUB_ENV
-      #         echo "ica_connection_id=$ica_connection_id" >> $GITHUB_ENV
-      #         scripts/start_relayer.sh
+              printf ">Saving variables to GITHUB_ENV.\n"
+              echo "ica_client_id=$ica_client_id" >> $GITHUB_ENV
+              echo "ica_connection_id=$ica_connection_id" >> $GITHUB_ENV
+              scripts/start_relayer.sh
 
-      #     - name: _Test ICA controller - register ICA with controller1
-      #       run: |
-      #         source scripts/vars.sh
-      #         echo "> Registering ICA."
-      #         $CHAIN_BINARY keys add controller1 --home $whale_home
-      #         controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-      #         $CHAIN_BINARY tx bank send $WALLET_1 $controller1 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         echo "> Controller account balances:"
-      #         $CHAIN_BINARY q bank balances $controller1 --home $whale_home
-      #         echo "> Register controller"
-      #         txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
-      #         sleep $(($COMMIT_TIMEOUT*15))
-      #         echo "txhash: $txhash"
-      #         $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
-      #         tail -n 100 relayer.log
-      #         tail -n 100 $whale_log
-      #         ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller1 connection-0 --home $whale_home -o json | jq -r '.address')
-      #         echo "ICA address: $ica_address"
-      #         echo "> Funding ICA."
-      #         source scripts/vars_ica.sh
-      #         $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-      #         sleep $(($COMMIT_TIMEOUT*3))
+          - name: _Test ICA controller - register ICA with controller1
+            run: |
+              source scripts/vars.sh
+              echo "> Registering ICA."
+              $CHAIN_BINARY keys add controller1 --home $whale_home
+              controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
+              $CHAIN_BINARY tx bank send $WALLET_1 $controller1 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep $(($COMMIT_TIMEOUT*2))
+              echo "> Controller account balances:"
+              $CHAIN_BINARY q bank balances $controller1 --home $whale_home
+              echo "> Register controller"
+              txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller1 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
+              sleep $(($COMMIT_TIMEOUT*15))
+              echo "txhash: $txhash"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
+              tail -n 100 relayer.log
+              tail -n 100 $whale_log
+              ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller1 connection-0 --home $whale_home -o json | jq -r '.address')
+              echo "ICA address: $ica_address"
+              echo "> Funding ICA."
+              source scripts/vars_ica.sh
+              $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep $(($COMMIT_TIMEOUT*3))
 
-      #     - name: _Test ICA send
-      #       run: |
-      #         source scripts/vars.sh
-      #         controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-      #         $CHAIN_BINARY keys add recipient1 --home $whale_home
-      #         recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient1").address')
-      #         tests/test_ica_send.sh $controller1 $recipient_wallet
+          - name: _Test ICA send
+            run: |
+              source scripts/vars.sh
+              controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
+              $CHAIN_BINARY keys add recipient1 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient1").address')
+              tests/test_ica_send.sh $controller1 $recipient_wallet
       
-      #     - name: Upgrade to v27.0.0
-      #       env:
-      #         TARGET_VERSION: v27.0.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
 
-      #     - name: Upgrade to v27.1.0
-      #       env:
-      #         TARGET_VERSION: v27.1.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
-
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
-          
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
-          
-      #     - name: Restart relayer
-      #       run: |
-      #         # sudo systemctl restart $RELAYER
-      #         tmux send-keys -t relayer C-c
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         scripts/start_relayer.sh
-      #         sleep $(($COMMIT_TIMEOUT*10))
-      #     - name: _Test ICA controller - register ICA with controller2
-      #       env:
-      #         CONTROLLER_HOME: /home/runner/.val1
-      #         HOST_HOME: /home/runner/.host
-      #       run: |
-      #         source scripts/vars.sh
-      #         echo "> Registering ICA."
-      #         $CHAIN_BINARY keys add controller2 --home $whale_home
-      #         controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
-      #         $CHAIN_BINARY tx bank send $WALLET_1 $controller2 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
-      #         sleep $(($COMMIT_TIMEOUT*10))
-      #         echo "txhash: $txhash"
-      #         $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
-      #         journalctl -u hermes
-      #         tail -n 100 $whale_log
-      #         ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller2 connection-0 --home $whale_home -o json | jq -r '.address')
-      #         echo "ICA address: $ica_address"
-      #         echo "> Funding ICA."
-      #         source scripts/vars_ica.sh
-      #         $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
-      #         sleep $(($COMMIT_TIMEOUT*3))
-      #     - name: _Test ICA send with post-upgrade account
-      #       run: |
-      #         source scripts/vars.sh
-      #         controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
-      #         $CHAIN_BINARY keys add recipient2 --home $whale_home
-      #         recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient2").address')
-      #         tests/test_ica_send.sh $controller2 $recipient_wallet
-      #     - name: _Test ICA send with pre-upgrade account
-      #       run: |
-      #         source scripts/vars.sh
-      #         controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-      #         $CHAIN_BINARY keys add recipient3 --home $whale_home
-      #         recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient3").address')
-      #         tests/test_ica_send.sh $controller1 $recipient_wallet
-
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost $whale_api
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost $whale_rpc
-  
-      # Test-09-cosmwasm:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: false
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh $whale_rpc 3
-
-      #     - name: _Test counter contract
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_contract_counter.sh
-
-      #     - name: _Test multisig contract
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_contract_multisig.sh
-
-      #     - name: Change consensus and feemarket params
-      #       run: |
-      #         source scripts/vars.sh  
-      #         txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
-      #         echo "tx hash: $txhash"
-      #         sleep $(($COMMIT_TIMEOUT+2))
-      #         prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
-      #         echo "> Proposal ID: $prop_id"
-      #         $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
-      #         sleep $VOTING_PERIOD
-      #         sleep $(($COMMIT_TIMEOUT+2))
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
               
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost $whale_api
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost $whale_rpc
+          - name: Upgrade to v27.2.0
+            env:
+              TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
 
-      #     - name: Upgrade to v27.0.0
-      #       env:
-      #         TARGET_VERSION: v27.0.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
-      #     - name: Upgrade to v27.1.0
-      #       env:
-      #         TARGET_VERSION: v27.1.0
-      #         STAKING_OPERATIONS: false
-      #       run: |
-      #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh $TARGET_VERSION
-
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
-
-      #     - name: _Test counter contract
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_contract_counter.sh
-
-      #     - name: _Test multisig contract
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_contract_multisig.sh
-
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
           
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          - name: Restart relayer
+            run: |
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*10))
+          - name: _Test ICA controller - register ICA with controller2
+            env:
+              CONTROLLER_HOME: /home/runner/.val1
+              HOST_HOME: /home/runner/.host
+            run: |
+              source scripts/vars.sh
+              echo "> Registering ICA."
+              $CHAIN_BINARY keys add controller2 --home $whale_home
+              controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
+              $CHAIN_BINARY tx bank send $WALLET_1 $controller2 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep $(($COMMIT_TIMEOUT*2))
+              txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "txhash: $txhash"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
+              journalctl -u hermes
+              tail -n 100 $whale_log
+              ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller2 connection-0 --home $whale_home -o json | jq -r '.address')
+              echo "ICA address: $ica_address"
+              echo "> Funding ICA."
+              source scripts/vars_ica.sh
+              $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep $(($COMMIT_TIMEOUT*3))
+          - name: _Test ICA send with post-upgrade account
+            run: |
+              source scripts/vars.sh
+              controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
+              $CHAIN_BINARY keys add recipient2 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient2").address')
+              tests/test_ica_send.sh $controller2 $recipient_wallet
+          - name: _Test ICA send with pre-upgrade account
+            run: |
+              source scripts/vars.sh
+              controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
+              $CHAIN_BINARY keys add recipient3 --home $whale_home
+              recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient3").address')
+              tests/test_ica_send.sh $controller1 $recipient_wallet
+
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
+  
+      Test-09-cosmwasm:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: _Test counter contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_counter.sh
+
+          - name: _Test multisig contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_multisig.sh
+
+          - name: Change consensus and feemarket params
+            run: |
+              source scripts/vars.sh  
+              txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
+              echo "tx hash: $txhash"
+              sleep $(($COMMIT_TIMEOUT+2))
+              prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
+              echo "> Proposal ID: $prop_id"
+              $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+              sleep $VOTING_PERIOD
+              sleep $(($COMMIT_TIMEOUT+2))
+              
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: _Test counter contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_counter.sh
+
+          - name: _Test multisig contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_multisig.sh
+
+          - name: Upgrade to v27.2.0
+            env:
+              TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: _Test counter contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_counter.sh
+
+          - name: _Test multisig contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_multisig.sh
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
                   
-      #     - name: _Test counter contract
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_contract_counter.sh
+          - name: _Test counter contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_counter.sh
 
-      #     - name: _Test multisig contract
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_contract_multisig.sh
+          - name: _Test multisig contract
+            run: |
+              source scripts/vars.sh
+              tests/test_contract_multisig.sh
 
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost $whale_api
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost $whale_rpc
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost $whale_api
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost $whale_rpc
     
       # Test-10-feemarket:
       #   runs-on: ubuntu-24.04
