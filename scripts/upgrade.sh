@@ -131,9 +131,6 @@ if [ "$STAKING_OPERATIONS" = true ]; then
     fi
 fi
 
-echo "> Submit an ICS param update proposal"
-$CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
-
 echo "> Save the upgrade height to GITHUB_ENV"
 echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 
@@ -146,6 +143,9 @@ $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq 
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
 
+echo "> Submit an ICS param update proposal"
+$CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y
+
 current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
 blocks_delta=$(($upgrade_height-$current_height))
 
@@ -153,7 +153,7 @@ blocks_delta=$(($upgrade_height-$current_height))
 echo "Waiting for the upgrade to take place at block height $upgrade_height..."
 tests/test_block_production.sh 127.0.0.1 $whale_rpc $blocks_delta 50
 echo "> Validator log:"
-tail -n 50 ${logs[0]}
+tail -n 200 $whale_log
 
 echo "The upgrade height was reached."
 if [ "$COSMOVISOR" = true ]; then
