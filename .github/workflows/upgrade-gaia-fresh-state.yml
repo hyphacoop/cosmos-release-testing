@@ -392,6 +392,25 @@
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Restart chain
+            run: |
+              source scripts/vars.sh
+              ./$STOP_SCRIPT
+              sleep 10s
+              ./$START_SCRIPT
+              sleep 10s
+              tail -n 100 $whale_log
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
           - name: Check whale delegations
             run: |
               source scripts/vars.sh
