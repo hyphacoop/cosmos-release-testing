@@ -48,6 +48,7 @@ screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m gaiad start --home $HOME_2 --unsafe-skip-upgrades $upgrade_height
 
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 20
+tail -f $HOME/artifact/$PROVIDER_SERVICE_1.log &
 
 # Check if plan is empty
 echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
@@ -55,7 +56,7 @@ post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
 echo $post_upgrade_plan
 if [ "$post_upgrade_plan" != "{}" ]
 then
-    echo "[ERROR]: Upgrade plan is not empty"
+    echo "[INFO]: Upgrade plan is not empty"
 else
     echo "[INFO]: Upgrade plan is empty"
 fi
@@ -81,3 +82,27 @@ do
     fi
     sleep 1
 done
+
+# Check if plan is empty
+echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
+post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
+echo $post_upgrade_plan
+if [ "$post_upgrade_plan" != "{}" ]
+then
+    echo "[INFO]: Upgrade plan is not empty"
+else
+    echo "[INFO]: Upgrade plan is empty"
+fi
+
+# Restart validators
+echo "[INFO]: Restart validators normally..."
+screen -S $PROVIDER_SERVICE_1 -X stuff "^C" || true
+screen -S $PROVIDER_SERVICE_2 -X stuff "^C" || true
+screen -XS $PROVIDER_SERVICE_1 quit || true
+screen -XS $PROVIDER_SERVICE_2 quit || true
+sleep 10
+screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m bash $HOME/$PROVIDER_SERVICE_1.sh
+screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m bash $HOME/$PROVIDER_SERVICE_2.sh
+
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 20
+tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 20
