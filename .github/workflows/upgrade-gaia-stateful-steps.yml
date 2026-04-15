@@ -285,6 +285,12 @@ jobs:
       - name: Prop 792 debug
         run: gaiad --home $HOME_1 q gov proposal 792
 
+      - name: _Test cancelled upgrade using cancle proposal TX
+        env:
+          UPGRADE_NAME: v99
+          UPGRADE_AFTER: 50
+        run: tests/stateful/cancel-upgrade-with-unsafe-skip-upgrade.sh
+
       - name: _Consumer rewards balances check
         run: |
           source ~/env/bin/activate
@@ -1331,6 +1337,9 @@ jobs:
 
       - name: Make snapshot of val1
         run: |
+          echo "[INFO]: rm -r $HOME/.gaia"
+          rm -rv $HOME/.gaia || true
+          echo "[INFO]: cp -rvp $HOME_1 $HOME/.gaia"
           cp -rvp $HOME_1 $HOME/.gaia
       - name: Create tmp home
         run: gaiad init --chain-id cosmoshub-4 --home $HOME/.test-fork fork-vel
@@ -1353,6 +1362,7 @@ jobs:
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
           --auto-find-target
+          tail -f $HOME/artifact/gaiad_fork.log &
           tests/test_block_production.sh 127.0.0.1 26657 20 50
           sleep 30
           cat $HOME/artifact/gaiad_fork.log
