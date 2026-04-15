@@ -44,8 +44,8 @@ screen -XS $PROVIDER_SERVICE_2 quit || true
 sleep 10
 
 # Restart validators with --unsafe-skip-upgrades
-screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m bash $HOME/$PROVIDER_SERVICE_1.sh
-screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m bash $HOME/$PROVIDER_SERVICE_2.sh
+screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m gaiad start --home $HOME_1 --unsafe-skip-upgrades $upgrade_height
+screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m gaiad start --home $HOME_2 --unsafe-skip-upgrades $upgrade_height
 
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 20
 
