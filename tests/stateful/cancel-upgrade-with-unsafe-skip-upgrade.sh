@@ -48,17 +48,18 @@ screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m gaiad start --home $HOME_2 --unsafe-skip-upgrades $upgrade_height
 
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 2 20
-tail -f $HOME/artifact/$PROVIDER_SERVICE_1.log &
+tail -f $HOME/artifact/$PROVIDER_SERVICE_1.log | grep SKIPPED &
 
-# Check if plan is empty
+# Check if plan is set
 echo "[INFO]: $CHAIN_BINARY --home $HOME_1 q upgrade plan -o json"
 post_upgrade_plan=$($CHAIN_BINARY --home $HOME_1 q upgrade plan -o json)
 echo $post_upgrade_plan
 if [ "$post_upgrade_plan" != "{}" ]
 then
-    echo "[INFO]: Upgrade plan is not empty"
+    echo "[INFO]: Upgrade plan is set"
 else
     echo "[INFO]: Upgrade plan is empty"
+    exit 1
 fi
 
 echo "[INFO]: Wait until upgrade height is reached"
@@ -90,6 +91,7 @@ echo $post_upgrade_plan
 if [ "$post_upgrade_plan" != "{}" ]
 then
     echo "[INFO]: Upgrade plan is not empty"
+    exit 1
 else
     echo "[INFO]: Upgrade plan is empty"
 fi
