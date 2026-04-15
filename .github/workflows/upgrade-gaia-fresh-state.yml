@@ -628,6 +628,32 @@
               source scripts/vars.sh
               cat $whale_log
 
+          - name: _Test export
+            run: |
+              source scripts/vars.sh
+              ./$STOP_SCRIPT
+              $CHAIN_BINARY export --home $whale_home -o json > export.json
+              jq '.' export.json
+
+          - name: _Test restart from export
+            run: |
+              source scripts/vars.sh
+              export validator_count=10
+              # Copy export file to each of the validator nodes
+              for i in $(seq -w 01 $validator_count)
+              do
+                  home=$home_prefix$i
+                  echo "> Copying export file to $home/config/genesis.json"
+                  cp export.json $home/config/genesis.json
+                  echo "> Resetting state in all nodes"
+                  $CHAIN_BINARY unsafe-reset-all --home $home
+              done
+              # Start the chain with the export file as genesis
+              ./$START_SCRIPT
+              sleep 10s
+              tail -n 100 $whale_log
+              tests/test_block_production.sh $whale_rpc 5
+
       Test-01-cosmovisor-upgrade:
         runs-on: ubuntu-24.04
         needs: set-versions
