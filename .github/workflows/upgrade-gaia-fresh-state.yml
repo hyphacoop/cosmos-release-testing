@@ -3193,7 +3193,7 @@
           - name: Install dependencies
             run: |
               python -m pip install --upgrade pip
-              python -m pip install toml-cli
+              python -m pip install toml-cli asyncio websockets requests urllib3 bech32
 
           - name: Set up relayer
             run: |
