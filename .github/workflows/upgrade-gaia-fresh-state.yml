@@ -658,14 +658,13 @@
               jq '.' export-test.json
               echo "> Patching genesis file"
               python scripts/genesis_dist_patch.py export-test.json -o export-patched.json
-              echo "> Patched genesis file:"
               # Only print the file if it exists, otherwise jq will error out and fail the job
               if [ -f export-patched.json ]; then
-                jq '.' export-patched.json
+                echo "> Patched genesis file generated."
               else
                 echo "export-patched.json not found"
                 cp export-test.json export-patched.json
-                jq '.' export-patched.json
+                echo "> Using original genesis file as patched genesis file."
               fi
 
           - name: _Test export
