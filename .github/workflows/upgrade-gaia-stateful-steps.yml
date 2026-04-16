@@ -286,7 +286,6 @@ jobs:
         run: gaiad --home $HOME_1 q gov proposal 792
 
       - name: Stop services
-        if: always()
         run: |
           # hermes
           screen -XS hermes.service quit || true
