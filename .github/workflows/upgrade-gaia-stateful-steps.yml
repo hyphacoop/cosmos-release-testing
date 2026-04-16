@@ -306,6 +306,15 @@ jobs:
           screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
           killall screen || true
           sleep 20
+      - name: Build fork tool
+        run: |
+          cd /home/runner
+          cd gaia
+          # git checkout ${{ env.RUNNING_VERSION }}
+          echo "git checkout ${{ env.UPGRADE_VERSION }}"
+          git checkout ${{ env.UPGRADE_VERSION }}
+          make build BUILD_TAGS="-tag unsafe_start_local_validator"
+          cp build/gaiad $HOME/go/bin/gaiad-fork
       - name: Make snapshot of val1
         run: |
           echo "[INFO]: rm -r $HOME/.gaia"
