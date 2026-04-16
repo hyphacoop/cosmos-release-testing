@@ -358,14 +358,6 @@
               ./stop-${CONSUMER_CHAIN_ID}.sh
             if: matrix.stop-chain == 'stop-consumer'
 
-          - name: Generate export
-            run: |
-              source scripts/vars.sh
-              export validator_count=10
-              ./$STOP_SCRIPT
-              $CHAIN_BINARY export --home $whale_home --output-document export-test.json
-              jq '.' export-test.json
-
           - name: Check for open provider channels before upgrade
             run: |
               source scripts/vars.sh  
@@ -385,7 +377,6 @@
             run: |
               source scripts/vars.sh
               $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
-
 
           - name: Upgrade to v28.0.0 (ICS Removal)
             env:
