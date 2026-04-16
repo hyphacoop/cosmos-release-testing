@@ -2979,6 +2979,8 @@
               make build BUILD_TAGS="-tag unsafe_start_local_validator"
               cp build/gaiad $FORK_BINARY
               popd
+              echo "> Fork binary version:"
+              $FORK_BINARY version
           
           - name: Fork chain
             run: |
