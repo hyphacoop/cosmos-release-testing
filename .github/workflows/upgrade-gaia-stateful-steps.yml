@@ -1354,6 +1354,7 @@ jobs:
           $CHAIN_BINARY keys list --keyring-backend test
       - name: _Test fork tool
         run: |
+          touch $HOME/artifact/gaiad_fork.log
           pubkey=$(jq -r .pub_key.value $HOME/.gaia/config/priv_validator_key.json)
           privkey=$(jq -r .priv_key.value $HOME/.gaia/config/priv_validator_key.json)
           screen -L -Logfile $HOME/artifact/gaiad_fork.log -S $CHAIN_BINARY -d -m $HOME/go/bin/gaiad-fork --home $HOME/.gaia testnet unsafe-start-local-validator \
@@ -1365,7 +1366,7 @@ jobs:
           tail -f $HOME/artifact/gaiad_fork.log &
           tests/test_block_production.sh 127.0.0.1 26657 20 50
           sleep 30
-          cat $HOME/artifact/gaiad_fork.log
+          # cat $HOME/artifact/gaiad_fork.log
       # - name: DEBUG
       #   if: always() && !cancelled()
       #   run: |

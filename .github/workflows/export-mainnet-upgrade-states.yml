@@ -254,19 +254,19 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ vars.GO_VER }}
-      # - name: Build fork tool
-      #   run: |
-      #     cd /home/runner
-      #     git clone https://github.com/cosmos/gaia.git
-      #     cd gaia
-      #     # git checkout ${{ env.RUNNING_VERSION }}
-      #     git checkout ${{ vars.FORK_TOOL_TAG }}
-      #     make build BUILD_TAGS="-tag unsafe_start_local_validator"
-      #     cp build/gaiad /home/runner/go/bin/gaiad-fork
-      - name: Download fork tool
+      - name: Build fork tool
         run: |
-          wget -O /home/runner/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.1.0-fork/gaiad
-          chmod +x /home/runner/go/bin/gaiad-fork
+          cd /home/runner
+          git clone https://github.com/cosmos/gaia.git
+          cd gaia
+          # git checkout ${{ env.RUNNING_VERSION }}
+          git checkout ${{ vars.FORK_TOOL_TAG }}
+          make build BUILD_TAGS="-tag unsafe_start_local_validator"
+          cp build/gaiad /home/runner/go/bin/gaiad-fork
+      # - name: Download fork tool
+      #   run: |
+      #     wget -O /home/runner/go/bin/gaiad-fork https://github.com/hyphacoop/cosmos-builds/releases/download/v27.1.0-fork/gaiad
+      #     chmod +x /home/runner/go/bin/gaiad-fork
       - name: Fork the chain
         env:
           NODE_HOME: /home/runner/.gaia
