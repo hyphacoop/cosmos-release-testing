@@ -3835,7 +3835,7 @@
           - name: Print consumer chain log
             run: |
               source scripts/vars.sh  
-              source scripts/vars_consumer_v640_one.sh 
+              source scripts/vars_consumer_v701_one.sh 
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
