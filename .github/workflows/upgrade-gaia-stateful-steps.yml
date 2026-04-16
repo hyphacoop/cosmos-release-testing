@@ -285,6 +285,69 @@ jobs:
       - name: Prop 792 debug
         run: gaiad --home $HOME_1 q gov proposal 792
 
+      - name: Stop services
+        if: always()
+        run: |
+          # hermes
+          screen -XS hermes.service quit || true
+          killall hermes || true
+          sleep 1
+          # provider
+          killall ${{ env.CHAIN_BINARY }}  || true
+          screen -XS {{ env.PROVIDER_SERVICE_1 }} quit || true
+          screen -XS {{ env.PROVIDER_SERVICE_2 }} quit || true
+          # consumer chains
+          killall ${{ env.CONSUMER_CHAIN_BINARY }} || true
+          killall ${{ env.CONSUMER_CHAIN_BINARY_2 }} || true
+          screen -XS ${{ env.CONSUMER_SERVICE_1 }} quit || true
+          screen -XS conb1.service quit || true
+          # stride
+          killall ${{ env.STRIDE_CHAIN_BINARY }}  || true
+          screen -XS ${{ env.STRIDE_SERVICE_1 }} quit || true
+          killall screen || true
+          sleep 20
+      - name: Make snapshot of val1
+        run: |
+          echo "[INFO]: rm -r $HOME/.gaia"
+          rm -rv $HOME/.gaia || true
+          echo "[INFO]: cp -rvp $HOME_1 $HOME/.gaia"
+          cp -rvp $HOME_1 $HOME/.gaia
+      - name: Create tmp home
+        run: gaiad init --chain-id cosmoshub-4 --home $HOME/.test-fork fork-vel
+      - name: Replace node keys
+        run: |
+          cp $HOME/.test-fork/config/priv_validator_key.json $HOME/.gaia/config/
+          cp $HOME/.test-fork/config/node_key.json $HOME/.gaia/config/
+      - name: Add fork wallet
+        run: |
+          echo "Restoring validator key"
+          echo "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon trouble" | $CHAIN_BINARY --output json keys add trouble --keyring-backend test --recover > ~/.gaia/validator.json
+          $CHAIN_BINARY keys list --keyring-backend test
+      - name: _Test fork tool
+        run: |
+          touch $HOME/artifact/gaiad_fork.log
+          pubkey=$(jq -r .pub_key.value $HOME/.gaia/config/priv_validator_key.json)
+          privkey=$(jq -r .priv_key.value $HOME/.gaia/config/priv_validator_key.json)
+          screen -L -Logfile $HOME/artifact/gaiad_fork.log -S $CHAIN_BINARY -d -m $HOME/go/bin/gaiad-fork --home $HOME/.gaia testnet unsafe-start-local-validator \
+          --validator-operator cosmosvaloper1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd5lxtwj \
+          --validator-pubkey "$pubkey" \
+          --validator-privkey "$privkey" \
+          --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
+          --auto-find-target
+          tail -f $HOME/artifact/gaiad_fork.log &
+          tests/test_block_production.sh 127.0.0.1 26657 20 50
+          sleep 30
+          # cat $HOME/artifact/gaiad_fork.log
+      - name: DEBUG
+        if: always() && !cancelled()
+        run: |
+          while [ ! -f /continue ]
+          do
+            sleep 1
+          done
+
+
+
       - name: _Test cancelled upgrade using cancle proposal TX
         env:
           UPGRADE_NAME: v99
@@ -1367,13 +1430,7 @@ jobs:
           tests/test_block_production.sh 127.0.0.1 26657 20 50
           sleep 30
           # cat $HOME/artifact/gaiad_fork.log
-      # - name: DEBUG
-      #   if: always() && !cancelled()
-      #   run: |
-      #     while [ ! -f /continue ]
-      #     do
-      #       sleep 1
-      #     done
+      
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
