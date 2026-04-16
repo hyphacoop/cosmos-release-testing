@@ -355,6 +355,7 @@
               $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
               echo "> Checking that the consumer chain is removed"
               $CHAIN_BINARY q provider list-consumer-chains --home $whale_home -o json | jq '.'
+              ./stop-${CONSUMER_CHAIN_ID}.sh
             if: matrix.stop-chain == 'stop-consumer'
 
           - name: Check for open provider channels before upgrade
@@ -631,6 +632,7 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
+            if: matrix.stop-chain != 'stop-consumer'
 
           - name: Query consumer rewards pool balances
             run: |
