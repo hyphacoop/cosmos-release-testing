@@ -142,7 +142,7 @@ def main():
     # Find adjustments.
     adjustments = compute_adjustments(dec_totals, bank_bal)
     if not adjustments:
-        print("No adjustments needed — accounting is consistent.")
+        print("Accounting is consistent. No adjustments needed .")
         sys.exit(0)
 
     print(f"\nAdjustments required for {len(adjustments)} denom(s):")
@@ -152,7 +152,7 @@ def main():
         print(f"  {denom}: holdings={truncated} bank={bank_amount} overshoot={amount}")
 
     if args.dry_run:
-        print("\nDry run — no changes written.")
+        print("\nDry run, no changes written.")
         sys.exit(0)
 
     # Apply adjustments to community pool.
