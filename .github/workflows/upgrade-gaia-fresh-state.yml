@@ -384,7 +384,7 @@
               TARGET_VERSION: ${{ matrix.target_version }}
             run: |
               # export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               export OPERATION=${{ matrix.operation }}
               source scripts/vars.sh
               echo "> Whale log file name: $whale_log"
@@ -755,7 +755,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
@@ -921,7 +921,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
@@ -1133,7 +1133,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: _Blocks produced after upgrade
@@ -1350,7 +1350,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}  
           - name: _Blocks produced after upgrade
             run: |
@@ -1477,7 +1477,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
@@ -1664,7 +1664,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
@@ -1826,7 +1826,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
           
           - name: _Blocks produced after upgrade
@@ -2030,7 +2030,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: _Blocks produced after upgrade
@@ -2231,7 +2231,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: _Blocks produced after upgrade
@@ -2360,7 +2360,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           
@@ -2491,7 +2491,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           
@@ -2610,7 +2610,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           
@@ -2716,7 +2716,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           
@@ -2844,7 +2844,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
               
@@ -2968,7 +2968,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: Stop chain
@@ -3152,7 +3152,7 @@
               # DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: _Blocks produced after upgrade
@@ -3678,7 +3678,7 @@
               TARGET_VERSION: ${{ matrix.target_version }}
             run: |
               # export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad-dist-fix
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
               export OPERATION=${{ matrix.operation }}
               source scripts/vars.sh
               export validator_count=10

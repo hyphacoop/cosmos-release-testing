@@ -74,22 +74,24 @@ def compute_holdings(distr_state):
 
 
 def compute_adjustments(dec_totals, bank_bal):
-    """Find denoms where truncated DecCoins exceed the bank balance."""
+    """Find denoms where truncated DecCoins differ from the bank balance."""
     adjustments = {}
-    for denom, dec_total in dec_totals.items():
-        truncated = int(dec_total)
+    for denom in set(list(dec_totals.keys()) + list(bank_bal.keys())):
+        truncated = int(dec_totals.get(denom, Decimal(0)))
         bank_amount = bank_bal.get(denom, 0)
-        if truncated > bank_amount:
-            adjustments[denom] = truncated - bank_amount
+        diff = truncated - bank_amount
+        if diff != 0:
+            adjustments[denom] = diff  # positive = overshoot, negative = undershoot
     return adjustments
 
 
 def apply_adjustments(community_pool, adjustments):
-    """Subtract adjustment amounts from community pool DecCoins entries."""
+    """Adjust community pool DecCoins to match bank balance."""
     for coin in community_pool:
         denom = coin["denom"]
         if denom in adjustments:
             old_val = Decimal(coin["amount"])
+            # Subtract overshoot (positive diff) or add undershoot (negative diff)
             new_val = old_val - Decimal(adjustments[denom])
             coin["amount"] = f"{new_val:.18f}"
             yield denom, old_val, new_val
