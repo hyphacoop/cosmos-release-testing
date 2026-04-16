@@ -3270,6 +3270,7 @@
               source scripts/vars_consumer_v701_one.sh  
               tests/test_ccv_channel.sh
               $CHAIN_BINARY q ibc channel channels -o json --home $whale_home | jq -r '.'
+
           - name: _Pre-upgrade IBC transfer successful> ICS v7.0.1 chain 1
             run: |
               source scripts/vars.sh  
@@ -3278,6 +3279,8 @@
               connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
               channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
               tests/test_consumer_ibc_transfer.sh $channel_id channel-1
+              echo "> Save provider-side channel id to GH environment variable"
+              echo "TRANSFER_CHANNEL_ID=$channel_id" >> $GITHUB_ENV
 
           - name: Register consumer reward denoms
             run: |
