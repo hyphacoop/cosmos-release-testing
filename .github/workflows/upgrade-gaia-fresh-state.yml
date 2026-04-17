@@ -3977,8 +3977,20 @@
               source scripts/vars.sh
               tests/test_multisend_gas_consumption.sh surcharge
 
+          - name: _State sync test
+            run: |
+              source scripts/vars.sh
+              echo "> Sleeping $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ] seconds for state sync to be ready"
+              sleep $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ]
+              source scripts/vars_state_sync.sh
+              scripts/setup_state_sync.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
+
           - name: _Test create validator
             run: |
+              # Must be run after state sync test: that node is used to create the validator
               source scripts/vars.sh
               source scripts/vars_state_sync.sh
               tests/test_create_validator.sh
@@ -3993,17 +4005,6 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
 
-          - name: _State sync test
-            run: |
-              source scripts/vars.sh
-              echo "> Sleeping $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ] seconds for state sync to be ready"
-              sleep $[ $COMMIT_TIMEOUT * $STATE_SYNC_SNAPSHOT_INTERVAL ]
-              source scripts/vars_state_sync.sh
-              scripts/setup_state_sync.sh
-              ./$START_SCRIPT
-              sleep $(($COMMIT_TIMEOUT*2))
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
-
           - name: Stop chain
             run: |
               source scripts/vars.sh
@@ -4014,7 +4015,7 @@
               source scripts/vars_state_sync.sh
               ./$STOP_SCRIPT
               sleep 10s
-            
+
           - name: Build fork binary
             run: |
               source scripts/vars.sh
