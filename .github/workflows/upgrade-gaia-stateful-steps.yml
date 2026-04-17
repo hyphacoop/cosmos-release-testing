@@ -1351,6 +1351,11 @@ jobs:
         run: |
           cp $HOME/.test-fork/config/priv_validator_key.json $HOME/.gaia/config/
           cp $HOME/.test-fork/config/node_key.json $HOME/.gaia/config/
+      - name: Resetting validator state 
+        run: |
+          jq '.height="0" | .round=0 | .step=0' $HOME/.gaia/data/priv_validator_state.json > $HOME/.gaia/data/priv_validator_state.json.tmp && mv $HOME/.gaia/data/priv_validator_state.json.tmp $HOME/.gaia/data/priv_validator_state.json
+          jq 'del(.signature) | del(.signbytes)' $HOME/.gaia/data/priv_validator_state.json > $HOME/.gaia/data/priv_validator_state.json.tmp && mv $HOME/.gaia/data/priv_validator_state.json.tmp $HOME/.gaia/data/priv_validator_state.json
+          jq '.' $HOME/.gaia/data/priv_validator_state.json
       - name: Add fork wallet
         run: |
           echo "Restoring validator key"
