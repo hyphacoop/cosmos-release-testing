@@ -76,6 +76,9 @@ do
     operators+=($operator)
 done
 
+echo "> Contents of temp folder:"
+ls temp
+
 echo "> Updating genesis file with specified denom"
 echo "> Updating crisis denom"
 jq -r --arg DENOM "$DENOM" '.app_state.crisis.constant_fee.denom = $DENOM' ${homes[0]}/config/genesis.json > temp/denom-crisis.json

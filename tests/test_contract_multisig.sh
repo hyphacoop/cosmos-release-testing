@@ -1,10 +1,24 @@
 #!/bin/bash
-WALLET_2=$(jq -r '.address' temp/keys-val_02.json)
-WALLET_3=$(jq -r '.address' temp/keys-val_03.json)
+
+echo "> Creating keys for multisig contract test"
+# Only create if the address is not in the keyring already
+if ! $CHAIN_BINARY keys show contract_signer --home $whale_home --keyring-backend test > /dev/null 2>&1; then
+    echo "> Key not found, creating..."
+    mnemonic="abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon garage"
+    echo $mnemonic | $CHAIN_BINARY keys add contract_signer --keyring-backend test --home $whale_home --recover
+else
+    echo "> Key already exists, skipping creation."
+fi
+recipient_address="cosmos1v8zgdpzqfazvk6fgwhqqhzx0hfannrajezuc6t"
+signer_address="cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq"
+
+echo "> Funding signer wallet"
+$CHAIN_BINARY tx bank send $WALLET_1 $signer_address 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json
+
 echo "> Balances before multisig contract test:"
 $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
-$CHAIN_BINARY q bank balances $WALLET_2 --home $whale_home -o json | jq '.'
-$CHAIN_BINARY q bank balances $WALLET_3 --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q bank balances $signer_address --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q bank balances $recipient_address --home $whale_home -o json | jq '.'
 
 
 $CHAIN_BINARY tx wasm store tests/contracts/cw3_fixed_multisig.wasm \
@@ -70,7 +84,8 @@ sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $whale_home -o json | jq '.'
 
 echo "> Execute multisig contract: vote on transfer proposal"
-$CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/vote.json)" --from $WALLET_2 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json
+$CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/vote.json)" --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json
+$CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/vote.json)" --from $signer_address --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $whale_home -o json | jq '.'
 
@@ -79,4 +94,4 @@ $CHAIN_BINARY tx wasm execute $contract_address "$(cat tests/contracts/execute.j
 sleep $(($COMMIT_TIMEOUT+2))
 $CHAIN_BINARY q wasm contract-state all $contract_address --home $whale_home -o json | jq '.'
 
-$CHAIN_BINARY q bank balances $WALLET_3 --home $whale_home -o json | jq '.'
+$CHAIN_BINARY q bank balances $recipient_address --home $whale_home -o json | jq '.'
