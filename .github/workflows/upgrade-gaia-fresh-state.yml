@@ -455,6 +455,8 @@
               export MAX_PROVIDER_VALIDATORS=5
               echo "> Outstanding rewards for Val1 before delegation:"
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Distribution info for Val1 before delegation:"
+              $CHAIN_BINARY q distribution validator-distribution-info $VALOPER_1 --home $whale_home -o json | jq '.'
               echo "> Self-delegation balances for Val1 before delegation:"
               $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
               echo "> Pre-delegation tokens:"
@@ -467,6 +469,8 @@
               $CHAIN_BINARY q staking validator $VALOPER_1 --home $whale_home -o json | jq '.validator.tokens'
               echo "> Outstanding rewards for Val1 after delegation:"
               $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Distribution info for Val1 after delegation:"
+              $CHAIN_BINARY q distribution validator-distribution-info $VALOPER_1 --home $whale_home -o json | jq '.'
               echo "> Self-delegation balances for Val1 after delegation:"
               $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
 
