@@ -106,5 +106,7 @@ sleep 10
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_1.log -S $PROVIDER_SERVICE_1 -d -m bash $HOME/$PROVIDER_SERVICE_1.sh
 screen -L -Logfile $HOME/artifact/$PROVIDER_SERVICE_2.log -S $PROVIDER_SERVICE_2 -d -m bash $HOME/$PROVIDER_SERVICE_2.sh
 
+echo "Testing val1 blocks..."
 tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 20
-tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 10 20
+echo "Testing val2 blocks..."
+tests/test_block_production.sh 127.0.0.1 $VAL2_RPC_PORT 10 20
