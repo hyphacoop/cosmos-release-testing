@@ -433,10 +433,8 @@
           - name: Query consumer rewards pool and community pool
             run: |
               source scripts/vars.sh
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
-              $cmd
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
 
           - name: _Blocks produced after upgrade
             run: |
@@ -467,10 +465,8 @@
           - name: Query consumer rewards pool and community pool
             run: |
               source scripts/vars.sh
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
-              $cmd
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
 
           - name: Validator set checks
             run: |
@@ -561,10 +557,9 @@
           - name: Query consumer rewards pool and community pool
             run: |
               source scripts/vars.sh
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
-              $cmd
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
 
           - name: _Test API endpoints
             run: |
@@ -651,43 +646,28 @@
               tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
             if: matrix.stop-chain != 'stop-consumer'
 
-          - name: Query consumer rewards pool and community pool
-            run: |
-              source scripts/vars.sh
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
-              $cmd
-
 
           - name: Query consumer rewards pool and community pool
             run: |
               source scripts/vars.sh
               echo "> Upgrade height - 1 ($((UPGRADE_HEIGHT - 1))):"
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'"
-              $cmd
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'
               echo "> Upgrade height ($UPGRADE_HEIGHT):"
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'"
-              $cmd
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'
               echo "> Upgrade height + 1 ($((UPGRADE_HEIGHT + 1))):"
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'"
-              $cmd
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'
+              echo "> Upgrade height + 2 ($((UPGRADE_HEIGHT + 2))):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 2)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 2)) -o json | jq '.'
               echo "> Upgrade height + 10 ($((UPGRADE_HEIGHT + 10))):"
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'"
-              $cmd         
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'
               echo "> Upgrade height + 100 ($((UPGRADE_HEIGHT + 100))):"
-              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'"
-              $cmd
-              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'"
-              $cmd           
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'
 
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
