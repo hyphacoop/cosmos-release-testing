@@ -430,11 +430,13 @@
               $CHAIN_BINARY q block-results $UPGRADE_HEIGHT --home $whale_home -o json | jq '.'
 
 
-          - name: Consumer rewards pool balances check after upgrade
+          - name: Query consumer rewards pool and community pool
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
-              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
+              $cmd
 
           - name: _Blocks produced after upgrade
             run: |
@@ -461,6 +463,14 @@
               sleep $(($COMMIT_TIMEOUT*2)) 
               echo "> Post-delegation tokens:"
               $CHAIN_BINARY q staking validator $VALOPER_1 --home $whale_home -o json | jq '.validator.tokens'
+
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
+              $cmd
 
           - name: Validator set checks
             run: |
@@ -548,6 +558,14 @@
               $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
               tests/test_downtime.sh
               
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
+              $cmd
+
           - name: _Test API endpoints
             run: |
               source scripts/vars.sh
@@ -633,11 +651,43 @@
               tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
             if: matrix.stop-chain != 'stop-consumer'
 
-          - name: Consumer rewards pool and community pool
+          - name: Query consumer rewards pool and community pool
             run: |
               source scripts/vars.sh
-              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
-              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'"
+              $cmd
+
+
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              echo "> Upgrade height - 1 ($((UPGRADE_HEIGHT - 1))):"
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'"
+              $cmd
+              echo "> Upgrade height ($UPGRADE_HEIGHT):"
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'"
+              $cmd
+              echo "> Upgrade height + 1 ($((UPGRADE_HEIGHT + 1))):"
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'"
+              $cmd
+              echo "> Upgrade height + 10 ($((UPGRADE_HEIGHT + 10))):"
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'"
+              $cmd         
+              echo "> Upgrade height + 100 ($((UPGRADE_HEIGHT + 100))):"
+              cmd="$CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'"
+              $cmd
+              cmd="$CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'"
+              $cmd           
 
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
@@ -655,7 +705,8 @@
               export validator_count=10
               ./$STOP_SCRIPT
               $CHAIN_BINARY export --home $whale_home --output-document export-test.json
-              jq '.' export-test.json
+              echo "> Checking for instances of 'provider' in the export file"
+              jq '.' export-test.json | grep provider
               echo "> Patching genesis file"
               python scripts/genesis_dist_patch.py export-test.json -o export-patched.json
               # Only print the file if it exists, otherwise jq will error out and fail the job
