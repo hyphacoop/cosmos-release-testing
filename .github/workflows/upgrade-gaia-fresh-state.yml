@@ -453,6 +453,8 @@
               export validator_count=10
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
+              echo "> Outstanding rewards for Val1 before delegation:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
               echo "> Pre-delegation tokens:"
               $CHAIN_BINARY q staking validator $VALOPER_1 --home $whale_home -o json | jq '.validator.tokens'
               $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000$DENOM --from $WALLET_1 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y | jq '.'
@@ -461,6 +463,8 @@
               sleep $(($COMMIT_TIMEOUT*2)) 
               echo "> Post-delegation tokens:"
               $CHAIN_BINARY q staking validator $VALOPER_1 --home $whale_home -o json | jq '.validator.tokens'
+              echo "> Outstanding rewards for Val1 after delegation:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
 
           - name: Query consumer rewards pool and community pool
             run: |

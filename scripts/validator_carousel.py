@@ -358,6 +358,7 @@ class ValidatorCarousel():
             # target_val = self._validators_by_vp[-1]
             staking_params = api_get_staking_params(self.urlAPI)
             bonded_cap = int(staking_params['max_validators'])
+            logging.info(f"Bonded validator cap is {bonded_cap}, total validators are {len(self._validators_by_vp)}.")
             target_val = self._validators_by_vp[bonded_cap + 1] # The second non-bonded validator
             operation = 'unbond'
             amount = int(source_val['tokens']) - int(target_val['tokens']) + self.ROTATION_DELTA
