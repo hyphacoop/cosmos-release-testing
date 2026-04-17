@@ -41,7 +41,7 @@ FORK_MNEMONIC="abandon cabbage abandon cabbage abandon cabbage abandon cabbage a
 $FORK_BINARY keys add fork-val --keyring-backend test --home $FORK_HOME --recover --output json <<< "$FORK_MNEMONIC" > /dev/null
 
 echo "> Resetting validator state."
-# Set height, round, and step to 0 to ensure a clean state for voting on the upgrade proposal
+# Set height, round, and step to 0 to ensure a clean state when the fork starts
 jq '.height="0" | .round=0 | .step=0' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
 jq 'del(.signature) | del(.signbytes)' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
 jq '.' $FORK_HOME/data/priv_validator_state.json
