@@ -1370,6 +1370,7 @@ jobs:
           --validator-pubkey "$pubkey" \
           --validator-privkey "$privkey" \
           --accounts-to-fund cosmos1jf7j9nvjmnflal5ehaj25p7nsk2t3lkd3tj7zp \
+          --validator-tokens 2000000000000000 \
           --auto-find-target
           tail -f $HOME/artifact/gaiad_fork.log &
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 20 50
