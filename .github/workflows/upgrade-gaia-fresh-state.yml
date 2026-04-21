@@ -728,6 +728,573 @@
               sleep 10s
               tail -n 200 $whale_log
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+      Test-ics-removal-testnet:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            operation: ["no-rotation"]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 2
+          STAKING_OPERATIONS: true
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli asyncio websockets requests urllib3 bech32
+
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
+
+          - name: Start chain at v26.0.0
+            env:
+              START_VERSION: ${{ needs.set-versions.outputs.start_version }}
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${START_VERSION}/gaiad-${START_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
+              printf "app.toml:\r\n"
+              cat $whale_home/config/app.toml
+              printf "config.toml:\r\n"
+              cat $whale_home/config/config.toml
+
+          - name: Start relayer
+            run: |
+              source scripts/vars.sh
+              scripts/start_relayer.sh
+
+          - name: Add consumer chain with ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              scripts/add_consumer.sh
+
+          - name: Initialize consumer chain with ICS v6.4.0  
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
+              chmod +x $HOME/go/bin/$CONSUMER_CHAIN_BINARY
+              scripts/setup_consumer.sh
+              sleep $(($COMMIT_TIMEOUT*4))
+
+          - name: Spawn consumer chain v640-one
+            env:
+              PROVIDER_ICS: v6.4.0
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              scripts/spawn_consumer.sh
+          - name: Start consumer chain v640-one
+            run: |
+              source scripts/vars.sh 
+              source scripts/vars_consumer_v640_one.sh
+              ./start-$CONSUMER_CHAIN_ID.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+              tail -n 100 ${consumer_log_prefix}$COUNT_WIDTH
+          - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars_consumer_v640_one.sh
+              tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
+
+          - name: Establish CCV channel for v640-one
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              echo "Creating channel with Hermes..."
+              hermes create connection --a-chain $CONSUMER_CHAIN_ID --a-client 07-tendermint-0 --b-client $client_id
+              hermes create channel --a-chain $CONSUMER_CHAIN_ID --a-port consumer --b-port provider --order ordered --a-connection connection-0 --channel-version 1
+              # sudo systemctl restart $RELAYER
+              tmux send-keys -t relayer C-c
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+
+          - name: _Pre-upgrade CCV channel verified> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              tests/test_ccv_channel.sh
+          - name: _Pre-upgrade IBC transfer successful> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              tests/test_consumer_ibc_transfer.sh $channel_id channel-1
+              echo "> Save provider-side channel id to GH environment variable"
+              echo "TRANSFER_CHANNEL_ID=$channel_id" >> $GITHUB_ENV
+    
+              
+          - name: Trigger consumer rewards distribution> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Send tx with high fees in consumer chain."
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000ucon \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*10))
+              $CONSUMER_CHAIN_BINARY tx bank send consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 1$CONSUMER_DENOM \
+              --from consumer1r5v5srda7xfth3hn2s26txvrcrntldju7725yc \
+              --gas auto --fees 1000000ucons \
+              --home $consumer_whale_home -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*20))
+              echo "> Balance in consumer chain recipient:"
+              $CONSUMER_CHAIN_BINARY q bank balances consumer1ay4dpm0kjmvtpug28vgw5w32yyjxa5spqtvan8 --home $consumer_whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Rewards pool:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+
+          - name: Add reward denom to allowlist> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              scripts/update_consumer_rewards.sh $channel_id
+              sleep $(($COMMIT_TIMEOUT*3))
+
+          - name: _Consumer rewards distribution> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
+              connection_id=$($CHAIN_BINARY q ibc connection connections -o json --home $whale_home | jq -r --arg client "$client_id" '.connections[] | select(.client_id==$client).id')
+              channel_id=$($CHAIN_BINARY q ibc channel connections $connection_id -o json --home $whale_home | jq -r '.channels[] | select(.port_id=="transfer").channel_id')
+              ibc_denom=ibc/$(echo -n transfer/$channel_id/$CONSUMER_DENOM | shasum -a 256 | cut -d ' ' -f1 | tr '[a-z]' '[A-Z]')
+              echo "> Denom: $ibc_denom"
+              echo "> Consumer rewards pool balances:"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              echo "> Val1 outstanding rewards:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              val1_rewards=$(curl -s http://localhost:$whale_api/cosmos/distribution/v1beta1/validators/$VALOPER_1/outstanding_rewards | jq -r '.rewards.rewards')
+              echo "> val1_rewards: $val1_rewards"
+              val1_consumer_rewards=$(echo $val1_rewards | jq -r --arg DENOM "$ibc_denom" '.[] | select(.denom==$DENOM).amount')
+              echo "> val1_consumer_rewards: $val1_consumer_rewards"
+              if [ -z "$val1_consumer_rewards" ]; then
+                echo "FAIL: No consumer rewards distributed to val1."
+                exit 1
+              else
+                echo "PASS: Consumer rewards distributed to val1."
+              fi            
+
+          - name: Submit proposal to update provider params
+            run: |
+              source scripts/vars.sh
+              txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq -r '.txhash')
+              sleep $(($COMMIT_TIMEOUT*2))
+              $CHAIN_BINARY q gov proposals --home $whale_home -o json | jq '.'
+              echo "> Exporting tx hash to GH environment variable"
+              echo "PARAMS_PROPOSAL_TX_HASH=$txhash" >> $GITHUB_ENV
+
+          - name: Upgrade to v27.0.0
+            env:
+              TARGET_VERSION: v27.0.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.1.0
+            env:
+              TARGET_VERSION: v27.1.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+              
+          - name: Upgrade to v27.2.0
+            env:
+              TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Check for open provider channels before upgrade
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
+
+          - name: Consumer rewards pool balances check before upgrade
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
+          - name: Check validators
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+
+          - name: Upgrade to v28.0.0 (ICS Removal)
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+            run: |
+              # export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
+              export OPERATION=${{ matrix.operation }}
+              source scripts/vars.sh
+              echo "> Whale log file name: $whale_log"
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Restart chain
+            run: |
+              source scripts/vars.sh
+              ./$STOP_SCRIPT
+              sleep 10s
+              ./$START_SCRIPT
+              sleep 10s
+              tail -n 100 $whale_log
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Check whale delegations
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking delegations $WALLET_1 --home $whale_home -o json --height $((UPGRADE_HEIGHT-1)) | jq '.'
+              $CHAIN_BINARY q staking delegations $WALLET_1 --home $whale_home -o json | jq '.'
+
+          - name: Check validators
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+
+
+          - name: Review block results at upgrade height
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block results at height $UPGRADE_HEIGHT"
+              $CHAIN_BINARY q block-results $UPGRADE_HEIGHT --home $whale_home -o json | jq '.'
+
+
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Restart relayer
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
+
+          - name: Delegate to validators
+            run: |
+              source scripts/vars.sh
+              echo "> Outstanding rewards for Val1 before delegation:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Distribution info for Val1 before delegation:"
+              $CHAIN_BINARY q distribution validator-distribution-info $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Self-delegation balances for Val1 before delegation:"
+              $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+              echo "> Pre-delegation tokens:"
+              $CHAIN_BINARY q staking validator $VALOPER_1 --home $whale_home -o json | jq '.validator.tokens'
+              $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000$DENOM --from $WALLET_1 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*2)) 
+              $CHAIN_BINARY tx staking delegate $VALOPER_1 1000000$DENOM --from $WALLET_1 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y | jq '.'
+              sleep $(($COMMIT_TIMEOUT*2)) 
+              echo "> Post-delegation tokens:"
+              $CHAIN_BINARY q staking validator $VALOPER_1 --home $whale_home -o json | jq '.validator.tokens'
+              echo "> Outstanding rewards for Val1 after delegation:"
+              $CHAIN_BINARY q distribution validator-outstanding-rewards $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Distribution info for Val1 after delegation:"
+              $CHAIN_BINARY q distribution validator-distribution-info $VALOPER_1 --home $whale_home -o json | jq '.'
+              echo "> Self-delegation balances for Val1 after delegation:"
+              $CHAIN_BINARY q bank balances $WALLET_1 --home $whale_home -o json | jq '.'
+
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
+          - name: Validator set checks
+            run: |
+              source scripts/vars.sh
+              python scripts/ics_removal_validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
+              jq '.' validator-check-$UPGRADE_HEIGHT.json
+              check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Validator set check passed"
+              else
+                echo "> FAIL: Validator set check failed"
+                jq '.' validator-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi
+              echo "> Verify that operations occurred at upgrade height"
+              operations=$(jq -r '.operations' validator-check-$UPGRADE_HEIGHT.json)
+              echo "> Operations: $operations"
+              if [ "${{ matrix.operation }}" != "no-rotation" ]; then
+                # Verify that operations array is not empty
+                if [ "$operations" != "[]" ]; then
+                  echo "> PASS: Operations occurred at upgrade height as expected for operation ${{ matrix.operation }}"
+                else
+                  echo "> FAIL: No operations occurred at upgrade height for operation ${{ matrix.operation }}"
+                  exit 1
+                fi
+              fi
+
+          - name: Consumer rewards balances check
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+              python scripts/ics_removal_consumer_rewards_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
+              jq '.' rewards-check-$UPGRADE_HEIGHT.json
+              check_result=$(jq -r '.' rewards-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: Consumer rewards balances check passed"
+              else
+                echo "> FAIL: Consumer rewards balances check failed"
+                jq '.' rewards-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi    
+
+          - name: IBC channels check
+            run: |
+              source scripts/vars.sh  
+              python scripts/ics_removal_ibc_channels_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --ics-removal-upgrade
+              jq '.' channels-check-$UPGRADE_HEIGHT.json
+              check_result=$(jq -r '.' channels-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
+              echo "Check result: $check_result"
+              if [ -z "$check_result" ]; then
+                echo "> PASS: IBC channels check passed"
+              else
+                echo "> FAIL: IBC channels check failed"
+                jq '.' channels-check-$UPGRADE_HEIGHT.json
+                exit 1
+              fi    
+
+          - name: Check for open provider channels after upgrade
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
+              echo "> All provider channels must be closed, fail if any open channels are found."
+              open_channels=$($CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")')
+              if [ -z "$open_channels" ]; then
+                echo "> PASS: No open provider channels found"
+              else
+                echo "> FAIL: Open provider channels found"
+                jq '.' <<< "$open_channels"
+                exit 1
+              fi
+
+          - name: _Test validator jailing and slashing
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+              tests/test_downtime.sh
+              
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+
+
+          - name: _Test API endpoints
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
+
+          - name: _Test RPC endpoints
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
+
+          - name: _Test RPC endpoint - block results - reward
+            run: |
+              source scripts/vars.sh
+              curl http://localhost:$whale_rpc/block_results?height=$REWARD_TX_HEIGHT | jq '.'
+
+          - name: _Test RPC endpoint - block - reward
+            run: |
+              source scripts/vars.sh
+              curl http://localhost:$whale_rpc/block?height=$REWARD_TX_HEIGHT | jq '.'
+
+          - name: Check CLI block query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block at height $REWARD_TX_HEIGHT"
+              $CHAIN_BINARY q block --type=height $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+              
+          - name: Check CLI block-results query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying block at height $REWARD_TX_HEIGHT"
+              $CHAIN_BINARY q block-results $REWARD_TX_HEIGHT --home $whale_home -o json | jq '.'
+
+          - name: Check CLI transaction query
+            run: |
+              source scripts/vars.sh
+              echo "> Querying txhash: $REWARD_TX_HASH"
+              $CHAIN_BINARY q tx $REWARD_TX_HASH --home $whale_home -o json | jq '.'
+
+          - name: Check proposals query
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q gov proposals --home $whale_home -o json | jq '.'
+
+          - name: Check proposal query
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q gov proposal 1 --home $whale_home -o json | jq '.'
+
+          - name: Check proposal tx query
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q tx $PARAMS_PROPOSAL_TX_HASH --home $whale_home -o json | jq -r '.'
+
+          - name: Check auth accounts queries
+            run: |
+              source scripts/vars.sh
+              $CHAIN_BINARY q auth accounts --home $whale_home -o json | jq '.'
+              $CHAIN_BINARY q auth module-accounts --home $whale_home -o json | jq '.'
+
+          - name: Print consumer chain log
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              cat $consumer_log_prefix$COUNT_WIDTH
+
+          - name: _Downtime test> ICS v6.4.0
+            run: |
+              source scripts/vars.sh
+              source scripts/vars_consumer_v640_one.sh
+              export validator_count=5
+              tests/test_consumer_downtime_disabled.sh
+
+          - name: _IBC transfer successful> ICS v6.4.0 chain 1
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
+            if: matrix.stop-chain != 'stop-consumer'
+
+
+          - name: Query consumer rewards pool and community pool
+            run: |
+              source scripts/vars.sh
+              echo "> Upgrade height - 1 ($((UPGRADE_HEIGHT - 1))):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT - 1)) -o json | jq '.'
+              echo "> Upgrade height ($UPGRADE_HEIGHT):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $UPGRADE_HEIGHT -o json | jq '.'
+              echo "> Upgrade height + 1 ($((UPGRADE_HEIGHT + 1))):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 1)) -o json | jq '.'
+              echo "> Upgrade height + 2 ($((UPGRADE_HEIGHT + 2))):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 2)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 2)) -o json | jq '.'
+              echo "> Upgrade height + 10 ($((UPGRADE_HEIGHT + 10))):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 10)) -o json | jq '.'
+              echo "> Upgrade height + 100 ($((UPGRADE_HEIGHT + 100))):"
+              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'
+              $CHAIN_BINARY q distribution community-pool --home $whale_home --height $((UPGRADE_HEIGHT + 100)) -o json | jq '.'
+
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+
+          - name: Print validator log
+            run: |
+              source scripts/vars.sh
+              cat $whale_log
+
+          - name: Generate export
+            run: |
+              source scripts/vars.sh
+              ./$STOP_SCRIPT
+              $CHAIN_BINARY export --home $whale_home --output-document export-test.json
+              echo "> Checking for instances of 'provider' in the export file"
+              jq '.' export-test.json | grep provider
+              echo "> Patching genesis file"
+              python scripts/genesis_dist_patch.py export-test.json -o export-patched.json
+              # Only print the file if it exists, otherwise jq will error out and fail the job
+              if [ -f export-patched.json ]; then
+                echo "> Patched genesis file generated."
+              else
+                echo "export-patched.json not found"
+                cp export-test.json export-patched.json
+                echo "> Using original genesis file as patched genesis file."
+              fi
+
+          - name: _Test export
+            run: |
+              source scripts/vars.sh
+              # Copy export file to each of the validator nodes
+              for i in $(seq -w 01 $validator_count)
+              do
+                  home=$home_prefix$i
+                  echo "> Copying export file to $home/config/genesis.json"
+                  cp export-patched.json $home/config/genesis.json
+                  echo "> Resetting state in all nodes"
+                  $CHAIN_BINARY comet unsafe-reset-all --home $home
+              done
+              # Start the chain with the export file as genesis
+              ./$START_SCRIPT
+              sleep 10s
+              tail -n 200 $whale_log
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
               
 
       Test-01-cosmovisor-upgrade:
