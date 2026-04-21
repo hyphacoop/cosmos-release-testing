@@ -436,11 +436,6 @@
       #         $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
       #         $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
 
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
-
       #     - name: Restart relayer
       #       run: |
       #         tmux send-keys -t relayer C-c
@@ -1017,6 +1012,20 @@
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
+          - name: Relax staking validator params
+            run: |
+              source scripts/vars.sh
+              sleep $(($COMMIT_TIMEOUT*2))
+              echo "> Reading params from staking module"
+              params=$($CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params')
+              # Patch proposal with current params for staking module
+              jq --argjson params "$params" '.messages[0].params = $params' templates/proposal-staking-params.json > proposal-patched-staking.json
+              echo "> Restricting staking max validators to $MAX_VALIDATORS"
+              jq --argjson max_validators "$MAX_VALIDATORS" '.messages[0].params.max_validators = $max_validators' proposal-patched-staking.json > proposal-patched-staking-vals.json
+              scripts/param_change.sh proposal-patched-staking-vals.json
+              echo "> Staking params:"
+              $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params'
+              
           - name: Check whale delegations
             run: |
               source scripts/vars.sh
@@ -1041,11 +1050,6 @@
               source scripts/vars.sh
               $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
               $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
-
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
           - name: Restart relayer
             run: |
