@@ -1022,7 +1022,9 @@
               jq --argjson params "$params" '.messages[0].params = $params' templates/proposal-staking-params.json > proposal-patched-staking.json
               echo "> Restricting staking max validators to $MAX_VALIDATORS"
               jq --argjson max_validators "$MAX_VALIDATORS" '.messages[0].params.max_validators = $max_validators' proposal-patched-staking.json > proposal-patched-staking-vals.json
-              scripts/param_change.sh proposal-patched-staking-vals.json
+              echo "> Setting proposal to expedited"
+              jq '.expedited = true' proposal-patched-staking-vals.json > proposal-patched-staking-vals-expedited.json
+              scripts/param_change.sh proposal-patched-staking-vals-expedited.json
               echo "> Staking params:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params'
               
