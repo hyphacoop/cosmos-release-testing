@@ -168,7 +168,7 @@ if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
 
 else
-    cat $STOP_SCRIPT
+    # cat $STOP_SCRIPT
     ./$STOP_SCRIPT
     sleep 6
     tmux list-sessions
@@ -199,7 +199,8 @@ else
     echo "> Starting validators from 2 to $validator_count with the new binary"
     for i in $(seq -w 02 $validator_count); do
         echo "Starting validator $i with the new binary"
-        tmux new-session -d -s ${monikers[i]} \"$CHAIN_BINARY start --home ${homes[i]} 2>&1 | tee ${logs[i]}\"
+        idx=$((10#$i))
+        tmux new-session -d -s ${monikers[$idx]} \"$CHAIN_BINARY start --home ${homes[$idx]} 2>&1 | tee ${logs[$idx]}\"
     done
     echo "> Submitting a staking transaction"
     $CHAIN_BINARY tx staking unbond $VALOPER_1 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home ${homes[1]} -o json

@@ -165,7 +165,7 @@ if [ "$COSMOVISOR" = true ]; then
     echo "> Cosmovisor-run upgrade."
 
 else
-    cat $STOP_SCRIPT
+    # cat $STOP_SCRIPT
     ./$STOP_SCRIPT
     sleep 6
     tmux list-sessions
