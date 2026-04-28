@@ -200,7 +200,7 @@ else
     for i in $(seq 1 $[$validator_count-1]); do
         echo "Starting validator $i with the new binary"
         idx=$i
-        tmux new-session -d -s ${monikers[$idx]} \"$CHAIN_BINARY start --home ${homes[$idx]} 2>&1 | tee ${logs[$idx]}\"
+        tmux new-session -d -s "${monikers[$idx]}" "$CHAIN_BINARY start --home ${homes[$idx]} 2>&1 | tee ${logs[$idx]}"
     done
     sleep 5s
     echo "> Val 2 log:"
@@ -208,7 +208,7 @@ else
     echo "> Submitting a staking transaction"
     $CHAIN_BINARY tx staking unbond $VALOPER_1 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home --node http://localhost:${rpc_prefix}02 -o json
     echo "> Starting whale validator with the new binary"
-    tmux new-session -d -s ${monikers[0]} \"$CHAIN_BINARY start --home $whale_home 2>&1 | tee $whale_log\"
+    tmux new-session -d -s "${monikers[0]}" "$CHAIN_BINARY start --home $whale_home 2>&1 | tee $whale_log"
 
 fi
 
