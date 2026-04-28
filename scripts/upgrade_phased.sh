@@ -197,9 +197,9 @@ else
     # ./$START_SCRIPT
 
     echo "> Starting validators from 2 to $validator_count with the new binary"
-    for i in $(seq -w 02 $validator_count); do
+    for i in $(seq 1 $[$validator_count-1]); do
         echo "Starting validator $i with the new binary"
-        idx=$((10#$i))
+        idx=$i
         tmux new-session -d -s ${monikers[$idx]} \"$CHAIN_BINARY start --home ${homes[$idx]} 2>&1 | tee ${logs[$idx]}\"
     done
     sleep 5s
