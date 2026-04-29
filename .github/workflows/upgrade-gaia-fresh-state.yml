@@ -94,7 +94,7 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["no-rotation",down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
+            operation: ["no-rotation","down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             # stop-chain: ["keep-consumer","stop-consumer"]
             phased-restart: [ "phased-restart", "synced-restart" ]
             operations-n2: [ "n-2", "-"]
