@@ -127,10 +127,10 @@
               python -m pip install --upgrade pip
               python -m pip install toml-cli asyncio websockets requests urllib3 bech32
 
-          - name: Set up relayer
-            run: |
-              source scripts/vars.sh
-              scripts/setup_relayer.sh
+          # - name: Set up relayer
+          #   run: |
+          #     source scripts/vars.sh
+          #     scripts/setup_relayer.sh
 
           - name: Start chain at v26.0.0
             env:
@@ -138,7 +138,7 @@
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${START_VERSION}/gaiad-${START_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/setup.sh
@@ -315,7 +315,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
@@ -326,7 +326,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
@@ -337,7 +337,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
@@ -362,7 +362,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
@@ -390,7 +390,7 @@
               export N1=${{ matrix.operations-n1 }}
               source scripts/vars.sh
               echo "> Whale log file name: $whale_log"
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
@@ -409,7 +409,7 @@
               export N1=${{ matrix.operations-n1 }}
               source scripts/vars.sh
               echo "> Whale log file name: $whale_log"
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade_phased.sh ${{ matrix.upgrade_name }}
@@ -423,7 +423,7 @@
           - name: Validator set checks
             run: |
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               python scripts/ics_removal_validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
