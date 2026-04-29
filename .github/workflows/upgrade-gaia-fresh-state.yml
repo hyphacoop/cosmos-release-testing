@@ -94,12 +94,11 @@
         needs: set-versions
         strategy:
           matrix:
-            operation: ["no-rotation"] # ",down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
+            operation: ["no-rotation",down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             # stop-chain: ["keep-consumer","stop-consumer"]
             phased-restart: [ "phased-restart", "synced-restart" ]
             operations-n2: [ "n-2", "-"]
             operations-n1: [ "n-1", "-"]
-            operations-n: [ "n", "-" ]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
           fail-fast: false
@@ -389,7 +388,6 @@
               export OPERATION=${{ matrix.operation }}
               export N2=${{ matrix.operations-n2 }}
               export N1=${{ matrix.operations-n1 }}
-              export N=${{ matrix.operations-n }}
               source scripts/vars.sh
               echo "> Whale log file name: $whale_log"
               export validator_count=10
@@ -409,7 +407,6 @@
               export OPERATION=${{ matrix.operation }}
               export N2=${{ matrix.operations-n2 }}
               export N1=${{ matrix.operations-n1 }}
-              export N=${{ matrix.operations-n }}
               source scripts/vars.sh
               echo "> Whale log file name: $whale_log"
               export validator_count=10
