@@ -207,7 +207,7 @@ else
         idx=$i
         tmux new-session -d -s "${monikers[$idx]}" "$CHAIN_BINARY start --home ${homes[$idx]} 2>&1 | tee ${logs[$idx]}"
     done
-    sleep 5s
+    sleep 10s
     echo "> Val 2 log:"
     tail -n 200 ${logs[2]}
     echo "> Submitting a staking transaction"
