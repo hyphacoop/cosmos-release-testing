@@ -160,7 +160,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/add_consumer.sh
@@ -169,7 +169,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               wget $CONSUMER_CHAIN_BINARY_URL -O $HOME/go/bin/$CONSUMER_CHAIN_BINARY -q
@@ -183,7 +183,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/spawn_consumer.sh
@@ -191,7 +191,7 @@
             run: |
               source scripts/vars.sh 
               source scripts/vars_consumer_v640_one.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               ./start-$CONSUMER_CHAIN_ID.sh
@@ -200,7 +200,7 @@
           - name: _Pre-upgrade consumer chain produces blocks> ICS v6.4.0 chain 1
             run: |
               source scripts/vars_consumer_v640_one.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               tests/test_block_production.sh 127.0.0.1 ${consumer_whale_rpc} 5
@@ -209,7 +209,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               client_id=$($CHAIN_BINARY q provider list-consumer-chains -o json --home $whale_home | jq -r --arg chain "$CONSUMER_CHAIN_ID" '.chains[] | select(.chain_id==$chain).client_id')
@@ -225,7 +225,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v640_one.sh  
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               tests/test_ccv_channel.sh
@@ -347,7 +347,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
+              export validator_count=12
               echo "> Submitting transaction to remove the consumer chain"
               txhash=$($CHAIN_BINARY tx provider remove-consumer 0 --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*10))
@@ -530,7 +530,7 @@
           - name: Delegate to validators
             run: |
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               echo "> Outstanding rewards for Val1 before delegation:"
@@ -564,7 +564,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
@@ -654,7 +654,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               cat $consumer_log_prefix$COUNT_WIDTH
@@ -670,7 +670,7 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh 
-              export validator_count=10
+              export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
@@ -712,7 +712,7 @@
           - name: Generate export
             run: |
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               ./$STOP_SCRIPT
               $CHAIN_BINARY export --home $whale_home --output-document export-test.json
               echo "> Checking for instances of 'provider' in the export file"
@@ -731,7 +731,7 @@
           - name: _Test export
             run: |
               source scripts/vars.sh
-              export validator_count=10
+              export validator_count=12
               # Copy export file to each of the validator nodes
               for i in $(seq -w 01 $validator_count)
               do
@@ -4244,7 +4244,7 @@
       #       run: |
       #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
       #         source scripts/vars.sh
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         scripts/upgrade.sh $TARGET_VERSION
@@ -4256,7 +4256,7 @@
       #       run: |
       #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
       #         source scripts/vars.sh
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         scripts/upgrade.sh $TARGET_VERSION
@@ -4268,7 +4268,7 @@
       #       run: |
       #         export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
       #         source scripts/vars.sh
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         scripts/upgrade.sh $TARGET_VERSION
@@ -4321,7 +4321,7 @@
       #       run: |
       #         source scripts/vars.sh  
       #         source scripts/vars_consumer_v640_one.sh 
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
@@ -4346,7 +4346,7 @@
       #         export DOWNLOAD_URL=https://github.com/hyphacoop/cosmos-builds/releases/download/v28-preview/gaiad
       #         export OPERATION=${{ matrix.operation }}
       #         source scripts/vars.sh
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
@@ -4387,7 +4387,7 @@
       #     - name: Delegate to validators
       #       run: |
       #         source scripts/vars.sh
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         echo "> Outstanding rewards for Val1 before delegation:"
@@ -4439,7 +4439,7 @@
       #       run: |
       #         source scripts/vars.sh  
       #         source scripts/vars_consumer_v640_one.sh 
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
@@ -4506,7 +4506,7 @@
       #       run: |
       #         source scripts/vars.sh  
       #         source scripts/vars_consumer_v701_one.sh 
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         cat ${consumer_log_prefix}$COUNT_WIDTH
@@ -4522,7 +4522,7 @@
       #       run: |
       #         source scripts/vars.sh  
       #         source scripts/vars_consumer_v701_one.sh
-      #         export validator_count=10
+      #         export validator_count=12
       #         export MAX_VALIDATORS=8
       #         export MAX_PROVIDER_VALIDATORS=5
       #         tests/test_consumer_ibc_transfer.sh $TRANSFER_CHANNEL_ID channel-1
