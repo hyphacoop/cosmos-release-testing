@@ -329,8 +329,6 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
-              echo "> Unsigned transaction:"
-              jq '.' tx-unsigned.json
 
           - name: Upgrade to v27.1.0
             env:
@@ -494,11 +492,21 @@
                 exit 1
               fi    
 
-          # - name: Submit ICS transaction
-          #   run: |
-          #     source scripts/vars.sh  
-          #     source scripts/vars_consumer_v640_one.sh
-
+          - name: Submit ICS transaction
+            run: |
+              source scripts/vars.sh  
+              source scripts/vars_consumer_v640_one.sh
+              echo "> Unsigned transaction:"
+              jq '.' tx-unsigned.json
+              echo "> Signing transaction"
+              $CHAIN_BINARY tx sign tx-unsigned.json --from $WALLET_1 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --output-document signed-tx.json
+              echo "> Signed transaction:"
+              jq '.' signed-tx.json
+              echo "> Broadcasting transaction"
+              txhash=$($CHAIN_BINARY tx broadcast signed-tx.json --home $whale_home -o json -y | jq -r '.txhash')
+              sleep $(($COMMIT_TIMEOUT*10))
+              echo "> Querying transaction hash $txhash"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
 
           - name: Restart chain
             run: |
