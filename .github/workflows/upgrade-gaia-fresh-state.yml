@@ -327,7 +327,7 @@
             run: |
               source scripts/vars.sh  
               jq '.messages[0].chain_id |= "reject-1"' templates/proposal-add-template.json > ics-proposal.json
-              jq '.messages[0].spawn_time = null' ics-proposal.json > ics-proposal-spawn.json
+              jq '.messages[0].spawn_time = "2027-01-01T00:00:00Z"' ics-proposal.json > ics-proposal-spawn.json
               echo "> Modified template:"
               jq '.' ics-proposal-spawn.json
               $CHAIN_BINARY tx gov submit-proposal ics-proposal-spawn.json --home $whale_home --from $WALLET_1 --gas 1000000 --gas-prices 0.005uatom --generate-only > unsigned-proposal.json
