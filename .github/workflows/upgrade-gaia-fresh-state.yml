@@ -313,7 +313,9 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh
-              $CHAIN_BINARY tx provider opt-in 0 $($CHAIN_BINARY comet show-validator --home $whale_home | jq -r '.key') --from $WALLET_1 --generate-only > tx-unsigned.json
+              pubkey=$($CHAIN_BINARY comet show-validator --home $whale_home)
+              echo "Pubkey: $pubkey"
+              $CHAIN_BINARY tx provider opt-in 0 $pubkey --from $WALLET_1 --generate-only > tx-unsigned.json
               echo "> Unsigned transaction:"
               jq '.' tx-unsigned.json
 
