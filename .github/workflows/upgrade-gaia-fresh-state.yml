@@ -330,11 +330,11 @@
               jq '.messages[0].spawn_time = "2027-01-01T00:00:00Z"' ics-proposal.json > ics-proposal-spawn.json
               echo "> Modified template:"
               jq '.' ics-proposal-spawn.json
-              $CHAIN_BINARY tx gov submit-proposal ics-proposal-spawn.json --home $whale_home --from val_02 --gas 1000000 --gas-prices 0.005uatom --generate-only > unsigned-proposal.json
+              $CHAIN_BINARY tx gov submit-proposal ics-proposal-spawn.json --home $whale_home --from proposer --gas 1000000 --gas-prices 0.005uatom --generate-only > unsigned-proposal.json
               echo "> Unsigned proposal:"
               jq '.' unsigned-proposal.json
               echo "> Signing proposal"
-              $CHAIN_BINARY tx sign unsigned-proposal.json --from val_02 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --output-document signed-ics-proposal.json
+              $CHAIN_BINARY tx sign unsigned-proposal.json --from proposer --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --output-document signed-ics-proposal.json
               echo "> Signed proposal:"
               jq '.' signed-ics-proposal.json
 
