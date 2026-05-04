@@ -340,6 +340,8 @@
               echo "> Send funds from WALLET_1 to proposer"
               address=$($CHAIN_BINARY keys show proposer --home $whale_home -a)
               $CHAIN_BINARY tx bank send $WALLET_1 $address 10000000$DENOM --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq '.'
+              echo "> Account auth info:"
+              $CHAIN_BINARY q auth account $address --home $whale_home -o json | jq '.'
 
           - name: Upgrade to v27.0.0
             env:
@@ -545,7 +547,7 @@
               echo "> Querying balances"
               $CHAIN_BINARY q bank balances $address --home $whale_home -o json | jq '.'
               echo "> Broadcasting proposal"
-              result=$($CHAIN_BINARY tx broadcast --home $whale_home signed-ics-proposal.json --node http://localhost:$whale_rpc -y -o json)
+              result=$($CHAIN_BINARY tx broadcast signed-ics-proposal.json --home $whale_home --node http://localhost:$whale_rpc -y -o json)
               echo "> Broadcast result: $result"
               txhash=$(echo $result | jq -r '.txhash')
               raw_log=$(echo $result | jq -r '.raw_log')

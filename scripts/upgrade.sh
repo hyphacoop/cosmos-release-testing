@@ -107,12 +107,12 @@ if [ "$STAKING_OPERATIONS" = true ]; then
 
     if [ "$N2" = "n-2" ]; then
         echo "> Schedule operations for upgrade height-2"
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-3)) --target-rank 1 --$N2 &
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-3)) --target-rank 1 &
     fi
 
     if [ "$N1" = "n-1" ]; then
         echo "> Schedule operations for upgrade height-1"
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-2)) --target-rank 1 --$N1 &
+        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-2)) --target-rank 1 &
     fi
 
     echo "> Schedule operations for upgrade height"
