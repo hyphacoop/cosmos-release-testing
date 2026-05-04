@@ -334,9 +334,9 @@
               echo "> Unsigned proposal:"
               jq '.' unsigned-proposal.json
               echo "> Signing proposal"
-              $CHAIN_BINARY tx sign unsigned-proposal.json --from val_02 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --output-document signed-proposal.json
+              $CHAIN_BINARY tx sign unsigned-proposal.json --from val_02 --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --output-document signed-ics-proposal.json
               echo "> Signed proposal:"
-              jq '.' signed-proposal.json
+              jq '.' signed-ics-proposal.json
 
           - name: Upgrade to v27.0.0
             env:
@@ -539,7 +539,7 @@
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh
               echo "> Broadcasting proposal"
-              result=$($CHAIN_BINARY tx broadcast signed-proposal.json --home $whale_home -y -o json)
+              result=$($CHAIN_BINARY tx broadcast signed-ics-proposal.json --home $whale_home -y -o json)
               echo "> Broadcast result: $result"
               txhash=$(echo $result | jq -r '.txhash')
               raw_log=$(echo $result | jq -r '.raw_log')
