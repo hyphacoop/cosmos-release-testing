@@ -36,7 +36,7 @@ import logging
 import requests
 import copy
 import urllib
-from bech32 import bech32_decode, bech32_encode
+from bech32 import bech32_decode, bech32_encode, convertbits
 
 
 logging.basicConfig(
@@ -65,6 +65,14 @@ def api_get_provider_params(urlAPI: str, height: int = 0):
 def operator_to_delegator(operator_addr: str) -> str:
     _, data = bech32_decode(operator_addr)
     return bech32_encode("cosmos", data)
+
+def get_operator_address_bytes(operator_addr: str) -> bytes:
+    """Decode bech32 operator address to raw bytes for tie-breaking sort."""
+    _, data = bech32_decode(operator_addr)
+    if data is None:
+        return b''
+    raw = convertbits(data, 5, 8, False)
+    return bytes(raw) if raw else b''
 
 def api_get_self_delegation(urlAPI: str, operator_addr: str, height: int = 0):
     delegator_addr = operator_to_delegator(operator_addr)
@@ -310,8 +318,8 @@ class ValsetInfo():
                 continue
             v['tokens_vp_fraction'] = int(v['tokens']/1000000)/int(total_active_bonded_tokens/1000000) # Must clip 1E6 decimals to avoid issues when comparing to comet vp fraction, which calculates with clipped amounts
 
-        # Sort validator_info by tokens descending
-        validator_info.sort(key=lambda v: v['tokens'], reverse=True)
+        # Sort validator_info by tokens descending, breaking ties by operator address bytes ascending
+        validator_info.sort(key=lambda v: (-v['tokens'], get_operator_address_bytes(v['operator_address'])))
 
         # Stage data for saving
         self.data['validator_info'] = validator_info
@@ -604,8 +612,9 @@ class ValsetCheck():
                 'starting_tokens': val['tokens'],
                 'rank_change': False
             }
-        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting tokens
-        sorted_validators = sorted(rank_comparison.items(), key=lambda x: x[1]['starting_tokens'], reverse=True)
+        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting tokens,
+        # breaking ties by operator address bytes ascending
+        sorted_validators = sorted(rank_comparison.items(), key=lambda x: (-x[1]['starting_tokens'], get_operator_address_bytes(x[0])))
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['starting_rank'] = rank
         
@@ -636,7 +645,7 @@ class ValsetCheck():
         
         # Re-check token eligibility after operations (exclude validators that dropped to 0)
         eligible_after_ops = {addr: val for addr, val in rank_comparison.items() if val['ending_tokens'] > 0}
-        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: x[1]['ending_tokens'], reverse=True)
+        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: (-x[1]['ending_tokens'], get_operator_address_bytes(x[0])))
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['ending_rank'] = rank
         # Check which validators are expected to be bonded or unbonded based on their new rank in the validator set (preop vs expected validator info)

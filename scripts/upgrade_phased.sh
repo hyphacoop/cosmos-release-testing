@@ -85,7 +85,7 @@ proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --fr
 echo "Submitting the upgrade proposal."
 echo $proposal
 txhash=$($proposal | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT*2))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
