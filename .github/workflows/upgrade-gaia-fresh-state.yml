@@ -329,6 +329,8 @@
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
+              echo "> Unsigned transaction:"
+              jq '.' tx-unsigned.json
 
           - name: Upgrade to v27.1.0
             env:
