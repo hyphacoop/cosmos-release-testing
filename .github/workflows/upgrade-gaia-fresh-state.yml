@@ -327,7 +327,7 @@
             run: |
               source scripts/vars.sh  
               jq '.chain_id |= "reject-1"' templates/proposal-add-template-legacy.json > ics-proposal.json
-              $CHAIN_BINARY tx gov submit-legacy-proposal ics-proposal.json --home $whale_home --from $WALLET_1 --generate-only --output-document unsigned-proposal.json
+              $CHAIN_BINARY tx gov submit-legacy-proposal ics-proposal.json --home $whale_home --from $WALLET_1 --generate-only > unsigned-proposal.json
               echo "> Unsigned proposal:"
               jq '.' unsigned-proposal.json
               echo "> Signing proposal"
