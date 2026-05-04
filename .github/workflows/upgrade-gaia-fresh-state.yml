@@ -538,6 +538,10 @@
             run: |
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh
+              address=$($CHAIN_BINARY keys show proposer --home $whale_home -a)
+              echo "Address: $address"
+              echo "> Querying balances"
+              $CHAIN_BINARY q bank balances $address --home $whale_home -o json | jq '.'
               echo "> Broadcasting proposal"
               result=$($CHAIN_BINARY tx broadcast signed-ics-proposal.json --home $whale_home -y -o json)
               echo "> Broadcast result: $result"
