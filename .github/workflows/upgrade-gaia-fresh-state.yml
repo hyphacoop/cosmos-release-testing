@@ -323,26 +323,39 @@
               echo "> Signed transaction:"
               jq '.' signed-tx.json
 
-          - name: Sign ICS proposal
+          # - name: Sign ICS proposal
+          #   run: |
+          #     source scripts/vars.sh
+          #     address=$($CHAIN_BINARY keys show proposer --home $whale_home -a)
+          #     jq --arg SUBMITTER "$address" '.messages[0].submitter |= $SUBMITTER' templates/proposal-create-consumer.json > ics-proposal.json
+          #     echo "> Modified template:"
+          #     jq '.' ics-proposal.json
+          #     $CHAIN_BINARY tx gov submit-proposal ics-proposal.json --home $whale_home --from proposer --gas 1000000 --gas-prices 0.005uatom --generate-only --chain-id testnet > unsigned-proposal.json
+          #     echo "> Unsigned proposal:"
+          #     jq '.' unsigned-proposal.json
+          #     echo "> Setting name in metadata"
+          #     jq '.body.messages[0].messages[0].metadata.name = "chain"' unsigned-proposal.json > unsigned-proposal-with-name.json
+          #     echo "> Signing proposal"
+          #     $CHAIN_BINARY tx sign unsigned-proposal-with-name.json --from proposer --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --chain-id testnet -o json -y --output-document signed-ics-proposal.json
+          #     echo "> Signed proposal:"
+          #     jq '.' signed-ics-proposal.json
+          #     echo "> Send funds from WALLET_1 to proposer"
+          #     $CHAIN_BINARY tx bank send $WALLET_1 $address 10000000$DENOM --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq '.'
+          #     echo "> Account auth info:"
+          #     $CHAIN_BINARY q auth account $address --home $whale_home -o json | jq '.'
+
+          - name: Sign ICS proposal - param update
             run: |
               source scripts/vars.sh
               address=$($CHAIN_BINARY keys show proposer --home $whale_home -a)
-              jq --arg SUBMITTER "$address" '.messages[0].submitter |= $SUBMITTER' templates/proposal-create-consumer.json > ics-proposal.json
-              echo "> Modified template:"
-              jq '.' ics-proposal.json
-              $CHAIN_BINARY tx gov submit-proposal ics-proposal.json --home $whale_home --from proposer --gas 1000000 --gas-prices 0.005uatom --generate-only --chain-id testnet > unsigned-proposal.json
+              $CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $address --gas 1000000 --gas-prices $GAS_PRICE --generate-only > unsigned-ics-param-proposal.json
               echo "> Unsigned proposal:"
-              jq '.' unsigned-proposal.json
-              echo "> Setting name in metadata"
-              jq '.body.messages[0].messages[0].metadata.name = "chain"' unsigned-proposal.json > unsigned-proposal-with-name.json
+              jq '.' unsigned-ics-param-proposal.json
               echo "> Signing proposal"
-              $CHAIN_BINARY tx sign unsigned-proposal-with-name.json --from proposer --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --chain-id testnet -o json -y --output-document signed-ics-proposal.json
+              $CHAIN_BINARY tx sign unsigned-ics-param-proposal.json --from $address --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -o json -y --output-document signed-ics-param-proposal.json
               echo "> Signed proposal:"
-              jq '.' signed-ics-proposal.json
-              echo "> Send funds from WALLET_1 to proposer"
-              $CHAIN_BINARY tx bank send $WALLET_1 $address 10000000$DENOM --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq '.'
-              echo "> Account auth info:"
-              $CHAIN_BINARY q auth account $address --home $whale_home -o json | jq '.'
+              jq '.' signed-ics-param-proposal.json
+              
 
           - name: Upgrade to v27.0.0
             env:
