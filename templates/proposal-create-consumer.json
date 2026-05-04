@@ -1,0 +1,23 @@
+{
+ "messages": [
+  {
+   "@type": "/interchain_security.ccv.provider.v1.MsgCreateConsumer",
+   "submitter": "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+   "chain_id": "test-create-1",
+   "metadata": {
+    "name": "",
+    "description": "",
+    "metadata": ""
+   },
+   "initialization_parameters": null,
+   "power_shaping_parameters": null,
+   "allowlisted_reward_denoms": null,
+   "infraction_parameters": null
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "100000000uatom",
+ "title": "1",
+ "summary": "1",
+ "expedited": false
+}
