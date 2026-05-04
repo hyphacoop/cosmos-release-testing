@@ -103,7 +103,7 @@ for i in $(seq -w 01 $validator_count); do
     echo $vote
     txhash=$($vote | jq -r .txhash)
 done
-sleep $(($COMMIT_TIMEOUT+2))
+sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
 
 if [ "$STAKING_OPERATIONS" = true ]; then
