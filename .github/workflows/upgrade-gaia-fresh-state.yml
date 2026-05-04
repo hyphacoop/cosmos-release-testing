@@ -501,11 +501,15 @@
               source scripts/vars.sh  
               source scripts/vars_consumer_v640_one.sh
               echo "> Broadcasting transaction"
-              $CHAIN_BINARY tx broadcast signed-tx.json --home $whale_home -y
-              # txhash=$($CHAIN_BINARY tx broadcast signed-tx.json --home $whale_home -o json -y | jq -r '.txhash')
-              # sleep $(($COMMIT_TIMEOUT*2))
-              # echo "> Querying transaction hash $txhash"
-              # $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
+              result=$($CHAIN_BINARY tx broadcast signed-tx.json --home $whale_home -y -o json)
+              echo "> Broadcast result: $result"
+              txhash=$(echo $result | jq -r '.txhash')
+              raw_log=$(echo $result | jq -r '.raw_log')
+              echo "> Transaction hash: $txhash"
+              echo "> Raw log: $raw_log"
+              sleep $(($COMMIT_TIMEOUT*2))
+              echo "> Querying transaction hash $txhash"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
 
           - name: Restart chain
             run: |
