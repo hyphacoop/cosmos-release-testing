@@ -542,7 +542,7 @@
               echo "> Querying balances"
               $CHAIN_BINARY q bank balances $address --home $whale_home -o json | jq '.'
               echo "> Broadcasting proposal"
-              result=$($CHAIN_BINARY tx broadcast signed-ics-proposal.json --home $whale_home -y -o json)
+              result=$($CHAIN_BINARY tx broadcast --home $whale_home signed-ics-proposal.json --node http://localhost:$whale_rpc -y -o json)
               echo "> Broadcast result: $result"
               txhash=$(echo $result | jq -r '.txhash')
               raw_log=$(echo $result | jq -r '.raw_log')
