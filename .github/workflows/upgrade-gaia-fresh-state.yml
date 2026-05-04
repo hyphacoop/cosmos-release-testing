@@ -95,8 +95,8 @@
         strategy:
           matrix:
             operation: ["no-rotation", "down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
-            stop-chain: ["keep-consumer"] #,"stop-consumer"]
-            phased-restart: [ "synced-restart" ] #,"phased-restart"
+            stop-chain: ["keep-consumer", "stop-consumer"]
+            phased-restart: [ "synced-restart","phased-restart" ]
             operations-n2: [ "n-2" ] #, "-"]
             operations-n1: [ "n-1" ] #, "-"]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]

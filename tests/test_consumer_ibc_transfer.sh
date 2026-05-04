@@ -77,5 +77,10 @@ if [ $provider_end_balance -gt $provider_start_balance ]; then
   echo "Provider balance has increased!"
 else
   echo "Provider balance has not increased!"
+  # Print relayer log and consumer log
+  echo "Relayer log:"
+  cat relayer.log
+  echo "Consumer log:"
+  cat $consumer_whale_log
   exit 1
 fi
