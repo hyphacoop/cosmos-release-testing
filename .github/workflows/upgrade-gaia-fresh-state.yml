@@ -509,7 +509,15 @@
               echo "> Raw log: $raw_log"
               sleep $(($COMMIT_TIMEOUT*2))
               echo "> Querying transaction hash $txhash"
-              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
+              # The result of the tx query must result in a "not found" error.
+              query_result=$($CHAIN_BINARY q tx $txhash --home $whale_home -o json 2>&1 || true)
+              echo "> Query result: $query_result"
+              if echo "$query_result" | grep -q "not found"; then
+                echo "> PASS: Transaction not found"
+              else
+                echo "> FAIL: Transaction was found"
+                exit 1
+              fi
 
           - name: Restart chain
             run: |
