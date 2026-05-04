@@ -325,7 +325,7 @@
 
           - name: Sign ICS proposal
             run: |
-              source scripts/vars.sh  
+              source scripts/vars.sh
               jq '.messages[0].chain_id |= "reject-1"' templates/proposal-add-template.json > ics-proposal.json
               jq '.messages[0].spawn_time = "2027-01-01T00:00:00Z"' ics-proposal.json > ics-proposal-spawn.json
               echo "> Modified template:"
@@ -337,6 +337,9 @@
               $CHAIN_BINARY tx sign unsigned-proposal.json --from proposer --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --chain-id testnet -o json -y --output-document signed-ics-proposal.json
               echo "> Signed proposal:"
               jq '.' signed-ics-proposal.json
+              echo "> Send funds from WALLET_1 to proposer"
+              address=$($CHAIN_BINARY keys show proposer --home $whale_home -a)
+              $CHAIN_BINARY tx bank send $WALLET_1 $address 10000000$DENOM --home $whale_home --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq '.'
 
           - name: Upgrade to v27.0.0
             env:
