@@ -4308,8 +4308,10 @@
               echo "> Registering ICA."
               $CHAIN_BINARY keys add controller1 --home $whale_home
               controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
-              $CHAIN_BINARY tx bank send $WALLET_1 $controller1 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              txhash=$($CHAIN_BINARY tx bank send $WALLET_1 $controller1 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
               sleep $(($COMMIT_TIMEOUT*2))
+              echo "> Controller fund tx:"
+              $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
               echo "> Controller account balances:"
               $CHAIN_BINARY q bank balances $controller1 --home $whale_home
               echo "> Register controller"
