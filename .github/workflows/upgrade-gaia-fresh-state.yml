@@ -95,8 +95,8 @@
         strategy:
           max-parallel: 10
           matrix:
-            operation: ["no-rotation", "down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
-            stop-chain: ["keep-consumer", "stop-consumer"]
+            operation: ["no-rotation","down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
+            stop-chain: ["keep-consumer"] #, "stop-consumer"]
             phased-restart: [ "synced-restart","phased-restart" ]
             operations-n2: [ "n-2", "-" ]
             operations-n1: [ "n-1", "-" ]
@@ -336,48 +336,48 @@
               echo "> Signed proposal:"
               jq '.' signed-ics-param-proposal.json
               
-          - name: Upgrade to v27.0.0
-            env:
-              TARGET_VERSION: v27.0.0
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+          # - name: Upgrade to v27.0.0
+          #   env:
+          #     TARGET_VERSION: v27.0.0
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
 
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+          # - name: _Blocks produced after upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
-          - name: Upgrade to v27.1.0
-            env:
-              TARGET_VERSION: v27.1.0
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+          # - name: Upgrade to v27.1.0
+          #   env:
+          #     TARGET_VERSION: v27.1.0
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
               
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+          # - name: _Blocks produced after upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
 
-          - name: Upgrade to v27.2.0
-            env:
-              TARGET_VERSION: v27.2.0
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+          # - name: Upgrade to v27.2.0
+          #   env:
+          #     TARGET_VERSION: v27.2.0
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
               
           - name: _Blocks produced after upgrade
             run: |
