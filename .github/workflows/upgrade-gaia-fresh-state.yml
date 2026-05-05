@@ -93,7 +93,6 @@
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
-          max-parallel: 10
           matrix:
             operation: ["no-rotation","down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: ["keep-consumer"] #, "stop-consumer"]
