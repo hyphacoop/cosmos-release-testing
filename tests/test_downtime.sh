@@ -98,8 +98,20 @@ echo "> Waiting for the downtime infraction to expire."
 sleep $DOWNTIME_JAIL_DURATION
 tail $log_file -n 100
 echo "> Submitting unjail transaction."
-$CHAIN_BINARY tx slashing unjail --from $wallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+txhash=$($CHAIN_BINARY tx slashing unjail --from $wallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT*2))
+echo "> Checking unjail transaction."
+$CHAIN_BINARY q tx $txhash --home $whale_home
+echo "> Waiting for the validator to be unjailed."
+sleep $(($COMMIT_TIMEOUT*3))
+status=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.status')
+echo "> Status: $status"
+if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
+    echo "> PASS: Validator is bonded."
+else
+    echo "> FAIL: Validator is not bonded."
+    exit 1
+fi
 echo "> Wait for another downtime infraction."
 sleep $(($COMMIT_TIMEOUT*5))
 status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
