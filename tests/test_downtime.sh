@@ -110,6 +110,8 @@ if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator is bonded."
 else
     echo "> FAIL: Validator is not bonded."
+    echo "> Whale log:"
+    cat $whale_log
     exit 1
 fi
 echo "> Wait for another downtime infraction."
@@ -120,6 +122,8 @@ if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator is bonded."
 else
     echo "> FAIL: Validator is not bonded."
+    echo "> Whale log:"
+    cat $whale_log
     exit 1
 fi
 
