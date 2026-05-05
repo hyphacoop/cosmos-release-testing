@@ -2942,12 +2942,12 @@
               source scripts/vars.sh  
               txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
               echo "tx hash: $txhash"
-              sleep $(($COMMIT_TIMEOUT+2))
+              sleep $(($COMMIT_TIMEOUT*2))
               prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
               echo "> Proposal ID: $prop_id"
               $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
               sleep $VOTING_PERIOD
-              sleep $(($COMMIT_TIMEOUT+2))
+              sleep $(($COMMIT_TIMEOUT*2))
               
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
@@ -3175,12 +3175,12 @@
               source scripts/vars.sh
               txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-consensus-feemarket-params.json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r '.txhash')
               echo "tx hash: $txhash"
-              sleep $(($COMMIT_TIMEOUT+2))
+              sleep $(($COMMIT_TIMEOUT*2))
               prop_id=$($CHAIN_BINARY q tx $txhash -o json --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key == "proposal_id") | .value')
               echo "> Proposal ID: $prop_id"
               $CHAIN_BINARY tx gov vote $prop_id yes --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
               sleep $VOTING_PERIOD
-              sleep $(($COMMIT_TIMEOUT+2))
+              sleep $(($COMMIT_TIMEOUT*2))
           - name: Print consensus and feemarket params
             run: |
               source scripts/vars.sh
