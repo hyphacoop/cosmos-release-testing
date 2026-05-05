@@ -65,6 +65,7 @@ sleep $((COMMIT_TIMEOUT*3))
 tail $log_file -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$DOWNTIME_WINDOW))
+sleep $((COMMIT_TIMEOUT*3))
 
 echo "> Valset:"
 $CHAIN_BINARY q comet-validator-set --home $whale_home -o json | jq '.'

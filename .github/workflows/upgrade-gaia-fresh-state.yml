@@ -93,7 +93,7 @@
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
-          max-parallel: 4
+          max-parallel: 10
           matrix:
             operation: ["no-rotation", "down","no-rotation","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: ["keep-consumer", "stop-consumer"]
@@ -706,6 +706,9 @@
           - name: _Test validator jailing and slashing
             run: |
               source scripts/vars.sh
+              export validator_count=12
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
               tests/test_downtime.sh
               
