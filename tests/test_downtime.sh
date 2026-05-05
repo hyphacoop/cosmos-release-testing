@@ -104,6 +104,7 @@ echo "> Checking unjail transaction."
 $CHAIN_BINARY q tx $txhash --home $whale_home
 echo "> Waiting for the validator to be unjailed."
 sleep $(($COMMIT_TIMEOUT*3))
+$CHAIN_BINARY q staking validator $valoper --home $whale_home
 status=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
