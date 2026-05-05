@@ -56,6 +56,10 @@ echo "> Log file: $log_file"
 echo "> Slashing parameters:"
 $CHAIN_BINARY q slashing params --home $whale_home -o json | jq '.'
 
+echo "> Collecting pre-slashing tokens."
+tokens_start=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.tokens')
+echo "> Tokens: $tokens_start"
+
 # Jailing
 echo "> Stopping the last validator's node."
 session=$moniker
@@ -90,6 +94,14 @@ else
     exit 1
 fi
 
+echo "> Collecting post-slashing tokens."
+tokens_end=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.tokens')
+echo "> Tokens: $tokens_end"
+
+# Calculate slashed tokens
+tokens_slashed=$(echo "$tokens_start - $tokens_end" | bc)
+echo "> Tokens slashed: $tokens_slashed"
+
 # Unjailing
 
 echo "> Starting the last validator's node again."
@@ -105,28 +117,54 @@ $CHAIN_BINARY q tx $txhash --home $whale_home
 echo "> Waiting for the validator to be unjailed."
 sleep $(($COMMIT_TIMEOUT*3))
 $CHAIN_BINARY q staking validator $valoper --home $whale_home
+jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
+if [[ "$jailed" == "true" ]]; then
+    echo "> FAIL: Validator is jailed."
+    exit 1
+else
+    echo "> PASS: Validator is not jailed."
+fi
+
+echo "> Restoring slashed tokens"
+$CHAIN_BINARY tx staking delegate $valoper $tokens_slashed$DENOM --from $wallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+sleep $(($COMMIT_TIMEOUT*2))
+
+echo "> Collecting post-restore tokens."
+tokens_end=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.tokens')
+echo "> Tokens: $tokens_end"
+
+# Verify that post-restore amount is equal to pre-slashing amount
+if [[ "$tokens_start" == "$tokens_end" ]]; then
+    echo "> PASS: Tokens restored successfully."
+else
+    echo "> FAIL: Tokens not restored successfully."
+    exit 1
+fi
+
 status=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator is bonded."
 else
     echo "> FAIL: Validator is not bonded."
-    echo "> Whale log:"
-    cat $whale_log
     exit 1
 fi
+
 echo "> Wait for another downtime infraction."
 sleep $(($COMMIT_TIMEOUT*5))
-status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
+jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
+if [[ "$jailed" == "true" ]]; then
+    echo "> FAIL: Validator is jailed."
+    exit 1
+else
+    echo "> PASS: Validator is not jailed."
+fi
+
+status=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator is bonded."
 else
     echo "> FAIL: Validator is not bonded."
-    echo "> Whale log:"
-    cat $whale_log
     exit 1
 fi
-
-jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
-echo "> Jailed: $jailed"
