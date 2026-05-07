@@ -209,7 +209,7 @@
 
           - name: Start chain
             env:
-              NODE_HOME: $HOME/.gaiad
+              NODE_HOME: /home/runner/.gaia
               CHAIN_BINARY: ./gaiad
               GAS_PRICE: 0.005uatom
             run: |
