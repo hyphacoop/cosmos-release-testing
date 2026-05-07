@@ -230,7 +230,7 @@
               popd
               pwd
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
-              sleep 5m
+              sleep 10m
             
           - name: Print log
             run: |
@@ -296,7 +296,7 @@
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_hash $trust_hash
               toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1,$STATE_SYNC_RPC_2"
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
-              sleep 5m
+              sleep 10m
             
           - name: Print log
             run: |
