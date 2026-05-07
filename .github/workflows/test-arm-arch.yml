@@ -146,16 +146,17 @@
               sleep $(($COMMIT_TIMEOUT*2))
               tail -n 100 $whale_log
               scripts/wait_for_block.sh 3
-          
+              
+          - name: _Blocks produced
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
               tests/test_tx.sh
 
-          - name: _Blocks produced
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
                   
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
@@ -172,3 +173,68 @@
               source scripts/vars.sh
               tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
   
+          - name: _Blocks produced
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+
+      Test-testnet-snapshot:
+        runs-on: ubuntu-24.04-arm
+        strategy:
+          fail-fast: false
+        env:
+          BINARY_SOURCE: DOWNLOAD
+          GO_VERSION: 1.25.7
+          GAIA_VERSION: ${{ github.event_name == 'push' && 'v27.3.0-rc0' || inputs.gaia-version }}
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-arm64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+
+          - name: Start chain
+            env:
+              NODE_HOME: $HOME/.gaiad
+              BINARY: ./gaiad
+              GAS_PRICE: 0.005uatom
+            run: |
+              echo "> Downloading Gaia"
+              wget https://github.com/cosmos/gaia/releases/download/$VERSION/gaiad-$VERSION-linux-arm64 -O $BINARY
+              chmod +x $BINARY
+              echo "> Initializing node @ $NODE_HOME"
+              $BINARY init provider-node --home $NODE_HOME
+              sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICE\"^" $NODE_HOME/config/app.toml
+              echo "> Downloading genesis file"
+              wget https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json -O $NODE_HOME/config/genesis.json
+              echo "> Setting up seeds"
+              toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "https://rpc.provider-seed-01.hub-testnet.polypore.xyz,https://rpc.provider-seed-02.hub-testnet.polypore.xyz"
+              echo "> Downloading and extracting snapshot"
+              pushd $NODE_HOME
+              wget https://snapshots.polypore.xyz/provider/latest.tar.gz
+              tar -xzf latest.tar.gz
+              popd
+              tmux new-session -d -s arm-test \"$BINARY start --home $NODE_HOME 2>&1 | tee gaia.log\"
+              sleep 5
+            
+          - name: Print log
+            run: |
+              tail -n 100 gaia.log
+
+          - name: _Blocks produced
+            run: |
+              tests/test_block_production.sh 127.0.0.1 26657 5
