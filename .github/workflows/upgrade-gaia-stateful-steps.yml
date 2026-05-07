@@ -1330,6 +1330,13 @@ jobs:
           mkdir ~/artifact/bin
           cp -p ~/go/bin/* ~/artifact/bin/ || true
 
+      - name: Make space for fork test
+        run: |
+          echo "rm -r $HOME_2"
+          rm -rf $HOME_2 || true
+          echo "rm -r $ICA_HOME"
+          rm -rf $ICA_HOME || true
+          df -h $HOME
       - name: Build fork tool
         run: |
           cd /home/runner
