@@ -4,11 +4,16 @@
     on:
       workflow_dispatch:
         inputs:
-          gaia-version:
-            description: 'Gaia version to test'
+          testnet-version:
+            description: 'Testnet version to test'
             required: true
             type: string
             default: v27.3.0-rc0
+          mainnet-version:
+            description: 'Mainnet version to test'
+            required: true
+            type: string
+            default: v27.2.0
           # from_version:
           #   description: 'Gaia version to upgrade from'
           #   required: true
@@ -243,6 +248,7 @@
                   break
                 else
                   echo "Node is still syncing... waiting 1m before checking again."
+                  tail -n 20 gaia.log
                   sleep 1m
                 fi
               done
@@ -251,18 +257,14 @@
             run: |
               tail -n 100 gaia.log
 
-          # - name: _Blocks produced
-          #   run: |
-          #     tests/test_block_production.sh 127.0.0.1 26657 5
-
-      Test-testnet-state-sync:
+      Test-mainnet-snapshot:
         runs-on: ubuntu-24.04-arm
         strategy:
           fail-fast: false
         env:
           BINARY_SOURCE: DOWNLOAD
           GO_VERSION: 1.25.7
-          GAIA_VERSION: ${{ github.event_name == 'push' && 'v27.3.0-rc0' || inputs.gaia-version }}
+          GAIA_VERSION: ${{ github.event_name == 'push' && 'v27.2.0' || inputs.gaia-version }}
         steps:
           - name: Update PATH
             run: |
@@ -280,14 +282,13 @@
             run: |
               python -m pip install --upgrade pip
               python -m pip install toml-cli
+              sudo apt install aria2 -y
 
           - name: Start chain
             env:
               NODE_HOME: /home/runner/.gaia
               CHAIN_BINARY: ./gaiad
               GAS_PRICE: 0.005uatom
-              STATE_SYNC_RPC_1: https://rpc.provider-state-sync-01.hub-testnet.polypore.xyz:443
-              STATE_SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz:443
             run: |
               echo "> Downloading Gaia"
               wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64 -O $CHAIN_BINARY
@@ -296,25 +297,22 @@
               $CHAIN_BINARY init provider-node --home $NODE_HOME
               sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICE\"^" $NODE_HOME/config/app.toml
               echo "> Downloading genesis file"
-              wget https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json -O $NODE_HOME/config/genesis.json
+              wget https://snapshots.polkachu.com/genesis/cosmos/genesis.json -O $NODE_HOME/config/genesis.json
               echo "> Setting up seeds"
-              toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
-              echo "> Setting up state sync"
-              current_height=$(curl -s $STATE_SYNC_RPC_1/block | jq -r '.result.block.header.height')
-              echo "> Current block height: $current_height"
-              trust_height=$[$current_height-1000]
-              trust_block=$(curl -s $STATE_SYNC_RPC_1/block\?height\=$trust_height)
-              trust_hash=$(echo $trust_block | jq -r '.result.block_id.hash')
-              toml set --toml-path $NODE_HOME/config/config.toml statesync.enable true
-              toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_period "8h0m0s"
-              toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_height $trust_height
-              toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_hash $trust_hash
-              toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1,$STATE_SYNC_RPC_2"
+              toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "327fb4151de9f78f29ff10714085e347a4e3c836@rpc.cosmos.nodestake.org:666"
+              pwd
+              echo "> Downloading and extracting snapshot"
+              pushd $NODE_HOME
+              aria2c -x 8 -s 8 https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.gz
+              tar -xzf latest.tar.gz
+              pwd
+              popd
+              pwd
               echo "> Starting node session."
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
               sleep 10s
               tail -n 100 gaia.log
-            
+
           - name: Wait until syncing flag is set to false
             run: |
               while true; do
@@ -324,6 +322,7 @@
                   break
                 else
                   echo "Node is still syncing... waiting 1m before checking again."
+                  tail -n 20 gaia.log
                   sleep 1m
                 fi
               done
@@ -332,11 +331,80 @@
             run: |
               tail -n 100 gaia.log
 
-          # - name: _Blocks produced
-          #   run: |
-          #     tests/test_block_production.sh 127.0.0.1 26657 5
-          
-          # - name: Print log
-          #   run: |
-          #     tail -n 100 gaia.log
+      # Test-testnet-state-sync:
+      #   runs-on: ubuntu-24.04-arm
+      #   strategy:
+      #     fail-fast: false
+      #   env:
+      #     BINARY_SOURCE: DOWNLOAD
+      #     GO_VERSION: 1.25.7
+      #     GAIA_VERSION: ${{ github.event_name == 'push' && 'v27.3.0-rc0' || inputs.gaia-version }}
+      #   steps:
+      #     - name: Update PATH
+      #       run: |
+      #         mkdir -p $HOME/go/bin
+      #         echo "$HOME/go/bin" >> $GITHUB_PATH
+      #     - name: Bypass the grub-efi-arm64-signed package
+      #       run: sudo apt-mark hold grub-efi-arm64-signed
+      #     - name: Check out repository code
+      #       uses: actions/checkout@v6
+      #     - name: Set up Python
+      #       uses: actions/setup-python@v6
+      #       with:
+      #         python-version: '3.11'
+      #     - name: Install dependencies
+      #       run: |
+      #         python -m pip install --upgrade pip
+      #         python -m pip install toml-cli
+
+      #     - name: Start chain
+      #       env:
+      #         NODE_HOME: /home/runner/.gaia
+      #         CHAIN_BINARY: ./gaiad
+      #         GAS_PRICE: 0.005uatom
+      #         STATE_SYNC_RPC_1: https://rpc.provider-state-sync-01.hub-testnet.polypore.xyz:443
+      #         STATE_SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz:443
+      #       run: |
+      #         echo "> Downloading Gaia"
+      #         wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64 -O $CHAIN_BINARY
+      #         chmod +x $CHAIN_BINARY
+      #         echo "> Initializing node @ $NODE_HOME"
+      #         $CHAIN_BINARY init provider-node --home $NODE_HOME
+      #         sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICE\"^" $NODE_HOME/config/app.toml
+      #         echo "> Downloading genesis file"
+      #         wget https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json -O $NODE_HOME/config/genesis.json
+      #         echo "> Setting up seeds"
+      #         toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
+      #         echo "> Setting up state sync"
+      #         current_height=$(curl -s $STATE_SYNC_RPC_1/block | jq -r '.result.block.header.height')
+      #         echo "> Current block height: $current_height"
+      #         trust_height=$[$current_height-1000]
+      #         trust_block=$(curl -s $STATE_SYNC_RPC_1/block\?height\=$trust_height)
+      #         trust_hash=$(echo $trust_block | jq -r '.result.block_id.hash')
+      #         toml set --toml-path $NODE_HOME/config/config.toml statesync.enable true
+      #         toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_period "8h0m0s"
+      #         toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_height $trust_height
+      #         toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_hash $trust_hash
+      #         toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1,$STATE_SYNC_RPC_2"
+      #         echo "> Starting node session."
+      #         tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
+      #         sleep 10s
+      #         tail -n 100 gaia.log
+            
+      #     - name: Wait until syncing flag is set to false
+      #       run: |
+      #         while true; do
+      #           syncing=$(curl -s localhost:26657/status | jq -r '.result.sync_info.catching_up')
+      #           if [ "$syncing" == "false" ]; then
+      #             echo "Node has finished syncing!"
+      #             break
+      #           else
+      #             echo "Node is still syncing... waiting 1m before checking again."
+      #             sleep 1m
+      #           fi
+      #         done
+
+      #     - name: Print log
+      #       run: |
+      #         tail -n 100 gaia.log
 
