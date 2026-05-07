@@ -229,9 +229,24 @@
               pwd
               popd
               pwd
+              echo "> Starting node session."
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
-              sleep 10m
-            
+              sleep 10s
+              tail -n 100 gaia.log
+
+          - name: Wait until syncing flag is set to false
+            run: |
+              while true; do
+                syncing=$(curl -s localhost:26657/status | jq -r '.result.sync_info.catching_up')
+                if [ "$syncing" == "false" ]; then
+                  echo "Node has finished syncing!"
+                  break
+                else
+                  echo "Node is still syncing... waiting 1m before checking again."
+                  sleep 1m
+                fi
+              done
+
           - name: Print log
             run: |
               tail -n 100 gaia.log
@@ -295,9 +310,24 @@
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_height $trust_height
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_hash $trust_hash
               toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1,$STATE_SYNC_RPC_2"
+              echo "> Starting node session."
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
-              sleep 10m
+              sleep 10s
+              tail -n 100 gaia.log
             
+          - name: Wait until syncing flag is set to false
+            run: |
+              while true; do
+                syncing=$(curl -s localhost:26657/status | jq -r '.result.sync_info.catching_up')
+                if [ "$syncing" == "false" ]; then
+                  echo "Node has finished syncing!"
+                  break
+                else
+                  echo "Node is still syncing... waiting 1m before checking again."
+                  sleep 1m
+                fi
+              done
+
           - name: Print log
             run: |
               tail -n 100 gaia.log
