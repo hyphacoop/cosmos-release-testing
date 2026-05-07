@@ -222,7 +222,7 @@
       #         echo "> Downloading genesis file"
       #         wget https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json -O $NODE_HOME/config/genesis.json
       #         echo "> Setting up seeds"
-      #         toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "https://rpc.provider-seed-01.hub-testnet.polypore.xyz,https://rpc.provider-seed-02.hub-testnet.polypore.xyz"
+      #         toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
       #         echo "> Downloading and extracting snapshot"
       #         pushd $NODE_HOME
       #         wget https://snapshots.polypore.xyz/provider/latest.tar.gz
@@ -284,7 +284,7 @@
               echo "> Downloading genesis file"
               wget https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json -O $NODE_HOME/config/genesis.json
               echo "> Setting up seeds"
-              toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "https://rpc.provider-seed-01.hub-testnet.polypore.xyz,https://rpc.provider-seed-02.hub-testnet.polypore.xyz"
+              toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
               echo "> Setting up state sync"
               current_height=$(curl -s $STATE_SYNC_RPC_1/block | jq -r '.result.block.header.height')
               echo "> Current block height: $current_height"
