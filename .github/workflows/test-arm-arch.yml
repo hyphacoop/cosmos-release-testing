@@ -1,0 +1,173 @@
+---
+
+    name: Test ARM Architecture
+    on:
+      workflow_dispatch:
+        inputs:
+          gaia-version:
+            description: 'Gaia version to test'
+            required: true
+            type: string
+            default: v27.3.0-rc0
+          # from_version:
+          #   description: 'Gaia version to upgrade from'
+          #   required: true
+          #   type: string
+          #   default: v26.0.0
+          # to_version:
+          #   description: 'Gaia version to upgrade to'
+          #   required: true
+          #   type: string
+          #   default: v27.3.0-rc0
+          # upgrade_name:
+          #   description: 'Name of the upgrade'
+          #   required: false
+          #   type: string
+          #   default: v27.3.0
+      push:
+    
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    
+    env:
+      GO_VERSION: 1.25.7
+      # All chain variables
+      COMMIT_TIMEOUT: 2
+      # Consumer chain variables
+      RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+      PROVIDER_ICS: v6.4.0
+      TOPN: 0
+      # Relayer variables
+      RELAYER: hermes
+      HERMES_VERSION: v1.13.3
+      RLY_VERSION: "2.5.0"
+    jobs:
+      # set-versions:
+      #   env:
+      #     START: ${{ github.event_name == 'push' && 'v26.0.0' || inputs.from_version }}
+      #     TARGET: ${{ github.event_name == 'push' && 'v27.3.0-rc0' || inputs.to_version }}
+      #     NAME: ${{ github.event_name == 'push' && 'v27.3.0' || inputs.upgrade_name }}
+      #   runs-on: ubuntu-24.04-arm
+      #   steps:
+      #     - name: Debug env vars
+      #       run: |
+      #         echo "START: $START"
+      #         echo "TARGET: $TARGET"
+      #         echo "NAME: $NAME"
+      #         ldd --version
+      #     - name: Check out repository code
+      #       uses: actions/checkout@v6
+      #     - name: Set up Python
+      #       uses: actions/setup-python@v6
+      #       with:
+      #         python-version: '3.11'
+      #     - name: Install dependencies
+      #       run: |
+      #         python -m pip install --upgrade pip
+      #         python -m pip install requests
+      #     - name: Set starting version
+      #       id: start
+      #       run: |
+      #         echo "version=$START" >> $GITHUB_OUTPUT
+      #     - name: Set target version
+      #       id: target
+      #       run: |
+      #         echo "version=$TARGET" >> $GITHUB_OUTPUT
+      #     - name: Set upgrade name
+      #       id: upgrade
+      #       run: |
+      #         echo "name=$NAME" >> $GITHUB_OUTPUT
+      #     - name: Set binary source
+      #       id: binary
+      #       run: |
+      #         if [[ "${TARGET:0:1}" != "v" ]]; then
+      #           echo "source=BUILD" >> $GITHUB_OUTPUT
+      #         else
+      #           echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+      #         fi
+              
+      #   outputs:
+      #    start_version: ${{ steps.start.outputs.version }}
+      #    target_version: ${{ steps.target.outputs.version }}
+      #    upgrade_name: ${{ steps.upgrade.outputs.name }}
+      #    binary_source: ${{ steps.binary.outputs.source }}
+
+      Test-chain-start:
+        runs-on: ubuntu-24.04-arm
+        # needs: set-versions
+        strategy:
+          # matrix:
+          #   start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+          #   target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+          #   upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          #   cv_version: [v1.7.1]
+          #   upgrade_mechanism: [cv_auto, cv_manual]
+          #   enable_cosmovisor: [false, true]
+          #   exclude:
+          #     - target_version: main
+          #       upgrade_mechanism: cv_auto
+          #     - enable_cosmovisor: false
+          #       upgrade_mechanism: cv_auto
+          fail-fast: false
+        env:
+          # COSMOVISOR: ${{ matrix.enable_cosmovisor }}
+          # COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+          # UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+          # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          BINARY_SOURCE: DOWNLOAD
+          GO_VERSION: 1.25.7
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ inputs.gaia-version }}/gaiad-${{ inputs.gaia-version }}-linux-arm64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh 3
+          
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+
+          - name: _Blocks produced
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+                  
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
+
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH
+  
