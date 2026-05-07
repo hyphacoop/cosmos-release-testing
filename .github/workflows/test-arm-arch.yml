@@ -214,7 +214,7 @@
       #         GAS_PRICE: 0.005uatom
       #       run: |
       #         echo "> Downloading Gaia"
-      #         wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64   -O $CHAIN_BINARY
+      #         wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64 -O $CHAIN_BINARY
       #         chmod +x $CHAIN_BINARY
       #         echo "> Initializing node @ $NODE_HOME"
       #         $CHAIN_BINARY init provider-node --home $NODE_HOME
@@ -276,7 +276,7 @@
               STATE_SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz:443
             run: |
               echo "> Downloading Gaia"
-              wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64   -O $CHAIN_BINARY
+              wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64 -O $CHAIN_BINARY
               chmod +x $CHAIN_BINARY
               echo "> Initializing node @ $NODE_HOME"
               $CHAIN_BINARY init provider-node --home $NODE_HOME
@@ -297,7 +297,7 @@
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_hash $trust_hash
               toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1,$STATE_SYNC_RPC_2"
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
-              sleep 10
+              sleep 3m
             
           - name: Print log
             run: |
@@ -306,3 +306,8 @@
           - name: _Blocks produced
             run: |
               tests/test_block_production.sh 127.0.0.1 26657 5
+          
+          - name: Print log
+            run: |
+              tail -n 100 gaia.log
+
