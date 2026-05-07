@@ -125,7 +125,7 @@
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
           - name: Bypass the grub-efi-amd64-signed package
-            run: sudo apt-mark hold grub-efi-amd64-signed
+            run: sudo apt-mark hold grub-efi-arm64-signed
           - name: Check out repository code
             uses: actions/checkout@v6
           - name: Set up Python
