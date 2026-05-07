@@ -317,6 +317,12 @@
                   break
                 else
                   echo "Node is still syncing... waiting 1m before checking again."
+                  # Check if the string "AppHash" is in the log
+                  if grep -q "AppHash" gaia.log; then
+                    echo "ERROR: AppHash found in log."
+                    cat gaia.log
+                    exit 1
+                  fi
                   tail -n 20 gaia.log
                   sleep 1m
                 fi
