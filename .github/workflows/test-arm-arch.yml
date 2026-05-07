@@ -210,14 +210,14 @@
           - name: Start chain
             env:
               NODE_HOME: $HOME/.gaiad
-              BINARY: ./gaiad
+              CHAIN_BINARY: ./gaiad
               GAS_PRICE: 0.005uatom
             run: |
               echo "> Downloading Gaia"
-              wget https://github.com/cosmos/gaia/releases/download/$VERSION/gaiad-$GAIA_VERSION-linux-arm64 -O $BINARY
-              chmod +x $BINARY
+              wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64   -O $CHAIN_BINARY
+              chmod +x $CHAIN_BINARY
               echo "> Initializing node @ $NODE_HOME"
-              $BINARY init provider-node --home $NODE_HOME
+              $CHAIN_BINARY init provider-node --home $NODE_HOME
               sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICE\"^" $NODE_HOME/config/app.toml
               echo "> Downloading genesis file"
               wget https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json -O $NODE_HOME/config/genesis.json
