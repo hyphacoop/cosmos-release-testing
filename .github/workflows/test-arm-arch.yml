@@ -272,8 +272,8 @@
               NODE_HOME: /home/runner/.gaia
               CHAIN_BINARY: ./gaiad
               GAS_PRICE: 0.005uatom
-              STATE_SYNC_RPC_1: https://rpc.provider-state-sync-01.hub-testnet.polypore.xyz
-              STATE_SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz
+              STATE_SYNC_RPC_1: https://rpc.provider-state-sync-01.hub-testnet.polypore.xyz:443
+              STATE_SYNC_RPC_2: https://rpc.provider-state-sync-02.hub-testnet.polypore.xyz:443
             run: |
               echo "> Downloading Gaia"
               wget https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64   -O $CHAIN_BINARY
@@ -295,7 +295,7 @@
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_period "8h0m0s"
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_height $trust_height
               toml set --toml-path $NODE_HOME/config/config.toml statesync.trust_hash $trust_hash
-              toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1, $STATE_SYNC_RPC_2"
+              toml set --toml-path $NODE_HOME/config/config.toml statesync.rpc_servers "$STATE_SYNC_RPC_1,$STATE_SYNC_RPC_2"
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
               sleep 10
             
