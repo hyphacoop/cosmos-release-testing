@@ -300,14 +300,9 @@
               wget https://snapshots.polkachu.com/genesis/cosmos/genesis.json -O $NODE_HOME/config/genesis.json
               echo "> Setting up seeds"
               toml set --toml-path $NODE_HOME/config/config.toml p2p.seeds "327fb4151de9f78f29ff10714085e347a4e3c836@rpc.cosmos.nodestake.org:666"
-              pwd
               echo "> Downloading and extracting snapshot"
-              pushd $NODE_HOME
-              aria2c -x 8 -s 8 https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.gz
-              tar -xzf latest.tar.gz
-              pwd
-              popd
-              pwd
+              aria2c -x 8 -s 8 https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4
+              lz4 -c -d latest.tar.lz4  | tar -x -C $NODE_HOME
               echo "> Starting node session."
               tmux new-session -d -s arm-test "$CHAIN_BINARY start --home $NODE_HOME 2>&1 | tee gaia.log"
               sleep 10s
