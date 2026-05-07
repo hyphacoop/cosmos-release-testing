@@ -117,6 +117,7 @@
           # BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
           BINARY_SOURCE: DOWNLOAD
           GO_VERSION: 1.25.7
+          GAIA_VERSION: ${{ github.event_name == 'push' && 'v27.3.0-rc0' || inputs.gaia-version }}
         steps:
           - name: Update PATH
             run: |
@@ -138,7 +139,7 @@
               python -m pip install toml-cli
           - name: Start chain
             run: |
-              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ inputs.gaia-version }}/gaiad-${{ inputs.gaia-version }}-linux-arm64  
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/$GAIA_VERSION/gaiad-$GAIA_VERSION-linux-arm64  
               source scripts/vars.sh
               scripts/setup.sh
               ./$START_SCRIPT
