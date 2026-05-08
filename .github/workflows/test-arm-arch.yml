@@ -124,6 +124,10 @@
           GO_VERSION: 1.25.7
           GAIA_VERSION: ${{ github.event_name == 'push' && 'v27.3.0-rc0' || inputs.gaia-version }}
         steps:
+          - name: Check Hardware Specs
+            run: |
+              echo "CPU Info:"
+              lscpu | grep -E "Model name|CPU\(s\)"
           - name: Update PATH
             run: |
               mkdir -p $HOME/go/bin
