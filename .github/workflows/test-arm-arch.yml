@@ -265,7 +265,7 @@
             if: failure()
             uses: actions/upload-artifact@v4
             with:
-              name: gaia-log-apphash-failure-testnet
+              name: testnet-failure-snapshot
               path: gaia.log
 
 
@@ -347,7 +347,7 @@
             if: failure()
             uses: actions/upload-artifact@v4
             with:
-              name: gaia-log-apphash-failure-mainnet
+              name: mainnet-failure-snapshot
               path: gaia.log
 
 
@@ -420,6 +420,11 @@
                   break
                 else
                   echo "Node is still syncing... waiting 1m before checking again."
+                  # Check if the string "state sync aborted" is in the log
+                  if grep -q "state sync aborted" gaia.log; then
+                    echo "ERROR: State sync aborted found in log."
+                    exit 1
+                  fi
                   tail -n 20 gaia.log
                   sleep 1m
                 fi
@@ -428,4 +433,11 @@
           - name: Print log
             run: |
               tail -n 100 gaia.log
+
+          - name: Upload log on failure
+            if: failure()
+            uses: actions/upload-artifact@v4
+            with:
+              name: testnet-failure-state-sync
+              path: gaia.log
 
