@@ -420,6 +420,7 @@
                   break
                 else
                   echo "Node is still syncing... waiting 1m before checking again."
+                  tail -n 20 gaia.log
                   sleep 1m
                 fi
               done
