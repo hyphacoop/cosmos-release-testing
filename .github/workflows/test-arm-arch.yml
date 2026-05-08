@@ -267,7 +267,7 @@
 
           - name: Upload log on failure
             if: failure()
-            uses: actions/upload-artifact@v4
+            uses: actions/upload-artifact@v7
             with:
               name: testnet-failure-snapshot
               path: gaia.log
@@ -357,7 +357,7 @@
 
           - name: Upload log on failure
             if: failure()
-            uses: actions/upload-artifact@v4
+            uses: actions/upload-artifact@v7
             with:
               name: testnet-failure-state-sync
               path: gaia.log
