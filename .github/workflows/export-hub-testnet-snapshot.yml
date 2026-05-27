@@ -160,7 +160,7 @@ jobs:
         run: |
           cd $NODE_HOME
           mkdir ~/snapshot
-          tar --use-compress-program="pigz -k " -cf ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
+          tar --use-compress-program="pigz -k " --exclude='data/snapshots' -cf ~/snapshot/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz data wasm
       - name: Upload snapshot
         run: |
           echo "Clear directory on server..."
