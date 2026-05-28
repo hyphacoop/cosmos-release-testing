@@ -152,6 +152,7 @@ jobs:
           echo "Done Syncing"
       - name: Check proposer_priority with validators
         run: |
+          sleep 30
           synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
           echo "Querying proposer_priority for block: $synced_block"
           apple=$(curl -s https://rpc.provider-apple.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
