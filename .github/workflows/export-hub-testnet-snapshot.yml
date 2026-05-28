@@ -157,7 +157,7 @@ jobs:
           apple=$(curl -s https://rpc.provider-apple.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
           banana=$(curl -s https://rpc.provider-banana.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
           cherry=$(curl -s https://rpc.provider-cherry.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
-          local=$(curl -s http://localhost:26657/validators\?height\=$synced_block | jq '.result.validators[0].proposer_priority')
+          local=$(curl -s http://localhost:26657/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
 
           if [[ "$apple" == "$banana" && "$apple" == "$cherry" && "$apple" == "$local" ]]; then
             echo "OK: all proposer_priority values match ($apple)"
