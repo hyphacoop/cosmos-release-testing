@@ -1,0 +1,153 @@
+---
+name: Test Hub Testnet snapshot
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Export Hub Testnet Snapshot']
+    types: [completed]
+  # schedule:
+  #   # At 05:30 on Monday.
+  #   - cron: '30 5 * * 1'
+  # push:
+# concurrency:
+#   group: self-hosted-runners
+
+jobs:
+  test-hub-testnet-snapshot:
+    runs-on: cosmos-runner-set
+    environment: test-hub-testnet-snapshot
+    env:
+      SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 screen curl jq wget python3-venv python3-pip build-essential git psmisc net-tools lz4
+      - run: ifconfig
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: mkdir ~/artifact
+        run: mkdir ~/artifact
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Install openssh-server
+        run: |
+          sudo apt install -y openssh-server
+          sudo mkdir /run/sshd
+          sudo /usr/sbin/sshd
+      - name: Setup SSH auth
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "$SSH_PUB_KEYS" > ~/.ssh/authorized_keys
+          ssh-keyscan files.polypore.xyz >> ~/.ssh/known_hosts
+      - name: Set SSH key
+        run: |
+          if [ ! -d ~/.ssh ]
+          then
+            mkdir -m 700 ~/.ssh
+          fi
+          echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli requests
+
+      - name: Get current running gaiad version
+        run: |
+          RUNNING_VERSION=$(curl -s ${{ vars.RPC_NODE }}/abci_info | jq -r '.result.response.version')
+          echo "Running gaiad version: $RUNNING_VERSION"
+          echo "RUNNING_VERSION=$RUNNING_VERSION" >> $GITHUB_ENV
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+      - name: Initializing chain to sync with hub testnet
+        env:
+          NODE_HOME: /home/runner/.gaia
+          NODE_MONIKER: testnet-export
+          SERVICE_NAME: testnet-export
+          CHAIN_ID: cosmoshub-4
+          CHAIN_BINARY: 'gaiad'
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json
+          GAS_PRICES: "0.0025uatom"
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
+        run: |
+          echo "Initializing $NODE_HOME..."
+          $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
+          $CHAIN_BINARY config set client keyring-backend test --home $NODE_HOME
+          $CHAIN_BINARY config set client broadcast-mode sync --home $NODE_HOME
+          $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
+          echo "Configuring state sync..."
+          sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
+          echo "Replaceing genesis..."
+          wget -nv $GENESIS_URL -O genesis.json
+          mv genesis.json $NODE_HOME/config/genesis.json
+      - name: Download snapshot
+        env:
+          ARCHIVE_URL: https://snapshots.polypore.xyz/provider/latest.tar.gz
+        run: |
+          cd ~/.gaia
+          curl -o - -L $ARCHIVE_URL | tar xz -C .
+      - name: Start Chain
+        env:
+          NODE_HOME: /home/runner/.gaia
+          CHAIN_BINARY: 'gaiad'
+        run: screen -L -Logfile /home/runner/artifact/gaiad_sync.log -S gaiad -d -m $CHAIN_BINARY start --home $NODE_HOME
+      - name: Wait for gaiad to start and stabilize
+        run: tests/test_block_production.sh 127.0.0.1 26657 50 100000
+      - name: Syncing Chain
+        run: |
+          catching_up="true"
+          while [ $catching_up == "true" ]
+          do
+            catching_up=$(curl -s 127.0.0.1:26657/status | jq -r .result.sync_info.catching_up)
+            echo "Still Syncing: $catching_up"
+            sleep 5
+          done
+          echo "Done Syncing"
+      - name: Check proposer_priority with validators
+        run: |
+          sleep 30
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
+          echo "Querying proposer_priority for block: $synced_block"
+          apple=$(curl -s https://rpc.provider-apple.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+          banana=$(curl -s https://rpc.provider-banana.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+          cherry=$(curl -s https://rpc.provider-cherry.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+          local=$(curl -s http://localhost:26657/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+
+          if [[ "$apple" == "$banana" && "$apple" == "$cherry" && "$apple" == "$local" ]]; then
+            echo "OK: all proposer_priority values match ($apple)"
+          else
+            echo "MISMATCH detected at block $synced_block:"
+            echo "  apple:  $apple"
+            echo "  banana: $banana"
+            echo "  cherry: $cherry"
+            echo "  local:  $local"
+            exit 1
+          fi
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-hub-testnet
+          path: ~/artifact/
