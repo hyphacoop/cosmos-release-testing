@@ -64,7 +64,7 @@ jobs:
           echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
@@ -73,7 +73,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install toml-cli requests
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ vars.GO_VER }}
       - name: Get current running gaiad version
@@ -192,7 +192,7 @@ jobs:
           ssh gh-actions@files.polypore.xyz ln -sf /storage/snapshots/ics-testnet/provider/$CHAIN_ID-snapshot-${{ env.synced_block }}.tar.gz /storage/snapshots/ics-testnet/provider/latest.tar.gz
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: export-hub-testnet-provider
           path: ~/artifact/

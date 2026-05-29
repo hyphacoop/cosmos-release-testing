@@ -60,7 +60,7 @@ jobs:
           echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
@@ -212,7 +212,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: export-cosmos-hub-mainnet
           path: ~/artifact/

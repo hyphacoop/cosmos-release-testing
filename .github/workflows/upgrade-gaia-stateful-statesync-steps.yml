@@ -127,7 +127,7 @@ jobs:
           TARGET_COMMIT=$(curl -s -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/hyphacoop/cosmos-builds/releases/tags/$BUILD_TAG | jq -r '.name')
           echo TARGET_COMMIT: $TARGET_COMMIT
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ vars.GO_VER }}
       - name: Consumer chain binary URLs
@@ -137,7 +137,7 @@ jobs:
           echo "$HOME/go/bin" >> $GITHUB_PATH
           echo "$HOME/.hermes" >> $GITHUB_PATH
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
@@ -269,7 +269,7 @@ jobs:
           cp -p ~/go/bin/* ~/artifact/bin/ || true
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: archived-upgrade-${{ vars.CHAIN_ID }}-${{ inputs.gaia_version }}-${{ inputs.upgrade_version }}
           path: ~/artifact/

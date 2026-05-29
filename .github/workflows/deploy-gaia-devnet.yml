@@ -29,7 +29,7 @@ jobs:
       - run: lsb_release -a
       - run: echo "GitHub branch is ${{ github.ref }}"
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
@@ -38,7 +38,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install toml-cli requests
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ vars.GO_VER }}
 

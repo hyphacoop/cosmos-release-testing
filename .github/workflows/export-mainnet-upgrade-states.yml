@@ -60,7 +60,7 @@ jobs:
           echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
@@ -205,7 +205,7 @@ jobs:
       #     echo "[INFO]: Remove local snapshot archive"
       #     rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ vars.GO_VER }}
       - name: Build fork tool
@@ -340,7 +340,7 @@ jobs:
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: export-cosmos-hub-mainnet
           path: ~/artifact/
