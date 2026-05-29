@@ -405,9 +405,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0
               
           - name: _Blocks produced after upgrade
@@ -1115,9 +1112,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.3.0
 
           - name: Upgrade to v27.4.0
@@ -1126,9 +1120,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0
               
           - name: _Blocks produced after upgrade
@@ -1763,9 +1754,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0              
 
           - name: Test software upgrade
@@ -1995,9 +1983,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -2241,9 +2226,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -2397,9 +2379,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0                    
               
           - name: Test software upgrade
@@ -2604,9 +2583,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -2786,9 +2762,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0                    
 
           - name: Test software upgrade
@@ -3010,9 +2983,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -3221,9 +3191,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: _Test counter contract
@@ -3380,9 +3347,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -3531,9 +3495,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -3670,9 +3631,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -3796,9 +3754,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -3943,9 +3898,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -4087,9 +4039,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade
@@ -4252,9 +4201,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade cancellation - proposer tx
@@ -4778,9 +4724,6 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh v27.4.0      
 
           - name: Test software upgrade cancellation - proposer tx
