@@ -408,7 +408,7 @@
               export validator_count=12
               export MAX_VALIDATORS=8
               export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh v27.3.0
+              scripts/upgrade.sh v27.4.0
               
           - name: _Blocks produced after upgrade
             run: |
