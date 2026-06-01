@@ -460,7 +460,7 @@ jobs:
           path: ~/snapshot/
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: export-hub-testnet-provider
           path: ~/artifact/
