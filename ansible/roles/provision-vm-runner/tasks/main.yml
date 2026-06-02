@@ -32,6 +32,7 @@
   community.general.proxmox_kvm:
     api_host: "{{ api_host }}"
     api_user: "{{ api_user }}"
+    validate_certs: false
     node: "{{ vm_node }}"
     pool: "{{ resource_pool }}"
     vmid: "{{ vmid }}"
