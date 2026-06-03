@@ -8,7 +8,7 @@
     vm_name_prefix: cosmos-git-runner-ubuntu
     resource_pool: ci
     template_clone: git-runner-ubuntu-2404
-    template_id: 9351
+    template_id: 9352
     # memory: 65536
     memory: 16384
     cpu_cores: 8
