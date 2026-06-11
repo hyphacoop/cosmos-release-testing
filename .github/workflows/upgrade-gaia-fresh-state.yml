@@ -76,7 +76,7 @@
           - name: Set binary source
             id: binary
             run: |
-              echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+              echo "source=BUILD" >> $GITHUB_OUTPUT
               # if [[ "${TARGET:0:1}" != "v" ]]; then
               #   echo "source=BUILD" >> $GITHUB_OUTPUT
               # else
