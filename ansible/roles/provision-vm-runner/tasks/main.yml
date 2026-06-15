@@ -1,8 +1,9 @@
 ---
 - name: Clone ubuntu runner template
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: "{{ api_host }}"
     api_user: "{{ api_user }}"
+    validate_certs: false
     node: "{{ vm_node }}"
     pool: "{{ resource_pool }}"
     clone: "{{ template_clone }}"
@@ -18,18 +19,20 @@
   set_fact:
     vmid: "{{ proxmox_info.vmid }}"
 - name: Grow existing disk
-  community.general.proxmox_disk:
+  community.proxmox.proxmox_disk:
     api_host: "{{ api_host }}"
     api_user: "{{ api_user }}"
+    validate_certs: false
     vmid: "{{ vmid }}"
     disk: virtio0
     size: "{{ disk_size }}"
     state: resized
 
 - name: Configure runner VM
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: "{{ api_host }}"
     api_user: "{{ api_user }}"
+    validate_certs: false
     node: "{{ vm_node }}"
     pool: "{{ resource_pool }}"
     vmid: "{{ vmid }}"
@@ -39,9 +42,10 @@
     update: true
 
 - name: Start runner VM
-  community.general.proxmox_kvm:
+  community.proxmox.proxmox_kvm:
     api_host: "{{ api_host }}"
     api_user: "{{ api_user }}"
+    validate_certs: false
     node: "{{ vm_node }}"
     pool: "{{ resource_pool }}"
     vmid: "{{ vmid }}"

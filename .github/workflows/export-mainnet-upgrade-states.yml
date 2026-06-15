@@ -60,7 +60,7 @@ jobs:
           echo "${{ secrets.SSH_PRIV_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Init Python venv
         run: python -m venv ~/env
       - name: Install dependencies
@@ -205,7 +205,7 @@ jobs:
       #     echo "[INFO]: Remove local snapshot archive"
       #     rm ${{ env.RUNNING_VERSION }}_${{ env.SNAPSHOT_HEIGHT }}-snapshot.tar.*
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ vars.GO_VER }}
       - name: Build fork tool
@@ -308,15 +308,14 @@ jobs:
           echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
           jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
-          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --fees 1000000uatom --from val --yes"
-          $proposal
+          proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 0.005uatom --gas-adjustment 2.0 --from val --yes"
           txhash=$($proposal | jq -r .txhash)
           echo "Wait for the proposal to go on chain..."
           tests/test_block_production.sh 127.0.0.1 26657 1 1
           echo "Get proposal ID from txhash..."
           proposal_id=$(gaiad --output json q tx $txhash | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
           echo "Submitting the \"yes\" vote to proposal $proposal_id..."
-          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --fees 1000uatom --yes"
+          vote="gaiad tx gov vote $proposal_id yes --from val --keyring-backend test --gas auto --gas-prices 0.005uatom --gas-adjustment 2.0 --yes"
           $vote
       - name: Stop gaiad when reached upgrade height
         run: |
@@ -340,7 +339,7 @@ jobs:
           ssh gh-actions@files.polypore.xyz ln -sf /var/www/html/archived-state/${{ env.RUNNING_VERSION }}_${{ env.upgrade_height }}-stateful-upgrade.tar.gz /var/www/html/archived-state/latest_v$(echo ${{ env.RUNNING_VERSION }} | awk -F "." '{ print substr($1,2) }').tar.gz
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: export-cosmos-hub-mainnet
           path: ~/artifact/
