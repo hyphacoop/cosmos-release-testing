@@ -13,13 +13,13 @@
             description: 'Gaia version to upgrade to'
             required: true
             type: string
-            default: v27.3.0-rc0
+            default: v27.5.0
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
             type: string
-            default: v27.3.0
-      # push:
+            default: v27.5.0
+      push:
     
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -788,6 +788,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -993,6 +1011,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
@@ -1234,6 +1270,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: "${{ matrix.target_version }}"
@@ -1363,6 +1417,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
@@ -1555,6 +1627,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -1710,6 +1800,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
@@ -1919,6 +2027,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2094,6 +2220,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
@@ -2237,6 +2381,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
     
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2366,6 +2528,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
                   
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2483,6 +2663,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2581,6 +2779,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
@@ -2713,6 +2929,24 @@
               source scripts/vars.sh
               scripts/upgrade.sh $TARGET_VERSION
 
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2829,6 +3063,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
@@ -2970,6 +3222,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
@@ -3472,6 +3742,24 @@
           - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.3.0
+            env:
+              TARGET_VERSION: v27.3.0
+              STAKING_OPERATIONS: false
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh $TARGET_VERSION
+
+          - name: Upgrade to v27.4.0
+            env:
+              TARGET_VERSION: v27.4.0
               STAKING_OPERATIONS: false
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
