@@ -401,12 +401,38 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0
               
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
+
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
@@ -1116,12 +1142,38 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0
               
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
+
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
@@ -1750,11 +1802,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0              
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -1979,11 +2047,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -2222,11 +2306,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -2375,12 +2475,28 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0                    
               
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
+
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -2579,11 +2695,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -2758,11 +2890,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0                    
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -2979,11 +3127,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -3187,11 +3351,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: _Test counter contract
             run: |
@@ -3343,11 +3523,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -3491,11 +3687,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -3627,11 +3839,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -3750,11 +3978,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -3894,11 +4138,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -4035,11 +4295,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
             env:
@@ -4197,11 +4473,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade cancellation - proposer tx
             env:
@@ -4720,11 +5012,27 @@
 
           - name: Upgrade to v27.4.0
             env:
-              TARGET_VERSION: v27.4.0-rc0
+              TARGET_VERSION: v27.4.0
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               scripts/upgrade.sh v27.4.0      
+
+          - name: Upgrade to v27.5.0
+            env:
+              TARGET_VERSION: v27.5.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.5.0
+
+          - name: Upgrade to v27.6.0
+            env:
+              TARGET_VERSION: v27.6.0
+            run: |
+              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+              source scripts/vars.sh
+              scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade cancellation - proposer tx
             env:
