@@ -1204,14 +1204,14 @@
               params=$($CHAIN_BINARY q provider params --home $whale_home -o json | jq '.')
               # Patch template proposal with current params for provider module
               jq --argjson params "$params" '.messages[0].params = $params' templates/proposal-provider-staking-params.json > proposal-patched-provider.json
-              echo "> Restricting provider max validators to 3"
-              jq '.messages[0].params.max_provider_consensus_validators = "3"' proposal-patched-provider.json > proposal-patched-provider-vals.json
+              echo "> Restricting provider max validators to 4"
+              jq '.messages[0].params.max_provider_consensus_validators = "4"' proposal-patched-provider.json > proposal-patched-provider-vals.json
               echo "> Reading params from staking module"
               params=$($CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params')
               # Patch proposal with current params for staking module
               jq --argjson params "$params" '.messages[1].params = $params' proposal-patched-provider-vals.json > proposal-patched-staking.json
-              echo "> Restricting staking max validators to 4"
-              jq '.messages[1].params.max_validators = 4' proposal-patched-staking.json > proposal-patched-staking-vals.json
+              echo "> Restricting staking max validators to 5"
+              jq '.messages[1].params.max_validators = 5' proposal-patched-staking.json > proposal-patched-staking-vals.json
               scripts/param_change.sh proposal-patched-staking-vals.json
               echo "> Staking params:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params'
@@ -1329,7 +1329,7 @@
           - name: Validator set checks
             run: |
               source scripts/vars.sh
-              export MAX_PROVIDER_VALIDATORS=3
+              export MAX_PROVIDER_VALIDATORS=4
               python scripts/ics_removal_validator_check.py --height $UPGRADE_HEIGHT --binary $CHAIN_BINARY --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --provider-max-vals $MAX_PROVIDER_VALIDATORS --ics-removal-upgrade
               jq '.' validator-check-$UPGRADE_HEIGHT.json
               check_result=$(jq -r '.' validator-check-$UPGRADE_HEIGHT.json | grep FAIL || true)
