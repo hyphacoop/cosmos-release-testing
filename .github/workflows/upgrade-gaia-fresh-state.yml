@@ -1206,13 +1206,15 @@
               jq --argjson params "$params" '.messages[0].params = $params' templates/proposal-provider-staking-params.json > proposal-patched-provider.json
               echo "> Restricting provider max validators to 4"
               jq '.messages[0].params.max_provider_consensus_validators = "4"' proposal-patched-provider.json > proposal-patched-provider-vals.json
-              echo "> Reading params from staking module"
-              params=$($CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params')
-              # Patch proposal with current params for staking module
-              jq --argjson params "$params" '.messages[1].params = $params' proposal-patched-provider-vals.json > proposal-patched-staking.json
-              echo "> Restricting staking max validators to 5"
-              jq '.messages[1].params.max_validators = 5' proposal-patched-staking.json > proposal-patched-staking-vals.json
-              scripts/param_change.sh proposal-patched-staking-vals.json
+              scripts/param_change.sh proposal-patched-provider-vals.json
+              
+              # echo "> Reading params from staking module"
+              # params=$($CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params')
+              # # Patch proposal with current params for staking module
+              # jq --argjson params "$params" '.messages[1].params = $params' proposal-patched-provider-vals.json > proposal-patched-staking.json
+              # echo "> Restricting staking max validators to 5"
+              # jq '.messages[1].params.max_validators = 5' proposal-patched-staking.json > proposal-patched-staking-vals.json
+              # scripts/param_change.sh proposal-patched-staking-vals.json
               echo "> Staking params:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.params'
               echo "> Provider params:"
