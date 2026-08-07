@@ -13,7 +13,7 @@
             description: 'Gaia version to upgrade to'
             required: true
             type: string
-            default: release/v28.x
+            default: v28.0.0-rc0
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
@@ -41,7 +41,7 @@
       set-versions:
         env:
           START: ${{ github.event_name == 'push' && 'v26.0.0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'release/v28.x' || inputs.to_version }}
+          TARGET: ${{ github.event_name == 'push' && 'v28.0.0-rc0' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v28.0.0' || inputs.upgrade_name }}
         runs-on: ubuntu-24.04
         steps:
@@ -76,12 +76,11 @@
           - name: Set binary source
             id: binary
             run: |
-              echo "source=BUILD" >> $GITHUB_OUTPUT
-              # if [[ "${TARGET:0:1}" != "v" ]]; then
-              #   echo "source=BUILD" >> $GITHUB_OUTPUT
-              # else
-              #   echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
-              # fi
+              if [[ "${TARGET:0:1}" != "v" ]]; then
+                echo "source=BUILD" >> $GITHUB_OUTPUT
+              else
+                echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+              fi
               
         outputs:
          start_version: ${{ steps.start.outputs.version }}
