@@ -3,6 +3,7 @@
 # It assumes gaia is running on the local host.
 
 upgrade_name=$1
+export GAS_ADJUSTMENT=5
 
 homes=()
 logs=()
