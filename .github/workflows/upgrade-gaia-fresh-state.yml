@@ -4894,6 +4894,11 @@
               source scripts/vars.sh
               scripts/upgrade_cancel_tx.sh ${{ matrix.upgrade_name }}
 
+          - name: _Blocks produced after cancelled upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
           - name: Test software upgrade cancellation - cancel software upgrade proposal
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -4901,6 +4906,11 @@
             run: |
               source scripts/vars.sh
               scripts/upgrade_cancel_proposal.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after cancelled upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: Test software upgrade cancellation - skip upgrade height through early staging
             env:
@@ -4910,6 +4920,11 @@
               source scripts/vars.sh
               export START_SKIP_SCRIPT="start_skip.sh"
               scripts/upgrade_skip_early_staging.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after cancelled upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
           - name: Test software upgrade cancellation - skip upgrade height after it has been reached
             env:
