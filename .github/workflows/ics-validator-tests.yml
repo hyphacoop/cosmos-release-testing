@@ -49,7 +49,7 @@ jobs:
           echo "IPv6: $ipv6_addr"
           echo "IPv4: $ipv4_addr"
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Get current running gaiad version
         run: |
           RUNNING_VERSION=$(curl -s https://$RPC_NODE/abci_info | jq -r '.result.response.version')

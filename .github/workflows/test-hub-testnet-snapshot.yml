@@ -1,9 +1,9 @@
 ---
-name: Test mainnet snapshot
+name: Test Hub Testnet snapshot
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ['Export Mainnet Snapshot']
+    workflows: ['Export Hub Testnet Snapshot']
     types: [completed]
   # schedule:
   #   # At 05:30 on Monday.
@@ -13,9 +13,9 @@ on:
 #   group: self-hosted-runners
 
 jobs:
-  test-cosmoshub-snapshot:
+  test-hub-testnet-snapshot:
     runs-on: cosmos-runner-set
-    environment: test-mainnet-snapshot
+    environment: test-hub-testnet-snapshot
     env:
       SSH_PUB_KEYS: ${{ vars.SSH_PUB_KEYS }}
     steps:
@@ -80,15 +80,16 @@ jobs:
         run: |
           sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
-      - name: Initializing chain to sync with mainnet
+      - name: Initializing chain to sync with hub testnet
         env:
           NODE_HOME: /home/runner/.gaia
-          NODE_MONIKER: mainnet-export
-          SERVICE_NAME: mainnet-export
+          NODE_MONIKER: testnet-export
+          SERVICE_NAME: testnet-export
           CHAIN_ID: cosmoshub-4
           CHAIN_BINARY: 'gaiad'
-          GENESIS_URL: https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
+          GENESIS_URL: https://github.com/cosmos/testnets/raw/refs/heads/master/provider/provider-genesis.json
           GAS_PRICES: "0.0025uatom"
+          SEEDS: "08ec17e86dac67b9da70deb20177655495a55407@provider-seed-01.hub-testnet.polypore.xyz:26656,4ea6e56300a2f37b90e58de5ee27d1c9065cf871@provider-seed-02.hub-testnet.polypore.xyz:26656"
         run: |
           echo "Initializing $NODE_HOME..."
           $CHAIN_BINARY config set client chain-id $CHAIN_ID --home $NODE_HOME
@@ -97,20 +98,16 @@ jobs:
           $CHAIN_BINARY init $NODE_MONIKER --chain-id $CHAIN_ID --home $NODE_HOME
           echo "Configuring state sync..."
           sed -i -e "/minimum-gas-prices =/ s^= .*^= \"$GAS_PRICES\"^" $NODE_HOME/config/app.toml
+          sed -i -e "/seeds =/ s^= .*^= \"$SEEDS\"^" $NODE_HOME/config/config.toml
           echo "Replaceing genesis..."
-          wget -nv $GENESIS_URL -O genesis.json.gz
-          gunzip genesis.json.gz
+          wget -nv $GENESIS_URL -O genesis.json
           mv genesis.json $NODE_HOME/config/genesis.json
       - name: Download snapshot
         env:
-          ARCHIVE_URL: https://snapshots.polypore.xyz/cosmoshub-4/latest.tar.lz4
+          ARCHIVE_URL: https://snapshots.polypore.xyz/provider/latest.tar.gz
         run: |
           cd ~/.gaia
-          curl -o - -L $ARCHIVE_URL | lz4 -d | tar x -C .
-      - name: Get addrbook
-        env:
-          ADDR_BOOK_URL: https://snapshots.polypore.xyz/cosmoshub-4/addrbook.json
-        run: curl -Ls $ADDR_BOOK_URL > /home/runner/.gaia/config/addrbook.json
+          curl -o - -L $ARCHIVE_URL | tar xz -C .
       - name: Start Chain
         env:
           NODE_HOME: /home/runner/.gaia
@@ -128,9 +125,29 @@ jobs:
             sleep 5
           done
           echo "Done Syncing"
+      - name: Check proposer_priority with validators
+        run: |
+          sleep 30
+          synced_block=$(gaiad status | jq -r '.sync_info.latest_block_height')
+          echo "Querying proposer_priority for block: $synced_block"
+          apple=$(curl -s https://rpc.provider-apple.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+          banana=$(curl -s https://rpc.provider-banana.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+          cherry=$(curl -s https://rpc.provider-cherry.hub-testnet.polypore.xyz/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+          local=$(curl -s http://localhost:26657/validators\?height\=$synced_block | jq -r '.result.validators[0].proposer_priority')
+
+          if [[ "$apple" == "$banana" && "$apple" == "$cherry" && "$apple" == "$local" ]]; then
+            echo "OK: all proposer_priority values match ($apple)"
+          else
+            echo "MISMATCH detected at block $synced_block:"
+            echo "  apple:  $apple"
+            echo "  banana: $banana"
+            echo "  cherry: $cherry"
+            echo "  local:  $local"
+            exit 1
+          fi
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: export-cosmos-hub-mainnet
+          name: export-hub-testnet
           path: ~/artifact/
