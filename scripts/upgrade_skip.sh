@@ -128,7 +128,7 @@ tail -n 50 ${logs[0]}
 echo "> Stopping all nodes at the upgrade height and simulate an upgrade skip"
 ./$STOP_SCRIPT
 sleep 6
-touch $START_SKIP_SCRIPT ; chmod +x $START_SKIP_SCRIPT ; echo "#!/bin/bash" >> $START_SKIP_SCRIPT
+rm -f $START_SKIP_SCRIPT ; touch $START_SKIP_SCRIPT ; chmod +x $START_SKIP_SCRIPT ; echo "#!/bin/bash" >> $START_SKIP_SCRIPT
 for i in $(seq 0 $[$validator_count-1])
 do
     echo "echo \"Starting validator ${monikers[i]}...\"" >> $START_SKIP_SCRIPT
