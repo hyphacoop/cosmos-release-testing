@@ -21,6 +21,7 @@
             default: v28.0.0
       push:
     
+
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
@@ -92,6 +93,7 @@
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
+          max-parallel: 4
           matrix:
             operation: ["no-rotation","down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: ["keep-consumer"] #, "stop-consumer"]
@@ -4189,6 +4191,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh $TARGET_VERSION
               
           - name: Upgrade to v27.3.0
@@ -4198,6 +4201,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.4.0
@@ -4207,7 +4211,7 @@
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               export validator_count=1
-              scripts/upgrade.sh v27.4.0      
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.5.0
             env:
@@ -4216,7 +4220,7 @@
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               export validator_count=1
-              scripts/upgrade.sh v27.5.0
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.6.0
             env:
@@ -4225,7 +4229,7 @@
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
               export validator_count=1
-              scripts/upgrade.sh v27.6.0
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Test software upgrade
             env:
