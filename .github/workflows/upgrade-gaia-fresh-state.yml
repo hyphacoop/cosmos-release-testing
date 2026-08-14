@@ -3239,7 +3239,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              scripts/upgrade.sh v27.4.0                    
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.5.0
             env:
@@ -3247,7 +3247,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              scripts/upgrade.sh v27.5.0
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.6.0
             env:
@@ -3255,7 +3255,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
-              scripts/upgrade.sh v27.6.0
+              scripts/upgrade.sh $TARGET_VERSION
 
           - name: Test software upgrade
             env:
