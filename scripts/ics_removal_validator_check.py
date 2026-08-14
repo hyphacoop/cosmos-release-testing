@@ -612,9 +612,13 @@ class ValsetCheck():
                 'starting_tokens': val['tokens'],
                 'rank_change': False
             }
-        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting tokens,
-        # breaking ties by operator address bytes ascending
-        sorted_validators = sorted(rank_comparison.items(), key=lambda x: (-x[1]['starting_tokens'], get_operator_address_bytes(x[0])))
+        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting
+        # voting power (consensus power, i.e. tokens truncated to whole ATOM), breaking ties by
+        # operator address bytes ascending. This must rank by voting power, not raw tokens: the chain's
+        # power index ranks by truncated consensus power, so two validators with different raw token
+        # counts that truncate to the same power are tied on-chain and ordered by address bytes.
+        # Sorting by raw tokens instead would disagree with the chain on that tie-break.
+        sorted_validators = sorted(rank_comparison.items(), key=lambda x: (-x[1]['starting_vp'], get_operator_address_bytes(x[0])))
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['starting_rank'] = rank
         
@@ -645,7 +649,9 @@ class ValsetCheck():
         
         # Re-check token eligibility after operations (exclude validators that dropped to 0)
         eligible_after_ops = {addr: val for addr, val in rank_comparison.items() if val['ending_tokens'] > 0}
-        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: (-x[1]['ending_tokens'], get_operator_address_bytes(x[0])))
+        # Same as above: rank by ending voting power (truncated consensus power), not raw ending
+        # tokens, so ties at the max_validators boundary resolve the same way the chain resolves them.
+        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: (-x[1]['ending_vp'], get_operator_address_bytes(x[0])))
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['ending_rank'] = rank
         # Check which validators are expected to be bonded or unbonded based on their new rank in the validator set (preop vs expected validator info)
