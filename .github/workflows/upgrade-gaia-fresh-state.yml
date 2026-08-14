@@ -3257,42 +3257,6 @@
               source scripts/vars.sh
               scripts/upgrade.sh v27.6.0
 
-          - name: Upgrade to v27.2.0
-            env:
-              TARGET_VERSION: v27.2.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              scripts/upgrade.sh $TARGET_VERSION
-
-          - name: Upgrade to v27.3.0
-            env:
-              TARGET_VERSION: v27.3.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              scripts/upgrade.sh $TARGET_VERSION
-
-          - name: Upgrade to v27.4.0
-            env:
-              TARGET_VERSION: v27.4.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              scripts/upgrade.sh $TARGET_VERSION
-
-          - name: Upgrade to v27.5.0
-            env:
-              TARGET_VERSION: v27.5.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              scripts/upgrade.sh $TARGET_VERSION
-
           - name: Test software upgrade
             env:
               TARGET_VERSION: ${{ matrix.target_version }}
@@ -4205,6 +4169,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.1.0
@@ -4214,6 +4179,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh $TARGET_VERSION
               
           - name: Upgrade to v27.2.0
@@ -4240,6 +4206,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh v27.4.0      
 
           - name: Upgrade to v27.5.0
@@ -4248,6 +4215,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh v27.5.0
 
           - name: Upgrade to v27.6.0
@@ -4256,6 +4224,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade
@@ -4264,24 +4233,29 @@
               DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
             run: |
               source scripts/vars.sh
+              export validator_count=1
               scripts/upgrade.sh ${{ matrix.upgrade_name }}
 
           - name: _Blocks produced after upgrade
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
                   
           - name: _Transactions verified> bank send, delegate, and withdraw rewards
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_tx.sh
           - name: _API endpoints check
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_endpoints_api.sh localhost $whale_api
           - name: _RPC endpoints check
             run: |
               source scripts/vars.sh
+              export validator_count=1
               tests/test_endpoints_rpc.sh localhost $whale_rpc
 
       Test-13-state-sync:
