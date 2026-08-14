@@ -4867,6 +4867,9 @@
             run: |
               export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=12
+              export MAX_VALIDATORS=8
+              export MAX_PROVIDER_VALIDATORS=5
               scripts/setup.sh
               ./$START_SCRIPT
               sleep $(($COMMIT_TIMEOUT*2))
