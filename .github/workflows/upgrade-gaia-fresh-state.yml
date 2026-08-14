@@ -5263,7 +5263,7 @@
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
 
-          - name: Test software upgrade
+          - name: Upgrade to v27.2.0
             env:
               TARGET_VERSION: v27.2.0
               STAKING_OPERATIONS: false
@@ -5282,6 +5282,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=12
               scripts/upgrade.sh $TARGET_VERSION
 
           - name: Upgrade to v27.4.0
@@ -5290,6 +5291,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=12
               scripts/upgrade.sh v27.4.0      
 
           - name: Upgrade to v27.5.0
@@ -5298,6 +5300,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=12
               scripts/upgrade.sh v27.5.0
 
           - name: Upgrade to v27.6.0
@@ -5306,6 +5309,7 @@
             run: |
               export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
               source scripts/vars.sh
+              export validator_count=12
               scripts/upgrade.sh v27.6.0
 
           - name: Test software upgrade cancellation - proposer tx
