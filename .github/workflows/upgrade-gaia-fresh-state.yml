@@ -77,11 +77,12 @@
           - name: Set binary source
             id: binary
             run: |
-              if [[ "${TARGET:0:1}" != "v" ]]; then
-                echo "source=BUILD" >> $GITHUB_OUTPUT
-              else
-                echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
-              fi
+              echo "source=BUILD" >> $GITHUB_OUTPUT
+              # if [[ "${TARGET:0:1}" != "v" ]]; then
+              #   echo "source=BUILD" >> $GITHUB_OUTPUT
+              # else
+              #   echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+              # fi
               
         outputs:
          start_version: ${{ steps.start.outputs.version }}
@@ -5689,6 +5690,7 @@
             run: |
               source scripts/vars.sh
               scripts/param_change.sh templates/proposal-staking-params.json
+              sleep $VOTING_PERIOD
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
 
           - name: _State sync test
