@@ -3223,8 +3223,8 @@
     
               txhash=$($CHAIN_BINARY tx liquid tokenize-share $VALOPER_1 100000$DENOM $vesting_wallet --from $vesting_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json | jq -r '.txhash')
               echo "txhash: $txhash"
-    
-              sleep $COMMIT_TIMEOUT
+
+              scripts/wait_for_tx.sh $txhash $whale_home || exit 1
               $CHAIN_BINARY q bank balances $vesting_wallet --home $whale_home -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1")'
               liquid_tokens=$($CHAIN_BINARY q bank balances $vesting_wallet --home $whale_home -o json | jq -r '.balances[] | select(.denom == "cosmosvaloper1r5v5srda7xfth3hn2s26txvrcrntldju7lnwmv/1").amount')
               echo "liquid tokens: $liquid_tokens"
