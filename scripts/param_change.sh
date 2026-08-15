@@ -15,8 +15,8 @@ vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --home $whale_
 txhash=$($vote | jq -r .txhash)
 sleep $(( $COMMIT_TIMEOUT*2 ))
 echo "Vote hash: $txhash"
-echo "> Sleeping for $EXPEDITED_VOTING_PERIOD."
-sleep $EXPEDITED_VOTING_PERIOD
+echo "> Sleeping for $VOTING_PERIOD."
+sleep $VOTING_PERIOD
 sleep $(( $COMMIT_TIMEOUT*2 ))
 echo "> Query proposal."
 $CHAIN_BINARY q gov proposal $proposal_id --home $whale_home -o json | jq '.'
