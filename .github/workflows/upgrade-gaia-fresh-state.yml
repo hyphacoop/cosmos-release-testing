@@ -5699,7 +5699,7 @@
               source scripts/vars_state_sync.sh
               scripts/setup_state_sync.sh
               ./$START_SCRIPT
-              sleep $(($COMMIT_TIMEOUT*2))
+              sleep 1m
               cat statesync.log
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}999 5
 
