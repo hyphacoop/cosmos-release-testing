@@ -77,12 +77,11 @@
           - name: Set binary source
             id: binary
             run: |
-              echo "source=BUILD" >> $GITHUB_OUTPUT
-              # if [[ "${TARGET:0:1}" != "v" ]]; then
-              #   echo "source=BUILD" >> $GITHUB_OUTPUT
-              # else
-              #   echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
-              # fi
+              if [[ "${TARGET:0:1}" != "v" ]]; then
+                echo "source=BUILD" >> $GITHUB_OUTPUT
+              else
+                echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+              fi
               
         outputs:
          start_version: ${{ steps.start.outputs.version }}
@@ -94,7 +93,7 @@
         runs-on: ubuntu-24.04
         needs: set-versions
         strategy:
-          max-parallel: 4
+          max-parallel: 8
           matrix:
             operation: ["no-rotation","down","up","swap-consensus","swap-bonded","double-swap","double-swap-redel","up-double-swap-redel"]
             stop-chain: ["keep-consumer"] #, "stop-consumer"]

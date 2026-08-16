@@ -11,10 +11,16 @@ echo "Proposal hash: $txhash"
 #$CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.'
 proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
-vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $WALLET_1 --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
-txhash=$($vote | jq -r .txhash)
+echo "Voting from all validators..."
+for i in $(seq -w 01 $validator_count); do
+    val_wallet="$moniker_prefix$i"
+    echo "Voting from $val_wallet"
+    vote="$CHAIN_BINARY tx gov vote $proposal_id yes --from $val_wallet --home $whale_home --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json"
+    txhash=$($vote | jq -r .txhash)
+done
+
 sleep $(( $COMMIT_TIMEOUT*2 ))
-echo "Vote hash: $txhash"
+echo "Last vote hash: $txhash"
 echo "> Sleeping for $VOTING_PERIOD."
 sleep $VOTING_PERIOD
 sleep $(( $COMMIT_TIMEOUT*2 ))
