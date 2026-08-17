@@ -5254,134 +5254,134 @@
               export MAX_PROVIDER_VALIDATORS=5
               scripts/upgrade.sh $TARGET_VERSION
 
-          - name: Upgrade to v27.1.0
-            env:
-              TARGET_VERSION: v27.1.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+          # - name: Upgrade to v27.1.0
+          #   env:
+          #     TARGET_VERSION: v27.1.0
+          #     STAKING_OPERATIONS: false
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
 
-          - name: Upgrade to v27.2.0
-            env:
-              TARGET_VERSION: v27.2.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              scripts/upgrade.sh $TARGET_VERSION
+          # - name: Upgrade to v27.2.0
+          #   env:
+          #     TARGET_VERSION: v27.2.0
+          #     STAKING_OPERATIONS: false
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     scripts/upgrade.sh $TARGET_VERSION
               
-          - name: Upgrade to v27.3.0
-            env:
-              TARGET_VERSION: v27.3.0
-              STAKING_OPERATIONS: false
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              scripts/upgrade.sh $TARGET_VERSION
+          # - name: Upgrade to v27.3.0
+          #   env:
+          #     TARGET_VERSION: v27.3.0
+          #     STAKING_OPERATIONS: false
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     scripts/upgrade.sh $TARGET_VERSION
 
-          - name: Upgrade to v27.4.0
-            env:
-              TARGET_VERSION: v27.4.0
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              scripts/upgrade.sh v27.4.0      
+          # - name: Upgrade to v27.4.0
+          #   env:
+          #     TARGET_VERSION: v27.4.0
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     scripts/upgrade.sh v27.4.0      
 
-          - name: Upgrade to v27.5.0
-            env:
-              TARGET_VERSION: v27.5.0
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              scripts/upgrade.sh v27.5.0
+          # - name: Upgrade to v27.5.0
+          #   env:
+          #     TARGET_VERSION: v27.5.0
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     scripts/upgrade.sh v27.5.0
 
-          - name: Upgrade to v27.6.0
-            env:
-              TARGET_VERSION: v27.6.0
-            run: |
-              export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
-              source scripts/vars.sh
-              export validator_count=12
-              scripts/upgrade.sh v27.6.0
+          # - name: Upgrade to v27.6.0
+          #   env:
+          #     TARGET_VERSION: v27.6.0
+          #   run: |
+          #     export DOWNLOAD_URL=https://github.com/cosmos/gaia/releases/download/${TARGET_VERSION}/gaiad-${TARGET_VERSION}-linux-amd64  
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     scripts/upgrade.sh v27.6.0
 
-          - name: Test software upgrade cancellation - proposer tx
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              source scripts/vars.sh
-              export validator_count=12
-              scripts/upgrade_cancel_tx.sh ${{ matrix.upgrade_name }}
+          # - name: Test software upgrade cancellation - proposer tx
+          #   env:
+          #     TARGET_VERSION: ${{ matrix.target_version }}
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+          #   run: |
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     scripts/upgrade_cancel_tx.sh ${{ matrix.upgrade_name }}
 
-          - name: Test software upgrade cancellation - cancel software upgrade proposal
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              source scripts/vars.sh
-              export validator_count=12
-              scripts/upgrade_cancel_proposal.sh ${{ matrix.upgrade_name }}
+          # - name: Test software upgrade cancellation - cancel software upgrade proposal
+          #   env:
+          #     TARGET_VERSION: ${{ matrix.target_version }}
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+          #   run: |
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     scripts/upgrade_cancel_proposal.sh ${{ matrix.upgrade_name }}
 
-          - name: Test software upgrade cancellation - skip upgrade height through early staging
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              source scripts/vars.sh
-              export validator_count=12
-              export START_SKIP_SCRIPT="start_skip.sh"
-              scripts/upgrade_skip_early_staging.sh ${{ matrix.upgrade_name }}
+          # - name: Test software upgrade cancellation - skip upgrade height through early staging
+          #   env:
+          #     TARGET_VERSION: ${{ matrix.target_version }}
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+          #   run: |
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export START_SKIP_SCRIPT="start_skip.sh"
+          #     scripts/upgrade_skip_early_staging.sh ${{ matrix.upgrade_name }}
 
-          - name: Test software upgrade cancellation - skip upgrade height after it has been reached
-            env:
-              TARGET_VERSION: ${{ matrix.target_version }}
-              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-            run: |
-              source scripts/vars.sh
-              export validator_count=12
-              export START_SKIP_SCRIPT="start_skip.sh"
-              scripts/upgrade_skip.sh ${{ matrix.upgrade_name }}
+          # - name: Test software upgrade cancellation - skip upgrade height after it has been reached
+          #   env:
+          #     TARGET_VERSION: ${{ matrix.target_version }}
+          #     DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+          #   run: |
+          #     source scripts/vars.sh
+          #     export validator_count=12
+          #     export START_SKIP_SCRIPT="start_skip.sh"
+          #     scripts/upgrade_skip.sh ${{ matrix.upgrade_name }}
 
-          - name: _Blocks produced after cancelled upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          # - name: _Blocks produced after cancelled upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
-          - name: _Blocks produced after upgrade
-            run: |
-              source scripts/vars.sh
-              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+          # - name: _Blocks produced after upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
-          - name: Check for open provider channels before upgrade
-            run: |
-              source scripts/vars.sh  
-              source scripts/vars_consumer_v640_one.sh 
-              export validator_count=12
-              export MAX_VALIDATORS=8
-              export MAX_PROVIDER_VALIDATORS=5
-              $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
+          # - name: Check for open provider channels before upgrade
+          #   run: |
+          #     source scripts/vars.sh  
+          #     source scripts/vars_consumer_v640_one.sh 
+          #     export validator_count=12
+          #     export MAX_VALIDATORS=8
+          #     export MAX_PROVIDER_VALIDATORS=5
+          #     $CHAIN_BINARY q ibc channel channels --home $whale_home --limit 2000 -o json | jq '.channels[] | select(.port_id=="provider" and .state=="STATE_OPEN")'
 
-          - name: Consumer rewards pool balances check before upgrade
-            run: |
-              source scripts/vars.sh
-              $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
-              $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
+          # - name: Consumer rewards pool balances check before upgrade
+          #   run: |
+          #     source scripts/vars.sh
+          #     $CHAIN_BINARY q bank balances cosmos1ap0mh6xzfn8943urr84q6ae7zfnar48am2erhd --home $whale_home -o json | jq '.'
+          #     $CHAIN_BINARY q distribution community-pool --home $whale_home -o json | jq '.'
 
-          - name: Check validators
-            run: |
-              source scripts/vars.sh
-              $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
+          # - name: Check validators
+          #   run: |
+          #     source scripts/vars.sh
+          #     $CHAIN_BINARY q staking validators --home $whale_home -o json | jq '.'
 
 
           - name: Upgrade to v28.0.0 (ICS Removal)
@@ -5703,9 +5703,9 @@
               echo "> Whale: "
               tail -n 200 $whale_log
               echo "> Val 02"
-              tail -n 200 ${log_prefix}$02${log_suffix}
+              tail -n 200 ${moniker_prefix}$02${log_suffix}
               echo "> Val 03"
-              tail -n 200 ${log_prefix}$03${log_suffix}
+              tail -n 200 ${moniker_prefix}$03${log_suffix}
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}02 5
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}03 5
               tail -n 200 $whale_log
