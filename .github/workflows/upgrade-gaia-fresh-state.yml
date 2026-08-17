@@ -5696,8 +5696,9 @@
               export validator_count=12
               echo "> Before:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
-              jq '.messages[0].params.min_commission_rate="0.000000000000000000"' templates/proposal-staking-params.json > staking-params.json
-              scripts/param_change.sh staking-params.json
+              # jq '.messages[0].params.min_commission_rate="0.000000000000000000"' templates/proposal-staking-params.json > staking-params.json
+              # scripts/param_change.sh staking-params.json
+              scripts/param_change.sh templates/proposal-staking-params.json
               echo "> After:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
               sleep 30s
