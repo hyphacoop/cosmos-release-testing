@@ -5690,6 +5690,7 @@
               source scripts/vars.sh
               scripts/param_change.sh templates/proposal-staking-params.json
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
+              tail -n 200 $whale_log
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
               tail -n 200 $whale_log
 
