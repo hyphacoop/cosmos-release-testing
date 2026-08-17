@@ -85,11 +85,10 @@ proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --fr
 echo "Submitting the upgrade proposal."
 echo $proposal
 txhash=$($proposal | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT*2))
 
-# Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
-proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+tx_result=$(scripts/wait_for_tx.sh $txhash $whale_home) || exit 1
+proposal_id=$(echo "$tx_result" | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 
 echo "Proposal ID: $proposal_id"
 
