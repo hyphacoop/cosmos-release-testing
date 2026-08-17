@@ -5556,7 +5556,7 @@
             run: |
               source scripts/vars.sh
               source scripts/vars_consumer_v701_one.sh
-              export validator_count=5
+              export validator_count=12
               tests/test_consumer_downtime_disabled.sh
 
           - name: _IBC transfer successful> ICS v7.0.1 chain 1
@@ -5599,6 +5599,7 @@
           - name: _Test validator jailing and slashing
             run: |
               source scripts/vars.sh
+              export validator_count=12
               tests/test_downtime.sh
 
           - name: Restart relayer
@@ -5688,6 +5689,7 @@
           - name: Set staking params to bump max validators to 200
             run: |
               source scripts/vars.sh
+              export validator_count=12
               scripts/param_change.sh templates/proposal-staking-params.json
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
               sleep 30s
