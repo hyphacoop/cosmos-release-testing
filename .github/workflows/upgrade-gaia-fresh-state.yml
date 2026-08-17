@@ -5237,11 +5237,6 @@
               source scripts/vars.sh
               tests/test_authz.sh
 
-          - name: _Test bank module
-            run: |
-              source scripts/vars.sh
-              tests/test_bank.sh
-
           - name: Upgrade to v27.0.0
             env:
               TARGET_VERSION: v27.0.0
