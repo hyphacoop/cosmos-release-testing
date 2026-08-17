@@ -4991,82 +4991,82 @@
           #     echo "> Exporting tx hash to GH environment variable"
           #     echo "PARAMS_PROPOSAL_TX_HASH=$txhash" >> $GITHUB_ENV
 
-          # - name: Start pfm1 chain
-          #   run: |
-          #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-          #     source scripts/vars_pfm_1.sh
-          #     scripts/setup.sh
-          #     ./$START_SCRIPT
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          #     tail -n 100 $whale_log
-          #     scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start pfm1 chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_pfm_1.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-          # - name: Start pfm2 chain
-          #   run: |
-          #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-          #     source scripts/vars_pfm_2.sh
-          #     scripts/setup.sh
-          #     ./$START_SCRIPT
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          #     tail -n 100 $whale_log
-          #     scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start pfm2 chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_pfm_2.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-          # - name: Start pfm3 chain
-          #   run: |
-          #     export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-          #     source scripts/vars_pfm_3.sh
-          #     scripts/setup.sh
-          #     ./$START_SCRIPT
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          #     tail -n 100 $whale_log
-          #     scripts/wait_for_block.sh $whale_rpc 3
+          - name: Start pfm3 chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_pfm_3.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
 
-          # - name: Create transfer channels for PFM test
-          #   run: |
-          #     tmux send-keys -t relayer C-c
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          #     source scripts/vars.sh
-          #     if [ $RELAYER == "hermes" ]; then
-          #       echo "Creating channels with Hermes..."
-          #       hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
-          #       hermes create channel --new-client-connection --a-chain pfm1 --b-chain pfm2 --a-port transfer --b-port transfer --yes
-          #       hermes create channel --new-client-connection --a-chain pfm2 --b-chain pfm3 --a-port transfer --b-port transfer --yes
-          #     elif [ $RELAYER == "rly" ]; then
-          #       echo "Creating channel with Go relayer..."
-          #       echo "Paths"
-          #       rly paths new testnet pfm1 pfm-path-1
-          #       rly paths new pfm1 pfm2 pfm-path-2
-          #       rly paths new pfm2 pfm3 pfm-path-3
-          #       echo "Clients"
-          #       rly transact client testnet pfm1 pfm-path-1
-          #       rly transact client pfm1 pfm2 pfm-path-2
-          #       rly transact client pfm2 pfm3 pfm-path-3
-          #       sleep $(($COMMIT_TIMEOUT*2))
-          #       echo "Connections"
-          #       rly transact connection pfm-path-1
-          #       rly transact connection pfm-path-2
-          #       rly transact connection pfm-path-3
-          #       sleep $(($COMMIT_TIMEOUT*2))
-          #       echo "Channels"
-          #       rly transact channel pfm-path-1
-          #       rly transact channel pfm-path-2
-          #       rly transact channel pfm-path-3
-          #     fi
-          #     scripts/start_relayer.sh
+          - name: Create transfer channels for PFM test
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              source scripts/vars.sh
+              if [ $RELAYER == "hermes" ]; then
+                echo "Creating channels with Hermes..."
+                hermes create channel --new-client-connection --a-chain $CHAIN_ID --b-chain pfm1 --a-port transfer --b-port transfer --yes
+                hermes create channel --new-client-connection --a-chain pfm1 --b-chain pfm2 --a-port transfer --b-port transfer --yes
+                hermes create channel --new-client-connection --a-chain pfm2 --b-chain pfm3 --a-port transfer --b-port transfer --yes
+              elif [ $RELAYER == "rly" ]; then
+                echo "Creating channel with Go relayer..."
+                echo "Paths"
+                rly paths new testnet pfm1 pfm-path-1
+                rly paths new pfm1 pfm2 pfm-path-2
+                rly paths new pfm2 pfm3 pfm-path-3
+                echo "Clients"
+                rly transact client testnet pfm1 pfm-path-1
+                rly transact client pfm1 pfm2 pfm-path-2
+                rly transact client pfm2 pfm3 pfm-path-3
+                sleep $(($COMMIT_TIMEOUT*2))
+                echo "Connections"
+                rly transact connection pfm-path-1
+                rly transact connection pfm-path-2
+                rly transact connection pfm-path-3
+                sleep $(($COMMIT_TIMEOUT*2))
+                echo "Channels"
+                rly transact channel pfm-path-1
+                rly transact channel pfm-path-2
+                rly transact channel pfm-path-3
+              fi
+              scripts/start_relayer.sh
 
-          # - name: Restart relayer
-          #   run: |
-          #     tmux send-keys -t relayer C-c
-          #     sleep $(($COMMIT_TIMEOUT*2))
-          #     scripts/start_relayer.sh
+          - name: Restart relayer
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              scripts/start_relayer.sh
 
-          # - name: Store channel IDs for PFM test
-          #   run: |
-          #     scripts/store_pfm_channel_ids.sh
+          - name: Store channel IDs for PFM test
+            run: |
+              scripts/store_pfm_channel_ids.sh
 
-          # - name: _Test PFM transfers
-          #   run: |
-          #     tests/test_pfm_transfers.sh
+          - name: _Test PFM transfers
+            run: |
+              tests/test_pfm_transfers.sh
 
           # - name: Set up happy path liquid accounts
           #   run: |
