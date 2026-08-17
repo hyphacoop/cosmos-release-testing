@@ -5696,16 +5696,19 @@
               export validator_count=12
               echo "> Before:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
-              scripts/param_change.sh templates/proposal-staking-params.json
+              jq '.messages[0].params.min_commission_rate="0.000000000000000000"' templates/proposal-staking-params.json > staking-params.json
+              scripts/param_change.sh staking-params.json
               echo "> After:"
               $CHAIN_BINARY q staking params --home $whale_home -o json | jq '.'
               sleep 30s
               echo "> Whale: "
               tail -n 200 $whale_log
-              echo "> Val 02"
-              tail -n 200 ${moniker_prefix}$02${log_suffix}
-              echo "> Val 03"
-              tail -n 200 ${moniker_prefix}$03${log_suffix}
+              echo "> Val 02:"
+              tail -n 200 ${moniker_prefix}02${log_suffix}
+              echo "> Val 03:"
+              tail -n 200 ${moniker_prefix}03${log_suffix}
+              echo "> Val 12:"
+              tail -n 200 ${moniker_prefix}12${log_suffix}
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}02 5
               tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}03 5
               tail -n 200 $whale_log
