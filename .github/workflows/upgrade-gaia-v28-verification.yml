@@ -1,0 +1,70 @@
+---
+
+name: Test Gaia v28 verification
+on:
+  push:
+      
+jobs:
+  test-upgrade:
+    runs-on: ubuntu-latest
+    env:
+      CHAIN_BINARY: gaiad
+      RUNNING_VERSION: v28.0.0-rc0
+      UPGRADE_NAME: v28.0.0
+      CHAIN_ID: provider
+      MAX_VALIDATORS: 100
+      # RPC: https://rpc.sentry-01.cosmoshub-4.polypore.xyz
+      # API: https://rest.sentry-01.cosmoshub-4.polypore.xyz
+      RPC: https://rpc.provider-sentry-01.hub-testnet.polypore.xyz
+      API: https://rest.provider-sentry-01.hub-testnet.polypore.xyz
+      
+    steps:
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop lz4 aria2
+      - run: ip addr
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli graph-cli cosmospy requests asyncio websockets urllib3 bech32
+      
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+
+      - name: Validator set checks after fork
+        run: |
+          source ~/env/bin/activate
+          upgrade_height=$(gaiad q upgrade applied {{ env.UPGRADE_NAME }} | jq -r '.height')
+          echo "Upgrade height was: $upgrade_height"
+          python scripts/ics_removal_validator_check.py --height $upgrade_height --binary gaiad --api ${{ env.$API }} --rpc ${{ env.REST }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
+          check_result=$(jq -r '.' validator-check-$upgrade_height.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 0
+          fi

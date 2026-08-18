@@ -36,7 +36,7 @@ import logging
 import requests
 import copy
 import urllib
-from bech32 import bech32_decode, bech32_encode
+from bech32 import bech32_decode, bech32_encode, convertbits
 
 
 logging.basicConfig(
@@ -65,6 +65,14 @@ def api_get_provider_params(urlAPI: str, height: int = 0):
 def operator_to_delegator(operator_addr: str) -> str:
     _, data = bech32_decode(operator_addr)
     return bech32_encode("cosmos", data)
+
+def get_operator_address_bytes(operator_addr: str) -> bytes:
+    """Decode bech32 operator address to raw bytes for tie-breaking sort."""
+    _, data = bech32_decode(operator_addr)
+    if data is None:
+        return b''
+    raw = convertbits(data, 5, 8, False)
+    return bytes(raw) if raw else b''
 
 def api_get_self_delegation(urlAPI: str, operator_addr: str, height: int = 0):
     delegator_addr = operator_to_delegator(operator_addr)
@@ -310,8 +318,13 @@ class ValsetInfo():
                 continue
             v['tokens_vp_fraction'] = int(v['tokens']/1000000)/int(total_active_bonded_tokens/1000000) # Must clip 1E6 decimals to avoid issues when comparing to comet vp fraction, which calculates with clipped amounts
 
-        # Sort validator_info by tokens descending
-        validator_info.sort(key=lambda v: v['tokens'], reverse=True)
+        # Sort validator_info by voting power (truncated consensus power) descending, breaking ties by
+        # operator address bytes ascending. Must sort by truncated voting power, not raw tokens, to
+        # match the chain's actual power-index ordering (same reasoning as in
+        # calculate_expected_validator_data) -- otherwise anything relying on this list's order, like
+        # the n-2 comet-set cutoff in calculate_expected_comet_validator_sets, can disagree with the
+        # real chain whenever two validators tie on truncated power but differ in raw tokens.
+        validator_info.sort(key=lambda v: (-(v['tokens']//1000000), get_operator_address_bytes(v['operator_address'])))
 
         # Stage data for saving
         self.data['validator_info'] = validator_info
@@ -534,45 +547,41 @@ class ValsetCheck():
 
     def apply_expected_bonded_status(self):
         """
-        Apply the expected bonded status based on the reordering of the validators due to token changes.
+        Apply the expected bonded status based on the reordering of the validators due to token changes,
+        AND due to the max_validators threshold itself changing between n-1 and n (e.g. a governance param
+        change), independent of whether this particular validator's own rank or voting power moved.
         """
         for validator in self.data['n']['expected_validator_info']:
 
-            # # Get comet rank for validator in n-1
-            # for old_val in self.data['n-1']['validator_info']:
-            #     if old_val['operator_address'] == validator['operator_address']:
-            #         old_rank = old_val.get('comet_rank', None)
-            # #         break
-            
             if validator['jailed']:
                 logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it is jailed in block n with {validator["tokens"]} tokens')
                 continue
-            
+
             if validator['tokens'] == 0:
                 logging.info(f'Skipping validator {validator["moniker"]} in bonded status check because it has 0 tokens in block n')
                 continue
 
             validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
-            
-            if not self.data['n']['rank_change_validators'][validator['operator_address']]['rank_change'] and (self.data['n']['rank_change_validators'][validator['operator_address']]['starting_vp'] == self.data['n']['rank_change_validators'][validator['operator_address']]['ending_vp']):
-                logging.info(f'Validator {validator["moniker"]} with {validator["tokens"]} tokens and comet rank {validator["comet_rank"]} did not change rank.')               
-            else:
-                validator['comet_rank'] = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_rank']
-                # 1. Is it within the max_validators threshold?
-                if validator['comet_rank'] <= self.data['n']['staking_validators']:
-                    if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING':
-                        validator['bonded'] = 'BOND_STATUS_BONDED'
-                # 2. Is if outside the max_validators threshold?
-                if validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
-                    validator['bonded'] = 'BOND_STATUS_UNBONDING'
+            ending_vp = self.data['n']['rank_change_validators'][validator['operator_address']]['ending_vp']
 
-            if self.ics_disable_upgrade:
-                if validator['comet_rank'] <= self.data['n']['staking_validators']:
-                    if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING':
-                        validator['bonded'] = 'BOND_STATUS_BONDED'
-                elif validator['comet_rank'] > self.data['n']['staking_validators'] and validator['bonded'] == 'BOND_STATUS_BONDED':
-                    validator['bonded'] = 'BOND_STATUS_UNBONDING'
-            logging.info(f"Validator {validator['moniker']} is expected to have status {validator['bonded']} tokens after applying operations because it is ranked {validator['comet_rank']}")
+            # Always re-check against the current max_validators threshold. Even if this validator's
+            # own rank/voting power didn't change, the threshold itself may have moved at block n (a
+            # param change is not tied to any individual validator's delegations), which can bond or
+            # unbond validators with no transaction of their own. This must not be conditional on
+            # whether the rank changed, or on the --ics-removal-upgrade flag: a plain max_validators
+            # param change has the same effect as the ICS removal upgrade shrinking the active set.
+            #
+            # A validator can only be promoted to bonded if it also has nonzero voting power
+            # (truncated consensus power >= 1): the chain never bonds a validator with 0 power
+            # regardless of how much headroom is left under max_validators, since a 0-power
+            # validator can't be represented in the CometBFT validator set.
+            if validator['comet_rank'] <= self.data['n']['staking_validators'] and ending_vp > 0:
+                if validator['bonded'] == 'BOND_STATUS_UNBONDED' or validator['bonded'] == 'BOND_STATUS_UNBONDING':
+                    validator['bonded'] = 'BOND_STATUS_BONDED'
+            elif (validator['comet_rank'] > self.data['n']['staking_validators'] or ending_vp == 0) and validator['bonded'] == 'BOND_STATUS_BONDED':
+                validator['bonded'] = 'BOND_STATUS_UNBONDING'
+
+            logging.info(f"Validator {validator['moniker']} is expected to have status {validator['bonded']} because it is ranked {validator['comet_rank']} against a max_validators threshold of {self.data['n']['staking_validators']}")
 
 
     def calculate_expected_total_bonded_tokens(self):
@@ -604,8 +613,13 @@ class ValsetCheck():
                 'starting_tokens': val['tokens'],
                 'rank_change': False
             }
-        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting tokens
-        sorted_validators = sorted(rank_comparison.items(), key=lambda x: x[1]['starting_tokens'], reverse=True)
+        # Assign a "starting_rank" field to each validator in rank_comparison based on their starting
+        # voting power (consensus power, i.e. tokens truncated to whole ATOM), breaking ties by
+        # operator address bytes ascending. This must rank by voting power, not raw tokens: the chain's
+        # power index ranks by truncated consensus power, so two validators with different raw token
+        # counts that truncate to the same power are tied on-chain and ordered by address bytes.
+        # Sorting by raw tokens instead would disagree with the chain on that tie-break.
+        sorted_validators = sorted(rank_comparison.items(), key=lambda x: (-x[1]['starting_vp'], get_operator_address_bytes(x[0])))
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['starting_rank'] = rank
         
@@ -636,7 +650,9 @@ class ValsetCheck():
         
         # Re-check token eligibility after operations (exclude validators that dropped to 0)
         eligible_after_ops = {addr: val for addr, val in rank_comparison.items() if val['ending_tokens'] > 0}
-        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: x[1]['ending_tokens'], reverse=True)
+        # Same as above: rank by ending voting power (truncated consensus power), not raw ending
+        # tokens, so ties at the max_validators boundary resolve the same way the chain resolves them.
+        sorted_validators = sorted(eligible_after_ops.items(), key=lambda x: (-x[1]['ending_vp'], get_operator_address_bytes(x[0])))
         for rank, (operator_address, val) in enumerate(sorted_validators, start=1):
             rank_comparison[operator_address]['ending_rank'] = rank
         # Check which validators are expected to be bonded or unbonded based on their new rank in the validator set (preop vs expected validator info)
@@ -739,11 +755,11 @@ class ValsetCheck():
         Checks if the the max_validators staking param at the ending height matches
         the max_provider_consensus_validators param at the starting height.
         """
-        if self.data['n']['staking_validators'] is None:
-            logging.error("Cannot perform ICS param check because max_validators param could not be fetched at the upgrade height")
+        if self.data['n+1']['staking_validators'] is None:
+            logging.error("Cannot perform ICS param check because max_validators param could not be fetched at the ending height")
             self.data['checks']['ics_param_check'] = 'FAIL'
             return
-        if self.provider_max_vals != self.data['n']['staking_validators']:
+        if self.provider_max_vals != self.data['n+1']['staking_validators']:
             self.data['checks']['ics_param_check'] = 'FAIL'
             logging.error(f"> ICS param check failed: max_provider_consensus_validators at block n is {self.provider_max_vals} but max_validators at block n+1 is {self.data['n+1']['staking_validators']}")
             exit()
@@ -812,13 +828,18 @@ class ValsetCheck():
 
     def comet_size_bonded_validators_check(self):
         """
+        [n+1]
         If ICS is disabled:
-        Checks that the comet validator set size matches the number of validators with `BOND_STATUS_BONDED` status.
+        Checks that the comet validator set size matches the number of validators with `BOND_STATUS_BONDED` status,
+        at the ending height (n+1). This invariant -- comet size == bonded count -- only holds once the local
+        max_validators param has actually taken over as the sole cap; at the starting height (n), ICS's own
+        max_provider_consensus_validators cap can still constrain the comet set to fewer validators than are
+        legitimately bonded under the (larger, pre-migration) max_validators value, which is not a bug.
         """
-        comet_size = len(self.data['n']['comet_validator_set'])
+        comet_size = len(self.data['n+1']['comet_validator_set'])
         if self.ics_disable_upgrade:
             bonded_validators = 0
-            for val in self.data['n']['validator_info']:
+            for val in self.data['n+1']['validator_info']:
                 if val['bonded'] == 'BOND_STATUS_BONDED':
                     bonded_validators += 1
             if comet_size != bonded_validators:
