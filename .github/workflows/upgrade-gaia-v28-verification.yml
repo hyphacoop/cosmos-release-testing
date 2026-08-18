@@ -58,7 +58,7 @@ jobs:
           source ~/env/bin/activate
           upgrade_height=$(gaiad q upgrade applied {{ env.UPGRADE_NAME }} | jq -r '.height')
           echo "Upgrade height was: $upgrade_height"
-          python scripts/ics_removal_validator_check.py --height $upgrade_height --binary gaiad --api ${{ env.$API }} --rpc ${{ env.REST }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
+          python scripts/ics_removal_validator_check.py --height $upgrade_height --binary gaiad --api ${{ env.API }} --rpc ${{ env.REST }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
           check_result=$(jq -r '.' validator-check-$upgrade_height.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
