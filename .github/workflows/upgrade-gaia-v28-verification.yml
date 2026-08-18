@@ -53,10 +53,10 @@ jobs:
           sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
 
-      - name: Validator set checks after fork
+      - name: Validator set check
         run: |
           source ~/env/bin/activate
-          upgrade_height=$(gaiad q upgrade applied {{ env.UPGRADE_NAME }} | jq -r '.height')
+          upgrade_height=$(gaiad q upgrade applied ${{ env.UPGRADE_NAME }} | jq -r '.height')
           echo "Upgrade height was: $upgrade_height"
           python scripts/ics_removal_validator_check.py --height $upgrade_height --binary gaiad --api ${{ env.API }} --rpc ${{ env.REST }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
           check_result=$(jq -r '.' validator-check-$upgrade_height.json | grep FAIL || true)
