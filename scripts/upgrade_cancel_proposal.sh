@@ -82,11 +82,11 @@ proposal="$CHAIN_BINARY --output json tx gov submit-proposal upgrade-4.json --fr
 echo "Submitting the upgrade proposal."
 echo $proposal
 txhash=$($proposal | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
 
 # Get proposal ID from txhash
 echo "Getting proposal ID from txhash..."
-proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+tx_result=$(scripts/wait_for_tx.sh $txhash $whale_home) || exit 1
+proposal_id=$(echo "$tx_result" | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "Proposal ID: $proposal_id"
 
 # Vote yes on the proposal
@@ -109,9 +109,9 @@ echo "> Submitting the cancel-software-proposal proposal while the upgrade propo
 cancel_proposal="$CHAIN_BINARY --output json tx gov submit-proposal cancel-upgrade.json --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home -o json"
 echo $cancel_proposal
 txhash=$($cancel_proposal | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
 echo "Getting cancel proposal ID from txhash..."
-cancel_proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
+tx_result=$(scripts/wait_for_tx.sh $txhash $whale_home) || exit 1
+cancel_proposal_id=$(echo "$tx_result" | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
 echo "Cancel Proposal ID: $cancel_proposal_id"
 
 # Vote yes on the cancel proposal

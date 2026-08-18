@@ -55,7 +55,7 @@ rm $RESET_SCRIPT ; touch $RESET_SCRIPT ; chmod +x $RESET_SCRIPT ; echo "#!/bin/b
 
 
 echo "echo \"Starting state sync node... \"" >> $START_SCRIPT
-echo "tmux new-session -d -s statesync \"$CHAIN_BINARY start --home $node_home 2>&1 | tee ${logs[i]}\"" >> $START_SCRIPT
+echo "tmux new-session -d -s statesync \"$CHAIN_BINARY start --home $node_home 2>&1 | tee statesync.log\"" >> $START_SCRIPT
 echo "sleep 0.2s" >> $START_SCRIPT
 echo "sleep 3s" >> $START_SCRIPT
 echo "echo \"tmux sessions:\"" >> $STOP_SCRIPT

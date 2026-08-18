@@ -3,12 +3,14 @@
 # It assumes gaia is running on the local host.
 
 upgrade_name=$1
-export GAS_ADJUSTMENT=5
 
+monikers=()
 homes=()
 logs=()
 for i in $(seq -w 01 $validator_count)
 do
+    moniker=$moniker_prefix$i
+    monikers+=($moniker)
     home=$home_prefix$i
     homes+=($home)
     log=$moniker_prefix$i$log_suffix
@@ -100,7 +102,8 @@ for i in $(seq -w 01 $validator_count); do
     echo $vote
     txhash=$($vote | jq -r .txhash)
 done
-scripts/wait_for_tx.sh $txhash $whale_home || exit 1
+sleep $(($COMMIT_TIMEOUT*2))
+$CHAIN_BINARY q tx $txhash --home $whale_home
 
 if [ "$STAKING_OPERATIONS" = true ]; then
 
@@ -195,7 +198,22 @@ else
         mv ./upgraded $CHAIN_BINARY
     fi
     ls -la
-    ./$START_SCRIPT
+    # ./$START_SCRIPT
+
+    echo "> Starting validators from 2 to $validator_count with the new binary"
+    for i in $(seq 1 $[$validator_count-1]); do
+        echo "Starting validator at index $i with the new binary"
+        idx=$i
+        tmux new-session -d -s "${monikers[$idx]}" "$CHAIN_BINARY start --home ${homes[$idx]} 2>&1 | tee ${logs[$idx]}"
+    done
+    sleep 10s
+    echo "> Val 2 log:"
+    tail -n 200 ${logs[2]}
+    echo "> Submitting a staking transaction"
+    $CHAIN_BINARY tx staking unbond $VALOPER_1 10000000$DENOM --from $WALLET_1 --keyring-backend test --chain-id $CHAIN_ID --gas $GAS --gas-prices $GAS_PRICE --gas-adjustment $GAS_ADJUSTMENT -y --home $whale_home --node http://localhost:${rpc_prefix}02 -o json
+    echo "> Starting whale validator with the new binary"
+    tmux new-session -d -s "${monikers[0]}" "$CHAIN_BINARY start --home $whale_home 2>&1 | tee $whale_log"
+
 fi
 
 sleep 10

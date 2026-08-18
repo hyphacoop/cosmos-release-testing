@@ -24,3 +24,4 @@ export consumer_log_prefix="con64log_"
 
 export consumer_whale_home=${consumer_home_prefix}01
 export consumer_whale_rpc=${consumer_rpc_prefix}01
+export consumer_whale_log="${consumer_log_prefix}01"
