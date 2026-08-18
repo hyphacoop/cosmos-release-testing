@@ -12,7 +12,7 @@ jobs:
       RUNNING_VERSION: v28.0.0-rc0
       UPGRADE_NAME: v28.0.0
       CHAIN_ID: provider
-      MAX_VALIDATORS: 100
+      MAX_VALIDATORS: 180
       # RPC: https://rpc.sentry-01.cosmoshub-4.polypore.xyz
       # API: https://rest.sentry-01.cosmoshub-4.polypore.xyz
       RPC: https://rpc.provider-sentry-01.hub-testnet.polypore.xyz
