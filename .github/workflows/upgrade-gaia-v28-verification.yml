@@ -56,6 +56,7 @@ jobs:
       - name: Validator set check
         run: |
           source ~/env/bin/activate
+          gaiad --node ${{ env.RPC }} q upgrade applied ${{ env.UPGRADE_NAME }}
           upgrade_height=$(gaiad --node ${{ env.RPC }} q upgrade applied ${{ env.UPGRADE_NAME }} | jq -r '.height')
           echo "Upgrade height was: $upgrade_height"
           python scripts/ics_removal_validator_check.py --height $upgrade_height --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
