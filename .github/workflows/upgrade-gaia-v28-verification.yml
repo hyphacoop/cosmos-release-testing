@@ -67,5 +67,5 @@ jobs:
           else
             echo "> FAIL: Validator set check failed"
             jq -r '.' validator-check-$upgrade_height.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
-            exit 0
+            exit 1
           fi
