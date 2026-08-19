@@ -55,6 +55,7 @@ jobs:
 
       - name: Validator set check
         run: |
+          set -e
           source ~/env/bin/activate
           upgrade_height=$(gaiad --node ${{ env.RPC }} q upgrade applied ${{ env.UPGRADE_NAME }} -o json | jq -r '.height')
           echo "Upgrade height was: $upgrade_height"
