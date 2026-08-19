@@ -38,12 +38,12 @@ export p2p_prefix="560"
 export rpc_prefix="570"
 export grpc_prefix="580"
 export pprof_prefix="590"
-export log_prefix="logpfm3_"
+export log_suffix=".log"
 
 export whale_home=${home_prefix}$COUNT_WIDTH
 export whale_api=${api_prefix}$COUNT_WIDTH
 export whale_rpc=${rpc_prefix}$COUNT_WIDTH
-export whale_log=${log_prefix}$COUNT_WIDTH
+export whale_log="${moniker_prefix}$COUNT_WIDTH$log_suffix"
 
 export START_SCRIPT="start-pfm3.sh"
 export STOP_SCRIPT="stop-pfm3.sh"

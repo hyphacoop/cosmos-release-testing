@@ -1,6 +1,10 @@
 #!/bin/bash
 
+echo "> Initialize fork home at $FORK_HOME"
 $CHAIN_BINARY init fork-home --chain-id testnet --home $FORK_HOME
+echo "> Contents of fork home:"
+ls $FORK_HOME
+echo "> Updating config"
 toml set --toml-path $FORK_HOME/config/client.toml keyring-backend test
 toml set --toml-path $FORK_HOME/config/app.toml minimum-gas-prices $GAS_PRICE
 toml set --toml-path $FORK_HOME/config/app.toml api.enable true
@@ -36,11 +40,8 @@ echo "> Add new validator to keyring"
 FORK_MNEMONIC="abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon cabbage abandon garage"
 $FORK_BINARY keys add fork-val --keyring-backend test --home $FORK_HOME --recover --output json <<< "$FORK_MNEMONIC" > /dev/null
 
-# echo "> Rolling back chain to ensure a clean state."
-# $CHAIN_BINARY rollback --hard --home $FORK_HOME
 echo "> Resetting validator state."
-# jq '.' $FORK_HOME/data/priv_validator_state.json
-# Set height, round, and step to 0 to ensure a clean state for voting on the upgrade proposal
+# Set height, round, and step to 0 to ensure a clean state when the fork starts
 jq '.height="0" | .round=0 | .step=0' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
 jq 'del(.signature) | del(.signbytes)' $FORK_HOME/data/priv_validator_state.json > $FORK_HOME/data/priv_validator_state.json.tmp && mv $FORK_HOME/data/priv_validator_state.json.tmp $FORK_HOME/data/priv_validator_state.json
 jq '.' $FORK_HOME/data/priv_validator_state.json

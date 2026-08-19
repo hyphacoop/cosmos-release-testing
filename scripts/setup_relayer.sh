@@ -12,6 +12,7 @@ if [ $RELAYER == "hermes" ]; then
 
     echo "> Downloading Hermes"
     wget -q https://github.com/informalsystems/hermes/releases/download/$HERMES_VERSION/hermes-$HERMES_VERSION-x86_64-unknown-linux-gnu.tar.gz -O hermes-$HERMES_VERSION.tar.gz
+    ls hermes*
     tar -xzvf hermes-$HERMES_VERSION.tar.gz
     mkdir -p ~/.hermes
     ./hermes version

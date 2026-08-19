@@ -26,30 +26,50 @@ do
     grpc_ports+=($grpc_port)
     pprof_port=$pprof_prefix$i
     pprof_ports+=($pprof_port)
-    log=$log_prefix$i
+    log=$moniker$log_suffix
     logs+=($log)
 done
 
-echo "> Moniker: ${monikers[2]}"
-wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[2]}" '.[] | select(.name==$name).address')
-echo "> Wallet: $wallet"
-bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
-echo "> Bytes: $bytes"
-valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
+echo "> Finding first validator with BONDED status."
+moniker=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r '[.validators[] | select(.status=="BOND_STATUS_BONDED" and .description.moniker != "val_01")][0].description.moniker')
+echo "> Moniker: $moniker"
+valoper=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg moniker "$moniker" '.validators[] | select(.description.moniker==$moniker).operator_address')
 echo "> Valoper: $valoper"
+bytes=$($CHAIN_BINARY keys parse $valoper --output json --home $whale_home | jq -r '.bytes')
+echo "> Bytes: $bytes"
+wallet=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[0]')
+echo "> Wallet: $wallet"
+
+node_home="/home/runner/.$moniker"
+echo "> Node home: $node_home"
+log_file="$moniker$log_suffix"
+echo "> Log file: $log_file"
+
+# echo "> Moniker: ${monikers[1]}"
+# wallet=$($CHAIN_BINARY keys list --output json --home $whale_home | jq -r --arg name "${monikers[2]}" '.[] | select(.name==$name).address')
+# echo "> Wallet: $wallet"
+# bytes=$($CHAIN_BINARY keys parse $wallet --output json --home $whale_home | jq -r '.bytes')
+# echo "> Bytes: $bytes"
+# valoper=$($CHAIN_BINARY keys parse $bytes --output json --home $whale_home | jq -r '.formats[2]')
+# echo "> Valoper: $valoper"
 
 echo "> Slashing parameters:"
 $CHAIN_BINARY q slashing params --home $whale_home -o json | jq '.'
 
+echo "> Collecting pre-slashing tokens."
+tokens_start=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.tokens')
+echo "> Tokens: $tokens_start"
+
 # Jailing
 echo "> Stopping the last validator's node."
-session=${monikers[2]}
+session=$moniker
 echo "> Session: $session"
 tmux send-keys -t $session C-c
 sleep $((COMMIT_TIMEOUT*3))
-tail ${logs[2]} -n 100
+tail $log_file -n 100
 echo "> Waiting for the downtime infraction."
 sleep $(($COMMIT_TIMEOUT*$DOWNTIME_WINDOW))
+sleep $((COMMIT_TIMEOUT*3))
 
 echo "> Valset:"
 $CHAIN_BINARY q comet-validator-set --home $whale_home -o json | jq '.'
@@ -74,19 +94,54 @@ else
     exit 1
 fi
 
+echo "> Collecting post-slashing tokens."
+tokens_end=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.tokens')
+echo "> Tokens: $tokens_end"
+
+# Calculate slashed tokens
+tokens_slashed=$(echo "$tokens_start - $tokens_end" | bc)
+echo "> Tokens slashed: $tokens_slashed"
+
 # Unjailing
 
 echo "> Starting the last validator's node again."
-tmux new-session -d -s $session "$CHAIN_BINARY start --home ${homes[2]} 2>&1 | tee ${logs[2]}"
+tmux new-session -d -s $session "$CHAIN_BINARY start --home $node_home 2>&1 | tee $log_file"
 echo "> Waiting for the downtime infraction to expire."
 sleep $DOWNTIME_JAIL_DURATION
-tail ${logs[2]} -n 100
+tail $log_file -n 100
 echo "> Submitting unjail transaction."
-$CHAIN_BINARY tx slashing unjail --from ${monikers[2]} --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+txhash=$($CHAIN_BINARY tx slashing unjail --from $wallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y -o json | jq -r .txhash)
 sleep $(($COMMIT_TIMEOUT*2))
-echo "> Wait for another downtime infraction."
-sleep $(($COMMIT_TIMEOUT*5))
-status=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).status')
+echo "> Checking unjail transaction."
+$CHAIN_BINARY q tx $txhash --home $whale_home
+echo "> Waiting for the validator to be unjailed."
+sleep $(($COMMIT_TIMEOUT*3))
+$CHAIN_BINARY q staking validator $valoper --home $whale_home
+jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
+if [[ "$jailed" == "true" ]]; then
+    echo "> FAIL: Validator is jailed."
+    exit 1
+else
+    echo "> PASS: Validator is not jailed."
+fi
+
+echo "> Restoring slashed tokens"
+$CHAIN_BINARY tx staking delegate $valoper $tokens_slashed$DENOM --from $wallet --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE --home $whale_home -y
+sleep $(($COMMIT_TIMEOUT*2))
+
+echo "> Collecting post-restore tokens."
+tokens_end=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.tokens')
+echo "> Tokens: $tokens_end"
+
+# Verify that post-restore amount is equal to pre-slashing amount
+if [[ "$tokens_start" == "$tokens_end" ]]; then
+    echo "> PASS: Tokens restored successfully."
+else
+    echo "> FAIL: Tokens not restored successfully."
+    exit 1
+fi
+
+status=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.status')
 echo "> Status: $status"
 if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
     echo "> PASS: Validator is bonded."
@@ -95,5 +150,21 @@ else
     exit 1
 fi
 
+echo "> Wait for another downtime infraction."
+sleep $(($COMMIT_TIMEOUT*5))
 jailed=$($CHAIN_BINARY q staking validators --home $whale_home -o json | jq -r --arg addr "$valoper" '.validators[] | select(.operator_address==$addr).jailed')
-echo "> Jailed: $jailed"
+if [[ "$jailed" == "true" ]]; then
+    echo "> FAIL: Validator is jailed."
+    exit 1
+else
+    echo "> PASS: Validator is not jailed."
+fi
+
+status=$($CHAIN_BINARY q staking validator $valoper --home $whale_home -o json | jq -r '.validator.status')
+echo "> Status: $status"
+if [[ "$status" == "BOND_STATUS_BONDED" ]]; then
+    echo "> PASS: Validator is bonded."
+else
+    echo "> FAIL: Validator is not bonded."
+    exit 1
+fi

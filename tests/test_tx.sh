@@ -18,7 +18,7 @@ do
   homes+=($home)
   rpc_port=$rpc_prefix$i
   rpc_ports+=($rpc_port)
-  log=$log_prefix$i
+  log=$moniker$log_suffix
   logs+=($log)
 done
 
