@@ -213,7 +213,7 @@ jobs:
           else
             echo "> FAIL: Validator set check failed"
             jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
-            exit 0
+            exit 1
           fi
       - name: Stop gaiad
         env:
@@ -314,7 +314,7 @@ jobs:
           else
             echo "> FAIL: Validator set check failed"
             jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
-            exit 0
+            exit 1
           fi
       - name: Restore val key
         run: |
@@ -340,7 +340,7 @@ jobs:
           else
             echo "> FAIL: Validator set check failed"
             jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
-            exit 0
+            exit 1
           fi
 
       - name: Get min_deposit
@@ -408,6 +408,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
@@ -478,6 +487,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
@@ -548,6 +566,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
@@ -618,6 +645,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
@@ -688,6 +724,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
@@ -758,6 +803,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
       
@@ -828,6 +882,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
@@ -898,6 +961,15 @@ jobs:
         run: |
           source ~/env/bin/activate
           python scripts/ics_removal_validator_check.py --height ${{ env.upgrade_height }} --binary gaiad-v28 --api http://localhost:1317 --rpc http://localhost:26657 --provider-max-vals ${{ env.PROVIDER_VALIDATORS }} --ics-removal-upgrade
+          check_result=$(jq -r '.' validator-check-${{ env.upgrade_height }} | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.upgrade_height }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
       - name: Print validator-check json
         run: jq '.' validator-check-${{ env.upgrade_height }}.json
 
