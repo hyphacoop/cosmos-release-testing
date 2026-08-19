@@ -89,97 +89,124 @@
          upgrade_name: ${{ steps.upgrade.outputs.name }}
          binary_source: ${{ steps.binary.outputs.source }}
 
-      # Test-01-cosmovisor-upgrade:
-      #   runs-on: ubuntu-24.04
-      #   needs: set-versions
-      #   strategy:
-      #     matrix:
-      #       start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
-      #       target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
-      #       upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-      #       cv_version: [v1.7.1]
-      #       upgrade_mechanism: [cv_auto, cv_manual]
-      #       enable_cosmovisor: [false, true]
-      #       exclude:
-      #         - target_version: main
-      #           upgrade_mechanism: cv_auto
-      #         - enable_cosmovisor: false
-      #           upgrade_mechanism: cv_auto
-      #     fail-fast: false
-      #   env:
-      #     COSMOVISOR: ${{ matrix.enable_cosmovisor }}
-      #     COSMOVISOR_VERSION: ${{ matrix.cv_version }}
-      #     UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
-      #     BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-      #     GO_VERSION: 1.24.1
-      #   steps:
-      #     - name: Update PATH
-      #       run: |
-      #         mkdir -p $HOME/go/bin
-      #         echo "$HOME/go/bin" >> $GITHUB_PATH
-      #         echo "$HOME/.hermes" >> $GITHUB_PATH
-      #         echo "$HOME/.relayer" >> $GITHUB_PATH
-      #     - name: Bypass the grub-efi-amd64-signed package
-      #       run: sudo apt-mark hold grub-efi-amd64-signed
-      #     - name: Check out repository code
-      #       uses: actions/checkout@v6
-      #     - name: Set up Python
-      #       uses: actions/setup-python@v6
-      #       with:
-      #         python-version: '3.11'
-      #     - name: Install dependencies
-      #       run: |
-      #         python -m pip install --upgrade pip
-      #         python -m pip install toml-cli
-      #     - name: Install Cosmovisor
-      #       if: ${{ matrix.enable_cosmovisor == true }}
-      #       run: |
-      #         go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
-      #     - name: Start chain
-      #       run: |
-      #         export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
-      #         source scripts/vars.sh
-      #         scripts/setup.sh
-      #         ./$START_SCRIPT
-      #         sleep $(($COMMIT_TIMEOUT*2))
-      #         tail -n 100 $whale_log
-      #         scripts/wait_for_block.sh 3
-          
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
+      build-binary:
+        needs: set-versions
+        if: needs.set-versions.outputs.binary_source == 'BUILD'
+        runs-on: ubuntu-24.04
+        env:
+          TARGET_VERSION: ${{ needs.set-versions.outputs.target_version }}
+        steps:
+          - name: Install Go
+            uses: actions/setup-go@v6
+            with:
+              go-version: ${{ env.GO_VERSION }}
+          - name: Build gaiad from source
+            run: |
+              git clone https://github.com/cosmos/gaia.git
+              cd gaia
+              git checkout $TARGET_VERSION
+              make install
+              cp $HOME/go/bin/gaiad $HOME/gaiad
+          - name: Upload gaiad binary
+            uses: actions/upload-artifact@v7
+            with:
+              name: gaiad-binary
+              path: /home/runner/gaiad
 
-      #     - name: Test software upgrade
-      #       env:
-      #         TARGET_VERSION: ${{ matrix.target_version }}
-      #         DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
-      #       run: |
-      #         source scripts/vars.sh
-      #         scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+      Test-01-cosmovisor-upgrade:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        if: needs.set-versions.outputs.binary_source == 'DOWNLOAD'
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+            cv_version: [v1.7.1]
+            upgrade_mechanism: [cv_auto, cv_manual]
+            enable_cosmovisor: [false, true]
+            exclude:
+              - target_version: main
+                upgrade_mechanism: cv_auto
+              - enable_cosmovisor: false
+                upgrade_mechanism: cv_auto
+          fail-fast: false
+        env:
+          COSMOVISOR: ${{ matrix.enable_cosmovisor }}
+          COSMOVISOR_VERSION: ${{ matrix.cv_version }}
+          UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          GO_VERSION: 1.24.1
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Install Cosmovisor
+            if: ${{ matrix.enable_cosmovisor == true }}
+            run: |
+              go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@$COSMOVISOR_VERSION
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh 3
           
-      #     - name: _Blocks produced after upgrade
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+          
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 ${rpc_prefix}$COUNT_WIDTH 5
                   
-      #     - name: _Transactions verified> bank send, delegate, and withdraw rewards
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_tx.sh
+          - name: _Transactions verified> bank send, delegate, and withdraw rewards
+            run: |
+              source scripts/vars.sh
+              tests/test_tx.sh
 
-      #     - name: _API endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
-      #     - name: _RPC endpoints check
-      #       run: |
-      #         source scripts/vars.sh
-      #         tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH  
+          - name: _API endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_api.sh localhost ${api_prefix}$COUNT_WIDTH
+          - name: _RPC endpoints check
+            run: |
+              source scripts/vars.sh
+              tests/test_endpoints_rpc.sh localhost ${rpc_prefix}$COUNT_WIDTH  
   
       Test-04-pfm:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -196,6 +223,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -346,7 +384,8 @@
 
       Test-05-liquid-staking:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -363,6 +402,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -453,7 +503,8 @@
     
       Test-07-vesting-liquid-staking:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -472,6 +523,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -590,7 +652,8 @@
 
       Test-08-ICA-controller:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -610,6 +673,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -777,7 +851,8 @@
   
       Test-09-cosmwasm:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -794,6 +869,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -900,7 +986,8 @@
     
       Test-10-feemarket:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -918,6 +1005,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1023,7 +1121,8 @@
   
       Test-11-expedited-proposals:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1040,6 +1139,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1086,7 +1196,8 @@
 
       Test-12-key-management:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1103,6 +1214,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1189,7 +1311,8 @@
 
       Test-13-state-sync:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1206,6 +1329,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1275,7 +1409,8 @@
 
       Test-14-tokenfactory:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1293,6 +1428,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1390,7 +1536,8 @@
 
       Test-15-fork:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1408,6 +1555,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1507,7 +1665,8 @@
 
       Test-16-cancel-upgrade:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1525,6 +1684,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code
@@ -1617,7 +1787,8 @@
 
       Test-All:
         runs-on: ubuntu-24.04
-        needs: set-versions
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
         strategy:
           matrix:
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
@@ -1637,6 +1808,17 @@
               echo "$HOME/go/bin" >> $GITHUB_PATH
               echo "$HOME/.hermes" >> $GITHUB_PATH
               echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
           - name: Bypass the grub-efi-amd64-signed package
             run: sudo apt-mark hold grub-efi-amd64-signed
           - name: Check out repository code

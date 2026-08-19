@@ -174,18 +174,7 @@ else
     sleep 6
     tmux list-sessions
     if [ "$BINARY_SOURCE" = "BUILD" ]; then
-        # Build
-        sudo apt install build-essential -y
-        wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
-        sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
-        rm -rf gaia
-        git clone https://github.com/cosmos/gaia.git
-        # cd gaia
-        pushd gaia
-        git checkout $TARGET_VERSION
-        make install
-        # cd ..
-        popd
+        # Pre-built once by the build-binary job and downloaded by the workflow.
         cp $HOME/go/bin/gaiad $CHAIN_BINARY
     else
         # Download
