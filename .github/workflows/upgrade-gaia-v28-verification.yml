@@ -66,6 +66,6 @@ jobs:
             echo "> PASS: Validator set check passed"
           else
             echo "> FAIL: Validator set check failed"
-            jq -r '.' validator-check-$current_block.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            jq -r '.' validator-check-$upgrade_height.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
             exit 0
           fi
