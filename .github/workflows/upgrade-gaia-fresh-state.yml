@@ -100,6 +100,7 @@
             uses: actions/setup-go@v6
             with:
               go-version: ${{ env.GO_VERSION }}
+              cache: false
           - name: Build gaiad from source
             run: |
               git clone https://github.com/cosmos/gaia.git
@@ -112,6 +113,7 @@
             with:
               name: gaiad-binary
               path: /home/runner/gaiad
+              retention-days: 1
 
 
       Test-01-cosmovisor-upgrade:
