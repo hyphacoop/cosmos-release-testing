@@ -102,8 +102,8 @@
               cd gaia
               git checkout $TARGET_VERSION
               make build-static-linux-amd64
-              ls build/
-              cp build/gaiad-linux-amd64 $HOME/gaiad
+              ls -la build/
+              cp build/gaiad-linux-amd64/gaiad $HOME/gaiad
           - name: Upload gaiad binary
             uses: actions/upload-artifact@v7
             with:
