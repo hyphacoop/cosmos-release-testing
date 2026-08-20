@@ -359,13 +359,13 @@ jobs:
         run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
       - name: Check tendermint validators
         run: $CHAIN_BINARY --home $HOME_2 q tendermint-validator-set -o json | jq -r '.'
-      - name: Check validator set is 1
+      - name: Check validator set is 2
         run: |
           $CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.'
           total_validator=$($CHAIN_BINARY --home $HOME_1 q comet-validator-set -o json | jq -r '.pagination.total')
-          if [ $total_validator != 1 ]
+          if [ $total_validator != 2 ]
           then
-            echo "[ERROR]: Unexpected number of validators $total_validator, expected 1"
+            echo "[ERROR]: Unexpected number of validators $total_validator, expected 2"
             exit 1
           fi
       - name: Check number of signatures
