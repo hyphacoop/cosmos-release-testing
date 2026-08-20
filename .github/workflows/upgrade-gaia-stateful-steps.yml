@@ -372,9 +372,9 @@ jobs:
         run: |
           set -e
           total_signatures=$(curl -s 127.0.0.1:$VAL1_RPC_PORT/block | jq -r '.result.block.last_commit.signatures | length')
-          if [ $total_signatures != 1 ]
+          if [ $total_signatures != 2 ]
           then
-            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 1"
+            echo "[ERROR]: Unexpected number of validators $total_signatures, expected 2"
             exit 1
           fi
 
