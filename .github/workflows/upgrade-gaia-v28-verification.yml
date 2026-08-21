@@ -86,3 +86,4 @@ jobs:
             echo "> FAIL: Channels check failed"
             jq -r '.' channels-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
             exit 1
+          fi
