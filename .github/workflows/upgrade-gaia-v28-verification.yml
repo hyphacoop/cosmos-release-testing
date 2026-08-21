@@ -77,7 +77,7 @@ jobs:
         run: |
           set -e
           source ~/env/bin/activate
-          python scripts/scripts/ics_removal_ibc_channels_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
+          python scripts/ics_removal_ibc_channels_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
           check_result=$(jq -r '.' channels-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
