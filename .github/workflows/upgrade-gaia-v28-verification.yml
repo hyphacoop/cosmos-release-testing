@@ -53,19 +53,36 @@ jobs:
           sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
           sudo chmod +x /usr/local/bin/gaiad
 
+      - name: Store upgrade height
+        run: |
+          upgrade_height=$(gaiad --node ${{ env.RPC }} q upgrade applied ${{ env.UPGRADE_NAME }} -o json | jq -r '.height')
+          echo "Upgrade height was: $upgrade_height"
+          echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
+
       - name: Validator set check
         run: |
           set -e
           source ~/env/bin/activate
-          upgrade_height=$(gaiad --node ${{ env.RPC }} q upgrade applied ${{ env.UPGRADE_NAME }} -o json | jq -r '.height')
-          echo "Upgrade height was: $upgrade_height"
-          python scripts/ics_removal_validator_check.py --height $upgrade_height --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
-          check_result=$(jq -r '.' validator-check-$upgrade_height.json | grep FAIL || true)
+          python scripts/ics_removal_validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
+          check_result=$(jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
             echo "> PASS: Validator set check passed"
           else
             echo "> FAIL: Validator set check failed"
-            jq -r '.' validator-check-$upgrade_height.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
             exit 1
           fi
+      - name: Channels check
+        run: |
+          set -e
+          source ~/env/bin/activate
+          python scripts/scripts/ics_removal_ibc_channels_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
+          check_result=$(jq -r '.' channels-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Channels check passed"
+          else
+            echo "> FAIL: Channels check failed"
+            jq -r '.' channels-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
