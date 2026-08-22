@@ -1783,6 +1783,101 @@
               source scripts/vars.sh
               tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
 
+      Test-17-params:
+        runs-on: ubuntu-24.04
+        needs: [set-versions, build-binary]
+        if: ${{ !cancelled() && needs.set-versions.result == 'success' }}
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+            target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
+            upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 3
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Download pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            uses: actions/download-artifact@v7
+            with:
+              name: gaiad-binary
+              path: ./prebuilt-gaiad
+          - name: Install pre-built gaiad binary
+            if: needs.set-versions.outputs.binary_source == 'BUILD'
+            run: |
+              cp ./prebuilt-gaiad/gaiad $HOME/go/bin/gaiad
+              chmod +x $HOME/go/bin/gaiad
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Capture module params before upgrade
+            run: |
+              source scripts/vars.sh
+              scripts/query_module_params.sh > params-before.json
+              jq '.' params-before.json
+
+          - name: Test software upgrade
+            env:
+              TARGET_VERSION: ${{ matrix.target_version }}
+              DOWNLOAD_URL: https://github.com/cosmos/gaia/releases/download/${{ matrix.target_version }}/gaiad-${{ matrix.target_version }}-linux-amd64
+            run: |
+              source scripts/vars.sh
+              scripts/upgrade.sh ${{ matrix.upgrade_name }}
+
+          - name: _Blocks produced after upgrade
+            run: |
+              source scripts/vars.sh
+              tests/test_block_production.sh 127.0.0.1 $whale_rpc 5
+
+          - name: Capture module params after upgrade
+            run: |
+              source scripts/vars.sh
+              scripts/query_module_params.sh > params-after.json
+              jq '.' params-after.json
+
+          - name: _Test module params unchanged
+            run: |
+              source scripts/vars.sh
+              tests/test_params_unchanged.sh params-before.json params-after.json
+
+          # - name: Upload param snapshots
+          #   if: always()
+          #   uses: actions/upload-artifact@v7
+          #   with:
+          #     name: params-snapshots
+          #     path: |
+          #       params-before.json
+          #       params-after.json
+          #     retention-days: 1
+
       Test-All:
         runs-on: ubuntu-24.04
         needs: [set-versions, build-binary]
