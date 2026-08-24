@@ -1,0 +1,121 @@
+---
+
+name: Test Gaia v28 verification
+on:
+  # push:
+  workflow_dispatch:
+    inputs:
+      chain:
+        description: Chain to verify
+        required: true
+        type: choice
+        default: hub testnet
+        options:
+          - hub testnet
+          - cosmoshub-4
+
+jobs:
+  test-upgrade:
+    runs-on: ubuntu-latest
+    env:
+      CHAIN_BINARY: gaiad
+      UPGRADE_NAME: v28.0.0
+    steps:
+      - name: Set chain env vars
+        run: |
+          if [ "${{ inputs.chain }}" == "cosmoshub-4" ]; then
+            echo "RPC=https://rpc.sentry-01.cosmoshub-4.polypore.xyz" >> $GITHUB_ENV
+            echo "API=https://rest.sentry-01.cosmoshub-4.polypore.xyz" >> $GITHUB_ENV
+            echo "CHAIN_ID=cosmoshub-4" >> $GITHUB_ENV
+            echo "MAX_VALIDATORS=180" >> $GITHUB_ENV
+            echo "RUNNING_VERSION=v28.0.0" >> $GITHUB_ENV
+          else
+            echo "RPC=https://rpc.provider-sentry-01.hub-testnet.polypore.xyz" >> $GITHUB_ENV
+            echo "API=https://rest.provider-sentry-01.hub-testnet.polypore.xyz" >> $GITHUB_ENV
+            echo "CHAIN_ID=provider" >> $GITHUB_ENV
+            echo "MAX_VALIDATORS=100" >> $GITHUB_ENV
+            echo "RUNNING_VERSION=v28.0.0-rc0" >> $GITHUB_ENV
+          fi
+      # Get system info
+      - name: Install required packages
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+          sudo apt -y install python-is-python3 screen curl jq wget python3-venv python3-pip bc git psmisc build-essential net-tools vim htop lz4 aria2
+      - run: ip addr
+      - run: lscpu
+      - run: df -h
+      - run: free -m
+      - run: uname -a
+      - run: lsb_release -a
+      - run: echo "GitHub branch is ${{ github.ref }}"
+      - run: whoami
+      - run: pwd
+      - name: Update Apt
+        run: |
+          sudo apt update
+          sudo apt dist-upgrade -y
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Init Python venv
+        run: python -m venv ~/env
+      - name: Install dependencies
+        run: |
+          source ~/env/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install toml-cli graph-cli cosmospy requests asyncio websockets urllib3 bech32
+      
+      - name: Download binary from cosmos/gaia repo
+        run: |
+          sudo wget -nv https://github.com/cosmos/gaia/releases/download/${{ env.RUNNING_VERSION }}/gaiad-${{ env.RUNNING_VERSION }}-linux-amd64 -O /usr/local/bin/gaiad
+          sudo chmod +x /usr/local/bin/gaiad
+
+      - name: Store upgrade height
+        run: |
+          upgrade_height=$(gaiad --node ${{ env.RPC }} q upgrade applied ${{ env.UPGRADE_NAME }} -o json | jq -r '.height')
+          echo "Upgrade height was: $upgrade_height"
+          echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
+
+      - name: Validator set check
+        run: |
+          set -e
+          source ~/env/bin/activate
+          python scripts/ics_removal_validator_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --provider-max-vals ${{ env.MAX_VALIDATORS }}
+          check_result=$(jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Validator set check passed"
+          else
+            echo "> FAIL: Validator set check failed"
+            jq -r '.' validator-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
+      - name: Channels check
+        run: |
+          set -e
+          source ~/env/bin/activate
+          python scripts/ics_removal_ibc_channels_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
+          check_result=$(jq -r '.' channels-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Channels check passed"
+          else
+            echo "> FAIL: Channels check failed"
+            jq -r '.' channels-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
+      - name: Consumer rewards check
+        run: |
+          set -e
+          source ~/env/bin/activate
+          python scripts/ics_removal_consumer_rewards_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
+          check_result=$(jq -r '.' rewards-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
+          echo "Check result: $check_result"
+          if [ -z "$check_result" ]; then
+            echo "> PASS: Consumer rewards balances check passed"
+          else
+            echo "> FAIL: Consumer rewards balances check failed"
+            jq '.' rewards-check-${{ env.UPGRADE_HEIGHT }}.json
+            jq -r '.' rewards-check-${{ env.UPGRADE_HEIGHT }}.json | curl -s -H "x-uuid;" --upload-file - 'https://paste.c-net.org/'
+            exit 1
+          fi
