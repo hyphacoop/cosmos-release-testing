@@ -2,23 +2,40 @@
 
 name: Test Gaia v28 verification
 on:
-  push:
-      
+  # push:
+  workflow_dispatch:
+    inputs:
+      chain:
+        description: Chain to verify
+        required: true
+        type: choice
+        default: hub testnet
+        options:
+          - hub testnet
+          - cosmoshub-4
+
 jobs:
   test-upgrade:
     runs-on: ubuntu-latest
     env:
       CHAIN_BINARY: gaiad
-      RUNNING_VERSION: v28.0.0-rc0
       UPGRADE_NAME: v28.0.0
-      CHAIN_ID: provider
-      MAX_VALIDATORS: 100
-      # RPC: https://rpc.sentry-01.cosmoshub-4.polypore.xyz
-      # API: https://rest.sentry-01.cosmoshub-4.polypore.xyz
-      RPC: https://rpc.provider-sentry-01.hub-testnet.polypore.xyz
-      API: https://rest.provider-sentry-01.hub-testnet.polypore.xyz
-      
     steps:
+      - name: Set chain env vars
+        run: |
+          if [ "${{ inputs.chain }}" == "cosmoshub-4" ]; then
+            echo "RPC=https://rpc.sentry-01.cosmoshub-4.polypore.xyz" >> $GITHUB_ENV
+            echo "API=https://rest.sentry-01.cosmoshub-4.polypore.xyz" >> $GITHUB_ENV
+            echo "CHAIN_ID=cosmoshub-4" >> $GITHUB_ENV
+            echo "MAX_VALIDATORS=180" >> $GITHUB_ENV
+            echo "RUNNING_VERSION=v28.0.0" >> $GITHUB_ENV
+          else
+            echo "RPC=https://rpc.provider-sentry-01.hub-testnet.polypore.xyz" >> $GITHUB_ENV
+            echo "API=https://rest.provider-sentry-01.hub-testnet.polypore.xyz" >> $GITHUB_ENV
+            echo "CHAIN_ID=provider" >> $GITHUB_ENV
+            echo "MAX_VALIDATORS=100" >> $GITHUB_ENV
+            echo "RUNNING_VERSION=v28.0.0-rc0" >> $GITHUB_ENV
+          fi
       # Get system info
       - name: Install required packages
         run: |
