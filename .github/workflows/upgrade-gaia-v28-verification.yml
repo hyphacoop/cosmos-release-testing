@@ -16,6 +16,7 @@ on:
 
 jobs:
   test-upgrade:
+    name: Testing ${{ inputs.chain || 'hub testnet' }}
     runs-on: ubuntu-latest
     env:
       CHAIN_BINARY: gaiad
