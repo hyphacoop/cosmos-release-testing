@@ -91,7 +91,7 @@ jobs:
         run: |
           set -e
           source ~/env/bin/activate
-          python scripts/ics_removal_ibc_consumer_rewards.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
+          python scripts/ics_removal_ibc_consumer_rewards_check.py --height ${{ env.UPGRADE_HEIGHT }} --binary gaiad --api ${{ env.API }} --rpc ${{ env.RPC }} --ics-removal-upgrade
           check_result=$(jq -r '.' rewards-check-${{ env.UPGRADE_HEIGHT }}.json | grep FAIL || true)
           echo "Check result: $check_result"
           if [ -z "$check_result" ]; then
