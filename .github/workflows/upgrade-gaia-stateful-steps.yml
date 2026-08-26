@@ -368,9 +368,9 @@ jobs:
       - name: _Test ratelimit unmodified
         run: |
           echo "Mainnet"
-          echo "${{ env.RATELIMIT_MAINNET }}" | jq -r '.'
+          echo "${{ env.RATELIMIT_MAINNET }}"
           echo "Local"
-          echo "${{ env.RATELIMIT_LOCAL }}" | jq -r '.'
+          echo "${{ env.RATELIMIT_LOCAL }}"
       - name: Query slashing params
         run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
       - name: Check tendermint validators
