@@ -356,9 +356,21 @@ jobs:
           echo "[INFO]: Query staking validators"
           $CHAIN_BINARY --home $HOME_2 query staking validators
       - name: Query mainnet ratelimit
-        run: $CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits
+        run: |
+          $CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits
+          json=$($CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits -o json)
+          echo "RATELIMIT_MAINNET=$json" >> $GITHUB_ENV
       - name: Query chain ratelimit
-        run: $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits
+          json=$($CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits -o json)
+          echo "RATELIMIT_LOCAL=$json" >> $GITHUB_ENV
+      - name: _Test ratelimit unmodified
+        run: |
+          echo "Mainnet"
+          echo "${{ env.RATELIMIT_MAINNET }}" | jq -r '.'
+          echo "Local"
+          echo "${{ env.RATELIMIT_LOCAL }}" | jq -r '.'
       - name: Query slashing params
         run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
       - name: Check tendermint validators
