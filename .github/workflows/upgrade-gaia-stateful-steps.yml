@@ -194,7 +194,7 @@ jobs:
         run: |
           source ~/env/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install toml-cli graph-cli cosmospy
+          python -m pip install toml-cli graph-cli cosmospy yq
 
       - name: Print RPC port
         run: echo $VAL1_RPC_PORT
@@ -242,6 +242,30 @@ jobs:
         run: |
           $CHAIN_BINARY keys list --home $HOME_1
           $CHAIN_BINARY keys list --home $HOME_2
+      - name: Query mainnet ratelimit
+        run: |
+          $CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits
+          json=$($CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits)
+          echo "RATELIMIT_MAINNET=$json" >> $GITHUB_ENV
+      - name: Query chain ratelimit
+        run: |
+          $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits
+          json=$($CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits)
+          echo "RATELIMIT_LOCAL=$json" >> $GITHUB_ENV
+      - name: _Test ratelimit unmodified after upgrade
+        run: |
+          source ~/env/bin/activate
+          error=0
+          for ch in $(echo "${{ env.RATELIMIT_MAINNET }}" | yq -r '.rate_limits[].path.channel_or_client_id'); do
+            mainnet_entry=$(echo "${{ env.RATELIMIT_MAINNET }}" | yq -c --arg ch "$ch" '.rate_limits[] | select(.path.channel_or_client_id == $ch) | del(.flow)')
+            local_entry=$(echo "${{ env.RATELIMIT_LOCAL }}" | yq -c --arg ch "$ch" '.rate_limits[] | select(.path.channel_or_client_id == $ch) | del(.flow)')
+            if [ "$mainnet_entry" != "$local_entry" ]
+            then
+              echo "[ERROR]: Channel $ch missing or mismatched locally. Mainnet: $mainnet_entry Local: $local_entry"
+              error=1
+            fi
+          done
+          [ $error -eq 0 ]
       - name: Get starting balances
         run: |
           set -e
@@ -355,22 +379,6 @@ jobs:
           tests/test_block_production.sh 127.0.0.1 $VAL1_RPC_PORT 1 10
           echo "[INFO]: Query staking validators"
           $CHAIN_BINARY --home $HOME_2 query staking validators
-      - name: Query mainnet ratelimit
-        run: |
-          $CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits
-          json=$($CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits -o json)
-          echo "RATELIMIT_MAINNET=$json" >> $GITHUB_ENV
-      - name: Query chain ratelimit
-        run: |
-          $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits
-          json=$($CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits -o json)
-          echo "RATELIMIT_LOCAL=$json" >> $GITHUB_ENV
-      - name: _Test ratelimit unmodified
-        run: |
-          echo "Mainnet"
-          echo "${{ env.RATELIMIT_MAINNET }}"
-          echo "Local"
-          echo "${{ env.RATELIMIT_LOCAL }}"
       - name: Query slashing params
         run: $CHAIN_BINARY --home $HOME_1 q slashing params -o json | jq -r '.'
       - name: Check tendermint validators
