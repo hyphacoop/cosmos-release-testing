@@ -263,7 +263,14 @@ jobs:
               error=1
             fi
           done
-          [ $error -eq 0 ]
+
+          if [ $error -eq 1 ]
+          then
+            echo "[FAIL]: Local rate limits do not match mainnet"
+            exit 1
+          else
+            echo "[PASS]: Local rate limits match mainnet"
+          fi
       - name: Get starting balances
         run: |
           set -e
