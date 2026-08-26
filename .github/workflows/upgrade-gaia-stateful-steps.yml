@@ -249,7 +249,7 @@ jobs:
       - name: Query chain ratelimit
         run: |
           $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits
-          output=$($CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits > ~/ratelimit_local.txt
+          $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits > ~/ratelimit_local.txt
       - name: _Test ratelimit unmodified after upgrade
         run: |
           source ~/env/bin/activate
