@@ -245,20 +245,18 @@ jobs:
       - name: Query mainnet ratelimit
         run: |
           $CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits
-          json=$($CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits)
-          echo "RATELIMIT_MAINNET=$json" >> $GITHUB_ENV
+          $CHAIN_BINARY --node https://rpc.sentry-01.cosmoshub-4.polypore.xyz q ratelimit list-rate-limits > ~/ratelimit_mainnet.txt
       - name: Query chain ratelimit
         run: |
           $CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits
-          json=$($CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits)
-          echo "RATELIMIT_LOCAL=$json" >> $GITHUB_ENV
+          output=$($CHAIN_BINARY --home $HOME_1 q ratelimit list-rate-limits > ~/ratelimit_local.txt
       - name: _Test ratelimit unmodified after upgrade
         run: |
           source ~/env/bin/activate
           error=0
-          for ch in $(echo "${{ env.RATELIMIT_MAINNET }}" | yq -r '.rate_limits[].path.channel_or_client_id'); do
-            mainnet_entry=$(echo "${{ env.RATELIMIT_MAINNET }}" | yq -c --arg ch "$ch" '.rate_limits[] | select(.path.channel_or_client_id == $ch) | del(.flow)')
-            local_entry=$(echo "${{ env.RATELIMIT_LOCAL }}" | yq -c --arg ch "$ch" '.rate_limits[] | select(.path.channel_or_client_id == $ch) | del(.flow)')
+          for ch in $(cat ~/ratelimit_mainnet.txt | yq -r '.rate_limits[].path.channel_or_client_id'); do
+            mainnet_entry=$(cat ~/ratelimit_mainnet.txt | yq -c --arg ch "$ch" '.rate_limits[] | select(.path.channel_or_client_id == $ch) | del(.flow)')
+            local_entry=$(cat ~/ratelimit_local.txt | yq -c --arg ch "$ch" '.rate_limits[] | select(.path.channel_or_client_id == $ch) | del(.flow)')
             if [ "$mainnet_entry" != "$local_entry" ]
             then
               echo "[ERROR]: Channel $ch missing or mismatched locally. Mainnet: $mainnet_entry Local: $local_entry"
