@@ -1,5 +1,5 @@
 ---
-name: ICS Validator Tests
+name: Hub Testnet Validator Tests
 on:
   workflow_dispatch:
   schedule:
