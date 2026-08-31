@@ -8,12 +8,12 @@
             description: 'Gaia version to upgrade from'
             required: true
             type: string
-            default: v28.0.0-rc0
+            default: v28.0.0
           to_version:
             description: 'Gaia version to upgrade to'
             required: true
             type: string
-            default: chore/remove-params-module
+            default: chore/bump-go-v1.26
           upgrade_name:
             description: 'Name of the upgrade'
             required: false
@@ -27,7 +27,7 @@
       cancel-in-progress: true
     
     env:
-      GO_VERSION: 1.25.7
+      GO_VERSION: 1.26.7
       # All chain variables
       COMMIT_TIMEOUT: 2
       # Consumer chain variables
@@ -41,8 +41,8 @@
     jobs:
       set-versions:
         env:
-          START: ${{ github.event_name == 'push' && 'v28.0.0-rc0' || inputs.from_version }}
-          TARGET: ${{ github.event_name == 'push' && 'chore/remove-params-module' || inputs.to_version }}
+          START: ${{ github.event_name == 'push' && 'v28.0.0' || inputs.from_version }}
+          TARGET: ${{ github.event_name == 'push' && 'chore/bump-go-v1.26' || inputs.to_version }}
           NAME: ${{ github.event_name == 'push' && 'v29.0.0' || inputs.upgrade_name }}
         runs-on: ubuntu-24.04
         steps:
@@ -135,7 +135,7 @@
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          GO_VERSION: 1.24.1
+          GO_VERSION: 1.26.7
         steps:
           - name: Update PATH
             run: |
@@ -1315,7 +1315,6 @@
           fail-fast: false
         env:
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          GO_VERSION: 1.24.1
         steps:
           - name: Update PATH
             run: |
