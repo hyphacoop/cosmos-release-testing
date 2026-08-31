@@ -97,11 +97,27 @@
           TARGET_VERSION: ${{ needs.set-versions.outputs.target_version }}
         steps:
           - name: Build gaiad from source
+            env:
+              # Work around flaky "stream error ... INTERNAL_ERROR" responses from
+              # proxy.golang.org over HTTP/2 by forcing Go's module downloader to HTTP/1.1.
+              GODEBUG: http2client=0
             run: |
               git clone https://github.com/cosmos/gaia.git
               cd gaia
               git checkout $TARGET_VERSION
-              make build-static-linux-amd64
+
+              n=0
+              until [ $n -ge 5 ]; do
+                make build-static-linux-amd64 && break
+                n=$((n+1))
+                echo "::warning::build attempt $n failed (likely a transient Go module proxy error), retrying in $((n*10))s..."
+                sleep $((n*10))
+              done
+              if [ $n -ge 5 ]; then
+                echo "::error::build-static-linux-amd64 failed after 5 attempts"
+                exit 1
+              fi
+
               ls -la build/
               cp build/gaiad-linux-amd64/gaiad $HOME/gaiad
           - name: Upload gaiad binary
