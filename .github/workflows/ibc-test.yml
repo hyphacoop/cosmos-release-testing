@@ -148,6 +148,10 @@
               source scripts/vars_ica.sh
               $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 $RECIPIENT 100000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
               hermes tx packet-recv --dst-chain $CHAIN_1 --src-chain $CHAIN_2 --src-port transfer --src-channel channel-0
+              sleep 10s
+              source scripts/vars.sh
+              $CHAIN_BINARY q bank balances $RECIPIENT --home $whale_home -o json | jq '.'
+
 
           # - name: _Test ICA controller - register ICA with controller2
           #   env:
