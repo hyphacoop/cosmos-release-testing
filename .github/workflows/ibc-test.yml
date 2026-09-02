@@ -1,0 +1,178 @@
+---
+
+    name: IBC Test
+    on:
+      workflow_dispatch:
+        inputs:
+          version:
+            description: 'Gaia version to run'
+            required: true
+            type: string
+            default: v28.0.0
+      push:
+    
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    
+    env:
+      GO_VERSION: 1.25.7
+      # All chain variables
+      COMMIT_TIMEOUT: 2
+      # Consumer chain variables
+      RECIPIENT: cosmos1r5v5srda7xfth3hn2s26txvrcrntldjumt8mhl
+      PROVIDER_ICS: v6.4.0
+      TOPN: 0
+      # Relayer variables
+      RELAYER: hermes
+      HERMES_VERSION: v1.13.3
+      RLY_VERSION: "2.5.0"
+    jobs:
+      set-versions:
+        env:
+          START: ${{ github.event_name == 'push' && 'v28.0.0' || inputs.version }}
+        runs-on: ubuntu-24.04
+        steps:
+          - name: Debug env vars
+            run: |
+              echo "START: $START"
+              echo "TARGET: $TARGET"
+              echo "NAME: $NAME"
+              ldd --version
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install requests
+          - name: Set starting version
+            id: start
+            run: |
+              echo "version=$START" >> $GITHUB_OUTPUT
+          - name: Set binary source
+            id: binary
+            run: |
+              if [[ "${TARGET:0:1}" != "v" ]]; then
+                echo "source=BUILD" >> $GITHUB_OUTPUT
+              else
+                echo "source=DOWNLOAD" >> $GITHUB_OUTPUT
+              fi
+              
+        outputs:
+         start_version: ${{ steps.start.outputs.version }}
+         binary_source: ${{ steps.binary.outputs.source }}
+
+      Test-IBC:
+        runs-on: ubuntu-24.04
+        needs: set-versions
+        strategy:
+          matrix:
+            start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
+          fail-fast: false
+        env:
+          COSMOVISOR: false
+          BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
+          COMMIT_TIMEOUT: 1
+          RELAYER: hermes
+        steps:
+          - name: Update PATH
+            run: |
+              mkdir -p $HOME/go/bin
+              echo "$HOME/go/bin" >> $GITHUB_PATH
+              echo "$HOME/.hermes" >> $GITHUB_PATH
+              echo "$HOME/.relayer" >> $GITHUB_PATH
+          - name: Bypass the grub-efi-amd64-signed package
+            run: sudo apt-mark hold grub-efi-amd64-signed
+          - name: Check out repository code
+            uses: actions/checkout@v6
+          - name: Set up Python
+            uses: actions/setup-python@v6
+            with:
+              python-version: '3.11'
+          - name: Install dependencies
+            run: |
+              python -m pip install --upgrade pip
+              python -m pip install toml-cli
+          - name: Set up relayer
+            run: |
+              source scripts/vars.sh
+              scripts/setup_relayer.sh
+
+          - name: Start chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Start secondary chain
+            run: |
+              export CHAIN_BINARY_URL=https://github.com/cosmos/gaia/releases/download/${{ matrix.start_version }}/gaiad-${{ matrix.start_version }}-linux-amd64  
+              source scripts/vars_ica.sh
+              scripts/setup.sh
+              ./$START_SCRIPT
+              sleep $(($COMMIT_TIMEOUT*2))
+              tail -n 100 $whale_log
+              scripts/wait_for_block.sh $whale_rpc 3
+
+          - name: Start relayer
+            run: |
+              scripts/start_relayer.sh
+              sleep $(($COMMIT_TIMEOUT*3))
+              
+          - name: Generate channels
+            env:
+              CHAIN_1: testnet
+              CHAIN_2: ica
+            run: |
+              tmux send-keys -t relayer C-c
+              sleep $(($COMMIT_TIMEOUT*2))
+              hermes create channel --new-client-connection --a-chain $CHAIN_1 --b-chain $CHAIN_2 --a-port transfer --b-port transfer --yes
+              scripts/start_relayer.sh
+              # cat relayer.log
+
+          # - name: _Test ICA controller - register ICA with controller2
+          #   env:
+          #     CONTROLLER_HOME: /home/runner/.val1
+          #     HOST_HOME: /home/runner/.host
+          #   run: |
+          #     source scripts/vars.sh
+          #     echo "> Registering ICA."
+          #     $CHAIN_BINARY keys add controller2 --home $whale_home
+          #     controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
+          #     $CHAIN_BINARY tx bank send $WALLET_1 $controller2 100000000$DENOM --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+          #     sleep $(($COMMIT_TIMEOUT*2))
+          #     txhash=$($CHAIN_BINARY tx interchain-accounts controller register connection-0 --ordering ORDER_ORDERED --version "" --from $controller2 --gas auto --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home | jq -r '.txhash')
+          #     sleep $(($COMMIT_TIMEOUT*10))
+          #     echo "txhash: $txhash"
+          #     $CHAIN_BINARY q tx $txhash --home $whale_home -o json | jq '.'
+          #     journalctl -u hermes
+          #     tail -n 100 $whale_log
+          #     ica_address=$($CHAIN_BINARY q interchain-accounts controller interchain-account $controller2 connection-0 --home $whale_home -o json | jq -r '.address')
+          #     echo "ICA address: $ica_address"
+          #     echo "> Funding ICA."
+          #     source scripts/vars_ica.sh
+          #     $CHAIN_BINARY tx bank send $WALLET_1 $ica_address 100000000$DENOM --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y -o json --home $whale_home
+          #     sleep $(($COMMIT_TIMEOUT*3))
+          # - name: _Test ICA send with post-upgrade account
+          #   run: |
+          #     source scripts/vars.sh
+          #     controller2=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller2").address')
+          #     $CHAIN_BINARY keys add recipient2 --home $whale_home
+          #     recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient2").address')
+          #     tests/test_ica_send.sh $controller2 $recipient_wallet
+          # - name: _Test ICA send with pre-upgrade account
+          #   run: |
+          #     source scripts/vars.sh
+          #     controller1=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="controller1").address')
+          #     $CHAIN_BINARY keys add recipient3 --home $whale_home
+          #     recipient_wallet=$($CHAIN_BINARY keys list --home $whale_home --output json | jq -r '.[] | select(.name=="recipient3").address')
+          #     tests/test_ica_send.sh $controller1 $recipient_wallet
