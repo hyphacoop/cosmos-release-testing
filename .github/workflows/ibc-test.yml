@@ -155,10 +155,10 @@
               source scripts/vars.sh
               echo "> Recipient balance:"
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'
-              echo "> Starting relayer"
-              scripts/start_relayer.sh
+              # echo "> Starting relayer"
+              # scripts/start_relayer.sh
               sleep 30s
-              cat relayer.log
+              # cat relayer.log
               echo "> Recipient balance:"
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'
 
