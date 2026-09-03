@@ -181,7 +181,7 @@
               echo "> Querying MsgRecvPacket transactions:"
               $CHAIN_BINARY query txs --query "message.action='/ibc.core.channel.v1.MsgRecvPacket'" --home $whale_home -o json | jq '.txs[] | {txhash, code, gas_wanted, gas_used, timestamp}'
               echo "> Node log:"
-              tail -n 200 $whale_log
+              tail -n 250 $whale_log
 
           # - name: _Test ICA controller - register ICA with controller2
           #   env:
