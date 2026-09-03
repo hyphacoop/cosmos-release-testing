@@ -156,6 +156,25 @@
               echo "> Querying MsgRecvPacket transactions:"
               $CHAIN_BINARY query txs --query "message.action='/ibc.core.channel.v1.MsgRecvPacket'" --home $whale_home -o json | jq '.txs[] | {txhash, code, gas_wanted, gas_used, timestamp}'
 
+          - name: Test IBC transfer (ica -> testnet)
+            env:
+              CHAIN_1: testnet
+              CHAIN_2: ica
+              TEST_GAS: 1.5
+            run: |
+              source scripts/vars.sh  
+              echo "> Recipient balance:"
+              $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'  
+              source scripts/vars_ica.sh
+              $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 100000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              sleep 30s
+              source scripts/vars.sh
+              echo "> Recipient balance:"
+              $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'
+              echo "> Querying MsgRecvPacket transactions:"
+              $CHAIN_BINARY query txs --query "message.action='/ibc.core.channel.v1.MsgRecvPacket'" --home $whale_home -o json | jq '.txs[] | {txhash, code, gas_wanted, gas_used, timestamp}'
+
+
           - name: Restart relayer with low gas config
             run: |
               tmux send-keys -t relayer C-c
