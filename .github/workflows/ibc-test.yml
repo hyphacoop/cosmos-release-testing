@@ -136,8 +136,7 @@
               tmux send-keys -t relayer C-c
               sleep $(($COMMIT_TIMEOUT*2))
               hermes create channel --new-client-connection --a-chain $CHAIN_1 --b-chain $CHAIN_2 --a-port transfer --b-port transfer --yes
-              # scripts/start_relayer.sh
-              # cat relayer.log
+              scripts/start_relayer.sh
 
           - name: Test IBC transfer (ica -> testnet)
             env:
@@ -150,18 +149,38 @@
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'  
               source scripts/vars_ica.sh
               $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 100000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
-              hermes tx packet-recv --dst-chain $CHAIN_1 --src-chain $CHAIN_2 --src-port transfer --src-channel channel-0
               sleep 30s
               source scripts/vars.sh
               echo "> Recipient balance:"
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'
-              # echo "> Starting relayer"
-              # scripts/start_relayer.sh
+              echo "> Querying MsgRecvPacket transactions:"
+              $CHAIN_BINARY query txs --query "message.action='/ibc.core.channel.v1.MsgRecvPacket'" --home $whale_home -o json | jq '.txs[] | {txhash, code, gas_wanted, gas_used, timestamp}'
+
+          - name: Restart relayer with low gas config
+            run: |
+              tmux send-keys -t relayer C-c
+              cp templates/hermes-config-low-gas.toml $HOME/.hermes/config.toml
+              scripts/start_relayer.sh
+
+          - name: Test IBC transfer (ica -> testnet)
+            env:
+              CHAIN_1: testnet
+              CHAIN_2: ica
+              TEST_GAS: 1.5
+            run: |
+              source scripts/vars.sh  
+              echo "> Recipient balance:"
+              $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'  
+              source scripts/vars_ica.sh
+              $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 100000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
               sleep 30s
-              # cat relayer.log
+              source scripts/vars.sh
               echo "> Recipient balance:"
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'
-
+              echo "> Querying MsgRecvPacket transactions:"
+              $CHAIN_BINARY query txs --query "message.action='/ibc.core.channel.v1.MsgRecvPacket'" --home $whale_home -o json | jq '.txs[] | {txhash, code, gas_wanted, gas_used, timestamp}'
+              echo "> Node log:"
+              tail -n 100 $whale_log
 
           # - name: _Test ICA controller - register ICA with controller2
           #   env:
