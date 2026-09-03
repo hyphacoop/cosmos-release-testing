@@ -10,7 +10,7 @@ on:
         description: 'Gaia version to upgrade from'
         required: true
         type: string
-        default: v28.0.0-rc0
+        default: v28.0.0
       to_version:
         description: 'Gaia version to upgrade to'
         required: true
