@@ -148,7 +148,7 @@
               echo "> Recipient balance:"
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'  
               source scripts/vars_ica.sh
-              $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 100000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 1$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
               sleep 30s
               source scripts/vars.sh
               echo "> Recipient balance:"
@@ -166,7 +166,7 @@
               echo "> Recipient balance:"
               $CHAIN_BINARY q bank balances cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq --home $whale_home -o json | jq '.'  
               source scripts/vars_ica.sh
-              $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 100000000$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
+              $CHAIN_BINARY tx ibc-transfer transfer transfer channel-0 cosmos1ay4dpm0kjmvtpug28vgw5w32yyjxa5sp97pjqq 1$DENOM --from $WALLET_1 --gas $GAS --gas-adjustment $TEST_GAS --gas-prices $GAS_PRICE -y -o json --home $whale_home
               sleep 30s
               source scripts/vars.sh
               echo "> Recipient balance:"
