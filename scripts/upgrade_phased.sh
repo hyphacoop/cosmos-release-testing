@@ -105,39 +105,6 @@ done
 sleep $(($COMMIT_TIMEOUT*2))
 $CHAIN_BINARY q tx $txhash --home $whale_home
 
-if [ "$STAKING_OPERATIONS" = true ]; then
-
-    if [ "$N2" = "n-2" ]; then
-        echo "> Schedule operations for upgrade height-2"
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-3)) --target-rank 1 &
-    fi
-
-    if [ "$N1" = "n-1" ]; then
-        echo "> Schedule operations for upgrade height-1"
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-2)) --target-rank 1 &
-    fi
-
-    echo "> Schedule operations for upgrade height"
-    # Update the flag depending on the value of the OPERATION env var
-    if [ "$OPERATION" = "down" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 &
-    elif [ "$OPERATION" = "no-rotation" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --no-rotation &
-    elif [ "$OPERATION" = "up" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --up-rotation &
-    elif [ "$OPERATION" = "swap-consensus" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --swap-consensus &
-    elif [ "$OPERATION" = "swap-bonded" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --swap-bonded &
-    elif [ "$OPERATION" = "double-swap" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --swap-consensus --swap-bonded &
-    elif [ "$OPERATION" = "double-swap-redel" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --swap-consensus --swap-bonded --redelegate &
-    elif [ "$OPERATION" = "up-double-swap-redel" ]; then
-        python scripts/validator_carousel.py --binary $CHAIN_BINARY --home $whale_home --api http://localhost:$whale_api --rpc http://localhost:$whale_rpc --chain-id testnet --height $(($upgrade_height-1)) --target-rank 1 --swap-consensus --swap-bonded --redelegate --up-rotation &
-    fi
-fi
-
 echo "> Save the upgrade height to GITHUB_ENV"
 echo "UPGRADE_HEIGHT=$upgrade_height" >> $GITHUB_ENV
 
@@ -149,14 +116,6 @@ $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq 
 
 echo "Upgrade proposal $proposal_id status:"
 $CHAIN_BINARY q gov proposal $proposal_id --output json --home $whale_home | jq '.proposal.status'
-
-echo "> Submit an ICS param update proposal"
-txhash=$($CHAIN_BINARY tx gov submit-proposal templates/proposal-blocks-per-epoch-1.json --home $whale_home -o json --from $WALLET_1 --gas $GAS --gas-adjustment $GAS_ADJUSTMENT --gas-prices $GAS_PRICE -y | jq -r .txhash)
-sleep $(($COMMIT_TIMEOUT+2))
-ics_proposal_id=$($CHAIN_BINARY --output json q tx $txhash --home $whale_home | jq -r '.events[] | select(.type=="submit_proposal") | .attributes[] | select(.key=="proposal_id") | .value')
-
-echo "ICS proposal ID: $ics_proposal_id"
-
 
 current_height=$(curl -s http://127.0.0.1:$whale_rpc/block | jq -r '.result.block.header.height')
 blocks_delta=$(($upgrade_height-$current_height))
