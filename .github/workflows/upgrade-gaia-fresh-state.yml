@@ -27,7 +27,7 @@
       cancel-in-progress: true
     
     env:
-      GO_VERSION: 1.25.7
+      GO_VERSION: 1.26.7
       # All chain variables
       COMMIT_TIMEOUT: 2
       # Consumer chain variables
@@ -96,7 +96,7 @@
             start_version: [ "${{ needs.set-versions.outputs.start_version }}" ]
             target_version: [ "${{ needs.set-versions.outputs.target_version }}" ]
             upgrade_name: [ "${{ needs.set-versions.outputs.upgrade_name }}" ]
-            cv_version: [v1.7.1]
+            cv_version: [v1.7.3]
             upgrade_mechanism: [cv_auto, cv_manual]
             enable_cosmovisor: [false, true]
             exclude:
@@ -110,7 +110,6 @@
           COSMOVISOR_VERSION: ${{ matrix.cv_version }}
           UPGRADE_MECHANISM: ${{ matrix.upgrade_mechanism }}
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          GO_VERSION: 1.24.1
         steps:
           - name: Update PATH
             run: |
@@ -1311,7 +1310,6 @@
           fail-fast: false
         env:
           BINARY_SOURCE: ${{ needs.set-versions.outputs.binary_source }}
-          GO_VERSION: 1.24.1
         steps:
           - name: Update PATH
             run: |
