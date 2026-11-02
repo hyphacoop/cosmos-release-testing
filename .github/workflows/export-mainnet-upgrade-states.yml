@@ -2,6 +2,12 @@
 name: Export Mainnet Upgrade States
 on:
   workflow_dispatch:
+    inputs:
+      upgrade_name:
+        description: 'Override UPGRADE_NAME (leave empty to use the UPGRADE_NAME in export-cosmoshub-mainnet environment)'
+        required: false
+        type: string
+        default: ''
   schedule:
     # At 05:30 on Monday.
     - cron: '30 5 * * 1'
@@ -305,9 +311,9 @@ jobs:
           upgrade_height=$(($current_block+20))
           echo "upgrade_height=$upgrade_height" >> $GITHUB_ENV
           echo "Submitting the upgrade proposal..."
-          echo "Upgrade Name set to: ${{ vars.UPGRADE_NAME }}"
+          echo "Upgrade Name set to: ${{ inputs.upgrade_name || vars.UPGRADE_NAME }}"
           echo "Creating json proposal"
-          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ vars.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
+          jq ".messages[].plan .height=$upgrade_height | .messages[].plan .name=\"${{ inputs.upgrade_name || vars.UPGRADE_NAME }}\" | .deposit=\"${MIN_DEPOSIT}uatom\"" templates/proposal-software-upgrade.json > upgrade_prop.json
           proposal="gaiad --output json tx gov submit-proposal upgrade_prop.json --gas auto --gas-prices 0.005uatom --gas-adjustment 2.0 --from val --yes"
           txhash=$($proposal | jq -r .txhash)
           echo "Wait for the proposal to go on chain..."
