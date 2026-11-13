@@ -4,7 +4,7 @@
   - role: provision-vm-runner
     api_host: cosmos-kvm1.polypore.xyz
     api_user: ciuser@pve
-    vm_node: cosmos-kvm4
+    vm_node: cosmos-kvm1
     vm_name_prefix: cosmos-git-runner-ubuntu
     resource_pool: ci
     template_clone: git-runner-ubuntu-2404
