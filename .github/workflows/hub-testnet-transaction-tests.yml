@@ -64,7 +64,7 @@ jobs:
         run: gaiad q bank balances $TEST_WALLET
       - name: Test bank send
         run: |
-          json=$(gaiad tx bank send $TEST_WALLET $FAUCET_ADDR 1000000uatom --fees 10000uatom -y -o json)
+          json=$(gaiad tx bank send $TEST_WALLET $FAUCET_ADDR 500000uatom --fees 10000uatom -y -o json)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
@@ -82,7 +82,7 @@ jobs:
           fi
       - name: Test bank multi-send
         run: |
-          json=$(gaiad tx bank multi-send $TEST_WALLET $APPLE_ADDR $BANANA_ADDR $CHERRY_ADDR 1000000uatom --fees 10000uatom -y -o json)
+          json=$(gaiad tx bank multi-send $TEST_WALLET $APPLE_ADDR $BANANA_ADDR $CHERRY_ADDR 500000uatom --fees 10000uatom -y -o json)
           tests/test_block_production.sh $RPC_NODE $RPC_PORT 1
           echo "[INFO] JSON output:"
           echo $json
